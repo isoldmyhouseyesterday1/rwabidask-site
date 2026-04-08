@@ -7,6 +7,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8fH0T_6oxcvlqAXUItA6MNAUE-QJ0ZJw&v=alpha&libraries=maps3d,places"></script>
 <style>
+ /* This forces the Google search results to pop to the very front */
+.pac-container {
+    z-index: 10000 !important;
+    background-color: #050810; /* Match your dark theme */
+    border: 1px solid #00ff00;
+    color: #fff;
+}
+.pac-item {
+    color: #fff;
+    border-top: 1px solid #1a2840;
+}
+.pac-item:hover {
+    background-color: #1a2840;
+}
+.pac-item-query {
+    color: #00ff00; /* Makes the address text green like your theme */
+}
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #050810; --bg2: #0a0f1e; --bg3: #0f1628; --panel: #0d1220;
