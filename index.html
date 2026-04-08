@@ -204,45 +204,44 @@ async function initRWASystem() {
                 bid: Math.floor(Math.random() * (11000000 - 1400000) + 1400000)
             };
 
-            // B. INJECT INTO YOUR EXCHANGE INVENTORY
-            LISTINGS.unshift(newAsset); // Adds it to the top of your list
-            renderListings(); // Updates the left sidebar instantly
-            buildTicker();    // Updates the Market Cap in the top bar
+           // B. INJECT INTO YOUR EXCHANGE INVENTORY
+            LISTINGS.unshift(newAsset); 
+            renderListings(); 
+            buildTicker(); 
 
-       console.log("Flying to:", place.location.lat(), place.location.lng());
-        endCamera: { 
-            // Correcting the object structure for the Alpha 3D Map
-            center: { 
-                lat: place.location.lat(), 
-                lng: place.location.lng(), 
-                altitude: 150 
-            }, 
-            tilt: 62, 
-            range: 1200 
-        },
-        durationMillis: 3000 
-    });
-}
-            // D. UPDATE THE "LIVE TICKET" PANEL
+            // C. THE FLIGHT (Fixed Wrapper)
+            console.log("Flying to:", place.location.lat(), place.location.lng());
+            
+            map3D.flyCameraTo({
+                endCamera: { 
+                    center: { 
+                        lat: place.location.lat(), 
+                        lng: place.location.lng(), 
+                        altitude: 150 
+                    }, 
+                    tilt: 62, 
+                    range: 1200 
+                },
+                durationMillis: 3000 
+            });
+
+           // D. UPDATE THE "LIVE TICKET" PANEL
             document.getElementById('right-panel').innerHTML = `
-                <h3 style="color:var(--accent); font-family:var(--font-head);">RWABidAsk | ACTIVE</h3>
-                <p style="font-size:11px; margin-bottom:15px;">${place.formattedAddress}</p>
-                <div style="background:var(--bg3); padding:15px; border-radius:4px; border-left:3px solid var(--accent);">
-                    <div style="color:var(--muted); font-size:10px; letter-spacing:1px;">INSTITUTIONAL ASK</div>
+                <h3 style="color:var(--accent);">RWABidAsk | ACTIVE</h3>
+                <p style="font-size:11px;">${place.formattedAddress}</p>
+                <div style="background:var(--bg3); padding:15px; border-radius:4px;">
                     <div style="font-size:24px; font-weight:800; color:#fff;">${fmt(newAsset.ask)}</div>
-                    <hr style="margin:10px 0; border:0; border-top:1px solid var(--border);">
-                    <div style="color:var(--muted); font-size:10px; letter-spacing:1px;">CURRENT TOP BID</div>
                     <div style="font-size:24px; font-weight:800; color:var(--green);">${fmt(newAsset.bid)}</div>
                 </div>
-                <button style="width:100%; margin-top:15px; padding:15px; background:var(--accent); color:#000; font-weight:900; border:none; cursor:pointer; text-transform:uppercase; letter-spacing:1px;">Execute Bid</button>
             `;
-        }
-    });
-}
+        } // This closes if (place.location)
+    }); // This closes addEventListener
+} // This closes initRWASystem
+
 // ── START ALL SYSTEMS ──
 initRWASystem();
-renderListings(); // This shows your Marbella/Dubai/France list
-buildTicker();    // This starts the scrolling price bar
+renderListings();
+buildTicker();
 </script>
 </body>
 </html>
