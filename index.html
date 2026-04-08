@@ -174,6 +174,43 @@ searchInput.addEventListener('keypress', async (e) => {
         } catch (err) { alert("API Connection Error."); }
     }
 });
+ // 1. Define your "Inventory" (The Real World Assets)
+const rwaInventory = {
+    "burj_penthouse": {
+        name: "Burj Khalifa Penthouse - Unit 102",
+        ask: 9200000,
+        bid: 8500000,
+        coords: { lat: 25.1972, lng: 55.2744 }
+    },
+    "marina_villa": {
+        name: "Dubai Marina Waterfront Villa",
+        ask: 4500000,
+        bid: 4100000,
+        coords: { lat: 25.0657, lng: 55.1289 }
+    }
+};
+
+// 2. Add a Click Listener to the 3D Map
+map3D.addEventListener('gmp-click', (event) => {
+    // This captures the exact coordinate you clicked on the 3D building
+    const { lat, lng } = event.position;
+    
+    console.log(`Clicked at: ${lat}, ${lng}`);
+    
+    // Logic: If click is near Burj Khalifa, update the side panel
+    // For now, let's just update the panel to show we're "Active"
+    document.getElementById('d-price').innerText = `ASK: $${(Math.random() * 10).toFixed(1)}M`;
+    document.getElementById('d-bid').innerText = `BID: $${(Math.random() * 8).toFixed(1)}M`;
+});
+
+// 3. Simulating the "Bid/Ask" Tick
+setInterval(() => {
+    // Randomly fluctuate the bid price by $1,000 to simulate a live market
+    const currentBid = parseInt(document.getElementById('d-bid').innerText.replace(/[^0-9]/g, ''));
+    const fluctuation = (Math.random() - 0.5) * 2000;
+    const newBid = Math.floor(currentBid + fluctuation);
+    document.getElementById('d-bid').innerText = `BID: $${newBid.toLocaleString()}`;
+}, 3000);
 
 renderListings();
 buildTicker();
