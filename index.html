@@ -209,10 +209,7 @@ async function initRWASystem() {
             renderListings(); // Updates the left sidebar instantly
             buildTicker();    // Updates the Market Cap in the top bar
 
-            // C. THE FLIGHT
-const activeMap = document.querySelector('gmp-map-3d');
-if (activeMap) {
-    activeMap.flyCameraTo({
+       console.log("Flying to:", place.location.lat(), place.location.lng());
         endCamera: { 
             // Correcting the object structure for the Alpha 3D Map
             center: { 
