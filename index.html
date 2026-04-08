@@ -209,25 +209,23 @@ async function initRWASystem() {
             renderListings(); // Updates the left sidebar instantly
             buildTicker();    // Updates the Market Cap in the top bar
 
-            // C. THE FLIGHT (Re-targeting for takeoff)
-            const activeMap = document.querySelector('gmp-map-3d');
-            if (activeMap) {
-                activeMap.flyCameraTo({
-                    endCamera: { 
-                        center: { 
-                            lat: place.location.lat(), 
-                            lng: place.location.lng(), 
-                            altitude: 110 
-                        }, 
-                        tilt: 62, 
-                        range: 1100 
-                    },
-                    durationMillis: 2800 
-                });
-            } else {
-                console.error("Map not found for flight.");
-            }
-
+            // C. THE FLIGHT
+const activeMap = document.querySelector('gmp-map-3d');
+if (activeMap) {
+    activeMap.flyCameraTo({
+        endCamera: { 
+            // Correcting the object structure for the Alpha 3D Map
+            center: { 
+                lat: place.location.lat(), 
+                lng: place.location.lng(), 
+                altitude: 150 
+            }, 
+            tilt: 62, 
+            range: 1200 
+        },
+        durationMillis: 3000 
+    });
+}
             // D. UPDATE THE "LIVE TICKET" PANEL
             document.getElementById('right-panel').innerHTML = `
                 <h3 style="color:var(--accent); font-family:var(--font-head);">RWABidAsk | ACTIVE</h3>
