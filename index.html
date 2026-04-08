@@ -203,15 +203,22 @@ map3D.addEventListener('gmp-click', (event) => {
     document.getElementById('d-bid').innerText = `BID: $${(Math.random() * 8).toFixed(1)}M`;
 });
 
-// 3. Simulating the "Bid/Ask" Tick
+// 3. Simulating the "Bid/Ask" Tick (Precision Version)
 setInterval(() => {
-    // Randomly fluctuate the bid price by $1,000 to simulate a live market
-    const currentBid = parseInt(document.getElementById('d-bid').innerText.replace(/[^0-9]/g, ''));
-    const fluctuation = (Math.random() - 0.5) * 2000;
-    const newBid = Math.floor(currentBid + fluctuation);
-    document.getElementById('d-bid').innerText = `BID: $${newBid.toLocaleString()}`;
+    const bidElement = document.getElementById('d-bid');
+    if (bidElement) {
+        // Remove everything except numbers and decimals
+        const currentText = bidElement.innerText.replace(/[^0-9.]/g, '');
+        const currentBid = parseFloat(currentText) || 8500000; 
+        
+        // Fluctuate by a smaller amount to look like real institutional trading
+        const fluctuation = (Math.random() - 0.5) * 5000;
+        const newBid = Math.floor(currentBid + fluctuation);
+        
+        // Update the display with clean formatting
+        bidElement.innerText = `BID: $${newBid.toLocaleString()}`;
+    }
 }, 3000);
-
 renderListings();
 buildTicker();
 </script>
