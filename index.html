@@ -353,6 +353,10 @@
 
   <!-- GLOBE -->
   <div id="globe-container">
+   <div id="search-wrapper" style="position: absolute; top: 30px; left: 50%; transform: translateX(-50%); z-index: 10000; width: 90%; max-width: 500px;">
+    <input type="text" id="asset-search" placeholder="ENTER ADDRESS OR ASSET ID..." 
+        style="width: 100%; padding: 15px 25px; border-radius: 30px; border: 1px solid #00ff00; background: rgba(0,0,0,0.9); color: #00ff00; font-family: monospace; font-size: 16px; outline: none; box-shadow: 0 0 20px rgba(0,255,0,0.3); text-transform: uppercase;">
+</div>
     <gmp-map-3d mode="satellite" center="25.1972,55.2744" tilt="45" range="5000"></gmp-map-3d>
     <div class="globe-overlay">
       <div class="globe-legend" id="globe-legend">
@@ -908,9 +912,43 @@ initGlobe();
 // Select first listing on load
 setTimeout(()=>selectListing(1), 800);
 </script>
-</body>
- <footer style="position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 10, 10, 0.9); color: #888; text-align: center; padding: 10px; font-size: 12px; font-family: sans-serif; border-top: 1px solid #333; z-index: 9999;">
+
+<footer style="position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 10, 10, 0.9); color: #888; text-align: center; padding: 10px; font-size: 12px; font-family: sans-serif; border-top: 1px solid #333; z-index: 9999;">
     © 2026 Annie Group LLC. RWABidAsk is a trade name of Annie Group LLC. 
     <span style="color: #444; margin-left: 10px;">| Real-world asset visualizations for demonstration purposes.</span>
 </footer>
+
+<script>
+    const searchInput = document.getElementById('asset-search');
+    const map3D = document.querySelector('gmp-map-3d');
+
+    searchInput.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            const address = e.target.value;
+            const apiKey = 'YOUR_API_KEY'; // PASTE YOUR ACTUAL KEY HERE
+
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`);
+                const data = await response.json();
+
+                if (data.status === 'OK') {
+                    const loc = data.results[0].geometry.location;
+                    map3D.flyCameraTo({
+                        endCamera: {
+                            center: { lat: loc.lat, lng: loc.lng, altitude: 80 },
+                            range: 1000, 
+                            tilt: 55,   
+                            heading: 0
+                        },
+                        durationMillis: 3500 
+                    });
+                } else {
+                    alert("ASSET NOT FOUND IN RWA DIRECTORY.");
+                }
+            } catch (err) { console.error("Flight Error:", err); }
+        }
+    });
+</script>
+
+</body> 
 </html>
