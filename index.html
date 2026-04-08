@@ -209,20 +209,27 @@ async function initRWASystem() {
             renderListings(); 
             buildTicker(); 
 
-            // C. THE FLIGHT (Fixed Wrapper)
-            console.log("Flying to:", place.location.lat(), place.location.lng());
+            // C. THE FLIGHT (Bulletproof Version)
+            console.log("Initiating Flight to:", place.location.lat(), place.location.lng());
             
-            map3D.flyCameraTo({
-                endCamera: { 
-                    center: { 
-                        lat: place.location.lat(), 
-                        lng: place.location.lng(), 
-                        altitude: 150 
-                    }, 
-                    tilt: 62, 
-                    range: 1200 
-                },
-                durationMillis: 3000 
+            // Wait for one browser frame to ensure the map is ready for input
+            requestAnimationFrame(() => {
+                const mapElement = document.querySelector('gmp-map-3d');
+                
+                if (mapElement) {
+                    mapElement.flyCameraTo({
+                        endCamera: { 
+                            center: { 
+                                lat: place.location.lat(), 
+                                lng: place.location.lng(), 
+                                altitude: 150 
+                            }, 
+                            tilt: 62, 
+                            range: 1200 
+                        },
+                        durationMillis: 3000 
+                    });
+                }
             });
 
            // D. UPDATE THE "LIVE TICKET" PANEL
