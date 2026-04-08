@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RWABidAsk — Global Exchange</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8fH0T_6oxcvlqAXUItA6MNAUE-QJ0ZJw&v=beta&libraries=maps3d"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -160,49 +160,6 @@
   .ba-ask { font-size: 11px; color: var(--green); font-weight: 700; }
   .ba-sep { color: var(--border2); }
   .lc-source { font-size: 9px; color: var(--muted); margin-top: 4px; letter-spacing: 0.5px; }
-
-  /* ── GLOBE ── */
-  #globe-container {
-    position: relative;
-    background: var(--bg);
-    overflow: hidden;
-  }
-  #globe-canvas { width: 100%; height: 100%; display: block; }
-  .globe-overlay {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-  }
-  .globe-controls {
-    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 6px; pointer-events: all;
-  }
-  .gc-btn {
-    background: rgba(10,15,30,0.85); border: 1px solid var(--border2);
-    color: var(--dim); font-family: var(--font-mono); font-size: 10px;
-    padding: 7px 14px; cursor: pointer; letter-spacing: 1px;
-    transition: all 0.15s; backdrop-filter: blur(4px);
-  }
-  .gc-btn.active, .gc-btn:hover { color: var(--accent); border-color: var(--accent); }
-  .globe-legend {
-    position: absolute; top: 16px; left: 16px; pointer-events: none;
-    background: rgba(10,15,30,0.8); border: 1px solid var(--border);
-    padding: 10px 12px; backdrop-filter: blur(4px);
-  }
-  .legend-title { font-size: 9px; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; }
-  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 10px; color: var(--dim); }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .globe-heatmap-legend {
-    position: absolute; top: 16px; right: 16px; pointer-events: none;
-    background: rgba(10,15,30,0.8); border: 1px solid var(--border);
-    padding: 10px 12px; backdrop-filter: blur(4px);
-    display: none;
-  }
-  .hm-bar {
-    width: 120px; height: 8px;
-    background: linear-gradient(to right, #0066ff, #00d4aa, #f5c842, #ff6b35, #ff0055);
-    margin: 6px 0;
-  }
-  .hm-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); }
 
   /* ── RIGHT PANEL ── */
   #right-panel {
@@ -396,7 +353,7 @@
 
   <!-- GLOBE -->
   <div id="globe-container">
-    <canvas id="globe-canvas"></canvas>
+    <gmp-map-3d mode="satellite" center="25.1972,55.2744,500" tilt="45"></gmp-map-3d>
     <div class="globe-overlay">
       <div class="globe-legend" id="globe-legend">
         <div class="legend-title">Asset Type</div>
