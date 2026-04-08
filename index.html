@@ -167,69 +167,62 @@ function buildTicker() {
 const searchInput = document.getElementById('asset-search');
 const map3D = document.querySelector('gmp-map-3d');
 
-// 1. Initialize the Autocomplete feature on your search box
-const inputField = document.getElementById('asset-search');
-const autocomplete = new google.maps.places.Autocomplete(inputField);
+// ── RWABidAsk CORE ENGINE ──
 
-// 2. This runs the second you select an address from the dropdown
-autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace();
-    
-    if (!place.geometry || !place.geometry.location) {
-        alert("Please select an address from the dropdown list.");
-        return;
-    }
-
-    const lat = place.geometry.location.lat();
-    const lng = place.geometry.location.lng();
-
-    // 3. THE "BOOM" MOMENT: Camera flies to the house
+// 1. Initialize the NEW Places Autocomplete & Map Controls
+async function initRWACore() {
+    const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
     const map3D = document.querySelector('gmp-map-3d');
-    map3D.flyCameraTo({
-        endCamera: { 
-            center: { lat: lat, lng: lng, altitude: 80 }, 
-            tilt: 65, 
-            range: 1000 
-        },
-        durationMillis: 2500 // Snap to it in 2.5 seconds
+    
+    // This finds your search container and injects the modern search widget
+    const searchContainer = document.querySelector('.top-search');
+    const autocompleteWidget = new PlaceAutocompleteElement();
+    
+    // Style the widget to match your professional aesthetic
+    autocompleteWidget.setAttribute('placeholder', 'Search Global Assets...');
+    searchContainer.appendChild(autocompleteWidget);
+
+    // 2. The "BOOM" Moment: When an address is selected
+    autocompleteWidget.addEventListener('gmp-placeselect', async (e) => {
+        const place = e.detail.place;
+        
+        // Fetching real-world coordinates and address data
+        await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
+
+        if (place.location) {
+            // Smoothly fly to the real estate asset
+            map3D.flyCameraTo({
+                endCamera: { 
+                    center: { lat: place.location.lat(), lng: place.location.lng(), altitude: 100 }, 
+                    tilt: 65, 
+                    range: 1200 
+                },
+                durationMillis: 2500 
+            });
+
+            // Update the Right Panel with Real Data
+            document.getElementById('right-panel').innerHTML = `
+                <h3 style="color:#00ff00;">RWABidAsk | LIVE</h3>
+                <p style="font-size:11px; color:#fff;">${place.formattedAddress}</p>
+                <hr style="border:0.5px solid var(--border);">
+                <div id="d-price" style="font-size:22px;">ASK: $${(Math.random() * 5 + 1).toFixed(2)}M</div>
+                <div id="d-bid" style="font-size:22px; color:#00ff00;">BID: $${(Math.random() * 4 + 1).toFixed(2)}M</div>
+                <button style="width:100%; margin-top:15px; padding:10px; background:#00ff00; color:#000; font-weight:bold; border:none; cursor:pointer;">PLACE BID</button>
+            `;
+        }
     });
 
-    // 4. Update the Market Panel with the real address name
-    document.getElementById('right-panel').innerHTML = `
-        <h3 style="color:#00ff00;">LIVE MARKET DATA</h3>
-        <p style="font-size:12px;">${place.formatted_address}</p>
-        <div id="d-price" style="font-size:20px; color:#fff;">ASK: $${(Math.random() * 5 + 1).toFixed(2)}M</div>
-        <div id="d-bid" style="font-size:20px; color:#00ff00;">BID: $${(Math.random() * 4 + 1).toFixed(2)}M</div>
-    `;
-});
- // 1. Define your "Inventory" (The Real World Assets)
-const rwaInventory = {
-    "burj_penthouse": {
-        name: "Burj Khalifa Penthouse - Unit 102",
-        ask: 9200000,
-        bid: 8500000,
-        coords: { lat: 25.1972, lng: 55.2744 }
-    },
-    "marina_villa": {
-        name: "Dubai Marina Waterfront Villa",
-        ask: 4500000,
-        bid: 4100000,
-        coords: { lat: 25.0657, lng: 55.1289 }
-    }
-};
+    // 3. Keep the Click Listener for Manual Targeting
+    map3D.addEventListener('gmp-click', (event) => {
+        const { lat, lng } = event.position;
+        console.log(`Manual Asset Lock: ${lat}, ${lng}`);
+        document.getElementById('d-price').innerText = `ASK: $${(Math.random() * 10).toFixed(1)}M`;
+        document.getElementById('d-bid').innerText = `BID: $${(Math.random() * 8).toFixed(1)}M`;
+    });
+}
 
-// 2. Add a Click Listener to the 3D Map
-map3D.addEventListener('gmp-click', (event) => {
-    // This captures the exact coordinate you clicked on the 3D building
-    const { lat, lng } = event.position;
-    
-    console.log(`Clicked at: ${lat}, ${lng}`);
-    
-    // Logic: If click is near Burj Khalifa, update the side panel
-    // For now, let's just update the panel to show we're "Active"
-    document.getElementById('d-price').innerText = `ASK: $${(Math.random() * 10).toFixed(1)}M`;
-    document.getElementById('d-bid').innerText = `BID: $${(Math.random() * 8).toFixed(1)}M`;
-});
+// Start the engine
+initRWACore();
 
 // 3. Simulating the "Bid/Ask" Tick (Precision Version)
 setInterval(() => {
