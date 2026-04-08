@@ -163,85 +163,51 @@ function buildTicker() {
   document.getElementById('ticker-inner').innerHTML = items + ' — ' + items;
 }
 
-// ── FLIGHT CONTROLLER ──
-const searchInput = document.getElementById('asset-search');
-const map3D = document.querySelector('gmp-map-3d');
+// ── RWABidAsk MODERN ENGINE ──
 
-// ── RWABidAsk CORE ENGINE ──
-
-// 1. Initialize the NEW Places Autocomplete & Map Controls
-async function initRWACore() {
+async function initRWASystem() {
+    // 1. Import the New Places Library
     const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
     const map3D = document.querySelector('gmp-map-3d');
-    
-    // This finds your search container and injects the modern search widget
-    const searchContainer = document.querySelector('.top-search');
-    const autocompleteWidget = new PlaceAutocompleteElement();
-    
-    // Style the widget to match your professional aesthetic
-    autocompleteWidget.setAttribute('placeholder', 'Search Global Assets...');
-    searchContainer.appendChild(autocompleteWidget);
 
-    // 2. The "BOOM" Moment: When an address is selected
+    // 2. Create the Search Widget
+    const autocompleteWidget = new PlaceAutocompleteElement();
+    autocompleteWidget.style.width = "100%";
+    
+    // Inject it into your top bar
+    const container = document.getElementById('search-container');
+    if (container) container.appendChild(autocompleteWidget);
+
+    // 3. The "BOOM" Moment: When you pick an address
     autocompleteWidget.addEventListener('gmp-placeselect', async (e) => {
         const place = e.detail.place;
-        
-        // Fetching real-world coordinates and address data
         await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
 
         if (place.location) {
-            // Smoothly fly to the real estate asset
             map3D.flyCameraTo({
                 endCamera: { 
-                    center: { lat: place.location.lat(), lng: place.location.lng(), altitude: 100 }, 
-                    tilt: 65, 
-                    range: 1200 
+                    center: { lat: place.location.lat(), lng: place.location.lng(), altitude: 120 }, 
+                    tilt: 60, 
+                    range: 1000 
                 },
-                durationMillis: 2500 
+                durationMillis: 3000 
             });
 
-            // Update the Right Panel with Real Data
             document.getElementById('right-panel').innerHTML = `
                 <h3 style="color:#00ff00;">RWABidAsk | LIVE</h3>
                 <p style="font-size:11px; color:#fff;">${place.formattedAddress}</p>
-                <hr style="border:0.5px solid var(--border);">
-                <div id="d-price" style="font-size:22px;">ASK: $${(Math.random() * 5 + 1).toFixed(2)}M</div>
+                <div id="d-price" style="font-size:22px; color:#fff;">ASK: $${(Math.random() * 5 + 2).toFixed(2)}M</div>
                 <div id="d-bid" style="font-size:22px; color:#00ff00;">BID: $${(Math.random() * 4 + 1).toFixed(2)}M</div>
-                <button style="width:100%; margin-top:15px; padding:10px; background:#00ff00; color:#000; font-weight:bold; border:none; cursor:pointer;">PLACE BID</button>
+                <button style="width:100%; margin-top:10px; padding:12px; background:#00ff00; border:none; font-weight:bold; cursor:pointer;">EXECUTE TRANSACTION</button>
             `;
         }
     });
-
-    // 3. Keep the Click Listener for Manual Targeting
-    map3D.addEventListener('gmp-click', (event) => {
-        const { lat, lng } = event.position;
-        console.log(`Manual Asset Lock: ${lat}, ${lng}`);
-        document.getElementById('d-price').innerText = `ASK: $${(Math.random() * 10).toFixed(1)}M`;
-        document.getElementById('d-bid').innerText = `BID: $${(Math.random() * 8).toFixed(1)}M`;
-    });
 }
 
-// Start the engine
-initRWACore();
-
-// 3. Simulating the "Bid/Ask" Tick (Precision Version)
-setInterval(() => {
-    const bidElement = document.getElementById('d-bid');
-    if (bidElement) {
-        // Remove everything except numbers and decimals
-        const currentText = bidElement.innerText.replace(/[^0-9.]/g, '');
-        const currentBid = parseFloat(currentText) || 8500000; 
-        
-        // Fluctuate by a smaller amount to look like real institutional trading
-        const fluctuation = (Math.random() - 0.5) * 5000;
-        const newBid = Math.floor(currentBid + fluctuation);
-        
-        // Update the display with clean formatting
-        bidElement.innerText = `BID: $${newBid.toLocaleString()}`;
-    }
-}, 3000);
-renderListings();
-buildTicker();
+// ── START ALL SYSTEMS ──
+initRWASystem();
+renderListings(); // This shows your Marbella/Dubai/France list
+buildTicker();    // This starts the scrolling price bar
 </script>
 </body>
 </html>
