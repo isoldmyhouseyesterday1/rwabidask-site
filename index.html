@@ -203,22 +203,6 @@ gmp-map-3d { width: 100%; height: 100%; display: block; }
 /* ── NOTIF ── */
 #notif { position: fixed; top: 62px; right: 14px; z-index: 99999; background: var(--bg2); border: 1px solid var(--accent); padding: 10px 16px; font-size: 11px; color: var(--accent); display: none; animation: fadeIn .25s ease; border-radius: 2px; max-width: 300px; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
-  
-  #site-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(10, 15, 30, 0.9); /* Dark semi-transparent matching your theme */
-  color: #8899a6;
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  text-align: center;
-  padding: 8px 0;
-  border-top: 1px solid rgba(0, 212, 170, 0.3);
-  z-index: 2000000; /* Set higher than the 3D map layer */
-  pointer-events: none; /* Allows clicks to pass through to the map if needed */
-}
 </style>
 </head>
 <body>
@@ -984,11 +968,6 @@ if(typeof google!=='undefined'&&google.maps){
 
 // Start with Dubai selected
 setTimeout(()=>selectListing(9),1500);
-
-  <div id="site-footer">
-  © 2026 ANNIE GROUP LLC. RWABidAsk is a Registered trade name of ANNIE GROUP LLC.
-</div>
-  
 </script>
 </body>
 </html>
