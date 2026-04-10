@@ -3,13 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RWABidAsk — Global Real-World Asset Exchange</title>
-<meta name="description" content="The world's first open-market global exchange for real estate, businesses, and land. Direct bid, ask, and buy.">
+<title>RWABidAsk — Global Real-World Asset Market</title>
+<meta name="description" content="The world's first open-market global bid-ask platform for real estate, businesses, and land. Direct bid, ask, and buy.">
 
 <!-- ── FONTS ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;700&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ── SUPABASE ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- ── GOOGLE MAPS ── -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=beta&libraries=places,maps3d"></script>
@@ -20,16 +23,16 @@
 ══════════════════════════════════════════════ */
 .pac-container {
   z-index: 99999 !important;
-  background: #0c0c0c;
+  background: #1a1f2e;
   border: 1px solid rgba(0,255,200,.25);
   border-top: none;
   border-radius: 0 0 6px 6px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.9);
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
   font-family: 'Geist Mono', monospace;
 }
 .pac-item {
-  color: #6b7280;
-  border-top: 1px solid rgba(255,255,255,.05);
+  color: #a8b0c8;
+  border-top: 1px solid rgba(255,255,255,.06);
   padding: 10px 16px;
   cursor: pointer;
   font-size: 11px;
@@ -50,17 +53,17 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #080808;
-  --bg1:      #0c0c0c;
-  --bg2:      #111111;
-  --bg3:      #161616;
-  --bg4:      #1c1c1c;
-  --border:   rgba(255,255,255,.06);
-  --border2:  rgba(255,255,255,.11);
-  --border3:  rgba(255,255,255,.18);
-  --text:     #f0f0f0;
-  --muted:    #525252;
-  --dim:      #8a8a8a;
+  --bg:       #0f1117;
+  --bg1:      #141820;
+  --bg2:      #1a1f2e;
+  --bg3:      #1f2537;
+  --bg4:      #252c40;
+  --border:   rgba(255,255,255,.09);
+  --border2:  rgba(255,255,255,.15);
+  --border3:  rgba(255,255,255,.24);
+  --text:     #f4f6fa;
+  --muted:    #7a8099;
+  --dim:      #a8b0c8;
   --cyan:     #00ffc8;
   --cyan-dim: rgba(0,255,200,.12);
   --cyan-glow:rgba(0,255,200,.35);
@@ -1129,7 +1132,7 @@ html, body {
     <div class="logo-mark"></div>
     <div>
       <div class="logo-text">RWABidAsk</div>
-      <div class="logo-tag">EXCHANGE</div>
+      <div class="logo-tag">GLOBAL ASSET MARKET</div>
     </div>
   </div>
 
@@ -1258,7 +1261,7 @@ html, body {
       <div class="r-empty">
         <div class="r-empty-glyph">◎</div>
         <div class="r-empty-text">
-            BID · ASK · BUY<br>
+          BID · ASK · BUY<br>
           GLOBAL · LIQUID · OPEN
         </div>
       </div>
@@ -1287,7 +1290,7 @@ html, body {
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="mailto:ops@rwabidask.com">ops@rwabidask.com</a>
+    <a href="/cdn-cgi/l/email-protection#9cf3ecefdceeebfdfef5f8fdeff7b2fff3f1"><span class="__cf_email__" data-cfemail="1976696a596b6e787b707d786a72377a7674">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -1308,7 +1311,7 @@ html, body {
 <!-- ══ TOAST ══ -->
 <div id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 'use strict';
 
 /* ═══════════════════════════════════════════════════════════
@@ -1863,7 +1866,7 @@ function buildTicker(assets) {
     'ESTABLISHING SECURE CONNECTION',
     'GLOBAL DIRECTORY LIVE',
     'RWABIDASK.COM',
-    'NO BROKER — DIRECT BID',
+    'DIRECT BID',
     'ANNIE GROUP LLC',
     'TOKENIZATION AVAILABLE',
     'ops@rwabidask.com',
@@ -1887,12 +1890,12 @@ function openModal(type, id) {
 
     signin: () => `
       <div class="mtitle">Sign In</div>
-      <div class="msub">Access your exchange account, watchlist, and bid history.</div>
-      <div class="mfield"><label>Email</label><input type="email" placeholder="you@example.com"></div>
-      <div class="mfield"><label>Password</label><input type="password" placeholder="••••••••"></div>
+      <div class="msub">Access your account, watchlist, and bid history.</div>
+      <div class="mfield"><label>Email</label><input type="email" id="si-email" placeholder="you@example.com"></div>
+      <div class="mfield"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••"></div>
       <div class="mfooter">
         <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-        <button class="msub-btn" onclick="closeModal();toast('Welcome back — dashboard loading')">Sign In →</button>
+        <button class="msub-btn" onclick="handleSignIn()">Sign In →</button>
       </div>
       <div style="margin-top:16px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted)">
         No account? <span style="color:var(--cyan);cursor:pointer" onclick="closeModal();openModal('register')">Create one →</span>
@@ -1900,30 +1903,27 @@ function openModal(type, id) {
     `,
 
     register: () => `
-      <div class="mtitle">Join Exchange</div>
-      <div class="msub">Choose your role to get started on the world's first open-market global asset exchange.</div>
+      <div class="mtitle">Create Account</div>
+      <div class="msub">Select your role to access the global asset market. Institutional-grade verification required.</div>
       <div class="role-grid">
         <div class="role-card sel" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
-          <div class="role-icon">🏠</div>
           <div class="role-name">Asset Owner</div>
-          <div class="role-desc">List property or business. Direct to buyers.</div>
+          <div class="role-desc">List property, land, or business directly.</div>
         </div>
         <div class="role-card" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
-          <div class="role-icon">🤝</div>
-          <div class="role-name">Broker</div>
-          <div class="role-desc">List client inventory. Generate leads.</div>
+          <div class="role-name">Broker / Agent</div>
+          <div class="role-desc">Syndicate client inventory. Generate verified leads.</div>
         </div>
         <div class="role-card" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
-          <div class="role-icon">🏦</div>
-          <div class="role-name">Lender</div>
-          <div class="role-desc">Fund deals. Connect with buyers.</div>
+          <div class="role-name">Lender / Bank</div>
+          <div class="role-desc">Connect with qualified buyers. Fund deals globally.</div>
         </div>
       </div>
       <div class="mrow">
         <div class="mfield"><label>First Name</label><input type="text" placeholder="First"></div>
         <div class="mfield"><label>Last Name</label><input type="text" placeholder="Last"></div>
       </div>
-      <div class="mfield"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
       <div class="mfield"><label>Country</label>
         <select>
           <option>United States</option><option>Mexico</option><option>Brazil</option>
@@ -1932,10 +1932,36 @@ function openModal(type, id) {
           <option>Germany</option><option>Portugal</option><option>Other</option>
         </select>
       </div>
-      <div class="mfield"><label>Password</label><input type="password" placeholder="Create a strong password"></div>
+      <div class="mfield"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password"></div>
       <div class="mfooter">
         <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-        <button class="msub-btn" onclick="closeModal();toast('Account created — check email to verify')">Create Account →</button>
+        <button class="msub-btn" onclick="handleSignUp()">Create Account →</button>
+      </div>
+    `,
+
+    bid: () => `
+      <div class="mtitle">Place Bid on Ledger</div>
+      <div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent. No broker can take it off market.</div>
+      <div class="mfield"><label>Bid Amount (USD)</label><input type="number" id="bid-amount" placeholder="Enter your bid" min="1"></div>
+      <div class="mfield"><label>Financing Terms</label>
+        <select id="bid-terms">
+          <option value="cash">All Cash</option>
+          <option value="conventional">Conventional Mortgage</option>
+          <option value="seller_finance">Seller Financing</option>
+          <option value="bridge">Bridge Loan</option>
+          <option value="crypto">Crypto-Backed Loan</option>
+        </select>
+      </div>
+      <div class="mrow">
+        <div class="mfield"><label>Down Payment %</label><input type="number" id="bid-down" placeholder="e.g. 20" min="0" max="100"></div>
+        <div class="mfield"><label>Bid Expiry</label>
+          <select id="bid-expiry"><option>24 hours</option><option>3 days</option><option>7 days</option><option>30 days</option></select>
+        </div>
+      </div>
+      <div class="mfield"><label>Email (confirmation)</label><input type="email" id="bid-email" placeholder="you@example.com"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="handlePlaceBid('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g,'\\'') : ''}')">Place Bid on Ledger →</button>
       </div>
     `,
 
@@ -2030,9 +2056,9 @@ function openModal(type, id) {
 
     tos: () => `
       <div class="mtitle">Terms of Service</div>
-      <div class="msub">Annie Group LLC · RWABidAsk Exchange</div>
+      <div class="msub">Annie Group LLC · RWABidAsk</div>
       <div class="legal-note">
-        RWABidAsk is a trade name of Annie Group LLC. This platform facilitates connections between buyers, sellers, brokers, and lenders of real-world assets. It is not a licensed real estate broker, securities dealer, or investment advisor.<br><br>
+        RWABidAsk is a registered trade name of Annie Group LLC. This platform facilitates connections between buyers, sellers, brokers, and lenders of real-world assets. It is not a licensed real estate broker, securities dealer, or investment advisor.<br><br>
         All listings are informational only. Bids and offers submitted via this platform are letters of intent only and are not legally binding until both parties execute a formal purchase agreement under applicable law.<br><br>
         KYC and proof of funds verification is required for all transactional actions. Annie Group LLC reserves the right to remove any listing at its discretion.<br><br>
         Tokenization services are subject to applicable securities and property law in each jurisdiction. Annie Group LLC does not provide legal, tax, or investment advice.<br><br>
@@ -2043,7 +2069,7 @@ function openModal(type, id) {
 
     privacy: () => `
       <div class="mtitle">Privacy Policy</div>
-      <div class="msub">Annie Group LLC · RWABidAsk Exchange</div>
+      <div class="msub">Annie Group LLC · RWABidAsk</div>
       <div class="legal-note">
         Data collected: name, email, country, KYC documents, bid/offer history, and search behavior on this platform.<br><br>
         All data is encrypted in transit (TLS 1.3) and at rest. KYC documents are processed by licensed third-party providers (Jumio or equivalent) and are not retained by Annie Group LLC beyond verification.<br><br>
@@ -2070,13 +2096,246 @@ document.getElementById('modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
 
+
+/* ═══════════════════════════════════════════════════════════
+   SUPABASE — Auth, Bid Ledger, Lead CRM
+   Replace SB_KEY with your anon key from Supabase dashboard
+   Settings → API → Project API keys → anon / public
+═══════════════════════════════════════════════════════════ */
+const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MjYyNzIsImV4cCI6MjA1OTMwMjI3Mn0.Fy73JUGZFpxBiSoBbSFnVpFpLaQ0K1GMFAm-SxCWVY4';
+
+let _sb = null;
+let currentUser = null;
+let currentUserRole = null;
+
+/* Boot Supabase client safely */
+(function initSupabase() {
+  try {
+    if (typeof supabase !== 'undefined' && supabase.createClient) {
+      _sb = supabase.createClient(SB_URL, SB_KEY);
+      console.log('[RWABidAsk] Supabase connected');
+    } else {
+      console.warn('[RWABidAsk] Supabase library not loaded yet — retrying');
+      setTimeout(initSupabase, 400);
+    }
+  } catch (e) {
+    console.warn('[RWABidAsk] Supabase init error:', e.message);
+  }
+})();
+
+/* ── SIGN UP ── */
+async function handleSignUp() {
+  const email = (document.getElementById('reg-email')?.value || '').trim();
+  const pass  = (document.getElementById('reg-pass')?.value  || '').trim();
+  const role  = (document.querySelector('.role-card.sel .role-name')?.textContent || 'Asset Owner').trim();
+  if (!email || !pass) { toast('Enter email and password to continue'); return; }
+  if (pass.length < 8)  { toast('Password must be at least 8 characters'); return; }
+  if (!_sb) { toast('Connection unavailable — refresh and try again'); return; }
+  toast('Creating account…');
+  const { data, error } = await _sb.auth.signUp({
+    email,
+    password: pass,
+    options: { data: { role } },
+  });
+  if (error) {
+    toast('Error: ' + error.message);
+  } else {
+    currentUser     = data.user;
+    currentUserRole = role;
+    closeModal();
+    toast('✅ Account created — check your email to confirm');
+    updateAuthUI();
+    logLead(email, 'signup', role);
+  }
+}
+
+/* ── SIGN IN ── */
+async function handleSignIn() {
+  const email = (document.getElementById('si-email')?.value || '').trim();
+  const pass  = (document.getElementById('si-pass')?.value  || '').trim();
+  if (!email || !pass) { toast('Enter your email and password'); return; }
+  if (!_sb) { toast('Connection unavailable — refresh and try again'); return; }
+  toast('Signing in…');
+  const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    toast('Error: ' + error.message);
+  } else {
+    currentUser     = data.user;
+    currentUserRole = data.user.user_metadata?.role || 'User';
+    closeModal();
+    toast('Welcome back — ' + email.split('@')[0]);
+    updateAuthUI();
+  }
+}
+
+/* ── SIGN OUT ── */
+async function handleSignOut() {
+  if (!_sb) return;
+  await _sb.auth.signOut();
+  currentUser = null;
+  currentUserRole = null;
+  updateAuthUI();
+  toast('Signed out');
+}
+
+/* ── UPDATE TOP BAR AFTER AUTH ── */
+function updateAuthUI() {
+  const signinBtn = document.getElementById('signin-btn');
+  const joinBtn   = document.getElementById('join-btn');
+  if (!signinBtn || !joinBtn) return;
+  if (currentUser) {
+    const name = currentUser.email.split('@')[0];
+    signinBtn.textContent = name;
+    signinBtn.onclick = () => openModal('account');
+    joinBtn.textContent = 'Sign Out';
+    joinBtn.onclick = handleSignOut;
+  } else {
+    signinBtn.textContent = 'Sign In';
+    signinBtn.onclick = () => openModal('signin');
+    joinBtn.textContent = 'Join';
+    joinBtn.onclick = () => openModal('register');
+  }
+}
+
+/* ── PLACE BID → SUPABASE LEDGER ── */
+async function handlePlaceBid(propertyId, address) {
+  if (!currentUser) {
+    closeModal();
+    openModal('signin');
+    toast('Sign in to place a bid on the ledger');
+    return;
+  }
+  const amount = parseFloat(document.getElementById('bid-amount')?.value);
+  const terms  = document.getElementById('bid-terms')?.value   || 'cash';
+  const down   = document.getElementById('bid-down')?.value    || null;
+  const expiry = document.getElementById('bid-expiry')?.value  || '7 days';
+  const email  = document.getElementById('bid-email')?.value   || currentUser.email;
+  if (!amount || amount < 1) { toast('Enter a valid bid amount'); return; }
+  if (!_sb) { toast('Ledger unavailable — refresh and try again'); return; }
+  toast('Recording bid to ledger…');
+  const { error } = await _sb.from('bids').insert([{
+    property_id:       propertyId  || 'unknown',
+    property_address:  address     || '—',
+    bid_amount:        amount,
+    terms,
+    down_payment_pct:  down ? parseFloat(down) : null,
+    expiry,
+    bidder_email:      email,
+    user_id:           currentUser.id,
+    status:            'active',
+    created_at:        new Date().toISOString(),
+  }]);
+  if (error) {
+    toast('Ledger error: ' + error.message);
+    console.error('[RWABidAsk] Bid error:', error);
+  } else {
+    closeModal();
+    toast('✅ Bid placed — permanently recorded on ledger. Seller notified.');
+    loadUserBids();
+  }
+}
+
+/* ── LOAD USER'S OWN BIDS FOR ACCOUNT PANEL ── */
+async function loadUserBids() {
+  if (!_sb || !currentUser) return [];
+  const { data, error } = await _sb
+    .from('bids')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+  if (error) { console.warn('[RWABidAsk] loadUserBids:', error.message); return []; }
+  return data || [];
+}
+
+/* ── ACCOUNT MODAL (shows bid history) ── */
+async function openAccountModal() {
+  const bids = await loadUserBids();
+  const box  = document.getElementById('mbox');
+  box.innerHTML = `
+    <button class="mclose-btn" onclick="closeModal()">✕</button>
+    <div class="mtitle">My Account</div>
+    <div class="msub">${currentUser?.email || ''} · ${currentUserRole || 'User'}</div>
+    <div class="rsect-title" style="font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px">Active Bids on Ledger</div>
+    ${bids.length === 0
+      ? `<div style="font-family:var(--mono);font-size:10px;color:var(--muted);padding:12px 0">No bids placed yet.</div>`
+      : bids.map(b => `
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:10px;gap:10px">
+          <span style="color:var(--dim);font-family:var(--mono);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.property_address}</span>
+          <span style="color:var(--cyan);font-family:var(--mono);flex-shrink:0">${fmtPrice(b.bid_amount)}</span>
+          <span style="color:var(--muted);font-family:var(--mono);flex-shrink:0">${b.status}</span>
+        </div>`).join('')
+    }
+    <div class="mfooter" style="margin-top:18px">
+      <button class="mcan-btn" onclick="closeModal()">Close</button>
+      <button class="msub-btn" onclick="closeModal();openModal('list-asset')">+ List an Asset</button>
+    </div>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+/* ── LOG LEAD / INTENT ── */
+async function logLead(email, action, role) {
+  if (!_sb) return;
+  try {
+    await _sb.from('leads').insert([{
+      email:      email || null,
+      action,
+      role:       role  || null,
+      user_agent: navigator.userAgent.slice(0, 120),
+      created_at: new Date().toISOString(),
+    }]);
+  } catch (e) { /* non-critical */ }
+}
+
+/* ── LOG BLIMP CLICK AS LEAD ── */
+function blimpClick() {
+  logLead(currentUser?.email || null, 'blimp_click', null);
+  openModal('partner');
+}
+
+/* ── RESTORE SESSION ON LOAD ── */
+async function restoreSession() {
+  if (!_sb) return;
+  const { data } = await _sb.auth.getSession();
+  if (data?.session?.user) {
+    currentUser     = data.session.user;
+    currentUserRole = currentUser.user_metadata?.role || 'User';
+    updateAuthUI();
+  }
+}
+
+/* ── OPEN MODAL OVERRIDE to route account → async modal ── */
+const _originalOpenModal = openModal;
+function openModal(type, id) {
+  if (type === 'account') { openAccountModal(); return; }
+  _originalOpenModal(type, id);
+}
+
 /* ═══════════════════════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════════════════════ */
-// Init ticker with base text while loading
 buildTicker([]);
 
-// Wait for Google Maps to be available then init
+/* Add IDs to topbar buttons for auth UI updates */
+document.addEventListener('DOMContentLoaded', () => {
+  const btns = document.querySelectorAll('.tbtn');
+  btns.forEach(b => {
+    if (b.textContent.trim() === 'Sign In') b.id = 'signin-btn';
+    if (b.textContent.trim() === 'Join')    b.id = 'join-btn';
+  });
+  restoreSession();
+});
+
+/* Also wire blimp to lead logger */
+const blimpEl = document.querySelector('.blimp');
+if (blimpEl) {
+  blimpEl.onclick = null;
+  blimpEl.addEventListener('click', blimpClick);
+}
+
+/* Wait for Google Maps then init */
 function waitForGoogleAndInit() {
   if (typeof google !== 'undefined' && google.maps && google.maps.importLibrary) {
     initMap();
@@ -2085,6 +2344,7 @@ function waitForGoogleAndInit() {
   }
 }
 waitForGoogleAndInit();
+
 </script>
 </body>
 </html>
