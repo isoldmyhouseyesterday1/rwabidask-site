@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RWABidAsk — Global Real-World Asset Market</title>
-<meta name="description" content="The world's first open-market global bid-ask platform for real estate, businesses, and land. Direct bid, ask, and buy.">
+<meta name="description" content="The world's first open-market global bid-ask platform for real estate, businesses, and land. No brokers. Direct bid, ask, and buy.">
 
 <!-- ── FONTS ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,11 +14,17 @@
 <!-- ── SUPABASE ── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- ── GOOGLE MAPS (alpha required for Map3DElement + Places) ── -->
+<!-- ── GOOGLE MAPS (alpha — Map3DElement requires this version) ── -->
 <script>
   window.__mapReady = function() { window.__googleMapsLoaded = true; window.__initRWA && window.__initRWA(); };
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady" async defer></script>
+<style>
+  /* Suppress Google Maps alpha/beta development banner */
+  .dismissButton, [class*="dismissButton"],
+  div[style*="z-index: 1000000"], div[style*="z-index:1000000"],
+  .gm-style-pbc, .gm-err-container { display: none !important; }
+</style>
 
 <style>
 /* ══════════════════════════════════════════════
@@ -56,25 +62,25 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #0f1117;
-  --bg1:      #141820;
-  --bg2:      #1a1f2e;
-  --bg3:      #1f2537;
-  --bg4:      #252c40;
-  --border:   rgba(255,255,255,.09);
-  --border2:  rgba(255,255,255,.15);
-  --border3:  rgba(255,255,255,.24);
-  --text:     #f4f6fa;
-  --muted:    #7a8099;
-  --dim:      #a8b0c8;
+  --bg:       #1a2236;
+  --bg1:      #1f2840;
+  --bg2:      #243050;
+  --bg3:      #2a3860;
+  --bg4:      #304070;
+  --border:   rgba(255,255,255,.12);
+  --border2:  rgba(255,255,255,.20);
+  --border3:  rgba(255,255,255,.32);
+  --text:     #f8faff;
+  --muted:    #94a0be;
+  --dim:      #c0cbe0;
   --cyan:     #00ffc8;
-  --cyan-dim: rgba(0,255,200,.12);
-  --cyan-glow:rgba(0,255,200,.35);
-  --silver:   #c8cdd6;
-  --gold:     #c9a84c;
-  --red:      #ef4444;
-  --blue:     #3b7df8;
-  --green:    #22c55e;
+  --cyan-dim: rgba(0,255,200,.14);
+  --cyan-glow:rgba(0,255,200,.4);
+  --silver:   #d4dae8;
+  --gold:     #d4b84a;
+  --red:      #ff5a5a;
+  --blue:     #5b96ff;
+  --green:    #2ed47a;
   --mono: 'Geist Mono', monospace;
   --sans: 'Geist', sans-serif;
 }
@@ -1264,8 +1270,9 @@ html, body {
       <div class="r-empty">
         <div class="r-empty-glyph">◎</div>
         <div class="r-empty-text">
-          BID · ASK · BUY<br>
-          GLOBAL · LIQUID · OPEN
+          SEARCH · BID · BUY · FINANCE<br>
+          RESIDENTIAL · COMMERCIAL · LAND<br>
+          TIMESHARES · LEASES · BUSINESSES
         </div>
       </div>
     </div>
@@ -1506,18 +1513,14 @@ function renderDetail(a) {
   document.getElementById('rbody').innerHTML = `
     <div class="rinner">
       <div class="act-grid">
-        <a class="abtn a-buy"
-           href="mailto:ops@rwabidask.com?subject=BUY%20INQUIRY%3A%20${encodeURIComponent(a.address)}&body=Asset%20ID%3A%20${a.id}%0APrice%3A%20${fmtPrice(a.price)}%0AAddress%3A%20${encodeURIComponent(a.address)}%0A%0APlease%20initiate%20my%20purchase%20inquiry."
-        >BUY NOW</a>
-        <a class="abtn a-bid"
-           href="mailto:ops@rwabidask.com?subject=BID%3A%20${encodeURIComponent(a.address)}&body=Asset%20ID%3A%20${a.id}%0AListed%20At%3A%20${fmtPrice(a.price)}%0AAddress%3A%20${encodeURIComponent(a.address)}%0A%0AMy%20bid%20amount%3A%20%24"
-        >PLACE BID</a>
+        <button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button>
+        <button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button>
         <button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button>
-        <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:#4ade80" onclick="openModal('insurance','${a.id}')">🛡 INSURANCE</button>
-        <button class="abtn a-save" onclick="openModal('signin')">WATCHLIST</button>
-        <button class="abtn" style="background:none;border:1px solid rgba(139,92,246,.3)!important;color:#a78bfa" onclick="openModal('bid','${a.id}')">BID ON LEDGER</button>
-        <button class="abtn a-claim" onclick="openModal('claim','${a.id}')">⬡ CLAIM FOR TOKENIZATION</button>
-        <button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">★ SPONSOR THIS LISTING</button>
+        <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:#2ed47a" onclick="openModal('insurance','${a.id}')">INSURANCE</button>
+        <button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button>
+        <button class="abtn" style="background:none;border:1px solid rgba(139,92,246,.3)!important;color:#a78bfa" onclick="requireAuth('bid','${a.id}')">BID ON LEDGER</button>
+        <button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button>
+        <button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button>
       </div>
 
       <div class="rsect">
@@ -1760,9 +1763,7 @@ function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   layer.innerHTML = '';
   domMarkers = {};
-  ASSETS.forEach(a => addDOMMarker(a));
-
-  // Listen to camera changes to reproject
+  ASSETS.forEach(a => _addMarkerEl(a));
   if (map3dEl) {
     map3dEl.addEventListener('gmp-centerchange',  reprojectMarkers);
     map3dEl.addEventListener('gmp-rangechange',   reprojectMarkers);
@@ -1771,7 +1772,19 @@ function renderDOMMarkers() {
   }
 }
 
+// For search results — show only the newly searched marker, hide previous search markers
+let lastSearchMarkerId = null;
 function addDOMMarker(asset) {
+  // Remove previous search-result marker
+  if (lastSearchMarkerId && domMarkers[lastSearchMarkerId]) {
+    domMarkers[lastSearchMarkerId].el.remove();
+    delete domMarkers[lastSearchMarkerId];
+  }
+  lastSearchMarkerId = asset.id;
+  _addMarkerEl(asset);
+}
+
+function _addMarkerEl(asset) {
   const el = document.createElement('div');
   el.className = 'map-marker-dot';
   el.style.pointerEvents = 'all';
@@ -1855,9 +1868,7 @@ function showInfoWin(asset, markerEl) {
       <div class="info-row"><span class="info-k">Source</span><span class="info-v">${asset.source}</span></div>
     </div>
     <div class="info-actions">
-      <a class="info-bid"
-        href="mailto:ops@rwabidask.com?subject=BID%3A%20${encodeURIComponent(asset.address)}&body=Asset%20ID%3A%20${asset.id}%0APrice%3A%20${fmtPrice(asset.price)}%0AAddress%3A%20${encodeURIComponent(asset.address)}%0A%0AMy%20bid%3A%20%24"
-      >PLACE BID</a>
+      <button class="info-bid" onclick="closeInfoWin();requireAuth('bid','${asset.id}')">PLACE BID</button>
       <button class="info-more" onclick="closeInfoWin();selectAsset('${asset.id}')">DETAILS</button>
     </div>
     <div class="info-sponsor">
@@ -1894,9 +1905,10 @@ function buildTicker(assets) {
     'ESTABLISHING SECURE CONNECTION',
     'GLOBAL DIRECTORY LIVE',
     'RWABIDASK.COM',
-    'DIRECT BID',
+    'BID · ASK · BUY · FINANCE',
     'ANNIE GROUP LLC',
     'TOKENIZATION AVAILABLE',
+    'TIMESHARES · LEASES · NEW DEVELOPMENTS',
     'ops@rwabidask.com',
   ];
   const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 40);
@@ -1932,35 +1944,81 @@ function openModal(type, id) {
 
     register: () => `
       <div class="mtitle">Create Account</div>
-      <div class="msub">Select your role to access the global asset market. Institutional-grade verification required.</div>
-      <div class="role-grid">
-        <div class="role-card sel" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
+      <div class="msub">Select your role. Buyers get a free trial. Service providers choose a plan.</div>
+      <div class="role-grid" style="grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px" id="role-grid">
+        <div class="role-card sel" onclick="selectRole(this,'Buyer')">
+          <div class="role-name">Buyer</div>
+          <div class="role-desc">Search, bid, and purchase property worldwide.</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--cyan);margin-top:6px">Free Trial</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this,'Asset Owner')">
           <div class="role-name">Asset Owner</div>
-          <div class="role-desc">List property, land, or business directly.</div>
+          <div class="role-desc">List property, land, timeshare, lease, or business.</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--cyan);margin-top:6px">Free Trial</div>
         </div>
-        <div class="role-card" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
+        <div class="role-card" onclick="selectRole(this,'Broker')">
           <div class="role-name">Broker / Agent</div>
-          <div class="role-desc">Syndicate client inventory. Generate verified leads.</div>
+          <div class="role-desc">List inventory. Generate leads. Own regional advertising.</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-top:6px">From $99/mo</div>
         </div>
-        <div class="role-card" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
+        <div class="role-card" onclick="selectRole(this,'Lender')">
           <div class="role-name">Lender / Bank</div>
-          <div class="role-desc">Connect with qualified buyers. Fund deals globally.</div>
+          <div class="role-desc">Connect with qualified buyers. Advertise loan products.</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-top:6px">From $199/mo</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this,'Insurance')">
+          <div class="role-name">Insurance Agent</div>
+          <div class="role-desc">Offer coverage to buyers. Own regions. Get instant leads.</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-top:6px">From $149/mo</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this,'Developer')">
+          <div class="role-name">Developer / Builder</div>
+          <div class="role-desc">List new developments, lots, and pre-sales globally.</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-top:6px">From $149/mo</div>
         </div>
       </div>
-      <div class="mrow">
-        <div class="mfield"><label>First Name</label><input type="text" placeholder="First"></div>
-        <div class="mfield"><label>Last Name</label><input type="text" placeholder="Last"></div>
+
+      <!-- Buyer / Owner fields (free trial) -->
+      <div id="reg-free-fields">
+        <div class="mrow">
+          <div class="mfield"><label>First Name</label><input type="text" id="reg-fname" placeholder="First"></div>
+          <div class="mfield"><label>Last Name</label><input type="text" id="reg-lname" placeholder="Last"></div>
+        </div>
+        <div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
+        <div class="mfield"><label>Country</label>
+          <select id="reg-country">
+            <option>United States</option><option>Mexico</option><option>Brazil</option>
+            <option>Argentina</option><option>Colombia</option><option>Spain</option>
+            <option>UAE</option><option>United Kingdom</option><option>Canada</option>
+            <option>Germany</option><option>Portugal</option><option>Australia</option>
+            <option>Singapore</option><option>South Africa</option><option>Other</option>
+          </select>
+        </div>
+        <div class="mfield"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password (8+ characters)"></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:4px;line-height:1.8">
+          Free 14-day trial. Card on file required after trial — you will not be charged until trial ends.
+        </div>
+        <div class="mfield"><label>Card Number (trial — not charged now)</label><input type="text" id="reg-card" placeholder="4242 4242 4242 4242" maxlength="19"></div>
+        <div class="mrow">
+          <div class="mfield"><label>Expiry</label><input type="text" placeholder="MM / YY" maxlength="7"></div>
+          <div class="mfield"><label>CVV</label><input type="text" placeholder="•••" maxlength="4"></div>
+        </div>
       </div>
-      <div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
-      <div class="mfield"><label>Country</label>
-        <select>
-          <option>United States</option><option>Mexico</option><option>Brazil</option>
-          <option>Argentina</option><option>Colombia</option><option>Spain</option>
-          <option>UAE</option><option>United Kingdom</option><option>Canada</option>
-          <option>Germany</option><option>Portugal</option><option>Other</option>
-        </select>
+
+      <!-- Service provider extra fields (shown when pro role selected) -->
+      <div id="reg-pro-fields" style="display:none">
+        <div class="mfield"><label>Company / Firm Name</label><input type="text" id="reg-company" placeholder="Your company"></div>
+        <div class="mfield"><label>License / Registration Number</label><input type="text" id="reg-license" placeholder="Professional license #"></div>
+        <div class="mfield"><label>Target Regions</label><input type="text" id="reg-regions" placeholder="e.g. Florida, Spain, UAE — regions you want to own"></div>
+        <div class="mfield"><label>Plan</label>
+          <select id="reg-plan">
+            <option value="standard">Standard — $99/mo (up to 25 listings, 1 region)</option>
+            <option value="premium">Premium — $299/mo (unlimited listings, 5 regions)</option>
+            <option value="institutional">Institutional — $999/mo (all regions, API access, white-label)</option>
+          </select>
+        </div>
       </div>
-      <div class="mfield"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password"></div>
+
       <div class="mfooter">
         <button class="mcan-btn" onclick="closeModal()">Cancel</button>
         <button class="msub-btn" onclick="handleSignUp()">Create Account →</button>
@@ -1969,7 +2027,7 @@ function openModal(type, id) {
 
     bid: () => `
       <div class="mtitle">Place Bid on Ledger</div>
-      <div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent.</div>
+      <div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent. No broker can take it off market.</div>
       <div class="mfield"><label>Bid Amount (USD)</label><input type="number" id="bid-amount" placeholder="Enter your bid" min="1"></div>
       <div class="mfield"><label>Financing Terms</label>
         <select id="bid-terms">
@@ -1989,7 +2047,7 @@ function openModal(type, id) {
       <div class="mfield"><label>Email (confirmation)</label><input type="email" id="bid-email" placeholder="you@example.com"></div>
       <div class="mfooter">
         <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-        <button class="msub-btn" onclick="handlePlaceBidFromMap()">Place Bid on Ledger →</button>
+        <button class="msub-btn" onclick="handlePlaceBid('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g, ' ') : ''}')">Place Bid on Ledger →</button>
       </div>
     `,
 
@@ -1997,7 +2055,7 @@ function openModal(type, id) {
       <div class="mtitle">Find a Lender</div>
       <div class="msub">
         ${a ? a.address + '<br>' : ''}
-        Connect with verified lenders directly.
+        Connect with verified lenders and financing partners on RWABidAsk.
       </div>
       <div class="mfield"><label>Loan Amount Needed (USD)</label><input type="number" placeholder="e.g. 2000000"></div>
       <div class="mfield"><label>Property Country</label><input type="text" placeholder="${a ? a.country : 'Country'}"></div>
@@ -2096,6 +2154,44 @@ function openModal(type, id) {
       </div>
     `,
 
+    buy: () => `
+      <div class="mtitle">Purchase Inquiry</div>
+      <div class="msub">${a ? a.address + (a.price ? ' · ' + fmtPrice(a.price) : '') + '<br>' : ''}Submit a purchase inquiry directly to the listing party.</div>
+      <div class="mfield"><label>Offer Price (USD)</label><input type="number" id="buy-amount" placeholder="${a && a.price ? a.price : ''}" value="${a && a.price ? a.price : ''}"></div>
+      <div class="mfield"><label>Financing Method</label>
+        <select>
+          <option>All Cash</option>
+          <option>Conventional Mortgage</option>
+          <option>Bridge Loan</option>
+          <option>Seller Financing</option>
+          <option>Crypto-Backed Loan</option>
+          <option>To Be Determined</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Message to Seller (optional)</label>
+        <textarea placeholder="Introduce yourself and your intent…" style="min-height:70px"></textarea>
+      </div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:4px">
+        Submission is a non-binding letter of intent pending due diligence. RWABidAsk facilitates the connection only.
+      </div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();logLead(currentUser?.email,\\'buy_inquiry\\',null);toast('Inquiry sent — listing party has been notified')">Submit Inquiry →</button>
+      </div>
+    `,
+
+    watchlist: () => `
+      <div class="mtitle">Saved to Watchlist</div>
+      <div class="msub">${a ? a.address + '<br>' : ''}You will be notified of price changes, new bids, and status updates for this asset.</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--dim);line-height:2;padding:10px 0">
+        Watchlist alerts are sent to: <span style="color:var(--cyan)">${'${currentUser ? currentUser.email : \"your account\"}'}</span>
+      </div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Close</button>
+        <button class="msub-btn" onclick="closeModal();toast('Watching — you will be notified of any changes')">Confirm →</button>
+      </div>
+    `,
+
     partner: () => `
       <div class="mtitle">Annie Group LLC — Partnership</div>
       <div class="msub">
@@ -2189,18 +2285,51 @@ function bootSupabase() {
   }
 }
 
+/* ── REQUIRE AUTH BEFORE ACTION ── */
+function requireAuth(action, assetId) {
+  if (currentUser) {
+    openModal(action, assetId);
+  } else {
+    // Store intended action so we can resume after login
+    window._pendingAction = { action, assetId };
+    openModal('signin');
+    toast('Sign in or create an account to continue');
+  }
+}
+
+/* ── ROLE SELECTOR in register modal ── */
+const PRO_ROLES = ['Broker', 'Lender', 'Insurance', 'Developer'];
+function selectRole(el, role) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  const proFields  = document.getElementById('reg-pro-fields');
+  const freeFields = document.getElementById('reg-free-fields');
+  if (proFields && freeFields) {
+    if (PRO_ROLES.includes(role)) {
+      proFields.style.display  = 'block';
+    } else {
+      proFields.style.display  = 'none';
+    }
+  }
+}
+
 /* ── SIGN UP ── */
 async function handleSignUp() {
   const email = (document.getElementById('reg-email')?.value || '').trim();
   const pass  = (document.getElementById('reg-pass')?.value  || '').trim();
-  const role  = document.querySelector('.role-card.sel .role-name')?.textContent?.trim() || 'Asset Owner';
+  const role  = document.querySelector('.role-card.sel .role-name')?.textContent?.trim() || 'Buyer';
+  const fname = document.getElementById('reg-fname')?.value?.trim() || '';
+  const lname = document.getElementById('reg-lname')?.value?.trim() || '';
+  const company = document.getElementById('reg-company')?.value?.trim() || '';
+  const regions = document.getElementById('reg-regions')?.value?.trim() || '';
+  const plan    = document.getElementById('reg-plan')?.value || 'standard';
   if (!email || !pass) { toast('Enter email and password'); return; }
   if (pass.length < 8)  { toast('Password must be 8+ characters'); return; }
   if (!_sb) { toast('Service unavailable — refresh and retry'); return; }
   toast('Creating account…');
   const { data, error } = await _sb.auth.signUp({
     email, password: pass,
-    options: { data: { role } },
+    options: { data: { role, fname, lname, company, regions, plan } },
   });
   if (error) { toast('Error: ' + error.message); return; }
   currentUser = data.user; currentUserRole = role;
@@ -2208,6 +2337,12 @@ async function handleSignUp() {
   toast('✅ Account created — check email to confirm');
   updateAuthUI();
   logLead(email, 'signup', role);
+  // Resume pending action if any
+  if (window._pendingAction) {
+    const { action, assetId } = window._pendingAction;
+    window._pendingAction = null;
+    setTimeout(() => openModal(action, assetId), 400);
+  }
 }
 
 /* ── SIGN IN ── */
@@ -2223,6 +2358,12 @@ async function handleSignIn() {
   closeModal();
   toast('Welcome back — ' + email.split('@')[0]);
   updateAuthUI();
+  // Resume any pending action (bid, buy, watchlist) that triggered the sign-in
+  if (window._pendingAction) {
+    const { action, assetId } = window._pendingAction;
+    window._pendingAction = null;
+    setTimeout(() => openModal(action, assetId), 400);
+  }
 }
 
 /* ── SIGN OUT ── */
@@ -2268,7 +2409,7 @@ async function handlePlaceBid(propertyId, address) {
   }]);
   if (error) { toast('Ledger error: ' + error.message); return; }
   closeModal();
-  toast('✅ Bid placed — permanently recorded.');
+  toast('✅ Bid placed — permanently recorded. No broker can remove it.');
 }
 
 /* ── ACCOUNT MODAL ── */
