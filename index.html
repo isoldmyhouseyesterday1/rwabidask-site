@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>RWABidAsk — Global Real-World Asset Market</title>
 <meta name="description" content="The world's first open-market global bid-ask platform for real estate, businesses, and land. No brokers. Direct bid, ask, and buy.">
 
@@ -1182,49 +1182,96 @@ html, body {
 
 /* Mobile: bottom sheet */
 @media (max-width: 767px) {
-  /* topbar: hide stats, keep search + auth */
-  .tstat { display: none; }
+
+  /* ── Topbar: strip non-essentials ── */
+  .tstat    { display: none; }
   .logo-tag { display: none; }
   #search-input { font-size: 12px; }
-  /* Tighten topbar buttons */
-  .tbtn { padding: 0 10px; font-size: 10px; }
-  /* Left panel hidden on mobile (drawer takes over) */
+  .tbtn     { padding: 0 10px; font-size: 10px; }
 
+  /* ── Full-screen map layout ── */
+  #main-row {
+    grid-template-columns: 1fr;   /* one column — map only */
+    grid-template-rows: 1fr;
+    position: relative;
+  }
+  #left, #right { display: none; } /* panels hidden; drawer takes over */
+
+  /* ── Map column: occupies full area by default,
+        shrinks to top 40% when drawer is open ── */
+  #map-col {
+    position: absolute;
+    inset: 0;
+    transition: bottom .32s cubic-bezier(.4,0,.2,1);
+  }
+  /* JS adds .drawer-open class to #map-col when drawer opens */
+  #map-col.drawer-open {
+    bottom: 60%; /* map shows top 40% of remaining height */
+  }
+
+  /* ── Bottom sheet drawer ── */
   #asset-drawer {
-    top: auto;
+    position: fixed;
+    top: auto;       /* ignore top */
     left: 0;
     right: 0;
     bottom: 0;
     width: 100%;
-    max-height: 90vh;
+    height: 60vh;    /* exactly 60% of viewport — map gets the other 40% */
+    max-height: 60vh;
     border-left: none;
-    border-top: 1px solid rgba(0,255,200,.25);
-    transform: translateY(105%);
-    box-shadow: 0 -20px 60px rgba(0,0,0,.7);
-    border-radius: 16px 16px 0 0;
+    border-top: 2px solid rgba(0,255,200,.3);
+    border-radius: 18px 18px 0 0;
+    transform: translateY(105%);  /* starts fully below screen */
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 -12px 50px rgba(0,0,0,.75);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    will-change: transform;
   }
-  #asset-drawer.open { transform: translateY(0); }
-  /* Mobile: pull handle */
+  #asset-drawer.open {
+    transform: translateY(0); /* slides up into view */
+  }
+
+  /* ── Pull handle ── */
   #asset-drawer::before {
     content: '';
     display: block;
-    width: 40px;
+    width: 44px;
     height: 4px;
-    background: var(--border2);
+    background: rgba(255,255,255,.18);
     border-radius: 2px;
-    margin: 10px auto 4px;
-    flex-shrink: 0;
+    margin: 12px auto 6px;
   }
-  /* Stack layout for small screens */
-  #main-row {
-    grid-template-columns: 0 1fr 0;
-  }
-  #left, #right { display: none; }
-  .drawer-btn-primary, .drawer-btn-secondary {
+
+  /* ── Touch-friendly buttons ── */
+  .drawer-btn-primary,
+  .drawer-btn-secondary {
     min-height: 52px;
     font-size: 14px;
+    border-radius: 8px;
   }
+  .drawer-close {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Tighten drawer padding on small screens ── */
+  .drawer-head    { padding: 10px 14px 10px; }
+  .drawer-section { padding: 10px 14px; }
+  .drawer-actions { padding: 10px 14px 20px; } /* extra bottom for home bar */
+  .drawer-legal   { padding: 8px 14px 24px; }  /* safe-area buffer */
+
+  /* ── Price tags: slightly larger tap target on mobile ── */
+  .price-tag {
+    padding: 6px 12px;
+  }
+  .price-tag-val { font-size: 13px; }
+  .price-marker  { z-index: 20; } /* above map controls on mobile */
 }
 
 .drawer-close {
@@ -2753,6 +2800,8 @@ function openDrawer(a) {
 
   drawer.classList.add('open');
   document.getElementById('right').style.zIndex = '1';
+  // Mobile: shrink map to top 40% so user can see clicked location
+  document.getElementById('map-col').classList.add('drawer-open');
 }
 
 // Helper: quantified manifest row (bold key, value right-aligned)
@@ -2763,6 +2812,7 @@ function drq(k, v) {
 function closeDrawer() {
   document.getElementById('asset-drawer').classList.remove('open');
   document.getElementById('right').style.zIndex = '';
+  document.getElementById('map-col').classList.remove('drawer-open');
 }
 
 // Helper: drawer data row
@@ -3235,8 +3285,8 @@ document.getElementById('modal').addEventListener('click', e => {
    CREATE POLICY "Service role only" ON leads USING (false);
    ─────────────────────────────────────────────────────────
 */
-   Project: 'iyejqvdjbvokrswlsoda.supabase.co';
-// ---------- */
+   Project: iyejqvdjbvokrswlsoda.supabase.co
+═══════════════════════════════════════════════════════════ */
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
 
