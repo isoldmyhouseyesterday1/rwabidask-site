@@ -14,8 +14,11 @@
 <!-- ── SUPABASE ── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- ── GOOGLE MAPS ── -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=beta&libraries=places,maps3d"></script>
+<!-- ── GOOGLE MAPS (alpha required for Map3DElement + Places) ── -->
+<script>
+  window.__mapReady = function() { window.__googleMapsLoaded = true; window.__initRWA && window.__initRWA(); };
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady" async defer></script>
 
 <style>
 /* ══════════════════════════════════════════════
@@ -1159,8 +1162,8 @@ html, body {
       <div class="tstat-l">Bids 24h</div>
       <div class="tstat-v" id="s-bids">—</div>
     </div>
-    <button class="tbtn" onclick="openModal('signin')">Sign In</button>
-    <button class="tbtn primary" onclick="openModal('register')">Join Exchange</button>
+    <button class="tbtn" id="signin-btn" onclick="openModal('signin')">Sign In</button>
+    <button class="tbtn primary" id="join-btn" onclick="openModal('register')">Join</button>
   </div>
 </div>
 
@@ -1233,7 +1236,7 @@ html, body {
 
     <!-- Blimp -->
     <div class="blimp-layer">
-      <div class="blimp" onclick="openModal('partner')" title="Partnership — Annie Group LLC">
+      <div class="blimp" id="blimp-el" title="Partnership — Annie Group LLC">
         <div class="blimp-body">
           <div class="blimp-hull">
             <div>
@@ -1510,7 +1513,9 @@ function renderDetail(a) {
            href="mailto:ops@rwabidask.com?subject=BID%3A%20${encodeURIComponent(a.address)}&body=Asset%20ID%3A%20${a.id}%0AListed%20At%3A%20${fmtPrice(a.price)}%0AAddress%3A%20${encodeURIComponent(a.address)}%0A%0AMy%20bid%20amount%3A%20%24"
         >PLACE BID</a>
         <button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button>
+        <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:#4ade80" onclick="openModal('insurance','${a.id}')">🛡 INSURANCE</button>
         <button class="abtn a-save" onclick="openModal('signin')">WATCHLIST</button>
+        <button class="abtn" style="background:none;border:1px solid rgba(139,92,246,.3)!important;color:#a78bfa" onclick="openModal('bid','${a.id}')">BID ON LEDGER</button>
         <button class="abtn a-claim" onclick="openModal('claim','${a.id}')">⬡ CLAIM FOR TOKENIZATION</button>
         <button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">★ SPONSOR THIS LISTING</button>
       </div>
@@ -1568,88 +1573,111 @@ function syncMarkerVisibility() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   GOOGLE MAPS 3D  (Map3DElement)
+   GOOGLE MAPS 3D  (Map3DElement — requires v=alpha)
 ═══════════════════════════════════════════════════════════ */
 async function initMap() {
   try {
-    const { Map3DElement, MapMode } = await google.maps.importLibrary('maps3d');
+    // importLibrary is the correct alpha API approach
+    const maps3dLib = await google.maps.importLibrary('maps3d');
+    const Map3DElement = maps3dLib.Map3DElement;
 
     map3dEl = new Map3DElement({
       center: { lat: 20, lng: 10, altitude: 0 },
       range: 22000000,
       tilt: 0,
       heading: 0,
-      mode: MapMode.SATELLITE,
     });
+    // Set satellite mode after construction
+    try {
+      const { MapMode } = maps3dLib;
+      if (MapMode) map3dEl.mode = MapMode.SATELLITE;
+    } catch(e) { /* mode may not be needed */ }
 
     const container = document.getElementById('map3d-container');
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
 
-    // Slight entrance tilt
-    setTimeout(() => {
-      map3dEl.tilt = 15;
-    }, 1400);
+    // Wait one frame for element to attach, then gentle tilt
+    requestAnimationFrame(() => {
+      setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200);
+    });
 
-    // Load data
+    setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
+
+    // Load CSV data
     await loadMarketData();
 
-    // Init search
+    // Init Places search (must come after map loads)
     initSearch();
 
   } catch (err) {
     console.error('[RWABidAsk] Map3DElement init error:', err);
-    setStatus('MAP UNAVAILABLE — CHECK API KEY');
+    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING');
   }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SEARCH — Google Places SearchBox on the top input
+   SEARCH — Places Autocomplete
 ═══════════════════════════════════════════════════════════ */
-function initSearch() {
+async function initSearch() {
   const input = document.getElementById('search-input');
+  if (!input) return;
   try {
-    // Use Autocomplete (stable, works with beta key)
-    const ac = new google.maps.places.Autocomplete(input, {
-      fields: ['geometry', 'name', 'formatted_address'],
-    });
-    acInstance = ac;
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace();
-      if (!place.geometry || !place.geometry.location) {
-        toast('Location not found — try a different search');
-        return;
+    // Try new PlaceAutocompleteElement first (alpha)
+    let usedLegacy = false;
+    try {
+      const placesLib = await google.maps.importLibrary('places');
+      if (placesLib.Autocomplete) {
+        const ac = new placesLib.Autocomplete(input, {
+          fields: ['geometry', 'name', 'formatted_address'],
+        });
+        acInstance = ac;
+        ac.addListener('place_changed', onPlaceSelected.bind(null, ac));
+        usedLegacy = true;
       }
-      const lat = place.geometry.location.lat();
-      const lng = place.geometry.location.lng();
+    } catch(e) { /* fall through */ }
 
-      flyTo(lat, lng, 1400, 45);
-      setStatus('LOCATION: ' + (place.name || place.formatted_address || '').toUpperCase());
-
-      // Inject as unclaimed search result asset
-      const searched = {
-        id: 'search-' + Date.now(),
-        address: place.name || (place.formatted_address || '').split(',')[0],
-        city:    ((place.formatted_address || '').split(',')[1] || '').trim(),
-        country: ((place.formatted_address || '').split(',').pop() || '').trim(),
-        lat, lng,
-        price: 0, type: 'residential',
-        sqft: null, status: 'Unclaimed — Search Result',
-        source: 'Google Places', days: 0,
-      };
-      ASSETS.unshift(searched);
-      renderList();
-      buildTicker(ASSETS);
-      addDOMMarker(searched);
-      setTimeout(() => selectAsset(searched.id), 900);
-    });
+    // Fallback: classic google.maps.places.Autocomplete
+    if (!usedLegacy && google.maps.places && google.maps.places.Autocomplete) {
+      const ac = new google.maps.places.Autocomplete(input, {
+        fields: ['geometry', 'name', 'formatted_address'],
+      });
+      acInstance = ac;
+      ac.addListener('place_changed', onPlaceSelected.bind(null, ac));
+    }
   } catch (e) {
-    console.warn('[RWABidAsk] Search init:', e);
+    console.warn('[RWABidAsk] Search init error:', e);
   }
 }
 
-function triggerSearch() {
-  if (acInstance) google.maps.event.trigger(acInstance, 'place_changed');
+function onPlaceSelected(ac) {
+  const place = ac.getPlace();
+  if (!place || !place.geometry || !place.geometry.location) {
+    toast('Location not found — try a more specific address');
+    return;
+  }
+  const lat = place.geometry.location.lat();
+  const lng = place.geometry.location.lng();
+  flyTo(lat, lng, 1400, 45);
+  setStatus('LOCATION: ' + (place.name || place.formatted_address || '').toUpperCase());
+  logLead(null, 'search', null);
+
+  // Inject as unclaimed search result
+  const searched = {
+    id:      'search-' + Date.now(),
+    address: place.name || (place.formatted_address || '').split(',')[0],
+    city:    ((place.formatted_address || '').split(',')[1] || '').trim(),
+    country: ((place.formatted_address || '').split(',').pop() || '').trim(),
+    lat, lng,
+    price: 0, type: 'residential',
+    sqft: null, status: 'Unclaimed — Search Result',
+    source: 'Google Places', days: 0,
+  };
+  ASSETS.unshift(searched);
+  renderList();
+  buildTicker(ASSETS);
+  addDOMMarker(searched);
+  setTimeout(() => selectAsset(searched.id), 900);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1941,7 +1969,7 @@ function openModal(type, id) {
 
     bid: () => `
       <div class="mtitle">Place Bid on Ledger</div>
-      <div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent. No broker can take it off market.</div>
+      <div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent.</div>
       <div class="mfield"><label>Bid Amount (USD)</label><input type="number" id="bid-amount" placeholder="Enter your bid" min="1"></div>
       <div class="mfield"><label>Financing Terms</label>
         <select id="bid-terms">
@@ -2027,6 +2055,47 @@ function openModal(type, id) {
       </div>
     `,
 
+    insurance: () => `
+      <div class="mtitle">Property Insurance</div>
+      <div class="msub">${a ? a.address + '<br>' : ''}Connect with verified insurers in seconds. Coverage quotes for any asset, anywhere in the world.</div>
+      <div class="mfield"><label>Property Type</label>
+        <select>
+          <option>Residential — Single Family</option>
+          <option>Residential — Condo / Apartment</option>
+          <option>Commercial — Office</option>
+          <option>Commercial — Retail / Mixed Use</option>
+          <option>Industrial / Warehouse</option>
+          <option>Land / Agricultural</option>
+          <option>Business / Operations</option>
+          <option>Hospitality — Hotel / Resort</option>
+        </select>
+      </div>
+      <div class="mrow">
+        <div class="mfield"><label>Property Value (USD)</label><input type="number" placeholder="${a ? a.price || '' : ''}" value="${a ? a.price || '' : ''}"></div>
+        <div class="mfield"><label>Year Built</label><input type="number" placeholder="e.g. 2005" min="1800" max="2026"></div>
+      </div>
+      ${a && a.sqft ? `<div class="mfield"><label>Size (sqft)</label><input type="number" placeholder="${a.sqft}" value="${a.sqft}"></div>` : ''}
+      <div class="mfield"><label>Country / Jurisdiction</label><input type="text" placeholder="${a ? a.country || '' : 'e.g. United States'}"></div>
+      <div class="mfield"><label>Coverage Needed</label>
+        <select>
+          <option>Property / Structure</option>
+          <option>Property + Contents</option>
+          <option>Liability Only</option>
+          <option>Full Package — Property, Liability, Loss of Income</option>
+          <option>Title Insurance</option>
+          <option>Natural Disaster / Flood Rider</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Your Email</label><input type="email" placeholder="you@example.com"></div>
+      <div style="background:var(--bg3);border-left:2px solid rgba(34,197,94,.4);padding:10px 12px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:4px">
+        RWABidAsk connects you with licensed insurance providers in your jurisdiction. Quotes are provided by third-party carriers. Annie Group LLC is not an insurance broker.
+      </div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" style="background:rgba(34,197,94,.9);color:#000" onclick="closeModal();toast('Insurance quote request sent — providers will contact you within 24h')">Get Quotes →</button>
+      </div>
+    `,
+
     partner: () => `
       <div class="mtitle">Annie Group LLC — Partnership</div>
       <div class="msub">
@@ -2098,9 +2167,8 @@ document.getElementById('modal').addEventListener('click', e => {
 
 
 /* ═══════════════════════════════════════════════════════════
-   SUPABASE — Auth, Bid Ledger, Lead CRM
-   Replace SB_KEY with your anon key from Supabase dashboard
-   Settings → API → Project API keys → anon / public
+   SUPABASE — Auth · Bid Ledger · Lead CRM
+   Project: iyejqvdjbvokrswlsoda.supabase.co
 ═══════════════════════════════════════════════════════════ */
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MjYyNzIsImV4cCI6MjA1OTMwMjI3Mn0.Fy73JUGZFpxBiSoBbSFnVpFpLaQ0K1GMFAm-SxCWVY4';
@@ -2109,241 +2177,187 @@ let _sb = null;
 let currentUser = null;
 let currentUserRole = null;
 
-/* Boot Supabase client safely */
-(function initSupabase() {
-  try {
-    if (typeof supabase !== 'undefined' && supabase.createClient) {
+function bootSupabase() {
+  if (typeof supabase !== 'undefined' && supabase.createClient) {
+    try {
       _sb = supabase.createClient(SB_URL, SB_KEY);
-      console.log('[RWABidAsk] Supabase connected');
-    } else {
-      console.warn('[RWABidAsk] Supabase library not loaded yet — retrying');
-      setTimeout(initSupabase, 400);
-    }
-  } catch (e) {
-    console.warn('[RWABidAsk] Supabase init error:', e.message);
+      console.log('[RWABidAsk] Supabase ready');
+      restoreSession();
+    } catch(e) { console.warn('[RWABidAsk] Supabase error:', e.message); }
+  } else {
+    setTimeout(bootSupabase, 300);
   }
-})();
+}
 
 /* ── SIGN UP ── */
 async function handleSignUp() {
   const email = (document.getElementById('reg-email')?.value || '').trim();
   const pass  = (document.getElementById('reg-pass')?.value  || '').trim();
-  const role  = (document.querySelector('.role-card.sel .role-name')?.textContent || 'Asset Owner').trim();
-  if (!email || !pass) { toast('Enter email and password to continue'); return; }
-  if (pass.length < 8)  { toast('Password must be at least 8 characters'); return; }
-  if (!_sb) { toast('Connection unavailable — refresh and try again'); return; }
+  const role  = document.querySelector('.role-card.sel .role-name')?.textContent?.trim() || 'Asset Owner';
+  if (!email || !pass) { toast('Enter email and password'); return; }
+  if (pass.length < 8)  { toast('Password must be 8+ characters'); return; }
+  if (!_sb) { toast('Service unavailable — refresh and retry'); return; }
   toast('Creating account…');
   const { data, error } = await _sb.auth.signUp({
-    email,
-    password: pass,
+    email, password: pass,
     options: { data: { role } },
   });
-  if (error) {
-    toast('Error: ' + error.message);
-  } else {
-    currentUser     = data.user;
-    currentUserRole = role;
-    closeModal();
-    toast('✅ Account created — check your email to confirm');
-    updateAuthUI();
-    logLead(email, 'signup', role);
-  }
+  if (error) { toast('Error: ' + error.message); return; }
+  currentUser = data.user; currentUserRole = role;
+  closeModal();
+  toast('✅ Account created — check email to confirm');
+  updateAuthUI();
+  logLead(email, 'signup', role);
 }
 
 /* ── SIGN IN ── */
 async function handleSignIn() {
   const email = (document.getElementById('si-email')?.value || '').trim();
   const pass  = (document.getElementById('si-pass')?.value  || '').trim();
-  if (!email || !pass) { toast('Enter your email and password'); return; }
-  if (!_sb) { toast('Connection unavailable — refresh and try again'); return; }
+  if (!email || !pass) { toast('Enter email and password'); return; }
+  if (!_sb) { toast('Service unavailable — refresh and retry'); return; }
   toast('Signing in…');
   const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
-  if (error) {
-    toast('Error: ' + error.message);
-  } else {
-    currentUser     = data.user;
-    currentUserRole = data.user.user_metadata?.role || 'User';
-    closeModal();
-    toast('Welcome back — ' + email.split('@')[0]);
-    updateAuthUI();
-  }
+  if (error) { toast('Error: ' + error.message); return; }
+  currentUser = data.user; currentUserRole = data.user.user_metadata?.role || 'User';
+  closeModal();
+  toast('Welcome back — ' + email.split('@')[0]);
+  updateAuthUI();
 }
 
 /* ── SIGN OUT ── */
 async function handleSignOut() {
-  if (!_sb) return;
-  await _sb.auth.signOut();
-  currentUser = null;
-  currentUserRole = null;
-  updateAuthUI();
-  toast('Signed out');
+  if (_sb) await _sb.auth.signOut();
+  currentUser = null; currentUserRole = null;
+  updateAuthUI(); toast('Signed out');
 }
 
-/* ── UPDATE TOP BAR AFTER AUTH ── */
+/* ── UPDATE TOPBAR AFTER AUTH ── */
 function updateAuthUI() {
   const signinBtn = document.getElementById('signin-btn');
   const joinBtn   = document.getElementById('join-btn');
-  if (!signinBtn || !joinBtn) return;
   if (currentUser) {
-    const name = currentUser.email.split('@')[0];
-    signinBtn.textContent = name;
-    signinBtn.onclick = () => openModal('account');
-    joinBtn.textContent = 'Sign Out';
-    joinBtn.onclick = handleSignOut;
+    if (signinBtn) { signinBtn.textContent = currentUser.email.split('@')[0]; signinBtn.onclick = showAccountModal; }
+    if (joinBtn)   { joinBtn.textContent = 'Sign Out'; joinBtn.onclick = handleSignOut; }
   } else {
-    signinBtn.textContent = 'Sign In';
-    signinBtn.onclick = () => openModal('signin');
-    joinBtn.textContent = 'Join';
-    joinBtn.onclick = () => openModal('register');
+    if (signinBtn) { signinBtn.textContent = 'Sign In'; signinBtn.onclick = () => openModal('signin'); }
+    if (joinBtn)   { joinBtn.textContent = 'Join'; joinBtn.onclick = () => openModal('register'); }
   }
 }
 
-/* ── PLACE BID → SUPABASE LEDGER ── */
+/* ── PLACE BID → LEDGER ── */
 async function handlePlaceBid(propertyId, address) {
-  if (!currentUser) {
-    closeModal();
-    openModal('signin');
-    toast('Sign in to place a bid on the ledger');
-    return;
-  }
+  if (!currentUser) { closeModal(); openModal('signin'); toast('Sign in to place a bid'); return; }
   const amount = parseFloat(document.getElementById('bid-amount')?.value);
   const terms  = document.getElementById('bid-terms')?.value   || 'cash';
   const down   = document.getElementById('bid-down')?.value    || null;
   const expiry = document.getElementById('bid-expiry')?.value  || '7 days';
   const email  = document.getElementById('bid-email')?.value   || currentUser.email;
   if (!amount || amount < 1) { toast('Enter a valid bid amount'); return; }
-  if (!_sb) { toast('Ledger unavailable — refresh and try again'); return; }
+  if (!_sb) { toast('Ledger unavailable — refresh and retry'); return; }
   toast('Recording bid to ledger…');
   const { error } = await _sb.from('bids').insert([{
-    property_id:       propertyId  || 'unknown',
-    property_address:  address     || '—',
-    bid_amount:        amount,
-    terms,
-    down_payment_pct:  down ? parseFloat(down) : null,
-    expiry,
-    bidder_email:      email,
-    user_id:           currentUser.id,
-    status:            'active',
-    created_at:        new Date().toISOString(),
+    property_id: propertyId || 'unknown',
+    property_address: address || '—',
+    bid_amount: amount, terms,
+    down_payment_pct: down ? parseFloat(down) : null,
+    expiry, bidder_email: email,
+    user_id: currentUser.id,
+    status: 'active',
+    created_at: new Date().toISOString(),
   }]);
-  if (error) {
-    toast('Ledger error: ' + error.message);
-    console.error('[RWABidAsk] Bid error:', error);
-  } else {
-    closeModal();
-    toast('✅ Bid placed — permanently recorded on ledger. Seller notified.');
-    loadUserBids();
-  }
+  if (error) { toast('Ledger error: ' + error.message); return; }
+  closeModal();
+  toast('✅ Bid placed — permanently recorded.');
 }
 
-/* ── LOAD USER'S OWN BIDS FOR ACCOUNT PANEL ── */
-async function loadUserBids() {
-  if (!_sb || !currentUser) return [];
-  const { data, error } = await _sb
-    .from('bids')
-    .select('*')
-    .eq('user_id', currentUser.id)
-    .order('created_at', { ascending: false })
-    .limit(20);
-  if (error) { console.warn('[RWABidAsk] loadUserBids:', error.message); return []; }
-  return data || [];
-}
-
-/* ── ACCOUNT MODAL (shows bid history) ── */
-async function openAccountModal() {
+/* ── ACCOUNT MODAL ── */
+async function showAccountModal() {
   const bids = await loadUserBids();
   const box  = document.getElementById('mbox');
   box.innerHTML = `
     <button class="mclose-btn" onclick="closeModal()">✕</button>
     <div class="mtitle">My Account</div>
-    <div class="msub">${currentUser?.email || ''} · ${currentUserRole || 'User'}</div>
-    <div class="rsect-title" style="font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px">Active Bids on Ledger</div>
-    ${bids.length === 0
-      ? `<div style="font-family:var(--mono);font-size:10px;color:var(--muted);padding:12px 0">No bids placed yet.</div>`
+    <div class="msub" style="margin-bottom:16px">${currentUser?.email || ''}<br><span style="color:var(--cyan)">${currentUserRole || 'User'}</span></div>
+    <div style="font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px">Bids on Ledger</div>
+    ${!bids.length
+      ? `<div style="font-family:var(--mono);font-size:10px;color:var(--muted);padding:10px 0">No bids placed yet.</div>`
       : bids.map(b => `
-        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:10px;gap:10px">
-          <span style="color:var(--dim);font-family:var(--mono);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.property_address}</span>
-          <span style="color:var(--cyan);font-family:var(--mono);flex-shrink:0">${fmtPrice(b.bid_amount)}</span>
-          <span style="color:var(--muted);font-family:var(--mono);flex-shrink:0">${b.status}</span>
-        </div>`).join('')
-    }
-    <div class="mfooter" style="margin-top:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;gap:8px">
+            <span style="color:var(--dim);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.property_address}</span>
+            <span style="color:var(--cyan);font-family:var(--mono);flex-shrink:0">${fmtPrice(b.bid_amount)}</span>
+            <span style="color:var(--muted);font-family:var(--mono);font-size:9px;flex-shrink:0">${b.status}</span>
+          </div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:18px">
       <button class="mcan-btn" onclick="closeModal()">Close</button>
       <button class="msub-btn" onclick="closeModal();openModal('list-asset')">+ List an Asset</button>
-    </div>
-  `;
+    </div>`;
   document.getElementById('modal').classList.add('open');
 }
 
-/* ── LOG LEAD / INTENT ── */
+async function loadUserBids() {
+  if (!_sb || !currentUser) return [];
+  const { data, error } = await _sb.from('bids').select('*')
+    .eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+  if (error) return [];
+  return data || [];
+}
+
+/* ── LOG LEAD ── */
 async function logLead(email, action, role) {
   if (!_sb) return;
   try {
     await _sb.from('leads').insert([{
-      email:      email || null,
-      action,
-      role:       role  || null,
-      user_agent: navigator.userAgent.slice(0, 120),
+      email: email || null, action,
+      role: role || null,
+      user_agent: navigator.userAgent.slice(0, 100),
       created_at: new Date().toISOString(),
     }]);
-  } catch (e) { /* non-critical */ }
+  } catch(e) { /* non-critical */ }
 }
 
-/* ── LOG BLIMP CLICK AS LEAD ── */
+/* ── BLIMP CLICK → LEAD + MODAL ── */
 function blimpClick() {
   logLead(currentUser?.email || null, 'blimp_click', null);
   openModal('partner');
 }
 
-/* ── RESTORE SESSION ON LOAD ── */
+/* ── RESTORE SESSION ── */
 async function restoreSession() {
   if (!_sb) return;
   const { data } = await _sb.auth.getSession();
   if (data?.session?.user) {
-    currentUser     = data.session.user;
+    currentUser = data.session.user;
     currentUserRole = currentUser.user_metadata?.role || 'User';
     updateAuthUI();
   }
 }
 
-/* ── OPEN MODAL OVERRIDE to route account → async modal ── */
-const _originalOpenModal = openModal;
-function openModal(type, id) {
-  if (type === 'account') { openAccountModal(); return; }
-  _originalOpenModal(type, id);
+/* ── triggerSearch ── */
+function triggerSearch() {
+  if (acInstance) {
+    try { google.maps.event.trigger(acInstance, 'place_changed'); } catch(e) {}
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════════════════════ */
 buildTicker([]);
+bootSupabase();
 
-/* Add IDs to topbar buttons for auth UI updates */
+// Wire blimp
 document.addEventListener('DOMContentLoaded', () => {
-  const btns = document.querySelectorAll('.tbtn');
-  btns.forEach(b => {
-    if (b.textContent.trim() === 'Sign In') b.id = 'signin-btn';
-    if (b.textContent.trim() === 'Join')    b.id = 'join-btn';
-  });
-  restoreSession();
+  const bl = document.getElementById('blimp-el');
+  if (bl) bl.addEventListener('click', blimpClick);
 });
 
-/* Also wire blimp to lead logger */
-const blimpEl = document.querySelector('.blimp');
-if (blimpEl) {
-  blimpEl.onclick = null;
-  blimpEl.addEventListener('click', blimpClick);
-}
+// Google Maps boot — triggered by callback=__mapReady in script tag
+// __initRWA is set here; __mapReady calls it when Maps API is fully loaded
+window.__initRWA = initMap;
 
-/* Wait for Google Maps then init */
-function waitForGoogleAndInit() {
-  if (typeof google !== 'undefined' && google.maps && google.maps.importLibrary) {
-    initMap();
-  } else {
-    setTimeout(waitForGoogleAndInit, 100);
-  }
-}
-waitForGoogleAndInit();
+// Fallback: if Maps somehow loaded before this script ran
+if (window.__googleMapsLoaded) initMap();
 
 </script>
 </body>
