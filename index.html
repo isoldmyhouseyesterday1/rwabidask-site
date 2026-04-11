@@ -185,23 +185,20 @@ html, body {
   position: absolute;
   right: 0;
   top: 0; bottom: 0;
-  padding: 0 16px;
+  padding: 0 18px;
   display: flex;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
   border-left: 1px solid var(--border);
-  color: var(--muted);
-  font-family: var(--font);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  color: var(--dim);
   transition: all .15s;
   background: none;
   border-top: none;
   border-right: none;
   border-bottom: none;
 }
+.search-icon svg { display: block; }
 .search-icon:hover { color: var(--cyan); background: var(--cyan-dim); }
 
 /* Topbar right */
@@ -548,19 +545,20 @@ html, body {
 }
 .price-marker:hover { filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); transform: translate(-50%,-100%) scale(1.06); }
 .price-tag {
-  background: rgba(18,28,54,.96);
-  border: 1px solid rgba(0,255,200,.5);
-  border-radius: 4px;
-  padding: 4px 8px;
+  background: rgba(14,22,46,.97);
+  border: 1px solid rgba(0,255,200,.55);
+  border-radius: 5px;
+  padding: 5px 10px;
   white-space: nowrap;
   line-height: 1;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0,0,0,.5);
 }
 .price-tag-val {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   color: var(--cyan);
-  letter-spacing: .2px;
+  letter-spacing: .1px;
 }
 .price-tag-type {
   font-size: 8px;
@@ -571,12 +569,12 @@ html, body {
 }
 .price-stem {
   width: 1px;
-  height: 14px;
+  height: 20px;
   background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0));
 }
 .price-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--cyan);
   box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5);
@@ -1163,22 +1161,71 @@ html, body {
 /* ══════════════════════════════════════════════
    ASSET DRAWER (Institutional Side Drawer)
 ══════════════════════════════════════════════ */
+/* Desktop: side drawer */
 #asset-drawer {
   position: fixed;
-  top: 54px; /* below topbar */
+  top: 54px;
   right: 0;
-  bottom: 30px; /* above ticker */
+  bottom: 30px;
   width: min(480px, 38vw);
   background: var(--bg1);
   border-left: 1px solid rgba(0,255,200,.2);
   display: flex;
   flex-direction: column;
   z-index: 700;
-  transform: translateX(100%);
-  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  transform: translateX(105%);
+  transition: transform .32s cubic-bezier(.4,0,.2,1);
   box-shadow: -20px 0 60px rgba(0,0,0,.6);
+  will-change: transform;
 }
 #asset-drawer.open { transform: translateX(0); }
+
+/* Mobile: bottom sheet */
+@media (max-width: 767px) {
+  /* topbar: hide stats, keep search + auth */
+  .tstat { display: none; }
+  .logo-tag { display: none; }
+  #search-input { font-size: 12px; }
+  /* Tighten topbar buttons */
+  .tbtn { padding: 0 10px; font-size: 10px; }
+  /* Left panel hidden on mobile (drawer takes over) */
+
+  #asset-drawer {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 90vh;
+    border-left: none;
+    border-top: 1px solid rgba(0,255,200,.25);
+    transform: translateY(105%);
+    box-shadow: 0 -20px 60px rgba(0,0,0,.7);
+    border-radius: 16px 16px 0 0;
+    overflow-y: auto;
+  }
+  #asset-drawer.open { transform: translateY(0); }
+  /* Mobile: pull handle */
+  #asset-drawer::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 10px auto 4px;
+    flex-shrink: 0;
+  }
+  /* Stack layout for small screens */
+  #main-row {
+    grid-template-columns: 0 1fr 0;
+  }
+  #left, #right { display: none; }
+  .drawer-btn-primary, .drawer-btn-secondary {
+    min-height: 52px;
+    font-size: 14px;
+  }
+}
 
 .drawer-close {
   position: absolute;
@@ -1286,13 +1333,15 @@ html, body {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  max-height: calc(90vh - 280px);
+  -webkit-overflow-scrolling: touch;
 }
 .drawer-body::-webkit-scrollbar { width: 3px; }
 .drawer-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
 .drawer-specs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   border-bottom: 1px solid var(--border);
 }
 .drawer-spec {
@@ -1386,6 +1435,7 @@ html, body {
 }
 .drawer-btn-primary {
   width: 100%;
+  min-height: 48px;
   padding: 13px;
   background: linear-gradient(135deg, #00c49a 0%, #00ffc8 100%);
   color: #041a12;
@@ -1401,6 +1451,7 @@ html, body {
 .drawer-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
 .drawer-btn-secondary {
   width: 100%;
+  min-height: 44px;
   padding: 11px;
   background: none;
   border: 1px solid var(--border2);
@@ -1463,10 +1514,14 @@ html, body {
     <input
       id="search-input"
       type="text"
-      placeholder="⌕  Search any address, city, or region worldwide…"
+      placeholder="Global Asset Navigation — search any address, city, or region…"
       autocomplete="off"
     >
-    <button class="search-icon" onclick="triggerSearch()">FLY ↗</button>
+    <button class="search-icon" onclick="triggerSearch()" title="Global Asset Navigation" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
   </div>
 
   <div class="topbar-right">
@@ -1544,7 +1599,7 @@ html, body {
       </div>
       <div class="mctl-group">
         <button class="mctl" onclick="toggleHeat(this)">Heat Zone</button>
-        <button class="mctl" onclick="flyGlobe()">Globe View</button>
+        <button class="mctl" onclick="flyGlobe()" title="Navigate to global view">Global View</button>
       </div>
     </div>
 
@@ -1664,7 +1719,7 @@ let ASSETS    = [];
 const SEED_ASSETS = [
   // ── SEATTLE ──────────────────────────────────────────
   {
-    id:'sea-001', brokerage:'RE/MAX Eastlake', agent_name:'Sarah Chen', agent_license:'WA-23918', mls_id:'NWMLS-2024001', source_url:'https://www.nwmls.com', address:'2450 Eastlake Ave E', city:'Seattle', country:'USA',
+    id:'sea-001', brokerage:'RE/MAX Eastlake', agent_name:'Sarah Chen', agent_license:'WA-23918', mls_id:'NWMLS-2024001', source_url:'https://www.nwmls.com',, address:'2450 Eastlake Ave E', city:'Seattle', country:'USA',
     lat:47.6423, lng:-122.3256, price:1850000, type:'residential', sqft:3200,
     status:'For Sale', source:'NWMLS', days:14, parcel:'3340200225',
     structures:[
@@ -1678,7 +1733,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-002', brokerage:'Compass Seattle', agent_name:'James Park', agent_license:'WA-18847', mls_id:'NWMLS-2024002', source_url:'https://www.nwmls.com', address:'1411 2nd Ave, Unit 2401', city:'Seattle', country:'USA',
+    id:'sea-002', brokerage:'Compass Seattle', agent_name:'James Park', agent_license:'WA-18847', mls_id:'NWMLS-2024002', source_url:'https://www.nwmls.com',, address:'1411 2nd Ave, Unit 2401', city:'Seattle', country:'USA',
     lat:47.6079, lng:-122.3370, price:3200000, type:'residential', sqft:2100,
     status:'For Sale', source:'NWMLS', days:6, parcel:'0660001880',
     structures:[{label:'Luxury Condo — 24th Floor',sqft:2100,beds:3,baths:2.5,built:2018,type:'Condominium',notes:'Corner unit, unobstructed Sound + mountain views'}],
@@ -1689,7 +1744,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-003', brokerage:'Windermere RE', agent_name:'Maria Lopez', agent_license:'WA-31204', mls_id:'NWMLS-2024003', source_url:'https://www.nwmls.com', address:'8820 35th Ave SW', city:'Seattle', country:'USA',
+    id:'sea-003', brokerage:'Windermere RE', agent_name:'Maria Lopez', agent_license:'WA-31204', mls_id:'NWMLS-2024003', source_url:'https://www.nwmls.com',, address:'8820 35th Ave SW', city:'Seattle', country:'USA',
     lat:47.5238, lng:-122.3804, price:875000, type:'residential', sqft:1850,
     status:'For Sale', source:'NWMLS', days:22, parcel:'2095600130',
     structures:[{label:'Main House',sqft:1850,beds:3,baths:1.75,built:1962,remodel:2018,type:'Single Family',notes:'Detached garage, basement'}],
@@ -1699,7 +1754,7 @@ const SEED_ASSETS = [
     bids:[], broker_active:true, tokenized:false
   },
   {
-    id:'sea-004', brokerage:'CBRE Seattle', agent_name:'Tom Nguyen', agent_license:'WA-22091', mls_id:'CoStar-2024004', source_url:'https://www.costar.com', address:'1200 Westlake Ave N, Suite 600', city:'Seattle', country:'USA',
+    id:'sea-004', brokerage:'CBRE Seattle', agent_name:'Tom Nguyen', agent_license:'WA-22091', mls_id:'CoStar-2024004', source_url:'https://www.costar.com',, address:'1200 Westlake Ave N, Suite 600', city:'Seattle', country:'USA',
     lat:47.6268, lng:-122.3393, price:4500000, type:'commercial', sqft:6200,
     status:'For Sale', source:'CoStar', days:45, parcel:'0660002411',
     structures:[{label:'Office — 6th Floor',sqft:6200,beds:null,baths:4,built:2001,remodel:2022,type:'Class A Office',notes:'Lake Union views, open floor plan, server room'}],
@@ -1710,7 +1765,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-005', brokerage:'Kidder Mathews', agent_name:'Diana Ross', agent_license:'WA-19934', mls_id:'NWMLS-2024005', source_url:'https://www.nwmls.com', address:'4721 University Way NE', city:'Seattle', country:'USA',
+    id:'sea-005', brokerage:'Kidder Mathews', agent_name:'Diana Ross', agent_license:'WA-19934', mls_id:'NWMLS-2024005', source_url:'https://www.nwmls.com',, address:'4721 University Way NE', city:'Seattle', country:'USA',
     lat:47.6636, lng:-122.3139, price:1250000, type:'commercial', sqft:3400,
     status:'For Sale', source:'NWMLS', days:60, parcel:'3827200305',
     structures:[{label:'Mixed-Use Retail + Apt',sqft:3400,beds:2,baths:2,built:1948,remodel:2010,type:'Mixed-Use',notes:'Street-level retail (1,800 sqft) + 2BR upstairs'}],
@@ -1720,7 +1775,7 @@ const SEED_ASSETS = [
     bids:[], broker_active:true, tokenized:false
   },
   {
-    id:'sea-006', brokerage:'John L. Scott', agent_name:'Kevin Wu', agent_license:'WA-28871', mls_id:'NWMLS-2024006', source_url:'https://www.nwmls.com', address:'14505 Aurora Ave N', city:'Shoreline', country:'USA',
+    id:'sea-006', brokerage:'John L. Scott', agent_name:'Kevin Wu', agent_license:'WA-28871', mls_id:'NWMLS-2024006', source_url:'https://www.nwmls.com',, address:'14505 Aurora Ave N', city:'Shoreline', country:'USA',
     lat:47.7268, lng:-122.3440, price:680000, type:'residential', sqft:1420,
     status:'For Sale', source:'NWMLS', days:38, parcel:'8650000135',
     structures:[{label:'Ranch House',sqft:1420,beds:3,baths:1.5,built:1955,remodel:2015,type:'Single Family'}],
@@ -1731,7 +1786,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-007', brokerage:'Berkshire Hathaway HomeServices', agent_name:'Amanda Cole', agent_license:'WA-34512', mls_id:'NWMLS-2024007', source_url:'https://www.nwmls.com', address:'910 NE 65th St', city:'Seattle', country:'USA',
+    id:'sea-007', brokerage:'Berkshire Hathaway HomeServices', agent_name:'Amanda Cole', agent_license:'WA-34512', mls_id:'NWMLS-2024007', source_url:'https://www.nwmls.com',, address:'910 NE 65th St', city:'Seattle', country:'USA',
     lat:47.6756, lng:-122.3242, price:1100000, type:'residential', sqft:2050,
     status:'Contingent', source:'NWMLS', days:9, parcel:'3918200270',
     structures:[{label:'Craftsman',sqft:2050,beds:4,baths:2,built:1928,remodel:2019,type:'Single Family',notes:'Original hardwood floors, claw tub, updated kitchen'}],
@@ -1742,7 +1797,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-008', brokerage:'Pacific Real Estate Group', agent_name:'David Kim', agent_license:'WA-17663', mls_id:'KCA-2024008', source_url:'https://kingcounty.gov', address:'Vacant Land — S Beacon Hill', city:'Seattle', country:'USA',
+    id:'sea-008', brokerage:'Pacific Real Estate Group', agent_name:'David Kim', agent_license:'WA-17663', mls_id:'KCA-2024008', source_url:'https://kingcounty.gov',, address:'Vacant Land — S Beacon Hill', city:'Seattle', country:'USA',
     lat:47.5635, lng:-122.3058, price:480000, type:'land', sqft:null,
     status:'For Sale', source:'King County Assessor', days:120, parcel:'7442600510',
     structures:[],
@@ -1753,7 +1808,7 @@ const SEED_ASSETS = [
   },
   // ── DUBAI ────────────────────────────────────────────
   {
-    id:'dxb-001', brokerage:'Engel & Völkers Dubai', agent_name:'Omar Al Rashid', agent_license:'RERA-28841', mls_id:'PF-DXB-001', source_url:'https://www.propertyfinder.ae', address:'Palm Jumeirah Signature Villa', city:'Dubai', country:'UAE',
+    id:'dxb-001', brokerage:'Engel & Völkers Dubai', agent_name:'Omar Al Rashid', agent_license:'RERA-28841', mls_id:'PF-DXB-001', source_url:'https://www.propertyfinder.ae',, address:'Palm Jumeirah Signature Villa', city:'Dubai', country:'UAE',
     lat:25.1124, lng:55.1390, price:12500000, type:'residential', sqft:9800,
     status:'For Sale', source:'Property Finder', days:30,
     structures:[{label:'Main Villa',sqft:8000,beds:6,baths:7,built:2017,type:'Villa',notes:'Beachfront, private pool, 3-car garage'},{label:'Guest House',sqft:1800,beds:2,baths:2,built:2017}],
@@ -1763,7 +1818,7 @@ const SEED_ASSETS = [
     bids:[], broker_active:true, tokenized:false
   },
   {
-    id:'dxb-002', brokerage:'Bayut Prime', agent_name:'Leila Mansouri', agent_license:'RERA-31920', mls_id:'BAYUT-DXB-002', source_url:'https://www.bayut.com', address:'Downtown Dubai — Burj Khalifa District', city:'Dubai', country:'UAE',
+    id:'dxb-002', brokerage:'Bayut Prime', agent_name:'Leila Mansouri', agent_license:'RERA-31920', mls_id:'BAYUT-DXB-002', source_url:'https://www.bayut.com',, address:'Downtown Dubai — Burj Khalifa District', city:'Dubai', country:'UAE',
     lat:25.1972, lng:55.2796, price:3800000, type:'residential', sqft:2600,
     status:'For Sale', source:'Bayut', days:18,
     structures:[{label:'Luxury Apartment',sqft:2600,beds:3,baths:3.5,built:2021,type:'High-Rise Condo',notes:'Burj Khalifa + fountain views, fully furnished'}],
@@ -1775,7 +1830,7 @@ const SEED_ASSETS = [
   },
   // ── LONDON ───────────────────────────────────────────
   {
-    id:'lon-001', brokerage:'Savills Belgravia', agent_name:'Charles Worthington', agent_license:'RICS-44821', mls_id:'RM-LON-001', source_url:'https://www.rightmove.co.uk', address:'15 Eaton Square, Belgravia', city:'London', country:'UK',
+    id:'lon-001', brokerage:'Savills Belgravia', agent_name:'Charles Worthington', agent_license:'RICS-44821', mls_id:'RM-LON-001', source_url:'https://www.rightmove.co.uk',, address:'15 Eaton Square, Belgravia', city:'London', country:'UK',
     lat:51.4965, lng:-0.1527, price:18000000, type:'residential', sqft:5400,
     status:'For Sale', source:'Rightmove', days:42,
     structures:[{label:'Stucco Townhouse',sqft:5400,beds:5,baths:5,built:1842,remodel:2018,type:'Georgian Townhouse',notes:'Freehold, original cornicing, south garden'}],
@@ -1786,7 +1841,7 @@ const SEED_ASSETS = [
   },
   // ── NEW YORK ──────────────────────────────────────────
   {
-    id:'nyc-001', brokerage:'Douglas Elliman', agent_name:'Victoria Stone', agent_license:'NY-48821AB', mls_id:'SE-NYC-001', source_url:'https://streeteasy.com', address:'432 Park Avenue, Unit 62A', city:'New York', country:'USA',
+    id:'nyc-001', brokerage:'Douglas Elliman', agent_name:'Victoria Stone', agent_license:'NY-48821AB', mls_id:'SE-NYC-001', source_url:'https://streeteasy.com',, address:'432 Park Avenue, Unit 62A', city:'New York', country:'USA',
     lat:40.7617, lng:-73.9717, price:23500000, type:'residential', sqft:4000,
     status:'For Sale', source:'StreetEasy', days:88,
     structures:[{label:'Full-Floor Residence',sqft:4000,beds:4,baths:4.5,built:2015,type:'Luxury Condo',notes:'10-ft windows, 360-degree views, full building amenities'}],
@@ -1797,7 +1852,7 @@ const SEED_ASSETS = [
   },
   // ── MIAMI ─────────────────────────────────────────────
   {
-    id:'mia-001', brokerage:'ONE Sotheby\'s International', agent_name:'Roberto Garcia', agent_license:'FL-BK3441209', mls_id:'MLS-MIA-001', source_url:'https://www.realtor.com', address:'3000 Collins Ave, Unit 1401', city:'Miami Beach', country:'USA',
+    id:'mia-001', brokerage:'ONE Sotheby\'s International', agent_name:'Roberto Garcia', agent_license:'FL-BK3441209', mls_id:'MLS-MIA-001', source_url:'https://www.realtor.com',, address:'3000 Collins Ave, Unit 1401', city:'Miami Beach', country:'USA',
     lat:25.7864, lng:-80.1300, price:5900000, type:'residential', sqft:3100,
     status:'For Sale', source:'Realtor.com', days:25,
     structures:[{label:'Oceanfront Condo',sqft:3100,beds:4,baths:4,built:2020,type:'Luxury Condo',notes:'Direct ocean views, private pool access, turnkey furnished'}],
@@ -1809,7 +1864,7 @@ const SEED_ASSETS = [
   },
   // ── SINGAPORE ────────────────────────────────────────
   {
-    id:'sgp-001', brokerage:'PropNex Realty', agent_name:'Wei Ling Tan', agent_license:'CEA-R012341G', mls_id:'PG-SGP-001', source_url:'https://www.propertyguru.com.sg', address:'1 Ardmore Park', city:'Singapore', country:'Singapore',
+    id:'sgp-001', brokerage:'PropNex Realty', agent_name:'Wei Ling Tan', agent_license:'CEA-R012341G', mls_id:'PG-SGP-001', source_url:'https://www.propertyguru.com.sg',, address:'1 Ardmore Park', city:'Singapore', country:'Singapore',
     lat:1.3048, lng:103.8267, price:8200000, type:'residential', sqft:2900,
     status:'For Sale', source:'PropertyGuru', days:55,
     structures:[{label:'Luxury Condo',sqft:2900,beds:4,baths:4,built:2001,remodel:2022,type:'Condominium',notes:'Prime District 10, freehold, full facilities'}],
@@ -1820,7 +1875,7 @@ const SEED_ASSETS = [
   },
   // ── SYDNEY ───────────────────────────────────────────
   {
-    id:'syd-001', brokerage:'McGrath Real Estate', agent_name:'Claire Watson', agent_license:'REIQ-00442', mls_id:'DOM-SYD-001', source_url:'https://www.domain.com.au', address:'45 Hopetoun Ave, Vaucluse', city:'Sydney', country:'Australia',
+    id:'syd-001', brokerage:'McGrath Real Estate', agent_name:'Claire Watson', agent_license:'REIQ-00442', mls_id:'DOM-SYD-001', source_url:'https://www.domain.com.au',, address:'45 Hopetoun Ave, Vaucluse', city:'Sydney', country:'Australia',
     lat:-33.8548, lng:151.2760, price:9800000, type:'residential', sqft:5200,
     status:'For Sale', source:'Domain.com.au', days:33,
     structures:[{label:'Federation House',sqft:5200,beds:5,baths:4,built:1908,remodel:2020,type:'Single Family',notes:'Harbor views, original sandstone, pool + boathouse'}],
@@ -1831,7 +1886,7 @@ const SEED_ASSETS = [
   },
   // ── SEQUIM WA (from your docs) ───────────────────────
   {
-    id:'seq-001', brokerage:'RE/MAX Evergreen', agent_name:'Shawn Washburn', agent_license:'WA-44219', mls_id:'NWMLS-2434863', source_url:'https://www.nwmls.com', address:'273702 Hwy 101', city:'Sequim', country:'USA',
+    id:'seq-001', brokerage:'RE/MAX Evergreen', agent_name:'Shawn Washburn', agent_license:'WA-44219', mls_id:'NWMLS-2434863', source_url:'https://www.nwmls.com',, address:'273702 Hwy 101', city:'Sequim', country:'USA',
     lat:48.0521, lng:-123.0847, price:1200000, type:'residential', sqft:5150,
     status:'For Sale', source:'NWMLS #2434863', days:206, parcel:'0230323202000000',
     structures:[
@@ -2161,6 +2216,10 @@ function setFilter(el, f) {
   syncMarkerVisibility();
 }
 function syncMarkerVisibility() {
+  if (!markersVisible()) {
+    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+    return;
+  }
   const vis = new Set(viewportVisible(filtered()).map(a => a.id));
   Object.entries(domMarkers).forEach(([id, { el }]) => {
     el.style.display = vis.has(id) ? 'flex' : 'none';
@@ -2276,7 +2335,7 @@ function onPlaceSelected(ac) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   FLY-TO
+   CAMERA NAVIGATION
 ═══════════════════════════════════════════════════════════ */
 function flyTo(lat, lng, range, tilt) {
   if (!map3dEl) return;
@@ -2351,13 +2410,14 @@ function toggleHeat(btn) {
    on camera change events.
 ═══════════════════════════════════════════════════════════ */
 function renderDOMMarkers() {
-  // Clear old DOM markers
   const layer = document.getElementById('overlay-layer');
   layer.innerHTML = '';
   domMarkers = {};
-  // Only render markers in current viewport for performance
-  const visible = viewportVisible(ASSETS);
-  visible.forEach(a => _addPriceMarker(a));
+  // Only render if zoomed in enough
+  if (markersVisible()) {
+    const visible = viewportVisible(ASSETS);
+    visible.forEach(a => _addPriceMarker(a));
+  }
   // On camera change: cull + reproject
   if (map3dEl) {
     map3dEl.addEventListener('gmp-centerchange',  onCameraChange);
@@ -2368,22 +2428,37 @@ function renderDOMMarkers() {
 }
 
 let _cameraChangeTimer = null;
+const MARKER_RANGE_THRESHOLD = 500000; // 500km — hide tags above this altitude
+
+function markersVisible() {
+  if (!map3dEl) return false;
+  const range = map3dEl.range || 22000000;
+  return range <= MARKER_RANGE_THRESHOLD;
+}
+
 function onCameraChange() {
-  // Debounce 80ms for performance
   clearTimeout(_cameraChangeTimer);
   _cameraChangeTimer = setTimeout(() => {
+    const show = markersVisible();
+    if (!show) {
+      // Hide all markers when zoomed out too far — clean globe view
+      Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+      return;
+    }
     reprojectMarkers();
-    // Cull/add based on new viewport
+    // Viewport cull: hide off-screen, add newly visible
     const vis = new Set(viewportVisible(filtered()).map(a => a.id));
-    // Hide out-of-view markers
     Object.entries(domMarkers).forEach(([id, { el }]) => {
       if (!vis.has(id)) el.style.display = 'none';
     });
-    // Add newly visible markers not yet rendered
     vis.forEach(id => {
       if (!domMarkers[id]) {
         const a = ASSETS.find(x => x.id === id);
         if (a) _addPriceMarker(a);
+      } else {
+        // Ensure existing marker is visible
+        const { el, asset } = domMarkers[id];
+        projectMarker(asset, el);
       }
     });
   }, 80);
@@ -2487,93 +2562,120 @@ function openDrawer(a) {
   const inner  = document.getElementById('drawer-inner');
 
   const mainS = a.structures && a.structures[0];
-  const beds  = mainS && mainS.beds  ? mainS.beds  : (a.beds  || '—');
-  const baths = mainS && mainS.baths ? mainS.baths : (a.baths || '—');
-  const sqft  = a.sqft || (mainS && mainS.sqft) || null;
-  const fin   = a.financials || {};
+  const beds  = mainS?.beds  ?? a.beds  ?? '—';
+  const baths = mainS?.baths ?? a.baths ?? '—';
+  const sqft  = a.sqft || mainS?.sqft || null;
+  const fin   = a.financials    || {};
   const infra = a.infrastructure || {};
-  const land  = a.land || {};
+  const land  = a.land          || {};
 
-  // Hero image or placeholder
+  // ── Hero image or placeholder
   const heroHTML = a.image_url
-    ? `<img class="drawer-hero" src="${a.image_url}" alt="${a.address}" onerror="this.style.display='none'">`
+    ? `<img class="drawer-hero" src="${a.image_url}" alt="${a.address}" onerror="this.parentNode.innerHTML='<div class=drawer-hero-placeholder>◎</div>'">`
     : `<div class="drawer-hero-placeholder">◎</div>`;
 
-  // Compliance block
-  const complianceHTML = `
+  // ── Status badge
+  const isActive   = a.broker_active !== false;
+  const statusText = isActive ? (a.status || 'For Sale') : 'Listing Expired — Data Retained';
+  const statusCls  = isActive ? '' : 'inactive';
+
+  // ── Compliance block
+  const compHTML = `
     <div class="drawer-section">
       <div class="drawer-section-title">Listing Compliance</div>
       <div class="compliance-block">
-        ${dr('Brokerage', a.brokerage || 'Not disclosed')}
-        ${dr('Listing Agent', a.agent_name || 'Not disclosed')}
-        ${dr('Agent License #', a.agent_license || '—')}
-        ${dr('MLS / Listing ID', a.mls_id || a.source || '—')}
-        ${dr('Parcel Number', a.parcel || '—')}
-        ${dr('Source', a.source || 'Public Registry')}
+        ${dr('Brokerage',       a.brokerage    || 'Not disclosed')}
+        ${dr('Listing Agent',   a.agent_name   || 'Not disclosed')}
+        ${dr('License #',       a.agent_license || '—')}
+        ${dr('MLS / Listing ID',a.mls_id || a.source || '—')}
+        ${dr('Parcel #',        a.parcel       || '—')}
+        ${dr('Data Source',     a.source       || 'Public Registry')}
       </div>
     </div>`;
 
-  // Structure manifest
+  // ── Anti-fairytale structure manifest
   const structs = a.structures || [];
   const structHTML = structs.length ? `
     <div class="drawer-section">
       <div class="drawer-section-title">Structure Manifest</div>
-      ${structs.map(s => `
+      ${structs.map((s, i) => `
         <div class="struct-card">
-          <div class="struct-label">${s.label || 'Structure'}</div>
-          ${s.sqft    ? dr('Size', s.sqft.toLocaleString() + ' sqft') : ''}
-          ${s.beds    ? dr('Beds', s.beds) : ''}
-          ${s.baths   ? dr('Baths', s.baths) : ''}
-          ${s.built   ? dr('Year Built', s.built) : ''}
-          ${s.remodel ? dr('Remodeled', s.remodel) : ''}
-          ${s.type    ? dr('Type', s.type) : ''}
-          ${s.notes   ? dr('Notes', s.notes) : ''}
+          <div class="struct-label">${s.label || 'Structure ' + (i+1)}</div>
+          ${s.sqft    ? drq('Floor Area',   s.sqft.toLocaleString() + ' sqft') : ''}
+          ${s.beds    ? drq('Bedrooms',     s.beds) : ''}
+          ${s.baths   ? drq('Bathrooms',    s.baths) : ''}
+          ${s.built   ? drq('Year Built',   s.built) : ''}
+          ${s.remodel ? drq('Remodeled',    s.remodel) : ''}
+          ${s.type    ? drq('Structure Type', s.type) : ''}
+          ${s.notes   ? drq('Notes',        s.notes) : ''}
         </div>`).join('')}
     </div>` : '';
 
-  // Infrastructure
-  const infraHTML = Object.keys(infra).length ? `
+  // ── Quantified infrastructure manifest
+  const infraItems = [];
+  if (infra.roof)       infraItems.push(drq('Roof',             infra.roof));
+  if (infra.hvac)       infraItems.push(drq('HVAC / Heating',   infra.hvac));
+  if (infra.water)      infraItems.push(drq('Water Source',     infra.water));
+  if (infra.sewer) {
+    // Extract septic age if present
+    const septicYear = infra.sewer.match(/(\d{4})/)?.[1];
+    const age = septicYear ? (2026 - parseInt(septicYear)) + ' yrs old' : null;
+    infraItems.push(drq('Sewer / Septic', infra.sewer + (age ? ` — Age: ${age}` : '')));
+  }
+  if (infra.electric)   infraItems.push(drq('Electric',         infra.electric));
+  if (infra.foundation) infraItems.push(drq('Foundation',       infra.foundation));
+  const infraHTML = infraItems.length ? `
     <div class="drawer-section">
       <div class="drawer-section-title">Infrastructure</div>
-      ${infra.roof      ? dr('Roof', infra.roof) : ''}
-      ${infra.hvac      ? dr('HVAC', infra.hvac) : ''}
-      ${infra.water     ? dr('Water', infra.water) : ''}
-      ${infra.sewer     ? dr('Sewer / Septic', infra.sewer) : ''}
-      ${infra.electric  ? dr('Electric', infra.electric) : ''}
-      ${infra.foundation? dr('Foundation', infra.foundation) : ''}
+      ${infraItems.join('')}
     </div>` : '';
 
-  // Land
-  const landHTML = Object.keys(land).length ? `
+  // ── Quantified land manifest (vegetation, trees, etc.)
+  const landItems = [];
+  if (land.acres)      landItems.push(drq('Lot Size',    land.acres + ' acres'));
+  if (land.topo)       landItems.push(drq('Topography',  land.topo));
+  if (land.fencing)    landItems.push(drq('Fencing',     land.fencing));
+  if (land.parking)    landItems.push(drq('Parking',     land.parking));
+  if (land.vegetation) {
+    // Parse vegetation into quantified items
+    const veg = land.vegetation;
+    const fruitMatch = veg.match(/(\d+)\s+fruit/i);
+    const treeMatch  = veg.match(/(\d+)\s+\w+/);
+    if (fruitMatch) {
+      landItems.push(drq('Fruit Trees', fruitMatch[1] + ' trees'));
+      landItems.push(drq('Varieties', veg.replace(/\d+\s+fruit trees?:?\s*/i, '')));
+    } else {
+      landItems.push(drq('Vegetation', veg));
+    }
+  }
+  if (land.features)   landItems.push(drq('Lot Features', land.features));
+  const landHTML = landItems.length ? `
     <div class="drawer-section">
-      <div class="drawer-section-title">Land & Lot</div>
-      ${land.acres      ? dr('Lot Size', land.acres + ' acres') : ''}
-      ${land.topo       ? dr('Topography', land.topo) : ''}
-      ${land.fencing    ? dr('Fencing', land.fencing) : ''}
-      ${land.parking    ? dr('Parking', land.parking) : ''}
-      ${land.vegetation ? dr('Vegetation', land.vegetation) : ''}
-      ${land.features   ? dr('Features', land.features) : ''}
+      <div class="drawer-section-title">Land & Vegetation</div>
+      ${landItems.join('')}
     </div>` : '';
 
-  // Financial
+  // ── Financial manifest
   const finHTML = `
     <div class="drawer-section">
       <div class="drawer-section-title">Financial Data</div>
-      ${a.price        ? dr('Listed Price', `<span class="drawer-v hl">${fmtPrice(a.price)}</span>`) : ''}
-      ${sqft && a.price? dr('Price / sqft', fmtPrice(Math.round(a.price / sqft))) : ''}
-      ${fin.tax_annual ? dr('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}
-      ${fin.hoa        ? dr('HOA / mo', '$' + fin.hoa) : ''}
-      ${fin.zestimate  ? dr('Est. Market Value', fmtPrice(fin.zestimate)) : ''}
-      ${a.days         ? dr('Days Listed', a.days + 'd') : ''}
+      ${a.price         ? drq('Listed Price',    `<span class="drawer-v hl">${fmtPrice(a.price)}</span>`) : ''}
+      ${sqft && a.price ? drq('Price / sqft',    fmtPrice(Math.round(a.price / sqft))) : ''}
+      ${fin.tax_annual  ? drq('Annual Tax',      '$' + Number(fin.tax_annual).toLocaleString()) : ''}
+      ${fin.hoa         ? drq('HOA / Month',     '$' + fin.hoa) : ''}
+      ${fin.zestimate   ? drq('Est. Value',      fmtPrice(fin.zestimate)) : ''}
+      ${a.days          ? drq('Days Listed',     a.days + 'd') : ''}
+      ${drq('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}
     </div>`;
 
-  // Bid order book
+  // ── Bid order book
   const bids = a.bids || [];
-  const bidsHTML = `
+  const bidHTML = `
     <div class="drawer-section">
       <div class="drawer-section-title">Bid Order Book</div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:9px;line-height:1.6">
         Permanent ledger — no broker can remove these bids.
+        Listing expired? Data and bids remain forever.
       </div>
       ${bids.length
         ? bids.map(b => `
@@ -2582,21 +2684,16 @@ function openDrawer(a) {
             <span class="bid-terms">${b.terms || 'cash'}</span>
             <span class="bid-expiry">${b.expiry || ''}</span>
           </div>`).join('')
-        : '<div style="font-size:10px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>'
+        : '<div style="font-size:10px;color:var(--muted);padding:6px 0">No bids placed yet. Be the first.</div>'
       }
     </div>`;
-
-  // Status badge
-  const statusActive = a.broker_active !== false;
-  const statusLabel  = statusActive ? a.status || 'For Sale' : 'Listing Expired — Data Retained';
-  const statusClass  = statusActive ? '' : 'inactive';
 
   inner.innerHTML = `
     ${heroHTML}
     <div class="drawer-head">
       <div class="drawer-type-row">
         <div class="drawer-type">${(a.type || 'Asset').toUpperCase()}</div>
-        <div class="drawer-status ${statusClass}">${statusLabel}</div>
+        <div class="drawer-status ${statusCls}">${statusText}</div>
       </div>
       <div class="drawer-address">${a.address}</div>
       <div class="drawer-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
@@ -2605,47 +2702,62 @@ function openDrawer(a) {
         ${sqft && a.price ? `<div class="drawer-psf">${fmtPrice(Math.round(a.price / sqft))} / sqft</div>` : ''}
       </div>
     </div>
-    <div class="drawer-body">
-      <div class="drawer-specs">
-        <div class="drawer-spec">
-          <div class="drawer-spec-val">${beds}</div>
-          <div class="drawer-spec-lbl">Beds</div>
-        </div>
-        <div class="drawer-spec">
-          <div class="drawer-spec-val">${baths}</div>
-          <div class="drawer-spec-lbl">Baths</div>
-        </div>
-        <div class="drawer-spec">
-          <div class="drawer-spec-val">${sqft ? (sqft >= 1000 ? (sqft/1000).toFixed(1)+'k' : sqft) : '—'}</div>
-          <div class="drawer-spec-lbl">Sqft</div>
-        </div>
+
+    <div class="drawer-specs">
+      <div class="drawer-spec">
+        <div class="drawer-spec-val">${beds}</div>
+        <div class="drawer-spec-lbl">Beds</div>
       </div>
-      ${complianceHTML}
+      <div class="drawer-spec">
+        <div class="drawer-spec-val">${baths}</div>
+        <div class="drawer-spec-lbl">Baths</div>
+      </div>
+      <div class="drawer-spec">
+        <div class="drawer-spec-val">${sqft ? (sqft >= 1000 ? (sqft/1000).toFixed(1) + 'k' : sqft) : '—'}</div>
+        <div class="drawer-spec-lbl">Sqft</div>
+      </div>
+      <div class="drawer-spec">
+        <div class="drawer-spec-val">${land.acres || '—'}</div>
+        <div class="drawer-spec-lbl">Acres</div>
+      </div>
+    </div>
+
+    <div class="drawer-body">
+      ${compHTML}
       ${structHTML}
       ${infraHTML}
       ${landHTML}
       ${finHTML}
-      ${bidsHTML}
+      ${bidHTML}
     </div>
+
     <div class="drawer-actions">
       <button class="drawer-btn-primary" onclick="closeDrawer();requireAuth('bid','${a.id}')">
         ↑ PLACE OFFICIAL BID ON LEDGER
       </button>
       ${a.source_url
-        ? `<a class="drawer-btn-secondary" href="${a.source_url}" target="_blank" rel="noopener">VIEW ORIGINAL LISTING ↗</a>`
+        ? `<a class="drawer-btn-secondary" href="${a.source_url}" target="_blank" rel="noopener noreferrer">VIEW ORIGINAL LISTING ↗</a>`
         : `<button class="drawer-btn-secondary" onclick="closeDrawer();requireAuth('buy','${a.id}')">SUBMIT PURCHASE INQUIRY →</button>`
       }
+      <button class="drawer-btn-secondary" style="font-size:10px;border-color:rgba(0,255,200,.2);color:var(--muted)" onclick="closeDrawer();openModal('partner')">
+        Upgrade for Premium Data (County Records, Septic Maps)
+      </button>
     </div>
+
     <div class="drawer-legal">
-      Data deemed reliable but not guaranteed. All information provided by the listing agent/broker.
+      Data deemed reliable but not guaranteed. Information provided by listing agent/broker.
       For consumers' personal, non-commercial use only.
-      Source: ${a.source || 'Public Registry'} · Asset ID #${a.id}
+      Source: ${a.source || 'Public Registry'} · ID #${a.id}
     </div>
   `;
 
   drawer.classList.add('open');
-  // Push right panel behind drawer on small screens
   document.getElementById('right').style.zIndex = '1';
+}
+
+// Helper: quantified manifest row (bold key, value right-aligned)
+function drq(k, v) {
+  return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`;
 }
 
 function closeDrawer() {
@@ -2962,6 +3074,32 @@ function openModal(type, id) {
       </div>
     `,
 
+
+    upgrade: () => `
+      <div class="mtitle">Premium Data Access</div>
+      <div class="msub">Unlock county records, septic inspection history, well reports, and property corner coordinates.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+        <div style="border:1px solid rgba(0,255,200,.3);padding:16px;border-radius:3px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--cyan);margin-bottom:4px">$9</div>
+          <div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px">Per Report</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6">County records, septic maps, well depth, corner coords</div>
+        </div>
+        <div style="border:1px solid rgba(212,181,74,.3);background:rgba(212,181,74,.04);padding:16px;border-radius:3px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--gold);margin-bottom:4px">$49</div>
+          <div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px">Per Month</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6">Unlimited reports + regional ad placement</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:16px;line-height:1.7">
+        Premium data sourced from county assessor records, FEMA flood maps, and septic permit databases.
+        All data is verified and timestamped.
+      </div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Not Now</button>
+        <button class="msub-btn" onclick="toast('Payment integration coming — contact ops@rwabidask.com');closeModal()">Unlock Premium →</button>
+      </div>
+    `,
+
     partner: () => `
       <div class="mtitle">Annie Group LLC — Partnership</div>
       <div class="msub">
@@ -3034,10 +3172,73 @@ document.getElementById('modal').addEventListener('click', e => {
 
 /* ═══════════════════════════════════════════════════════════
    SUPABASE — Auth · Bid Ledger · Lead CRM
+   ─────────────────────────────────────────────────────────
+   RUN THIS SQL IN YOUR SUPABASE SQL EDITOR:
+
+   -- 1. profiles table (auto-created on signup)
+   CREATE TABLE IF NOT EXISTS profiles (
+     id         uuid REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+     role       text DEFAULT 'buyer',
+     fname      text, lname text, company text,
+     plan       text DEFAULT 'free',
+     created_at timestamptz DEFAULT now()
+   );
+   ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
+   CREATE POLICY "Users update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+   -- 2. Auto-create profile on email confirm (FK constraint fix)
+   CREATE OR REPLACE FUNCTION public.handle_new_user()
+   RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+   BEGIN
+     INSERT INTO public.profiles (id, role, fname, lname, plan)
+     VALUES (
+       NEW.id,
+       COALESCE(NEW.raw_user_meta_data->>'role','buyer'),
+       COALESCE(NEW.raw_user_meta_data->>'fname',''),
+       COALESCE(NEW.raw_user_meta_data->>'lname',''),
+       'free'
+     ) ON CONFLICT (id) DO NOTHING;
+     RETURN NEW;
+   END;
+   $$;
+   DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+   CREATE TRIGGER on_auth_user_created
+     AFTER INSERT ON auth.users
+     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+   -- 3. bids table
+   CREATE TABLE IF NOT EXISTS bids (
+     id               uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     property_id      text NOT NULL,
+     property_address text,
+     bid_amount       numeric NOT NULL,
+     terms            text DEFAULT 'cash',
+     down_payment_pct numeric,
+     expiry           text,
+     bidder_email     text,
+     user_id          uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+     status           text DEFAULT 'active',
+     created_at       timestamptz DEFAULT now()
+   );
+   ALTER TABLE bids ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "Anyone can insert bids" ON bids FOR INSERT WITH CHECK (true);
+   CREATE POLICY "Users read own bids"    ON bids FOR SELECT USING (auth.uid() = user_id);
+
+   -- 4. leads table
+   CREATE TABLE IF NOT EXISTS leads (
+     id         uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     email      text, action text, role text,
+     user_agent text, created_at timestamptz DEFAULT now()
+   );
+   ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "Service role only" ON leads USING (false);
+   ─────────────────────────────────────────────────────────
+*/
    Project: iyejqvdjbvokrswlsoda.supabase.co
 ═══════════════════════════════════════════════════════════ */
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MjYyNzIsImV4cCI6MjA1OTMwMjI3Mn0.Fy73JUGZFpxBiSoBbSFnVpFpLaQ0K1GMFAm-SxCWVY4';
 
 let _sb = null;
 let currentUser = null;
@@ -3181,15 +3382,22 @@ async function handlePlaceBid(propertyId, address) {
   if (!amount || amount < 1) { toast('Enter a valid bid amount'); return; }
   if (!_sb) { toast('Ledger unavailable — refresh and retry'); return; }
   toast('Recording bid to ledger…');
+  // Get fresh session to ensure auth.uid() matches
+  const { data: sessionData } = await _sb.auth.getSession();
+  const uid = sessionData?.session?.user?.id || currentUser?.id;
+  if (!uid) { toast('Session expired — sign in again'); closeModal(); openModal('signin'); return; }
+
   const { error } = await _sb.from('bids').insert([{
-    property_id: propertyId || 'unknown',
-    property_address: address || '—',
-    bid_amount: amount, terms,
+    property_id:      propertyId || 'unknown',
+    property_address: address   || '—',
+    bid_amount:       amount,
+    terms,
     down_payment_pct: down ? parseFloat(down) : null,
-    expiry, bidder_email: email,
-    user_id: currentUser.id,
-    status: 'active',
-    created_at: new Date().toISOString(),
+    expiry,
+    bidder_email:     email,
+    user_id:          uid,          // explicit auth.uid() — prevents FK constraint errors
+    status:           'active',
+    created_at:       new Date().toISOString(),
   }]);
   if (error) { toast('Ledger error: ' + error.message); return; }
   closeModal();
