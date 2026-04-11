@@ -1989,7 +1989,7 @@ function openModal(type, id) {
       <div class="mfield"><label>Email (confirmation)</label><input type="email" id="bid-email" placeholder="you@example.com"></div>
       <div class="mfooter">
         <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-        <button class="msub-btn" onclick="handlePlaceBid('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g,'\\'') : ''}')">Place Bid on Ledger →</button>
+        <button class="msub-btn" onclick="handlePlaceBidFromMap()">Place Bid on Ledger →</button>
       </div>
     `,
 
