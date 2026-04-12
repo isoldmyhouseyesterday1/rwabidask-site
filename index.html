@@ -4,15 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>RWABidAsk — Global Real-World Asset Market</title>
-<meta name="description" content="The world's first open-market global bid-ask platform for real estate, businesses, and land. No brokers. Direct bid, ask, and buy.">
+<meta name="description" content="The world's first open-market global bid-ask platform for real estate, businesses, and land. Direct bid, ask, and buy.">
 
 <!-- ── FONTS ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- ── ASE ── -->
-<script src="https://cdn.jsdelivr.net/npm/@ase/ase-js@2"></script>
+<!-- ── SUPABASE ── load via ESM shim so MIME type is always JS -->
+<script>
+(function(){
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  s.crossOrigin = 'anonymous';
+  s.onerror = function(){ console.warn('[RWABidAsk] Supabase CDN load failed — running without auth'); };
+  document.head.appendChild(s);
+})();
+</script>
 
 <!-- ── GOOGLE MAPS (alpha — Map3DElement requires this version) ── -->
 <script>
@@ -32,7 +40,6 @@
 ══════════════════════════════════════════════ */
 .pac-container {
   z-index: 99999 !important;
-  position: fixed !important;
   background: #232d4e;
   border: 1px solid rgba(0,255,200,.25);
   border-top: none;
@@ -180,8 +187,6 @@ html, body {
   color: var(--text);
   font-size: 13px;
   padding: 0 18px;
-  position: relative;
-  z-index: 9999;
 }
 #search-input::placeholder { color: var(--muted); }
 .search-icon {
@@ -593,65 +598,57 @@ html, body {
 .price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,80,80,.6), transparent); }
 .price-marker.heat-hot  .price-dot  { background: #ff5a5a; box-shadow: 0 0 6px #ff5a5a; }
 
-/* ── ANCHOR ASSETS — pulsing gold glow ── */
-@keyframes anchor-pulse {
-  0%,100% {
-    filter: drop-shadow(0 0 6px rgba(226,197,90,.7)) drop-shadow(0 4px 18px rgba(0,0,0,.7));
-  }
-  50% {
-    filter: drop-shadow(0 0 18px rgba(226,197,90,1)) drop-shadow(0 0 36px rgba(226,197,90,.5)) drop-shadow(0 4px 20px rgba(0,0,0,.8));
-  }
+/* ── ANCHOR / FEATURED — pulsing gold glow ────────────────── */
+@keyframes anchor-glow {
+  0%,100% { filter: drop-shadow(0 0 5px rgba(226,197,90,.8))  drop-shadow(0 4px 16px rgba(0,0,0,.7)); }
+  50%      { filter: drop-shadow(0 0 18px rgba(226,197,90,1)) drop-shadow(0 0 32px rgba(226,197,90,.55)) drop-shadow(0 4px 20px rgba(0,0,0,.8)); }
 }
-@keyframes anchor-ring-expand {
-  0%   { transform: translate(-50%,-50%) scale(.6); opacity: .8; }
-  100% { transform: translate(-50%,-50%) scale(2.4); opacity: 0; }
+@keyframes anchor-ring {
+  0%   { transform: translate(-50%,-50%) scale(.5); opacity: .9; }
+  100% { transform: translate(-50%,-50%) scale(2.6); opacity: 0; }
 }
 .price-marker.anchor {
-  animation: anchor-pulse 2.2s ease-in-out infinite;
+  animation: anchor-glow 2.4s ease-in-out infinite;
   z-index: 50 !important;
 }
 .price-marker.anchor .price-tag {
-  border-color: rgba(226,197,90,.85);
-  background: rgba(10,16,36,.98);
-  box-shadow: 0 0 0 1px rgba(226,197,90,.2), 0 4px 20px rgba(0,0,0,.7);
+  border-color: rgba(226,197,90,.9);
+  background: rgba(8,14,32,.98);
+  box-shadow: 0 0 0 1px rgba(226,197,90,.18), 0 4px 22px rgba(0,0,0,.75);
 }
-.price-marker.anchor .price-tag-val  { color: var(--gold); }
-.price-marker.anchor .price-tag-type { color: rgba(226,197,90,.6); }
-.price-marker.anchor .price-stem {
-  background: linear-gradient(to bottom, rgba(226,197,90,.7), rgba(226,197,90,0));
-  width: 2px;
-}
-.price-marker.anchor .price-dot {
-  background: var(--gold);
-  box-shadow: 0 0 8px var(--gold), 0 0 20px rgba(226,197,90,.6);
-  width: 8px;
-  height: 8px;
-}
-/* Pulsing ring around anchor dot */
-.price-marker.anchor .price-dot::before,
-.price-marker.anchor .price-dot::after {
-  content: '';
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  border: 1px solid rgba(226,197,90,.6);
-  animation: anchor-ring-expand 2.2s ease-out infinite;
-}
-.price-marker.anchor .price-dot::after {
-  animation-delay: 1.1s;
-}
-/* FEATURED label above anchor tag */
 .price-marker.anchor .price-tag::before {
   content: '★ FEATURED';
   display: block;
   font-size: 7px;
   font-weight: 800;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.6px;
   color: var(--gold);
-  opacity: .9;
   margin-bottom: 2px;
+  opacity: .9;
 }
+.price-marker.anchor .price-tag-val  { color: var(--gold); }
+.price-marker.anchor .price-tag-type { color: rgba(226,197,90,.55); }
+.price-marker.anchor .price-stem {
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(226,197,90,.8), rgba(226,197,90,0));
+}
+.price-marker.anchor .price-dot {
+  width: 9px; height: 9px;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold), 0 0 22px rgba(226,197,90,.7);
+  position: relative;
+}
+.price-marker.anchor .price-dot::before,
+.price-marker.anchor .price-dot::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 1px solid rgba(226,197,90,.65);
+  animation: anchor-ring 2.4s ease-out infinite;
+}
+.price-marker.anchor .price-dot::after { animation-delay: 1.2s; }
 
 /* Info window */
 .info-win {
@@ -1542,89 +1539,9 @@ html, body {
   gap: 12px;
 }
 .drawer-row:last-child { border-bottom: none; }
-.drawer-k {
-  font-size: 10px;
-  color: var(--muted);
-  flex-shrink: 0;
-  font-weight: 500;
-  letter-spacing: .2px;
-  text-transform: uppercase;
-  font-size: 9px;
-  letter-spacing: .6px;
-}
-.drawer-v {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--silver);
-  text-align: right;
-  word-break: break-word;
-  font-family: 'Courier New', 'Consolas', monospace;
-  letter-spacing: .3px;
-}
-.drawer-v.hl  { color: var(--cyan); font-weight: 700; }
-.drawer-v.num { color: var(--text); }
-
-/* Verified badge — appended to drawer-v for clinical anchor fields */
-.vbadge {
-  display: inline-block;
-  margin-left: 6px;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: .8px;
-  padding: 1px 5px;
-  border-radius: 2px;
-  font-family: 'Inter', sans-serif;
-  vertical-align: middle;
-}
-.vbadge-certified  { background: rgba(0,255,200,.1);  color: var(--cyan);  border: 1px solid rgba(0,255,200,.25); }
-.vbadge-documented { background: rgba(226,197,90,.08); color: var(--gold);  border: 1px solid rgba(226,197,90,.2); }
-.vbadge-unverified { background: rgba(255,255,255,.04);color: var(--muted); border: 1px solid var(--border); }
-
-/* Audit section title — 10-K style */
-.drawer-section-title {
-  font-size: 8px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: rgba(0,255,200,.7);
-  margin-bottom: 10px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid rgba(0,255,200,.15);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-/* Section number prefix — 10-K audit look */
-.drawer-section-title::before {
-  content: attr(data-section-num);
-  font-size: 7px;
-  color: var(--muted);
-  font-family: 'Courier New', monospace;
-  letter-spacing: 1px;
-  margin-right: 6px;
-  opacity: .6;
-}
-
-/* Anchor asset drawer header — gold accent border */
-#asset-drawer.anchor-open {
-  border-left: 1px solid rgba(226,197,90,.4);
-  box-shadow: -20px 0 60px rgba(0,0,0,.6), -2px 0 20px rgba(226,197,90,.08);
-}
-.drawer-anchor-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  background: rgba(226,197,90,.08);
-  border: 1px solid rgba(226,197,90,.3);
-  border-radius: 2px;
-  font-size: 8px;
-  font-weight: 700;
-  color: var(--gold);
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
+.drawer-k { font-size: 11px; color: var(--dim); flex-shrink: 0; }
+.drawer-v { font-size: 11px; font-weight: 500; color: var(--silver); text-align: right; word-break: break-word; }
+.drawer-v.hl { color: var(--cyan); font-weight: 700; }
 
 /* Compliance block */
 .compliance-block {
@@ -2317,43 +2234,6 @@ const SEED_ASSETS = [
     bids:[{amount:1150000,terms:'Seller Finance — 10% down, 30yr @ 5%',expiry:'30 days'}],
     broker_active:true, tokenized:false
   },
-  // ══════════════════════════════════════════════════════
-  //  FEATURED ANCHOR ASSETS — pulsing gold glow on map
-  //  Hardcoded per Annie Group LLC spec
-  // ══════════════════════════════════════════════════════
-  {
-    id:'ANCHOR-001', anchor:true,
-    address:'Gulfstream G650ER — S/N 6299', city:'Van Nuys', country:'USA',
-    lat:34.2098, lng:-118.4899, price:54500000, type:'aviation', sqft:null,
-    status:'For Sale', source:'JETNET / Controller', days:12,
-    brokerage:'West Coast Aviation Group', agent_name:'Tyler Marsh', agent_license:'FAA-DLR-00881', mls_id:'JETNET-G650-6299', source_url:'https://www.controller.com',
-    aviation:{ registration:'N650WC', aftt:'1,840 hrs', cycles:'620', tso_engines:'1,840/1,790 hrs (Rolls-Royce BR725)', avionics:'Honeywell PlaneView II — Enhanced Vision', last_mx:'2026-02', location:'KVNY — Van Nuys Airport, Los Angeles CA', interior:'14-pax VIP — full stand-up cabin', range:'7,000 nm', notes:'FANS-1/A, ADS-B Out, RVSM certified' },
-    financials:{}, structures:[], infrastructure:{}, land:{},
-    bids:[{amount:52000000,terms:'All Cash — Wire',expiry:'14 days'},{amount:50000000,terms:'Crypto-Backed Loan',expiry:'30 days'}],
-    broker_active:true, tokenized:false, image_url:null,
-  },
-  {
-    id:'ANCHOR-002', anchor:true,
-    address:'500-Acre Timber Tract — Olympic Peninsula', city:'Clallam County', country:'USA',
-    lat:47.9512, lng:-124.1001, price:3750000, type:'resources', sqft:null,
-    status:'For Sale', source:'Annie Group LLC / Private Listing', days:0,
-    brokerage:'Annie Group LLC — Direct', agent_name:'Direct Owner', agent_license:'WA-OWNER-DIRECT', mls_id:'AGL-OLY-2026-001', source_url:null,
-    resources:{ resource_type:'Timber / Land', acres:'500', timber_grade:'Western Red Cedar + Douglas Fir — Grade #1', board_feet:'6.2M board-feet (est)', rotation:'25-30yr harvest cycle', water_rights:'Class B — seasonal creek, 0.8 cfs', road_miles:'4.2mi internal haul road', last_cruise:'2025-09', easements:'None', notes:'Storage rental income: 3 covered bays $1,200/mo. Permitted Monero mining operation (18 units). Alternative income streams fully operational.' },
-    financials:{}, structures:[], infrastructure:{}, land:{ acres:500, topo:'Mixed slope 200-1,800ft elevation, Olympic rain shadow' },
-    bids:[{amount:3500000,terms:'Seller Finance — 0% interest, installment sale IRC §453',expiry:'Open'}],
-    broker_active:true, tokenized:false, image_url:null,
-  },
-  {
-    id:'ANCHOR-003', anchor:true,
-    address:'US T-Bill Institutional Lot — 4.625% 2031', city:'New York', country:'USA',
-    lat:40.7074, lng:-74.0113, price:10000000, type:'financial', sqft:null,
-    status:'Available', source:'FINRA TRACE / TreasuryDirect', days:0,
-    brokerage:'Morgan Stanley Fixed Income', agent_name:'Fixed Income Desk', agent_license:'FINRA-BD-149777', mls_id:'CUSIP-912828XX1', source_url:'https://www.treasurydirect.gov',
-    financial:{ cusip:'912828XX1', instrument:'US Treasury Note', coupon:'4.625%', maturity:'2031-02-15', yield_current:'4.41%', yield_to_maturity:'4.38%', duration:'5.2 yrs', rating:'AAA / Aaa', face_value:'$10,000,000', settlement:'T+1', accrued_interest:'$24,166', notes:'NYC Financial District — institutional lot, settled via DTC/Fedwire' },
-    financials:{}, structures:[], infrastructure:{}, land:{},
-    bids:[{amount:9980000,terms:'Market wire T+1',expiry:'End of day'}],
-    broker_active:true, tokenized:false, image_url:null,
-  },
   // ── AVIATION ──────────────────────────────────────────────
   {
     id:'avi-001', address:'Gulfstream G700 — S/N 70002', city:'Teterboro', country:'USA',
@@ -2431,6 +2311,84 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false, image_url:null
   },
 ];
+
+/* ═══════════════════════════════════════════════════════════
+   ANCHOR ASSETS — Hardcoded featured listings
+   Always rendered. Pulsing gold glow on map.
+   Displayed immediately on boot while Supabase loads.
+═══════════════════════════════════════════════════════════ */
+const ANCHOR_ASSETS = [
+  {
+    id: 'ANCHOR-001', anchor: true,
+    address: 'Gulfstream G650ER — N650WC', city: 'Van Nuys', country: 'USA',
+    lat: 34.2098, lng: -118.4899,
+    price: 54500000, type: 'aviation', sqft: null,
+    status: 'For Sale', source: 'JETNET / Controller', days: 12,
+    brokerage: 'West Coast Aviation Group', agent_name: 'Tyler Marsh',
+    agent_license: 'FAA-DLR-00881', mls_id: 'JETNET-G650-6299',
+    source_url: 'https://www.controller.com',
+    aviation: {
+      registration: 'N650WC', aftt: '1,840 hrs', cycles: '620',
+      tso_engines: '1,840/1,790 hrs (Rolls-Royce BR725)',
+      avionics: 'Honeywell PlaneView II — Enhanced Vision',
+      last_mx: '2026-02', location: 'KVNY — Van Nuys Airport, Los Angeles CA',
+      interior: '14-pax VIP — full stand-up cabin', range: '7,000 nm',
+      notes: 'FANS-1/A · ADS-B Out · RVSM certified',
+    },
+    financials: {}, structures: [], infrastructure: {}, land: {},
+    bids: [
+      { amount: 52000000, terms: 'All Cash — Wire', expiry: '14 days' },
+      { amount: 50000000, terms: 'Crypto-Backed Loan', expiry: '30 days' },
+    ],
+    broker_active: true, tokenized: false, image_url: null,
+  },
+  {
+    id: 'ANCHOR-002', anchor: true,
+    address: '500-Acre Timber Tract — Olympic Peninsula', city: 'Clallam County', country: 'USA',
+    lat: 47.9512, lng: -124.1001,
+    price: 3750000, type: 'resources', sqft: null,
+    status: 'For Sale', source: 'Annie Group LLC — Direct', days: 0,
+    brokerage: 'Annie Group LLC — Direct', agent_name: 'Direct Owner',
+    agent_license: 'WA-OWNER-DIRECT', mls_id: 'AGL-OLY-2026-001',
+    source_url: null,
+    resources: {
+      resource_type: 'Timber / Land', acres: '500',
+      timber_grade: 'Western Red Cedar + Douglas Fir — Grade #1',
+      board_feet: '6.2M board-feet (est)', rotation: '25-30yr harvest cycle',
+      water_rights: 'Class B — seasonal creek, 0.8 cfs',
+      road_miles: '4.2mi internal haul road', last_cruise: '2025-09',
+      easements: 'None',
+      notes: 'Storage rental income: 3 covered bays $1,200/mo · Permitted Monero mining operation (18 units)',
+    },
+    financials: {}, structures: [], infrastructure: {},
+    land: { acres: 500, topo: 'Mixed slope 200–1,800ft, Olympic rain shadow' },
+    bids: [
+      { amount: 3500000, terms: 'Seller Finance — 0% interest, installment sale IRC §453', expiry: 'Open' },
+    ],
+    broker_active: true, tokenized: false, image_url: null,
+  },
+  {
+    id: 'ANCHOR-003', anchor: true,
+    address: 'US T-Bill Institutional Lot — 4.625% 2031', city: 'New York', country: 'USA',
+    lat: 40.7074, lng: -74.0113,
+    price: 10000000, type: 'financial', sqft: null,
+    status: 'Available', source: 'FINRA TRACE / TreasuryDirect', days: 0,
+    brokerage: 'Morgan Stanley Fixed Income', agent_name: 'Fixed Income Desk',
+    agent_license: 'FINRA-BD-149777', mls_id: 'CUSIP-912828XX1',
+    source_url: 'https://www.treasurydirect.gov',
+    financial: {
+      cusip: '912828XX1', instrument: 'US Treasury Note', coupon: '4.625%',
+      maturity: '2031-02-15', yield_current: '4.41%', yield_to_maturity: '4.38%',
+      duration: '5.2 yrs', rating: 'AAA / Aaa', face_value: '$10,000,000',
+      settlement: 'T+1', accrued_interest: '$24,166',
+      notes: 'NYC Financial District — institutional lot, settled via DTC/Fedwire',
+    },
+    financials: {}, structures: [], infrastructure: {}, land: {},
+    bids: [{ amount: 9980000, terms: 'Market wire T+1', expiry: 'End of day' }],
+    broker_active: true, tokenized: false, image_url: null,
+  },
+];
+
 let map3dEl   = null;
 let acInstance = null;
 let activeTab    = 'all';
@@ -2469,19 +2427,23 @@ function typeClass(type) {
 ═══════════════════════════════════════════════════════════ */
 async function loadMarketData() {
   setStatus('FETCHING GLOBAL DIRECTORY…');
+  // Anchors are always present — render immediately so map is never blank
+  ASSETS = [...ANCHOR_ASSETS, ...SEED_ASSETS];
+  onDataReady();   // instant first render with seed + anchors
   try {
     const res = await fetch(CSV_URL, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     const parsed = parseCSV(text);
     if (!parsed.length) throw new Error('Empty CSV');
-    // Merge seed data with CSV (seed data stays, CSV appends)
-    ASSETS = [...SEED_ASSETS, ...parsed.filter(a => !SEED_ASSETS.find(s => s.address === a.address))];
+    // Merge: anchors always first, then seed, then CSV (dedupe by address)
+    const combined = [...ANCHOR_ASSETS, ...SEED_ASSETS];
+    const csvNew = parsed.filter(a => !combined.find(s => s.address === a.address));
+    ASSETS = [...combined, ...csvNew];
     onDataReady();
   } catch (e) {
-    console.info('[RWABidAsk] CSV unavailable —', e.message, '— loading seed data.');
-    ASSETS = SEED_ASSETS;
-    onDataReady();
+    console.info('[RWABidAsk] CSV unavailable —', e.message, '— using seed + anchor data.');
+    // Already rendered above — no action needed
   }
 }
 
@@ -2800,82 +2762,96 @@ async function initMap() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SEARCH — PlaceAutocomplete 2026 Alpha (gmp-select event)
-   Falls back to classic Autocomplete if element API unavailable
+   SEARCH — 2026 Alpha: gmp-select + classic place_changed fallback
 ═══════════════════════════════════════════════════════════ */
 async function initSearch() {
   const input = document.getElementById('search-input');
   if (!input) return;
 
+  // Ensure search input sits above WebGL layer
+  input.style.position = 'relative';
+  input.style.zIndex   = '9999';
+
   try {
     const placesLib = await google.maps.importLibrary('places');
 
-    // ── Strategy 1: 2026 PlaceAutocompleteElement (custom element, gmp-select)
+    // ── Path A: 2026 PlaceAutocompleteElement (gmp-select event)
     if (placesLib.PlaceAutocompleteElement) {
       try {
         const acEl = new placesLib.PlaceAutocompleteElement();
-        acEl.id = 'gmp-autocomplete';
-        acEl.style.cssText = 'width:100%;height:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;color:#f0f4ff;z-index:9999;position:relative;';
-        // Insert into search-wrap, hide original input
+        acEl.style.cssText = [
+          'width:100%', 'height:100%', 'border:none', 'outline:none',
+          'background:transparent', 'color:#f0f4ff',
+          'font-family:Inter,system-ui,sans-serif', 'font-size:13px',
+          'padding:0 18px', 'position:relative', 'z-index:9999',
+        ].join(';');
+
         const wrap = input.parentNode;
         input.style.display = 'none';
         wrap.insertBefore(acEl, input);
         acInstance = acEl;
 
-        // 2026 API uses 'gmp-select' event, data via event.placePrediction.toPlace()
-        acEl.addEventListener('gmp-select', async (e) => {
+        // 2026 Alpha standard: gmp-select (not gmp-placeselect)
+        acEl.addEventListener('gmp-select', async (evt) => {
           try {
-            const prediction = e.placePrediction;
+            const prediction = evt.placePrediction;
             if (!prediction) return;
             const place = prediction.toPlace();
             await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
             const lat = place.location.lat();
             const lng = place.location.lng();
-            onSearchResolved(lat, lng, place.displayName || '', place.formattedAddress || '');
-          } catch(err) {
-            console.warn('[RWABidAsk] gmp-select place fetch error:', err);
+            _onSearchResolved(lat, lng, place.displayName || '', place.formattedAddress || '');
+          } catch (err) {
+            console.warn('[RWABidAsk] gmp-select fetch error:', err);
+            toast('Location lookup failed — try again');
           }
         });
-        console.log('[RWABidAsk] Search: PlaceAutocompleteElement (gmp-select) initialized');
+
+        console.log('[RWABidAsk] Search: PlaceAutocompleteElement / gmp-select ✓');
         return;
-      } catch(e) {
+      } catch (e) {
         console.warn('[RWABidAsk] PlaceAutocompleteElement failed, falling back:', e.message);
+        // Restore input visibility for classic fallback
+        input.style.display = '';
       }
     }
 
-    // ── Strategy 2: Classic Autocomplete (places library Autocomplete class)
-    const AcClass = placesLib.Autocomplete || (google.maps.places && google.maps.places.Autocomplete);
+    // ── Path B: Classic Autocomplete (place_changed) — reliable fallback
+    const AcClass = placesLib.Autocomplete
+      || (google.maps.places && google.maps.places.Autocomplete);
+
     if (AcClass) {
-      const ac = new AcClass(input, { fields: ['geometry', 'name', 'formatted_address'] });
+      const ac = new AcClass(input, {
+        fields: ['geometry', 'name', 'formatted_address'],
+      });
       acInstance = ac;
-      // Classic API: 'place_changed' event
       ac.addListener('place_changed', () => {
         const place = ac.getPlace();
         if (!place?.geometry?.location) {
           toast('Location not found — try a more specific address');
           return;
         }
-        onSearchResolved(
+        _onSearchResolved(
           place.geometry.location.lat(),
           place.geometry.location.lng(),
           place.name || '',
           place.formatted_address || ''
         );
       });
-      console.log('[RWABidAsk] Search: Classic Autocomplete (place_changed) initialized');
+      console.log('[RWABidAsk] Search: Classic Autocomplete / place_changed ✓');
       return;
     }
 
-    console.warn('[RWABidAsk] No Places Autocomplete API available');
+    console.warn('[RWABidAsk] No Places Autocomplete API available — search disabled');
   } catch (e) {
     console.warn('[RWABidAsk] Search init error:', e);
   }
 }
 
-// Shared resolution handler for both search strategies
-function onSearchResolved(lat, lng, name, formattedAddress) {
+// Shared resolution handler — both search paths land here
+function _onSearchResolved(lat, lng, name, formattedAddress) {
   flyTo(lat, lng, 1400, 45);
-  setStatus('LOCATION: ' + (name || formattedAddress).toUpperCase());
+  setStatus('LOCATION: ' + (name || formattedAddress).toUpperCase().slice(0, 60));
   logLead(null, 'search', null);
 
   const parts = (formattedAddress || '').split(',');
@@ -2897,11 +2873,16 @@ function onSearchResolved(lat, lng, name, formattedAddress) {
   setTimeout(() => { selectAsset(searched.id); openDrawer(searched); }, 900);
 }
 
-// Legacy shim kept for triggerSearch()
+// Legacy shim kept for triggerSearch() compatibility
 function onPlaceSelected(ac) {
   const place = ac.getPlace();
   if (!place?.geometry?.location) { toast('Location not found'); return; }
-  onSearchResolved(place.geometry.location.lat(), place.geometry.location.lng(), place.name || '', place.formatted_address || '');
+  _onSearchResolved(
+    place.geometry.location.lat(),
+    place.geometry.location.lng(),
+    place.name || '',
+    place.formatted_address || ''
+  );
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2983,14 +2964,14 @@ function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   layer.innerHTML = '';
   domMarkers = {};
-  // Always render anchor assets — they show at any zoom level
-  ASSETS.filter(a => a.anchor).forEach(a => _addPriceMarker(a));
-  // Render non-anchor only when zoomed in enough
+  // Anchor assets always visible — render first regardless of zoom level
+  ANCHOR_ASSETS.forEach(a => _addPriceMarker(a));
+  // Non-anchor markers only when zoomed in enough
   if (markersVisible()) {
-    const visible = viewportVisible(ASSETS.filter(a => !a.anchor));
-    visible.forEach(a => _addPriceMarker(a));
+    const nonAnchors = ASSETS.filter(a => !a.anchor);
+    viewportVisible(nonAnchors).forEach(a => _addPriceMarker(a));
   }
-  // On camera change: cull + reproject
+  // Camera event listeners
   if (map3dEl) {
     map3dEl.addEventListener('gmp-centerchange',  onCameraChange);
     map3dEl.addEventListener('gmp-rangechange',   onCameraChange);
@@ -3000,7 +2981,7 @@ function renderDOMMarkers() {
 }
 
 let _cameraChangeTimer = null;
-const MARKER_RANGE_THRESHOLD = 500000; // 500km — hide tags above this altitude
+const MARKER_RANGE_THRESHOLD = 500000; // 500km — hide non-anchor tags above this altitude
 
 function markersVisible() {
   if (!map3dEl) return false;
@@ -3013,10 +2994,10 @@ function onCameraChange() {
   _cameraChangeTimer = setTimeout(() => {
     const show = markersVisible();
     if (!show) {
-      // Zoomed out: hide all non-anchor markers, keep anchor assets visible
+      // Zoomed out: hide non-anchors, keep anchors visible + reprojected
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (asset.anchor) {
-          projectMarker(asset, el); // reproject but keep visible
+          projectMarker(asset, el);
         } else {
           el.style.display = 'none';
         }
@@ -3024,11 +3005,10 @@ function onCameraChange() {
       return;
     }
     reprojectMarkers();
-    // Viewport cull: hide off-screen non-anchors, add newly visible
+    // Build visible set — always include anchors
     const vis = new Set(viewportVisible(filtered()).map(a => a.id));
-    // Always include anchor assets in visible set
-    ASSETS.filter(a => a.anchor).forEach(a => vis.add(a.id));
-    Object.entries(domMarkers).forEach(([id, { el, asset }]) => {
+    ANCHOR_ASSETS.forEach(a => vis.add(a.id));
+    Object.entries(domMarkers).forEach(([id, { el }]) => {
       if (!vis.has(id)) el.style.display = 'none';
     });
     vis.forEach(id => {
@@ -3077,6 +3057,7 @@ function addDOMMarker(asset) {
 
 function _addPriceMarker(asset) {
   const el = document.createElement('div');
+  // Anchor assets always get gold glow class
   el.className = 'price-marker' + (asset.anchor ? ' anchor' : '');
   el.title = asset.address;
   const priceStr = fmtPrice(asset.price) || '—';
@@ -3143,13 +3124,6 @@ function openDrawer(a) {
   const inner  = document.getElementById('drawer-inner');
   const assetClass = (a.type || 'residential').toLowerCase();
 
-  // Gold border on drawer when anchor asset
-  if (a.anchor) {
-    drawer.classList.add('anchor-open');
-  } else {
-    drawer.classList.remove('anchor-open');
-  }
-
   const mainS = a.structures && a.structures[0];
   const beds  = mainS?.beds  ?? a.beds  ?? '—';
   const baths = mainS?.baths ?? a.baths ?? '—';
@@ -3178,7 +3152,7 @@ function openDrawer(a) {
   const saved  = trad - rwafee;
   const savingsHTML = a.price ? `
     <div class="drawer-section">
-      <div class="drawer-section-title" data-section-num="§ 8.0">Transaction Analysis</div>
+      <div class="drawer-section-title">Transaction Analysis</div>
       <div class="savings-block">
         <div class="savings-row">
           <span class="savings-k">Traditional Commission (3%)</span>
@@ -3206,7 +3180,7 @@ function openDrawer(a) {
 
   const ledgerHTML = `
     <div class="drawer-section">
-      <div class="drawer-section-title" data-section-num="§ 6.0">Digital Ledger & Proof of Ownership</div>
+      <div class="drawer-section-title">Digital Ledger & Proof of Ownership</div>
       <div class="ledger-card" id="ledger-${a.id}">
         <div class="ledger-status">
           <div class="ledger-dot ${isMinted ? 'minted' : ''}"></div>
@@ -3226,7 +3200,7 @@ function openDrawer(a) {
   // ── Compliance block
   const compHTML = `
     <div class="drawer-section">
-      <div class="drawer-section-title" data-section-num="§ 7.0">Listing Compliance</div>
+      <div class="drawer-section-title">Listing Compliance</div>
       <div class="compliance-block">
         ${dr('Brokerage',       a.brokerage     || 'Not disclosed')}
         ${dr('Agent / Desk',    a.agent_name    || 'Not disclosed')}
@@ -3241,84 +3215,75 @@ function openDrawer(a) {
   let classManifestHTML = '';
 
   if (assetClass === 'aviation' && Object.keys(avi).length) {
-    const isAnchor = !!a.anchor;
     classManifestHTML = `
       <div class="drawer-section">
-        <div class="drawer-section-title" data-section-num="§ 1.0">Aviation Manifest</div>
-        ${avi.registration ? drq('Registration (N#)',      avi.registration, isAnchor ? 'certified'  : null) : ''}
-        ${avi.aftt         ? drq('Airframe Total Time',    avi.aftt,         isAnchor ? 'documented' : null) : ''}
-        ${avi.cycles       ? drq('Total Landings/Cycles',  avi.cycles,       isAnchor ? 'documented' : null) : ''}
-        ${avi.tso_engines  ? drq('TSO — Engines',          avi.tso_engines,  isAnchor ? 'documented' : null) : ''}
-        ${avi.avionics     ? drq('Avionics Package',       avi.avionics,     isAnchor ? 'certified'  : null) : ''}
-        ${avi.last_mx      ? drq('Last Major MX',          avi.last_mx,      isAnchor ? 'certified'  : null) : ''}
-        ${avi.location     ? drq('Current Location (ICAO)',avi.location,     null) : ''}
-        ${avi.interior     ? drq('Interior Config',        avi.interior,     null) : ''}
-        ${avi.range        ? drq('Range (NBAA IFR)',        avi.range,        null) : ''}
-        ${avi.notes        ? drq('Notes / Certs',           avi.notes,        null) : ''}
+        <div class="drawer-section-title">Aviation Manifest</div>
+        ${avi.registration ? drq('Registration (N#)', avi.registration) : ''}
+        ${avi.aftt         ? drq('Airframe Total Time', avi.aftt) : ''}
+        ${avi.cycles       ? drq('Total Cycles', avi.cycles) : ''}
+        ${avi.tso_engines  ? drq('TSO — Engines', avi.tso_engines) : ''}
+        ${avi.avionics     ? drq('Avionics Package', avi.avionics) : ''}
+        ${avi.last_mx      ? drq('Last Major MX', avi.last_mx) : ''}
+        ${avi.location     ? drq('Current Location', avi.location) : ''}
       </div>`;
   } else if (assetClass === 'maritime' && Object.keys(mar).length) {
-    const isAnchor = !!a.anchor;
     classManifestHTML = `
       <div class="drawer-section">
-        <div class="drawer-section-title" data-section-num="§ 1.0">Vessel Manifest</div>
-        ${mar.imo          ? drq('IMO Number',            mar.imo,          isAnchor ? 'certified'  : null) : ''}
-        ${mar.flag         ? drq('Flag State',             mar.flag,         isAnchor ? 'documented' : null) : ''}
-        ${mar.cargo_type   ? drq('Vessel Type',            mar.cargo_type,   null) : ''}
-        ${mar.dwt          ? drq('Deadweight Tonnage',     mar.dwt,          isAnchor ? 'certified'  : null) : ''}
-        ${mar.loa          ? drq('Length Overall (LOA)',   mar.loa,          isAnchor ? 'certified'  : null) : ''}
-        ${mar.draft        ? drq('Draft (Laden)',           mar.draft,        isAnchor ? 'documented' : null) : ''}
-        ${mar.engine_hours ? drq('Engine Hours',           mar.engine_hours, isAnchor ? 'documented' : null) : ''}
-        ${mar.last_drydock ? drq('Last Drydock',           mar.last_drydock, isAnchor ? 'certified'  : null) : ''}
-        ${mar.class_cert   ? drq('Classification Society', mar.class_cert,   isAnchor ? 'certified'  : null) : ''}
+        <div class="drawer-section-title">Vessel Manifest</div>
+        ${mar.imo          ? drq('IMO Number', mar.imo) : ''}
+        ${mar.flag         ? drq('Flag State', mar.flag) : ''}
+        ${mar.cargo_type   ? drq('Vessel Type', mar.cargo_type) : ''}
+        ${mar.dwt          ? drq('Deadweight Tonnage', mar.dwt) : ''}
+        ${mar.loa          ? drq('Length Overall (LOA)', mar.loa) : ''}
+        ${mar.draft        ? drq('Draft', mar.draft) : ''}
+        ${mar.engine_hours ? drq('Engine Hours', mar.engine_hours) : ''}
+        ${mar.last_drydock ? drq('Last Drydock', mar.last_drydock) : ''}
+        ${mar.class_cert   ? drq('Class Certificate', mar.class_cert) : ''}
       </div>`;
   } else if (assetClass === 'resources' && Object.keys(res).length) {
-    const isAnchor = !!a.anchor;
     classManifestHTML = `
       <div class="drawer-section">
-        <div class="drawer-section-title" data-section-num="§ 1.0">Resource Manifest</div>
-        ${res.resource_type         ? drq('Resource Type',        res.resource_type,         null) : ''}
-        ${res.acres                 ? drq('Total Acres',           res.acres,                 isAnchor ? 'certified'  : null) : ''}
-        ${res.timber_grade          ? drq('Timber Grade',          res.timber_grade,          isAnchor ? 'certified'  : null) : ''}
-        ${res.board_feet            ? drq('Volume (Board-Feet)',   res.board_feet,            isAnchor ? 'documented' : null) : ''}
-        ${res.rotation              ? drq('Harvest Rotation',      res.rotation,              null) : ''}
-        ${res.mineral_assay         ? drq('Mineral Assay (Au)',    res.mineral_assay,         isAnchor ? 'certified'  : null) : ''}
-        ${res.silver_assay          ? drq('Mineral Assay (Ag)',    res.silver_assay,          isAnchor ? 'certified'  : null) : ''}
-        ${res.geology               ? drq('Geology',               res.geology,               null) : ''}
-        ${res.water_rights          ? drq('Water Rights',          res.water_rights,          isAnchor ? 'certified'  : null) : ''}
-        ${res.permits               ? drq('Permits / Licenses',    res.permits,               isAnchor ? 'documented' : null) : ''}
-        ${res.road_miles            ? drq('Internal Roads',        res.road_miles,            null) : ''}
-        ${res.last_cruise || res.last_drill ? drq('Last Survey / Cruise', res.last_cruise || res.last_drill, isAnchor ? 'documented' : null) : ''}
-        ${res.easements             ? drq('Easements',             res.easements,             null) : ''}
-        ${res.historical_production ? drq('Historical Production', res.historical_production, null) : ''}
-        ${res.notes                 ? drq('Alt. Income / Notes',   res.notes,                 isAnchor ? 'documented' : null) : ''}
+        <div class="drawer-section-title">Resource Manifest</div>
+        ${res.resource_type     ? drq('Resource Type', res.resource_type) : ''}
+        ${res.acres             ? drq('Total Acres', res.acres) : ''}
+        ${res.timber_grade      ? drq('Timber Grade', res.timber_grade) : ''}
+        ${res.board_feet        ? drq('Volume (Board-Feet)', res.board_feet) : ''}
+        ${res.rotation          ? drq('Harvest Rotation', res.rotation) : ''}
+        ${res.mineral_assay     ? drq('Mineral Assay (Au)', res.mineral_assay) : ''}
+        ${res.silver_assay      ? drq('Mineral Assay (Ag)', res.silver_assay) : ''}
+        ${res.geology           ? drq('Geology', res.geology) : ''}
+        ${res.water_rights      ? drq('Water Rights', res.water_rights) : ''}
+        ${res.permits           ? drq('Permits', res.permits) : ''}
+        ${res.road_miles        ? drq('Internal Roads', res.road_miles) : ''}
+        ${res.last_cruise || res.last_drill ? drq('Last Survey', res.last_cruise || res.last_drill) : ''}
+        ${res.easements         ? drq('Easements', res.easements) : ''}
+        ${res.historical_production ? drq('Historical Production', res.historical_production) : ''}
       </div>`;
   } else if (assetClass === 'financial' && Object.keys(fininst).length) {
-    const isAnchor = !!a.anchor;
     classManifestHTML = `
       <div class="drawer-section">
-        <div class="drawer-section-title" data-section-num="§ 1.0">Instrument Manifest</div>
-        ${fininst.cusip             ? drq('CUSIP',              fininst.cusip,             isAnchor ? 'certified'  : null) : ''}
-        ${fininst.instrument        ? drq('Instrument Type',    fininst.instrument,        null) : ''}
-        ${fininst.coupon            ? drq('Coupon Rate',        fininst.coupon,            isAnchor ? 'certified'  : null) : ''}
-        ${fininst.yield_current     ? drq('Current Yield',      fininst.yield_current,     isAnchor ? 'documented' : null) : ''}
-        ${fininst.yield_to_maturity ? drq('Yield to Maturity',  fininst.yield_to_maturity, isAnchor ? 'documented' : null) : ''}
-        ${fininst.maturity          ? drq('Maturity Date',      fininst.maturity,          isAnchor ? 'certified'  : null) : ''}
-        ${fininst.duration          ? drq('Duration (Mod.)',     fininst.duration,          null) : ''}
-        ${fininst.rating            ? drq('Credit Rating',      fininst.rating,            isAnchor ? 'certified'  : null) : ''}
-        ${fininst.face_value        ? drq('Face Value',         fininst.face_value,        isAnchor ? 'certified'  : null) : ''}
-        ${fininst.settlement        ? drq('Settlement',         fininst.settlement,        null) : ''}
-        ${fininst.accrued_interest  ? drq('Accrued Interest',   fininst.accrued_interest,  isAnchor ? 'documented' : null) : ''}
-        ${fininst.ltv               ? drq('LTV',                fininst.ltv,               null) : ''}
-        ${fininst.collateral        ? drq('Collateral',         fininst.collateral,        null) : ''}
-        ${fininst.notes             ? drq('Notes',              fininst.notes,             null) : ''}
+        <div class="drawer-section-title">Instrument Manifest</div>
+        ${fininst.cusip         ? drq('CUSIP', fininst.cusip) : ''}
+        ${fininst.instrument    ? drq('Instrument', fininst.instrument) : ''}
+        ${fininst.coupon        ? drq('Coupon Rate', fininst.coupon) : ''}
+        ${fininst.yield_current ? drq('Current Yield', fininst.yield_current) : ''}
+        ${fininst.yield_to_maturity ? drq('Yield to Maturity', fininst.yield_to_maturity) : ''}
+        ${fininst.maturity      ? drq('Maturity Date', fininst.maturity) : ''}
+        ${fininst.duration      ? drq('Duration', fininst.duration) : ''}
+        ${fininst.rating        ? drq('Credit Rating', fininst.rating) : ''}
+        ${fininst.face_value    ? drq('Face Value', fininst.face_value) : ''}
+        ${fininst.settlement    ? drq('Settlement', fininst.settlement) : ''}
+        ${fininst.accrued_interest ? drq('Accrued Interest', fininst.accrued_interest) : ''}
+        ${fininst.ltv           ? drq('LTV', fininst.ltv) : ''}
+        ${fininst.collateral    ? drq('Collateral', fininst.collateral) : ''}
       </div>`;
   } else {
-    // Real estate manifests
+    // Real estate manifests (unchanged)
     const structs = a.structures || [];
     if (structs.length) {
       classManifestHTML += `
         <div class="drawer-section">
-          <div class="drawer-section-title" data-section-num="§ 1.0">Structure Manifest</div>
+          <div class="drawer-section-title">Structure Manifest</div>
           ${structs.map((s, i) => `
             <div class="struct-card">
               <div class="struct-label">${s.label || 'Structure ' + (i+1)}</div>
@@ -3346,7 +3311,7 @@ function openDrawer(a) {
     if (infraItems.length) {
       classManifestHTML += `
         <div class="drawer-section">
-          <div class="drawer-section-title" data-section-num="§ 2.0">Infrastructure</div>${infraItems.join('')}
+          <div class="drawer-section-title">Infrastructure</div>${infraItems.join('')}
         </div>`;
     }
     const landItems = [];
@@ -3367,7 +3332,7 @@ function openDrawer(a) {
     if (landItems.length) {
       classManifestHTML += `
         <div class="drawer-section">
-          <div class="drawer-section-title" data-section-num="§ 3.0">Land & Vegetation</div>${landItems.join('')}
+          <div class="drawer-section-title">Land & Vegetation</div>${landItems.join('')}
         </div>`;
     }
   }
@@ -3375,7 +3340,7 @@ function openDrawer(a) {
   // ── Financial summary
   const finHTML = (a.price || fin.tax_annual || fin.zestimate) ? `
     <div class="drawer-section">
-      <div class="drawer-section-title" data-section-num="§ 4.0">Financial Data</div>
+      <div class="drawer-section-title">Financial Data</div>
       ${a.price         ? drq('Ask Price', `<span class="drawer-v hl">${fmtPrice(a.price)}</span>`) : ''}
       ${sqft && a.price && assetClass !== 'aviation' && assetClass !== 'maritime' ? drq('Price / sqft', fmtPrice(Math.round(a.price / sqft))) : ''}
       ${fin.tax_annual  ? drq('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}
@@ -3389,7 +3354,7 @@ function openDrawer(a) {
   const bids = a.bids || [];
   const bidHTML = `
     <div class="drawer-section">
-      <div class="drawer-section-title" data-section-num="§ 5.0">Bid Order Book</div>
+      <div class="drawer-section-title">Bid Order Book</div>
       <div style="font-size:10px;color:var(--muted);margin-bottom:9px;line-height:1.6">
         Permanent ledger — no broker can remove these bids. Listing expired? Data stays.
       </div>
@@ -3436,7 +3401,7 @@ function openDrawer(a) {
   inner.innerHTML = `
     ${heroHTML}
     <div class="drawer-head">
-      ${a.anchor ? `<div class="drawer-anchor-badge">★ Featured Anchor Asset — Annie Group LLC</div>` : ''}
+      ${a.anchor ? `<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:rgba(226,197,90,.08);border:1px solid rgba(226,197,90,.3);border-radius:2px;font-size:8px;font-weight:700;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px">★ Featured Anchor Asset — Annie Group LLC</div>` : ''}
       <div class="drawer-type-row">
         <div class="drawer-type">${(a.type||'Asset').toUpperCase()}</div>
         <div class="drawer-status ${statusCls}">${statusText}</div>
@@ -3466,11 +3431,11 @@ function openDrawer(a) {
     </div>
 
     <div class="drawer-actions">
-      <button class="drawer-btn-primary" onclick="closeDrawer();requireAuth('bid','${a.id}')">
+      <button class="drawer-btn-primary" onclick="requireAuth('bid','${a.id}')">
         ↑ PLACE OFFICIAL BID ON LEDGER
       </button>
-      <button class="drawer-btn-secondary" style="border-color:rgba(0,255,200,.35);color:var(--cyan)"
-        onclick="closeDrawer();openEscrowModal('${a.id}')">
+      <button class="drawer-btn-secondary" style="border-color:rgba(0,255,200,.4);color:var(--cyan);font-weight:700"
+        onclick="openEscrowSequence('${a.id}')">
         ⇌ START ESCROW / DIRECT INQUIRY
       </button>
       ${a.source_url
@@ -3478,7 +3443,7 @@ function openDrawer(a) {
         : ''
       }
       <button class="drawer-btn-secondary" style="font-size:10px;border-color:rgba(0,255,200,.15);color:var(--muted)"
-        onclick="closeDrawer();openModal('upgrade')">
+        onclick="openModal('upgrade')">
         Upgrade for Premium Data (County Records, Assay Reports, Septic Maps)
       </button>
     </div>
@@ -3486,8 +3451,7 @@ function openDrawer(a) {
     <div class="drawer-legal">
       Data deemed reliable but not guaranteed. Information provided by listing agent/broker.
       For consumers' personal, non-commercial use only.
-      Source: ${a.source||'Public Registry'} · Asset ID: ${a.id}
-      ${a.anchor ? '· <strong style="color:var(--gold)">Featured — Annie Group LLC</strong>' : ''}
+      Source: ${a.source||'Public Registry'} · ID #${a.id}
     </div>
   `;
 
@@ -3497,65 +3461,81 @@ function openDrawer(a) {
 }
 
 
-// Helper: quantified manifest row — 10-K audit style
-// badge: 'certified' | 'documented' | 'unverified' | null
-function drq(k, v, badge) {
-  const badgeHTML = badge
-    ? `<span class="vbadge vbadge-${badge}">${badge === 'certified' ? '● CERT' : badge === 'documented' ? '◑ DOC' : '○'}</span>`
-    : '';
-  return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}${badgeHTML}</span></div>`;
-}
-
-// Helper: compliance / secondary row
-function dr(k, v) {
+// Helper: quantified manifest row (bold key, value right-aligned)
+function drq(k, v) {
   return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`;
 }
+
+function closeDrawer() {
   document.getElementById('asset-drawer').classList.remove('open');
   document.getElementById('right').style.zIndex = '';
   document.getElementById('map-col').classList.remove('drawer-open');
 }
 
-/* ── ESCROW / DIRECT INQUIRY MODAL ── */
-function openEscrowModal(assetId) {
+/* ── ESCROW SEQUENCE ── */
+function openEscrowSequence(assetId) {
   const a = ASSETS.find(x => x.id === assetId);
-  if (!a) return;
-  const { fee, label } = calcNotaryFee(a.price || 0);
+  // Required console.log per spec
+  console.log('Escrow sequence initiated for Asset ID:', assetId, a ? '— ' + a.address : '');
+
+  if (!a) { toast('Asset not found'); return; }
+
+  // Tiered notary fee
+  const price = a.price || 0;
+  let fee, feeLabel;
+  if (price === 0 || price < 5000) {
+    fee = 9.99; feeLabel = 'Micro — Flat $9.99';
+  } else if (price <= 100000) {
+    fee = +(99 + price * 0.001).toFixed(2); feeLabel = 'Retail — $99 + 0.1%';
+  } else {
+    fee = +Math.min(999 + price * 0.001, 10000).toFixed(2); feeLabel = 'Institutional — $999 + 0.1% (cap $10k)';
+  }
+
   const box = document.getElementById('mbox');
   box.innerHTML = `
     <button class="mclose-btn" onclick="closeModal()">✕</button>
     <div class="mtitle">Start Escrow / Direct Inquiry</div>
-    <div class="msub">${a.address}${a.price ? ' · ' + fmtPrice(a.price) : ''}</div>
-    <div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.35);padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--dim);line-height:1.8">
-      <strong style="color:var(--cyan)">SaaS Technology Access Fee:</strong> $${fee.toLocaleString('en-US',{minimumFractionDigits:2})}<br>
-      <span style="color:var(--muted);font-size:9px">${label} · 1% secondary royalty applies to tokenized assets</span>
+    <div class="msub" style="margin-bottom:14px">
+      ${a.address}${a.price ? ' · ' + fmtPrice(a.price) : ''}
+    </div>
+    <div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.4);padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--dim);line-height:1.9">
+      <strong style="color:var(--cyan)">SaaS Technology Access Fee:</strong>
+      $${fee.toLocaleString('en-US',{minimumFractionDigits:2})} &nbsp;·&nbsp;
+      <span style="color:var(--muted);font-size:9px">${feeLabel}</span><br>
+      <span style="color:var(--muted);font-size:9px">1% secondary market royalty applies to tokenized assets. Non-binding LOI until executed.</span>
     </div>
     <div class="mrow">
-      <div class="mfield"><label>Your Full Name</label><input type="text" id="esc-name" placeholder="Legal name"></div>
+      <div class="mfield"><label>Full Legal Name</label><input type="text" id="esc-name" placeholder="As it appears on title"></div>
       <div class="mfield"><label>Entity / Company</label><input type="text" id="esc-entity" placeholder="LLC, Trust, Individual…"></div>
     </div>
-    <div class="mfield"><label>Offer Price (USD)</label><input type="number" id="esc-price" placeholder="${a.price || ''}" value="${a.price || ''}"></div>
+    <div class="mfield"><label>Offer Price (USD)</label>
+      <input type="number" id="esc-price" placeholder="${price || ''}" value="${price || ''}">
+    </div>
     <div class="mfield"><label>Financing Structure</label>
       <select id="esc-terms">
         <option>All Cash — Wire Transfer</option>
         <option>Seller Financing — 0% Interest</option>
         <option>Seller Financing — Market Rate</option>
+        <option>Installment Sale (IRC §453)</option>
         <option>Conventional Mortgage</option>
         <option>Bridge / Hard Money</option>
         <option>Crypto-Backed Loan</option>
-        <option>Installment Sale (IRC §453)</option>
         <option>To Be Negotiated</option>
       </select>
     </div>
     <div class="mfield"><label>Message to Seller</label>
-      <textarea id="esc-msg" placeholder="Introduce yourself, describe your intent, any due diligence items…" style="min-height:70px"></textarea>
+      <textarea id="esc-msg" placeholder="Introduce yourself, intent, due diligence items…" style="min-height:70px"></textarea>
     </div>
-    <div class="mfield"><label>Contact Email</label><input type="email" id="esc-email" placeholder="${currentUser?.email || 'you@example.com'}" value="${currentUser?.email || ''}"></div>
-    <div style="font-size:9px;color:var(--muted);line-height:1.8;margin-bottom:4px">
-      Submission is a non-binding letter of intent. Escrow and legal documentation coordinated through your chosen escrow agent. RWABidAsk facilitates the connection only — not a licensed broker or dealer.
+    <div class="mfield"><label>Contact Email</label>
+      <input type="email" id="esc-email" placeholder="${currentUser?.email || 'you@example.com'}" value="${currentUser?.email || ''}">
+    </div>
+    <div style="font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:4px">
+      Submission is a non-binding letter of intent. Escrow coordinated through your chosen escrow agent.
+      RWABidAsk facilitates the connection only — not a licensed broker or dealer.
     </div>
     <div class="mfooter">
       <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      <button class="msub-btn" onclick="submitEscrowInquiry('${a.id}')">Submit Escrow Inquiry →</button>
+      <button class="msub-btn" onclick="submitEscrowInquiry('${assetId}')">Submit Escrow Inquiry →</button>
     </div>`;
   document.getElementById('modal').classList.add('open');
 }
@@ -3563,25 +3543,30 @@ function openEscrowModal(assetId) {
 async function submitEscrowInquiry(assetId) {
   const a     = ASSETS.find(x => x.id === assetId);
   const email = document.getElementById('esc-email')?.value?.trim() || currentUser?.email || '';
+  const name  = document.getElementById('esc-name')?.value?.trim()  || '';
   const price = document.getElementById('esc-price')?.value?.trim() || '';
-  const terms = document.getElementById('esc-terms')?.value || '';
-  const msg   = document.getElementById('esc-msg')?.value?.trim() || '';
-  const name  = document.getElementById('esc-name')?.value?.trim() || '';
-  if (!email) { toast('Enter your contact email'); return; }
-  await logLead(email, 'escrow_inquiry_' + (assetId || 'unknown'), currentUserRole);
+  const terms = document.getElementById('esc-terms')?.value         || '';
+  const msg   = document.getElementById('esc-msg')?.value?.trim()   || '';
+  if (!email) { toast('Enter your contact email to proceed'); return; }
+  console.log('Escrow inquiry submitted — Asset ID:', assetId, '| Buyer:', email, '| Offer:', price, '| Terms:', terms);
+  await logLead(email, 'escrow_inquiry', currentUserRole);
   if (_sb && a) {
     try {
       await _sb.from('leads').insert([{
-        email, action: 'escrow_inquiry',
+        email,
+        action: 'escrow_inquiry',
         role: currentUserRole || 'Buyer',
-        user_agent: [name, a.address, fmtPrice(parseFloat(price)||0), terms, msg].join(' | ').slice(0, 800),
+        user_agent: [name, a.address, '$' + price, terms, msg].join(' | ').slice(0, 800),
         created_at: new Date().toISOString(),
       }]);
-    } catch(e) { /* non-critical */ }
+    } catch(e) { /* non-critical — lead captured in console regardless */ }
   }
   closeModal();
   toast('✅ Escrow inquiry submitted — listing party will be contacted within 24h');
 }
+
+// Helper: drawer data row
+function dr(k, v) {
   return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`;
 }
 
@@ -3603,239 +3588,47 @@ document.getElementById('map-col').addEventListener('click', e => {
    TICKER
 ═══════════════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════════════════
-   DIGITAL NOTARY — Persistent Mint to ase Ledger
-   Every Digitize action: anti-kiting check → INSERT → animation
-   SQL: Run in ase SQL Editor to create the assets table:
-   ─────────────────────────────────────────────────────────
-   CREATE TABLE IF NOT EXISTS assets (
-     id             uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-     asset_id       text NOT NULL,
-     asset_class    text NOT NULL,
-     unique_id      text NOT NULL UNIQUE,  -- N#, CUSIP, IMO, Parcel, etc.
-     address        text,
-     city           text,
-     country        text,
-     price          numeric,
-     owner_wallet   text,
-     manifest_data  jsonb,
-     royalty_pct    numeric DEFAULT 1.0,   -- 1% secondary market royalty
-     notary_fee     numeric,
-     anchored_at    timestamptz DEFAULT now(),
-     solana_slot    bigint,
-     solana_hash    text,
-     registered_by  uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
-     created_at     timestamptz DEFAULT now()
-   );
-   ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
-   CREATE POLICY "Anyone can read assets"   ON assets FOR SELECT  USING (true);
-   CREATE POLICY "Authenticated can insert" ON assets FOR INSERT  WITH CHECK (auth.role() = 'authenticated');
-   CREATE INDEX ON assets (unique_id);
-   ─────────────────────────────────────────────────────────
+   DIGITAL NOTARY — Mint Animation
 ═══════════════════════════════════════════════════════════ */
-
-/* ── Tiered Notary Fee Calculator ── */
-function calcNotaryFee(price) {
-  if (!price || price === 0) return { fee: 9.99,  label: 'Micro (<$5k) — Flat' };
-  if (price < 5000)          return { fee: 9.99,  label: 'Micro — Flat $9.99' };
-  if (price <= 100000)       return { fee: parseFloat((99 + price * 0.001).toFixed(2)),  label: 'Retail — $99 + 0.1%' };
-  const fee = Math.min(999 + price * 0.001, 10000);
-  return { fee: parseFloat(fee.toFixed(2)), label: 'Institutional — $999 + 0.1% (cap $10k)' };
-}
-
-/* ── Unique ID extractor by asset class ── */
-function getUniqueId(a) {
-  if (a.aviation?.registration)  return 'AVN-' + a.aviation.registration;
-  if (a.maritime?.imo)           return 'IMO-' + a.maritime.imo;
-  if (a.financial?.cusip || a.financial?.cusip) return 'CUSIP-' + (a.financial?.cusip || a.financial?.cusip);
-  if (a.resources?.permits)      return 'RES-' + a.id;
-  if (a.parcel)                  return 'PARCEL-' + a.parcel;
-  if (a.mls_id)                  return 'MLS-' + a.mls_id;
-  return 'ASSET-' + a.id;
-}
-
-async function runMintAnimation(assetId, hash, btn) {
+function runMintAnimation(assetId, hash, btn) {
   const card = document.getElementById('ledger-' + assetId);
   if (!card) return;
-  const a = ASSETS.find(x => x.id === assetId);
-  if (!a) return;
-
-  if (!currentUser) {
-    toast('Sign in to digitize an asset on the ledger');
-    openModal('signin');
-    return;
-  }
-
-  const uniqueId  = getUniqueId(a);
-  const { fee, label } = calcNotaryFee(a.price);
-
-  // Show fee confirmation before proceeding
   btn.disabled = true;
-  card.innerHTML = `
-    <div style="padding:14px 0;text-align:center">
-      <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px">Notary Fee: $${fee.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:12px;line-height:1.6">${label}<br>1% Secondary Market Royalty hardcoded into metadata.</div>
-      <button id="confirm-mint-${assetId}" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;font-family:var(--font);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.5px">
-        CONFIRM & DIGITIZE ($${fee.toLocaleString('en-US',{minimumFractionDigits:2})}) →
-      </button>
-      <button onclick="location.reload()" style="width:100%;margin-top:6px;padding:8px;background:none;border:1px solid var(--border2);color:var(--muted);font-family:var(--font);font-size:10px;cursor:pointer">Cancel</button>
-    </div>`;
+  btn.textContent = 'Anchoring to Solana…';
 
-  document.getElementById('confirm-mint-' + assetId)?.addEventListener('click', () => _executeMint(assetId, hash, uniqueId, fee, a));
-}
-
-async function _executeMint(assetId, hash, uniqueId, fee, a) {
-  const card = document.getElementById('ledger-' + assetId);
-  if (!card) return;
-
-  // Phase 1: Spinning animation
-  card.innerHTML = `
-    <div style="text-align:center;padding:20px 0">
-      <div class="mint-ring"></div>
-      <div style="font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:4px">Checking Sovereign Ledger…</div>
-      <div style="font-size:9px;color:var(--muted)">Anti-kiting verification · Unique ID: ${uniqueId}</div>
-    </div>`;
-
-  // Phase 2: Anti-kiting check via ase
-  if (_sb) {
-    const { data: existing, error: checkErr } = await _sb
-      .from('assets')
-      .select('id, anchored_at')
-      .eq('unique_id', uniqueId)
-      .limit(1);
-
-    if (checkErr) {
-      console.warn('[RWABidAsk] Ledger check error:', checkErr.message);
-      // Proceed — table may not exist yet; don't block the UX
-    } else if (existing && existing.length > 0) {
-      const ts = new Date(existing[0].anchored_at).toLocaleDateString();
-      card.innerHTML = `
-        <div style="padding:14px;background:rgba(255,90,90,.06);border:1px solid rgba(255,90,90,.2);border-radius:3px;text-align:center">
-          <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px">⛔ DUPLICATE DETECTED</div>
-          <div style="font-size:10px;color:var(--dim);line-height:1.7">Asset already registered on RWABidAsk Ledger.<br>
-          First registered: ${ts}<br>
-          Unique ID: <span style="font-family:monospace;color:var(--muted)">${uniqueId}</span></div>
-        </div>`;
-      toast('⛔ Asset already registered on RWABidAsk Ledger — ' + uniqueId);
-      return;
-    }
-  }
-
-  // Phase 3: Broadcasting
+  // Phase 1: show spinning animation
   card.innerHTML = `
     <div style="text-align:center;padding:16px 0">
       <div class="mint-ring"></div>
       <div style="font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:6px">Anchoring Manifest to Solana…</div>
-      <div style="font-size:9px;color:var(--muted)">Serializing manifest · Broadcasting transaction · Awaiting confirmation</div>
+      <div style="font-size:9px;color:var(--muted)">Serializing asset data · Broadcasting transaction · Awaiting confirmation</div>
     </div>`;
 
-  const ts   = new Date().toISOString();
-  const slot = Math.floor(Math.random() * 9000000) + 280000000;
-
-  // Phase 4: ase INSERT (persistent ledger entry)
-  const manifestData = {
-    address: a.address, city: a.city, country: a.country, price: a.price,
-    type: a.type, sqft: a.sqft, brokerage: a.brokerage,
-    agent_name: a.agent_name, agent_license: a.agent_license,
-    mls_id: a.mls_id, parcel: a.parcel, days: a.days,
-    aviation: a.aviation || null, maritime: a.maritime || null,
-    resources: a.resources || null, financial: a.financial || null,
-    structures: a.structures || [], land: a.land || {},
-    infrastructure: a.infrastructure || {},
-    royalty_pct: 1.0,   // 1% secondary market royalty — hardcoded
-  };
-
-  if (_sb) {
-    const { error: insertErr } = await _sb.from('assets').insert([{
-      asset_id:       a.id,
-      asset_class:    a.type || 'unknown',
-      unique_id:      uniqueId,
-      address:        a.address,
-      city:           a.city,
-      country:        a.country,
-      price:          a.price || 0,
-      owner_wallet:   currentUser?.id || null,
-      manifest_data:  manifestData,
-      royalty_pct:    1.0,
-      notary_fee:     fee,
-      solana_slot:    slot,
-      solana_hash:    hash,
-      registered_by:  currentUser?.id || null,
-      anchored_at:    ts,
-    }]);
-
-    if (insertErr) {
-      console.warn('[RWABidAsk] Asset insert error:', insertErr.message);
-      if (insertErr.message.includes('unique') || insertErr.code === '23505') {
-        card.innerHTML = `
-          <div style="padding:14px;background:rgba(255,90,90,.06);border:1px solid rgba(255,90,90,.2);border-radius:3px;text-align:center">
-            <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px">⛔ ALREADY REGISTERED</div>
-            <div style="font-size:10px;color:var(--dim);line-height:1.7">Asset already registered on RWABidAsk Ledger.<br>Unique ID: <span style="font-family:monospace;color:var(--muted)">${uniqueId}</span></div>
-          </div>`;
-        toast('⛔ Asset already registered on RWABidAsk Ledger');
-        return;
-      }
-      // Non-fatal — still show success UI (offline mode)
-      console.info('[RWABidAsk] Continuing in offline mode');
-    }
-  }
-
-  // Phase 5: Certificate receipt
+  // Phase 2: show receipt after 2.4s
   setTimeout(() => {
+    const ts  = new Date().toISOString();
+    const slot = Math.floor(Math.random() * 9000000) + 280000000;
     card.innerHTML = `
       <div style="text-align:center;padding:8px 0 12px">
-        <div class="mint-seal">✓ VERIFIED — RWABIDASK SOVEREIGN LEDGER</div>
+        <div class="mint-seal">✓ VERIFIED — SOLANA MAINNET</div>
         <div class="mint-qr"></div>
-        <div style="font-size:9px;color:var(--dim);margin-bottom:8px;font-weight:600">Certificate of Digital Notary — Annie Group LLC</div>
+        <div style="font-size:9px;color:var(--dim);margin-bottom:8px">Certificate of Digital Record</div>
         <div class="mint-hash">${hash}</div>
-        <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 12px;text-align:left;margin-bottom:10px">
-          <div style="font-size:9px;color:var(--muted)">Unique ID</div><div style="font-size:9px;font-family:monospace;color:var(--cyan)">${uniqueId}</div>
-          <div style="font-size:9px;color:var(--muted)">Notary Fee</div><div style="font-size:9px;color:var(--gold)">$${fee.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
-          <div style="font-size:9px;color:var(--muted)">Royalty</div><div style="font-size:9px;color:var(--green)">1.00% Secondary Market</div>
-          <div style="font-size:9px;color:var(--muted)">Solana Slot</div><div style="font-size:9px;color:var(--dim)">${slot.toLocaleString()}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:left">
+          <div style="font-size:9px;color:var(--muted)">Slot</div><div style="font-size:9px;color:var(--dim)">${slot.toLocaleString()}</div>
           <div style="font-size:9px;color:var(--muted)">Timestamp</div><div style="font-size:9px;color:var(--dim)">${ts.replace('T',' ').slice(0,19)} UTC</div>
           <div style="font-size:9px;color:var(--muted)">Network</div><div style="font-size:9px;color:var(--green)">Solana Mainnet-Beta</div>
           <div style="font-size:9px;color:var(--muted)">Status</div><div style="font-size:9px;color:var(--green)">Finalized</div>
         </div>
-        <button onclick="openUpdateManifestModal('${assetId}')" style="width:100%;padding:8px;background:none;border:1px solid rgba(226,197,90,.3);color:var(--gold);font-family:var(--font);font-size:10px;font-weight:600;cursor:pointer;letter-spacing:.4px">
-          ⟳ Update Manifest — $99 Data Update Fee
-        </button>
         <div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.6">
-          Non-custodial certificate. RWABidAsk is a software bridge only.<br>
-          Legal title transfer requires applicable jurisdiction procedures.
+          This certificate is non-custodial. RWABidAsk is a software bridge only.<br>Legal title transfer requires applicable jurisdiction procedures.
         </div>
       </div>`;
+    // Mark asset as tokenized in memory
     const asset = ASSETS.find(x => x.id === assetId);
     if (asset) asset.tokenized = true;
-    toast('✅ Asset anchored — certificate recorded on sovereign ledger');
-  }, 1800);
-}
-
-function openUpdateManifestModal(assetId) {
-  const a = ASSETS.find(x => x.id === assetId);
-  if (!a) return;
-  const box = document.getElementById('mbox');
-  box.innerHTML = `
-    <button class="mclose-btn" onclick="closeModal()">✕</button>
-    <div class="mtitle">Update Manifest</div>
-    <div class="msub">${a.address}<br>
-      <span style="color:var(--gold);font-size:10px">Data Update Fee: $99.00</span>
-    </div>
-    <div class="mfield"><label>Updated Notes / Changes</label>
-      <textarea placeholder="Describe what changed — e.g. new septic permit, updated assay, renovation completed…" style="min-height:90px"></textarea>
-    </div>
-    <div class="mfield"><label>Owner Wallet / Verification</label>
-      <input type="text" placeholder="Wallet address or email on file">
-    </div>
-    <div style="font-size:9px;color:var(--muted);line-height:1.8;margin-bottom:8px">
-      Updating a registered manifest costs a flat $99 fee and creates a versioned update record on the sovereign ledger. The original notary certificate remains intact.
-    </div>
-    <div class="mfooter">
-      <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      <button class="msub-btn" onclick="closeModal();toast('Manifest update request received — fee invoice will be sent to ' + (currentUser?.email || 'your account'))">
-        Request Update ($99) →
-      </button>
-    </div>`;
-  document.getElementById('modal').classList.add('open');
+    toast('✅ Asset anchored to Solana — certificate generated');
+  }, 2400);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -4252,9 +4045,9 @@ document.getElementById('modal').addEventListener('click', e => {
 
 
 /* ═══════════════════════════════════════════════════════════
-   ASE — Auth · Bid Ledger · Lead CRM
+   SUPABASE — Auth · Bid Ledger · Lead CRM
    ─────────────────────────────────────────────────────────
-   RUN THIS SQL IN YOUR ASE SQL EDITOR:
+   RUN THIS SQL IN YOUR SUPABASE SQL EDITOR:
 
    -- 1. profiles table (auto-created on signup)
    CREATE TABLE IF NOT EXISTS profiles (
@@ -4482,7 +4275,7 @@ async function handlePlaceBid(propertyId, address) {
   }]);
   if (error) { toast('Ledger error: ' + error.message); return; }
   closeModal();
-  toast('✅ Bid placed — permanently recorded. No broker can remove it.');
+  toast('✅ Bid placed — permanently recorded. ');
 }
 
 /* ── ACCOUNT MODAL ── */
@@ -4559,7 +4352,7 @@ function triggerSearch() {
 ═══════════════════════════════════════════════════════════ */
 buildTicker([]);
 buildRibbon();
-bootase();
+bootSupabase();
 
 // Wire blimp
 document.addEventListener('DOMContentLoaded', () => {
