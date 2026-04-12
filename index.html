@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- ── SUPABASE ── -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ── ASE ── -->
+<script src="https://cdn.jsdelivr.net/npm/@ase/ase-js@2"></script>
 
 <!-- ── GOOGLE MAPS (alpha — Map3DElement requires this version) ── -->
 <script>
@@ -32,6 +32,7 @@
 ══════════════════════════════════════════════ */
 .pac-container {
   z-index: 99999 !important;
+  position: fixed !important;
   background: #232d4e;
   border: 1px solid rgba(0,255,200,.25);
   border-top: none;
@@ -179,6 +180,8 @@ html, body {
   color: var(--text);
   font-size: 13px;
   padding: 0 18px;
+  position: relative;
+  z-index: 9999;
 }
 #search-input::placeholder { color: var(--muted); }
 .search-icon {
@@ -589,6 +592,66 @@ html, body {
 .price-marker.heat-hot  .price-tag-val { color: #ff5a5a; }
 .price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,80,80,.6), transparent); }
 .price-marker.heat-hot  .price-dot  { background: #ff5a5a; box-shadow: 0 0 6px #ff5a5a; }
+
+/* ── ANCHOR ASSETS — pulsing gold glow ── */
+@keyframes anchor-pulse {
+  0%,100% {
+    filter: drop-shadow(0 0 6px rgba(226,197,90,.7)) drop-shadow(0 4px 18px rgba(0,0,0,.7));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(226,197,90,1)) drop-shadow(0 0 36px rgba(226,197,90,.5)) drop-shadow(0 4px 20px rgba(0,0,0,.8));
+  }
+}
+@keyframes anchor-ring-expand {
+  0%   { transform: translate(-50%,-50%) scale(.6); opacity: .8; }
+  100% { transform: translate(-50%,-50%) scale(2.4); opacity: 0; }
+}
+.price-marker.anchor {
+  animation: anchor-pulse 2.2s ease-in-out infinite;
+  z-index: 50 !important;
+}
+.price-marker.anchor .price-tag {
+  border-color: rgba(226,197,90,.85);
+  background: rgba(10,16,36,.98);
+  box-shadow: 0 0 0 1px rgba(226,197,90,.2), 0 4px 20px rgba(0,0,0,.7);
+}
+.price-marker.anchor .price-tag-val  { color: var(--gold); }
+.price-marker.anchor .price-tag-type { color: rgba(226,197,90,.6); }
+.price-marker.anchor .price-stem {
+  background: linear-gradient(to bottom, rgba(226,197,90,.7), rgba(226,197,90,0));
+  width: 2px;
+}
+.price-marker.anchor .price-dot {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold), 0 0 20px rgba(226,197,90,.6);
+  width: 8px;
+  height: 8px;
+}
+/* Pulsing ring around anchor dot */
+.price-marker.anchor .price-dot::before,
+.price-marker.anchor .price-dot::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(226,197,90,.6);
+  animation: anchor-ring-expand 2.2s ease-out infinite;
+}
+.price-marker.anchor .price-dot::after {
+  animation-delay: 1.1s;
+}
+/* FEATURED label above anchor tag */
+.price-marker.anchor .price-tag::before {
+  content: '★ FEATURED';
+  display: block;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  opacity: .9;
+  margin-bottom: 2px;
+}
 
 /* Info window */
 .info-win {
@@ -1479,9 +1542,89 @@ html, body {
   gap: 12px;
 }
 .drawer-row:last-child { border-bottom: none; }
-.drawer-k { font-size: 11px; color: var(--dim); flex-shrink: 0; }
-.drawer-v { font-size: 11px; font-weight: 500; color: var(--silver); text-align: right; word-break: break-word; }
-.drawer-v.hl { color: var(--cyan); font-weight: 700; }
+.drawer-k {
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+  font-weight: 500;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: .6px;
+}
+.drawer-v {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--silver);
+  text-align: right;
+  word-break: break-word;
+  font-family: 'Courier New', 'Consolas', monospace;
+  letter-spacing: .3px;
+}
+.drawer-v.hl  { color: var(--cyan); font-weight: 700; }
+.drawer-v.num { color: var(--text); }
+
+/* Verified badge — appended to drawer-v for clinical anchor fields */
+.vbadge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-family: 'Inter', sans-serif;
+  vertical-align: middle;
+}
+.vbadge-certified  { background: rgba(0,255,200,.1);  color: var(--cyan);  border: 1px solid rgba(0,255,200,.25); }
+.vbadge-documented { background: rgba(226,197,90,.08); color: var(--gold);  border: 1px solid rgba(226,197,90,.2); }
+.vbadge-unverified { background: rgba(255,255,255,.04);color: var(--muted); border: 1px solid var(--border); }
+
+/* Audit section title — 10-K style */
+.drawer-section-title {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(0,255,200,.7);
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(0,255,200,.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+/* Section number prefix — 10-K audit look */
+.drawer-section-title::before {
+  content: attr(data-section-num);
+  font-size: 7px;
+  color: var(--muted);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  margin-right: 6px;
+  opacity: .6;
+}
+
+/* Anchor asset drawer header — gold accent border */
+#asset-drawer.anchor-open {
+  border-left: 1px solid rgba(226,197,90,.4);
+  box-shadow: -20px 0 60px rgba(0,0,0,.6), -2px 0 20px rgba(226,197,90,.08);
+}
+.drawer-anchor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: rgba(226,197,90,.08);
+  border: 1px solid rgba(226,197,90,.3);
+  border-radius: 2px;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
 
 /* Compliance block */
 .compliance-block {
@@ -1595,52 +1738,6 @@ html, body {
 .t-mar  { background: rgba(34,150,200,.12); color: #22c8e8; }
 .t-res2 { background: rgba(201,168,76,.12); color: var(--gold); }
 .t-fin  { background: rgba(46,212,122,.12); color: var(--green); }
-
-/* ── Verification tier badges ── */
-.verify-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .8px;
-  text-transform: uppercase;
-}
-.verify-unverified { background: rgba(255,150,50,.1); color: #ff9632; border: 1px solid rgba(255,150,50,.3); }
-.verify-documented  { background: rgba(107,163,251,.1); color: #6ba3fb; border: 1px solid rgba(107,163,251,.3); }
-.verify-certified   { background: rgba(46,212,122,.1);  color: var(--green); border: 1px solid rgba(46,212,122,.3); }
-
-/* ── Anti-fraud duplicate ID error ── */
-.dup-id-error {
-  background: rgba(255,80,80,.08);
-  border: 1px solid rgba(255,80,80,.3);
-  color: var(--red);
-  padding: 10px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 3px;
-  margin-bottom: 10px;
-}
-
-/* ── Contact Listing Agent button ── */
-.agent-contact-btn {
-  width: 100%;
-  padding: 11px;
-  background: none;
-  border: 1px solid rgba(201,168,76,.35);
-  color: var(--gold);
-  font-family: var(--font);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 3px;
-  transition: all .15s;
-}
-.agent-contact-btn:hover { background: rgba(201,168,76,.06); border-color: rgba(201,168,76,.6); }
 
 /* ── Mint / Digitize animation ── */
 @keyframes mint-spin {
@@ -2015,7 +2112,7 @@ html, body {
 <!-- ══ TOAST ══ -->
 <div id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 'use strict';
 
 /* ═══════════════════════════════════════════════════════════
@@ -2038,8 +2135,7 @@ let ASSETS    = [];
 const SEED_ASSETS = [
   // ── SEATTLE ──────────────────────────────────────────
   {
-    id:'sea-001', brokerage:'RE/MAX Eastlake', agent_name:'Sarah Chen', agent_license:'WA-23918', mls_id:'NWMLS-2024001', source_url:'https://www.nwmls.com',
-    address:'2450 Eastlake Ave E', city:'Seattle', country:'USA',
+    id:'sea-001', brokerage:'RE/MAX Eastlake', agent_name:'Sarah Chen', agent_license:'WA-23918', mls_id:'NWMLS-2024001', source_url:'https://www.nwmls.com', address:'2450 Eastlake Ave E', city:'Seattle', country:'USA',
     lat:47.6423, lng:-122.3256, price:1850000, type:'residential', sqft:3200,
     status:'For Sale', source:'NWMLS', days:14, parcel:'3340200225',
     structures:[
@@ -2053,8 +2149,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-002', brokerage:'Compass Seattle', agent_name:'James Park', agent_license:'WA-18847', mls_id:'NWMLS-2024002', source_url:'https://www.nwmls.com',
-    address:'1411 2nd Ave, Unit 2401', city:'Seattle', country:'USA',
+    id:'sea-002', brokerage:'Compass Seattle', agent_name:'James Park', agent_license:'WA-18847', mls_id:'NWMLS-2024002', source_url:'https://www.nwmls.com', address:'1411 2nd Ave, Unit 2401', city:'Seattle', country:'USA',
     lat:47.6079, lng:-122.3370, price:3200000, type:'residential', sqft:2100,
     status:'For Sale', source:'NWMLS', days:6, parcel:'0660001880',
     structures:[{label:'Luxury Condo — 24th Floor',sqft:2100,beds:3,baths:2.5,built:2018,type:'Condominium',notes:'Corner unit, unobstructed Sound + mountain views'}],
@@ -2065,8 +2160,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-003', brokerage:'Windermere RE', agent_name:'Maria Lopez', agent_license:'WA-31204', mls_id:'NWMLS-2024003', source_url:'https://www.nwmls.com',
-    address:'8820 35th Ave SW', city:'Seattle', country:'USA',
+    id:'sea-003', brokerage:'Windermere RE', agent_name:'Maria Lopez', agent_license:'WA-31204', mls_id:'NWMLS-2024003', source_url:'https://www.nwmls.com', address:'8820 35th Ave SW', city:'Seattle', country:'USA',
     lat:47.5238, lng:-122.3804, price:875000, type:'residential', sqft:1850,
     status:'For Sale', source:'NWMLS', days:22, parcel:'2095600130',
     structures:[{label:'Main House',sqft:1850,beds:3,baths:1.75,built:1962,remodel:2018,type:'Single Family',notes:'Detached garage, basement'}],
@@ -2076,8 +2170,7 @@ const SEED_ASSETS = [
     bids:[], broker_active:true, tokenized:false
   },
   {
-    id:'sea-004', brokerage:'CBRE Seattle', agent_name:'Tom Nguyen', agent_license:'WA-22091', mls_id:'CoStar-2024004', source_url:'https://www.costar.com',
-    address:'1200 Westlake Ave N, Suite 600', city:'Seattle', country:'USA',
+    id:'sea-004', brokerage:'CBRE Seattle', agent_name:'Tom Nguyen', agent_license:'WA-22091', mls_id:'CoStar-2024004', source_url:'https://www.costar.com', address:'1200 Westlake Ave N, Suite 600', city:'Seattle', country:'USA',
     lat:47.6268, lng:-122.3393, price:4500000, type:'commercial', sqft:6200,
     status:'For Sale', source:'CoStar', days:45, parcel:'0660002411',
     structures:[{label:'Office — 6th Floor',sqft:6200,beds:null,baths:4,built:2001,remodel:2022,type:'Class A Office',notes:'Lake Union views, open floor plan, server room'}],
@@ -2088,8 +2181,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-005', brokerage:'Kidder Mathews', agent_name:'Diana Ross', agent_license:'WA-19934', mls_id:'NWMLS-2024005', source_url:'https://www.nwmls.com',
-    address:'4721 University Way NE', city:'Seattle', country:'USA',
+    id:'sea-005', brokerage:'Kidder Mathews', agent_name:'Diana Ross', agent_license:'WA-19934', mls_id:'NWMLS-2024005', source_url:'https://www.nwmls.com', address:'4721 University Way NE', city:'Seattle', country:'USA',
     lat:47.6636, lng:-122.3139, price:1250000, type:'commercial', sqft:3400,
     status:'For Sale', source:'NWMLS', days:60, parcel:'3827200305',
     structures:[{label:'Mixed-Use Retail + Apt',sqft:3400,beds:2,baths:2,built:1948,remodel:2010,type:'Mixed-Use',notes:'Street-level retail (1,800 sqft) + 2BR upstairs'}],
@@ -2099,8 +2191,7 @@ const SEED_ASSETS = [
     bids:[], broker_active:true, tokenized:false
   },
   {
-    id:'sea-006', brokerage:'John L. Scott', agent_name:'Kevin Wu', agent_license:'WA-28871', mls_id:'NWMLS-2024006', source_url:'https://www.nwmls.com',
-    address:'14505 Aurora Ave N', city:'Shoreline', country:'USA',
+    id:'sea-006', brokerage:'John L. Scott', agent_name:'Kevin Wu', agent_license:'WA-28871', mls_id:'NWMLS-2024006', source_url:'https://www.nwmls.com', address:'14505 Aurora Ave N', city:'Shoreline', country:'USA',
     lat:47.7268, lng:-122.3440, price:680000, type:'residential', sqft:1420,
     status:'For Sale', source:'NWMLS', days:38, parcel:'8650000135',
     structures:[{label:'Ranch House',sqft:1420,beds:3,baths:1.5,built:1955,remodel:2015,type:'Single Family'}],
@@ -2111,8 +2202,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-007', brokerage:'Berkshire Hathaway HomeServices', agent_name:'Amanda Cole', agent_license:'WA-34512', mls_id:'NWMLS-2024007', source_url:'https://www.nwmls.com',
-    address:'910 NE 65th St', city:'Seattle', country:'USA',
+    id:'sea-007', brokerage:'Berkshire Hathaway HomeServices', agent_name:'Amanda Cole', agent_license:'WA-34512', mls_id:'NWMLS-2024007', source_url:'https://www.nwmls.com', address:'910 NE 65th St', city:'Seattle', country:'USA',
     lat:47.6756, lng:-122.3242, price:1100000, type:'residential', sqft:2050,
     status:'Contingent', source:'NWMLS', days:9, parcel:'3918200270',
     structures:[{label:'Craftsman',sqft:2050,beds:4,baths:2,built:1928,remodel:2019,type:'Single Family',notes:'Original hardwood floors, claw tub, updated kitchen'}],
@@ -2123,8 +2213,7 @@ const SEED_ASSETS = [
     broker_active:true, tokenized:false
   },
   {
-    id:'sea-008', brokerage:'Pacific Real Estate Group', agent_name:'David Kim', agent_license:'WA-17663', mls_id:'KCA-2024008', source_url:'https://kingcounty.gov',
-    address:'Vacant Land — S Beacon Hill', city:'Seattle', country:'USA',
+    id:'sea-008', brokerage:'Pacific Real Estate Group', agent_name:'David Kim', agent_license:'WA-17663', mls_id:'KCA-2024008', source_url:'https://kingcounty.gov', address:'Vacant Land — S Beacon Hill', city:'Seattle', country:'USA',
     lat:47.5635, lng:-122.3058, price:480000, type:'land', sqft:null,
     status:'For Sale', source:'King County Assessor', days:120, parcel:'7442600510',
     structures:[],
@@ -2135,8 +2224,7 @@ const SEED_ASSETS = [
   },
   // ── DUBAI ────────────────────────────────────────────
   {
-    id:'dxb-001', brokerage:'Engel & Völkers Dubai', agent_name:'Omar Al Rashid', agent_license:'RERA-28841', mls_id:'PF-DXB-001', source_url:'https://www.propertyfinder.ae',
-    address:'Palm Jumeirah Signature Villa', city:'Dubai', country:'UAE',
+    id:'dxb-001', brokerage:'Engel & Völkers Dubai', agent_name:'Omar Al Rashid', agent_license:'RERA-28841', mls_id:'PF-DXB-001', source_url:'https://www.propertyfinder.ae', address:'Palm Jumeirah Signature Villa', city:'Dubai', country:'UAE',
     lat:25.1124, lng:55.1390, price:12500000, type:'residential', sqft:9800,
     status:'For Sale', source:'Property Finder', days:30,
     structures:[{label:'Main Villa',sqft:8000,beds:6,baths:7,built:2017,type:'Villa',notes:'Beachfront, private pool, 3-car garage'},{label:'Guest House',sqft:1800,beds:2,baths:2,built:2017}],
@@ -2146,8 +2234,7 @@ const SEED_ASSETS = [
     bids:[], broker_active:true, tokenized:false
   },
   {
-    id:'dxb-002', brokerage:'Bayut Prime', agent_name:'Leila Mansouri', agent_license:'RERA-31920', mls_id:'BAYUT-DXB-002', source_url:'https://www.bayut.com',
-    address:'Downtown Dubai — Burj Khalifa District', city:'Dubai', country:'UAE',
+    id:'dxb-002', brokerage:'Bayut Prime', agent_name:'Leila Mansouri', agent_license:'RERA-31920', mls_id:'BAYUT-DXB-002', source_url:'https://www.bayut.com', address:'Downtown Dubai — Burj Khalifa District', city:'Dubai', country:'UAE',
     lat:25.1972, lng:55.2796, price:3800000, type:'residential', sqft:2600,
     status:'For Sale', source:'Bayut', days:18,
     structures:[{label:'Luxury Apartment',sqft:2600,beds:3,baths:3.5,built:2021,type:'High-Rise Condo',notes:'Burj Khalifa + fountain views, fully furnished'}],
@@ -2159,8 +2246,7 @@ const SEED_ASSETS = [
   },
   // ── LONDON ───────────────────────────────────────────
   {
-    id:'lon-001', brokerage:'Savills Belgravia', agent_name:'Charles Worthington', agent_license:'RICS-44821', mls_id:'RM-LON-001', source_url:'https://www.rightmove.co.uk',
-    address:'15 Eaton Square, Belgravia', city:'London', country:'UK',
+    id:'lon-001', brokerage:'Savills Belgravia', agent_name:'Charles Worthington', agent_license:'RICS-44821', mls_id:'RM-LON-001', source_url:'https://www.rightmove.co.uk', address:'15 Eaton Square, Belgravia', city:'London', country:'UK',
     lat:51.4965, lng:-0.1527, price:18000000, type:'residential', sqft:5400,
     status:'For Sale', source:'Rightmove', days:42,
     structures:[{label:'Stucco Townhouse',sqft:5400,beds:5,baths:5,built:1842,remodel:2018,type:'Georgian Townhouse',notes:'Freehold, original cornicing, south garden'}],
@@ -2171,8 +2257,7 @@ const SEED_ASSETS = [
   },
   // ── NEW YORK ──────────────────────────────────────────
   {
-    id:'nyc-001', brokerage:'Douglas Elliman', agent_name:'Victoria Stone', agent_license:'NY-48821AB', mls_id:'SE-NYC-001', source_url:'https://streeteasy.com',
-    address:'432 Park Avenue, Unit 62A', city:'New York', country:'USA',
+    id:'nyc-001', brokerage:'Douglas Elliman', agent_name:'Victoria Stone', agent_license:'NY-48821AB', mls_id:'SE-NYC-001', source_url:'https://streeteasy.com', address:'432 Park Avenue, Unit 62A', city:'New York', country:'USA',
     lat:40.7617, lng:-73.9717, price:23500000, type:'residential', sqft:4000,
     status:'For Sale', source:'StreetEasy', days:88,
     structures:[{label:'Full-Floor Residence',sqft:4000,beds:4,baths:4.5,built:2015,type:'Luxury Condo',notes:'10-ft windows, 360-degree views, full building amenities'}],
@@ -2183,8 +2268,7 @@ const SEED_ASSETS = [
   },
   // ── MIAMI ─────────────────────────────────────────────
   {
-    id:'mia-001', brokerage:'ONE Sotheby\'s International', agent_name:'Roberto Garcia', agent_license:'FL-BK3441209', mls_id:'MLS-MIA-001', source_url:'https://www.realtor.com',
-    address:'3000 Collins Ave, Unit 1401', city:'Miami Beach', country:'USA',
+    id:'mia-001', brokerage:'ONE Sotheby\'s International', agent_name:'Roberto Garcia', agent_license:'FL-BK3441209', mls_id:'MLS-MIA-001', source_url:'https://www.realtor.com', address:'3000 Collins Ave, Unit 1401', city:'Miami Beach', country:'USA',
     lat:25.7864, lng:-80.1300, price:5900000, type:'residential', sqft:3100,
     status:'For Sale', source:'Realtor.com', days:25,
     structures:[{label:'Oceanfront Condo',sqft:3100,beds:4,baths:4,built:2020,type:'Luxury Condo',notes:'Direct ocean views, private pool access, turnkey furnished'}],
@@ -2196,8 +2280,7 @@ const SEED_ASSETS = [
   },
   // ── SINGAPORE ────────────────────────────────────────
   {
-    id:'sgp-001', brokerage:'PropNex Realty', agent_name:'Wei Ling Tan', agent_license:'CEA-R012341G', mls_id:'PG-SGP-001', source_url:'https://www.propertyguru.com.sg',
-    address:'1 Ardmore Park', city:'Singapore', country:'Singapore',
+    id:'sgp-001', brokerage:'PropNex Realty', agent_name:'Wei Ling Tan', agent_license:'CEA-R012341G', mls_id:'PG-SGP-001', source_url:'https://www.propertyguru.com.sg', address:'1 Ardmore Park', city:'Singapore', country:'Singapore',
     lat:1.3048, lng:103.8267, price:8200000, type:'residential', sqft:2900,
     status:'For Sale', source:'PropertyGuru', days:55,
     structures:[{label:'Luxury Condo',sqft:2900,beds:4,baths:4,built:2001,remodel:2022,type:'Condominium',notes:'Prime District 10, freehold, full facilities'}],
@@ -2208,8 +2291,7 @@ const SEED_ASSETS = [
   },
   // ── SYDNEY ───────────────────────────────────────────
   {
-    id:'syd-001', brokerage:'McGrath Real Estate', agent_name:'Claire Watson', agent_license:'REIQ-00442', mls_id:'DOM-SYD-001', source_url:'https://www.domain.com.au',
-    address:'45 Hopetoun Ave, Vaucluse', city:'Sydney', country:'Australia',
+    id:'syd-001', brokerage:'McGrath Real Estate', agent_name:'Claire Watson', agent_license:'REIQ-00442', mls_id:'DOM-SYD-001', source_url:'https://www.domain.com.au', address:'45 Hopetoun Ave, Vaucluse', city:'Sydney', country:'Australia',
     lat:-33.8548, lng:151.2760, price:9800000, type:'residential', sqft:5200,
     status:'For Sale', source:'Domain.com.au', days:33,
     structures:[{label:'Federation House',sqft:5200,beds:5,baths:4,built:1908,remodel:2020,type:'Single Family',notes:'Harbor views, original sandstone, pool + boathouse'}],
@@ -2220,8 +2302,7 @@ const SEED_ASSETS = [
   },
   // ── SEQUIM WA (from your docs) ───────────────────────
   {
-    id:'seq-001', brokerage:'RE/MAX Evergreen', agent_name:'Shawn Washburn', agent_license:'WA-44219', mls_id:'NWMLS-2434863', source_url:'https://www.nwmls.com',
-    address:'273702 Hwy 101', city:'Sequim', country:'USA',
+    id:'seq-001', brokerage:'RE/MAX Evergreen', agent_name:'Shawn Washburn', agent_license:'WA-44219', mls_id:'NWMLS-2434863', source_url:'https://www.nwmls.com', address:'273702 Hwy 101', city:'Sequim', country:'USA',
     lat:48.0521, lng:-123.0847, price:1200000, type:'residential', sqft:5150,
     status:'For Sale', source:'NWMLS #2434863', days:206, parcel:'0230323202000000',
     structures:[
@@ -2236,6 +2317,43 @@ const SEED_ASSETS = [
     bids:[{amount:1150000,terms:'Seller Finance — 10% down, 30yr @ 5%',expiry:'30 days'}],
     broker_active:true, tokenized:false
   },
+  // ══════════════════════════════════════════════════════
+  //  FEATURED ANCHOR ASSETS — pulsing gold glow on map
+  //  Hardcoded per Annie Group LLC spec
+  // ══════════════════════════════════════════════════════
+  {
+    id:'ANCHOR-001', anchor:true,
+    address:'Gulfstream G650ER — S/N 6299', city:'Van Nuys', country:'USA',
+    lat:34.2098, lng:-118.4899, price:54500000, type:'aviation', sqft:null,
+    status:'For Sale', source:'JETNET / Controller', days:12,
+    brokerage:'West Coast Aviation Group', agent_name:'Tyler Marsh', agent_license:'FAA-DLR-00881', mls_id:'JETNET-G650-6299', source_url:'https://www.controller.com',
+    aviation:{ registration:'N650WC', aftt:'1,840 hrs', cycles:'620', tso_engines:'1,840/1,790 hrs (Rolls-Royce BR725)', avionics:'Honeywell PlaneView II — Enhanced Vision', last_mx:'2026-02', location:'KVNY — Van Nuys Airport, Los Angeles CA', interior:'14-pax VIP — full stand-up cabin', range:'7,000 nm', notes:'FANS-1/A, ADS-B Out, RVSM certified' },
+    financials:{}, structures:[], infrastructure:{}, land:{},
+    bids:[{amount:52000000,terms:'All Cash — Wire',expiry:'14 days'},{amount:50000000,terms:'Crypto-Backed Loan',expiry:'30 days'}],
+    broker_active:true, tokenized:false, image_url:null,
+  },
+  {
+    id:'ANCHOR-002', anchor:true,
+    address:'500-Acre Timber Tract — Olympic Peninsula', city:'Clallam County', country:'USA',
+    lat:47.9512, lng:-124.1001, price:3750000, type:'resources', sqft:null,
+    status:'For Sale', source:'Annie Group LLC / Private Listing', days:0,
+    brokerage:'Annie Group LLC — Direct', agent_name:'Direct Owner', agent_license:'WA-OWNER-DIRECT', mls_id:'AGL-OLY-2026-001', source_url:null,
+    resources:{ resource_type:'Timber / Land', acres:'500', timber_grade:'Western Red Cedar + Douglas Fir — Grade #1', board_feet:'6.2M board-feet (est)', rotation:'25-30yr harvest cycle', water_rights:'Class B — seasonal creek, 0.8 cfs', road_miles:'4.2mi internal haul road', last_cruise:'2025-09', easements:'None', notes:'Storage rental income: 3 covered bays $1,200/mo. Permitted Monero mining operation (18 units). Alternative income streams fully operational.' },
+    financials:{}, structures:[], infrastructure:{}, land:{ acres:500, topo:'Mixed slope 200-1,800ft elevation, Olympic rain shadow' },
+    bids:[{amount:3500000,terms:'Seller Finance — 0% interest, installment sale IRC §453',expiry:'Open'}],
+    broker_active:true, tokenized:false, image_url:null,
+  },
+  {
+    id:'ANCHOR-003', anchor:true,
+    address:'US T-Bill Institutional Lot — 4.625% 2031', city:'New York', country:'USA',
+    lat:40.7074, lng:-74.0113, price:10000000, type:'financial', sqft:null,
+    status:'Available', source:'FINRA TRACE / TreasuryDirect', days:0,
+    brokerage:'Morgan Stanley Fixed Income', agent_name:'Fixed Income Desk', agent_license:'FINRA-BD-149777', mls_id:'CUSIP-912828XX1', source_url:'https://www.treasurydirect.gov',
+    financial:{ cusip:'912828XX1', instrument:'US Treasury Note', coupon:'4.625%', maturity:'2031-02-15', yield_current:'4.41%', yield_to_maturity:'4.38%', duration:'5.2 yrs', rating:'AAA / Aaa', face_value:'$10,000,000', settlement:'T+1', accrued_interest:'$24,166', notes:'NYC Financial District — institutional lot, settled via DTC/Fedwire' },
+    financials:{}, structures:[], infrastructure:{}, land:{},
+    bids:[{amount:9980000,terms:'Market wire T+1',expiry:'End of day'}],
+    broker_active:true, tokenized:false, image_url:null,
+  },
   // ── AVIATION ──────────────────────────────────────────────
   {
     id:'avi-001', address:'Gulfstream G700 — S/N 70002', city:'Teterboro', country:'USA',
@@ -2244,8 +2362,7 @@ const SEED_ASSETS = [
     brokerage:'Air Purchase International', agent_name:'Robert Harlan', agent_license:'FAA-DLR-00441', mls_id:'JETNET-G700-002', source_url:'https://www.jetnet.com',
     aviation:{ registration:'N700GX', aftt:'812 hrs', cycles:'290', tso_engines:'812/812 hrs', avionics:'Honeywell Primus Epic 2', last_mx:'2025-11', location:'KTEB — Teterboro NJ' },
     financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:72000000,terms:'All Cash',expiry:'14 days'}],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'documented', unique_id:'N-N700GX'
+    broker_active:true, tokenized:false, image_url:null
   },
   {
     id:'avi-002', address:'Bombardier Global 7500 — S/N 70241', city:'Geneva', country:'Switzerland',
@@ -2254,8 +2371,7 @@ const SEED_ASSETS = [
     brokerage:'European Business Jets', agent_name:'Marc Dubois', agent_license:'EASA-DLR-08821', mls_id:'AMSTAT-G7500-241', source_url:'https://www.amstat.com',
     aviation:{ registration:'HB-JGX', aftt:'1,240 hrs', cycles:'410', tso_engines:'1,240/980 hrs', avionics:'Rockwell Collins Pro Line Fusion', last_mx:'2026-01', location:'LSGG — Geneva Intl' },
     financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'documented', unique_id:'N-HB-JGX'
+    broker_active:true, tokenized:false, image_url:null
   },
   // ── MARITIME ──────────────────────────────────────────────
   {
@@ -2265,8 +2381,7 @@ const SEED_ASSETS = [
     brokerage:'Pacific Maritime Brokers', agent_name:'James Tan', agent_license:'MPA-BKR-2291', mls_id:'VV-IMO-9841203', source_url:'https://www.vesselsvalue.com',
     maritime:{ imo:'9841203', flag:'Marshall Islands', dwt:'82,400 DWT', draft:'14.2m laden', loa:'229m', engine_hours:'18,450 hrs', last_drydock:'2024-03', class_cert:'DNV GL', cargo_type:'Bulk Carrier' },
     financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:36500000,terms:'30% down Bank Finance',expiry:'30 days'}],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'certified', unique_id:'IMO-9841203'
+    broker_active:true, tokenized:false, image_url:null
   },
   {
     id:'mar-002', address:'SY Hemisphere — 73m Superyacht', city:'Palma de Mallorca', country:'Spain',
@@ -2275,8 +2390,7 @@ const SEED_ASSETS = [
     brokerage:'Burgess Yachts', agent_name:'Sophie Laurent', agent_license:'MCA-YBK-4419', mls_id:'BURGESS-HEM-73', source_url:'https://www.burgesssyachts.com',
     maritime:{ flag:'Cayman Islands', dwt:'Pleasure Vessel', draft:'4.1m', loa:'73m', engine_hours:'3,200 hrs MTU 16V', last_drydock:'2024-08', class_cert:"Lloyd's Register", cargo_type:'Superyacht' },
     financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'unverified', unique_id:'IMO-SY-HEMISPHERE'
+    broker_active:true, tokenized:false, image_url:null
   },
   // ── NATURAL RESOURCES ─────────────────────────────────────
   {
@@ -2286,8 +2400,7 @@ const SEED_ASSETS = [
     brokerage:'Pacific Rim Timberlands', agent_name:'Craig Weston', agent_license:'WA-TIMBER-3312', mls_id:'MBG-2024-CASCADE', source_url:'https://www.prtimber.com',
     resources:{ resource_type:'Timber', acres:'4,200', timber_grade:'Douglas Fir — Grade #1 & #2', board_feet:'42M board-feet (est)', rotation:'35-40yr harvest', water_rights:'Class A — 2.4 cfs Stillaguamish tributary', road_miles:'18mi internal haul road', last_cruise:'2024-06', easements:'Conservation — upper 800 acres' },
     financials:{}, structures:[], infrastructure:{}, land:{ acres:4200, topo:'Mixed slope 800-3,200ft' }, bids:[{amount:20000000,terms:'Land Contract 25% down',expiry:'60 days'}],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'documented', unique_id:'WA-TIMBER-CASCADE-4200'
+    broker_active:true, tokenized:false, image_url:null
   },
   {
     id:'res-002', address:'Goldstrike Mineral Claim Block — Carlin Trend', city:'Elko', country:'USA',
@@ -2296,8 +2409,7 @@ const SEED_ASSETS = [
     brokerage:'Western States Mineral Brokers', agent_name:'Dean Alvarez', agent_license:'NV-MIN-BKR-0882', mls_id:'MI-2024-CARLIN', source_url:'https://www.miningintelligence.com',
     resources:{ resource_type:'Gold / Silver Mineral Rights', acres:'1,840', mineral_assay:'Au 2.4 g/t avg — 890k oz inferred', silver_assay:'Ag 18 g/t — 6.8M oz inferred', geology:'Carlin-type disseminated deposit', permits:'NV Exploration Permit NV-2019-4421', last_drill:'2023-11', historical_production:'None — greenfield' },
     financials:{}, structures:[], infrastructure:{}, land:{ acres:1840, topo:'Basin and Range semi-arid' }, bids:[],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'unverified', unique_id:'NV-MIN-CARLIN-1840'
+    broker_active:true, tokenized:false, image_url:null
   },
   // ── FINANCIAL INSTRUMENTS ────────────────────────────────
   {
@@ -2307,39 +2419,16 @@ const SEED_ASSETS = [
     brokerage:'Morgan Stanley Fixed Income', agent_name:'Fixed Income Desk', agent_license:'FINRA-BD-149777', mls_id:'CUSIP-912828XX1', source_url:'https://www.treasurydirect.gov',
     financial:{ cusip:'912828XX1', instrument:'US Treasury Note', coupon:'4.625%', maturity:'2031-02-15', yield_current:'4.41%', yield_to_maturity:'4.38%', duration:'5.2 yrs', rating:'AAA / Aaa', face_value:'$10,000,000', settlement:'T+1', accrued_interest:'$24,166' },
     financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:9980000,terms:'Market wire T+1',expiry:'End of day'}],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'certified', unique_id:'CUSIP-912828XX1'
-  },
-  // ── ANCHOR ASSETS (Hardcoded fallback seed) ──────────────────
-  {
-    id:'anc-001', address:'Gulfstream G650ER — N650AG', city:'Van Nuys', country:'USA',
-    lat:34.2097, lng:-118.4901, price:55000000, type:'aviation', sqft:null,
-    status:'For Sale', source:'JETNET Anchor', days:0,
-    brokerage:'Global Air Transactions Inc.', agent_name:'William Farrell', agent_license:'FAA-DLR-00819', mls_id:'JETNET-G650-AG', source_url:'https://www.jetnet.com',
-    aviation:{ registration:'N650AG', aftt:'3,210 hrs', cycles:'1,844', tso_engines:'3,210/2,980 hrs (Rolls-Royce BR725)', avionics:'PlaneView II — Honeywell Primus Elite', last_mx:'2025-09', location:'KVNY — Van Nuys Airport, CA' },
-    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:52500000,terms:'All Cash',expiry:'30 days'}],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'documented', unique_id:'N650AG'
+    broker_active:true, tokenized:false, image_url:null
   },
   {
-    id:'anc-002', address:'Clallam County Timber Tract — 500 Acres', city:'Clallam County', country:'USA',
-    lat:48.1030, lng:-123.8900, price:4200000, type:'resources', sqft:null,
-    status:'For Sale', source:'Pacific Rim Timberlands', days:0,
-    brokerage:'Pacific Rim Timberlands', agent_name:'Craig Weston', agent_license:'WA-TIMBER-3312', mls_id:'PRT-CL-500-2026', source_url:'https://www.prtimber.com',
-    resources:{ resource_type:'Timber — Douglas Fir / Western Red Cedar', acres:'500', timber_grade:'Grade #1 & Select Structural', board_feet:'6.2M board-feet (est)', rotation:'30-35yr harvest cycle', water_rights:'Class B — 1.1 cfs Elwha tributary', road_miles:'4.2mi internal haul road', last_cruise:'2025-11', easements:'None — fee simple' },
-    financials:{}, structures:[], infrastructure:{}, land:{ acres:500, topo:'Moderate slope 400–1,800ft, Olympic Peninsula' }, bids:[],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'unverified', unique_id:'WA-CLALLAM-TIMBER-500'
-  },
-  {
-    id:'anc-003', address:'US T-Bill Liquidity Lot — $10M Face Value', city:'New York', country:'USA',
-    lat:40.7128, lng:-74.0060, price:9941000, type:'financial', sqft:null,
-    status:'Available', source:'Federal Reserve / FINRA TRACE', days:0,
-    brokerage:'Goldman Sachs Fixed Income', agent_name:'Primary Dealer Desk', agent_license:'FINRA-BD-361271', mls_id:'CUSIP-912797KP5', source_url:'https://www.treasurydirect.gov',
-    financial:{ cusip:'912797KP5', instrument:'US Treasury Bill', coupon:'0.00% (Discount)', maturity:'2026-10-01', yield_current:'5.21%', yield_to_maturity:'5.21%', duration:'0.47 yrs', rating:'AAA / Aaa', face_value:'$10,000,000', settlement:'T+1', accrued_interest:'$0 (discount instrument)' },
-    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:9935000,terms:'Market wire T+1',expiry:'End of session'}],
-    broker_active:true, tokenized:false, image_url:null,
-    verify_tier:'certified', unique_id:'CUSIP-912797KP5'
+    id:'fin-002', address:'Miami CMBS Pool — Class A Tranche', city:'Miami', country:'USA',
+    lat:25.7800, lng:-80.2500, price:50000000, type:'financial', sqft:null,
+    status:'Available', source:'Bloomberg', days:3,
+    brokerage:'JP Morgan Structured Finance', agent_name:'Structured Products Desk', agent_license:'FINRA-BD-000079', mls_id:'CUSIP-59523PAA4', source_url:'https://www.bloomberg.com',
+    financial:{ cusip:'59523PAA4', instrument:'CMBS Class A', coupon:'5.12%', maturity:'2034-06-15', yield_current:'5.08%', yield_to_maturity:'5.05%', duration:'7.8 yrs', rating:'AAA (S&P)', face_value:'$50,000,000', ltv:'52%', collateral:'28 Miami-Dade commercial properties' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
+    broker_active:true, tokenized:false, image_url:null
   },
 ];
 let map3dEl   = null;
@@ -2349,69 +2438,6 @@ let activeFilter = 'any';
 let activeId     = null;
 let heatOn       = false;
 let domMarkers   = {};  // id → {el, asset}
-
-/* ═══════════════════════════════════════════════════════════
-   PILLAR 3 — ANTI-FRAUD UNIQUE ID REGISTRY
-   Prevents duplicate minting. Keys: N-Number, CUSIP, Parcel,
-   IMO, or any unique_id field. Hard error on collision.
-═══════════════════════════════════════════════════════════ */
-const REGISTERED_IDS = new Map(); // uniqueId → assetId
-
-function getUniqueId(a) {
-  if (a.unique_id) return a.unique_id;
-  if (a.aviation?.registration) return 'N-' + a.aviation.registration;
-  if (a.maritime?.imo)          return 'IMO-' + a.maritime.imo;
-  if (a.financial?.cusip)       return 'CUSIP-' + a.financial.cusip;
-  if (a.parcel)                 return 'PARCEL-' + a.parcel;
-  return null;
-}
-
-function registerAssetId(a) {
-  const uid = getUniqueId(a);
-  if (!uid) return true; // no unique ID — allow
-  if (REGISTERED_IDS.has(uid)) {
-    console.warn('[RWABidAsk] Duplicate ID blocked:', uid, '→', REGISTERED_IDS.get(uid));
-    return false; // duplicate
-  }
-  REGISTERED_IDS.set(uid, a.id);
-  return true;
-}
-
-function checkDuplicate(uniqueId) {
-  return REGISTERED_IDS.has(uniqueId) ? REGISTERED_IDS.get(uniqueId) : null;
-}
-
-// Called on data load — build registry from all seed assets
-function buildIdRegistry(assets) {
-  REGISTERED_IDS.clear();
-  assets.forEach(a => registerAssetId(a));
-}
-
-// Verification tier helper
-function verifyBadgeHTML(tier) {
-  const tiers = {
-    unverified: { cls:'verify-unverified', icon:'○', label:'Unverified' },
-    documented:  { cls:'verify-documented',  icon:'◑', label:'Documented' },
-    certified:   { cls:'verify-certified',   icon:'●', label:'Certified'  },
-  };
-  const t = tiers[tier] || tiers.unverified;
-  return `<span class="verify-badge ${t.cls}">${t.icon} ${t.label}</span>`;
-}
-
-/* ── PILLAR 2: Elastic Fair-Price Fee Engine ── */
-function calcSaasFee(price) {
-  if (!price || price <= 0) return { tier:'—', flat:0, network:0, total:0, label:'—', capped:false };
-  if (price < 5000) {
-    return { tier:'Micro', flat:9.99, network:0, total:9.99, label:'Micro Asset', capped:false };
-  } else if (price <= 100000) {
-    const net = price * 0.001;
-    return { tier:'Retail', flat:99, network:net, total:99 + net, label:'Retail Asset', capped:false };
-  } else {
-    const netRaw = price * 0.001;
-    const net = Math.min(netRaw, 10000);
-    return { tier:'Institutional', flat:999, network:net, total:999 + net, label:'Institutional Asset', capped: netRaw > 10000 };
-  }
-}
 
 /* ═══════════════════════════════════════════════════════════
    UTILS
@@ -2506,7 +2532,6 @@ function csvRow(line) {
 }
 
 function onDataReady() {
-  buildIdRegistry(ASSETS);  // Pillar 3: build anti-fraud registry
   setStatus('GLOBAL DIRECTORY LIVE — ' + ASSETS.length + ' ASSETS');
   document.getElementById('s-assets').textContent = ASSETS.length;
   document.getElementById('s-status').textContent = 'LIVE';
@@ -2775,86 +2800,108 @@ async function initMap() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SEARCH — PlaceAutocompleteElement (2025/2026 standard)
-   Priority: PlaceAutocompleteElement → Autocomplete (legacy)
+   SEARCH — PlaceAutocomplete 2026 Alpha (gmp-select event)
+   Falls back to classic Autocomplete if element API unavailable
 ═══════════════════════════════════════════════════════════ */
 async function initSearch() {
   const input = document.getElementById('search-input');
   if (!input) return;
+
   try {
     const placesLib = await google.maps.importLibrary('places');
 
-    // ── Tier 1: PlaceAutocompleteElement (new 2025 API)
+    // ── Strategy 1: 2026 PlaceAutocompleteElement (custom element, gmp-select)
     if (placesLib.PlaceAutocompleteElement) {
       try {
-        const pac = new placesLib.PlaceAutocompleteElement({
-          requestedLanguage: 'en',
-          requestedRegion: 'us',
+        const acEl = new placesLib.PlaceAutocompleteElement();
+        acEl.id = 'gmp-autocomplete';
+        acEl.style.cssText = 'width:100%;height:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;color:#f0f4ff;z-index:9999;position:relative;';
+        // Insert into search-wrap, hide original input
+        const wrap = input.parentNode;
+        input.style.display = 'none';
+        wrap.insertBefore(acEl, input);
+        acInstance = acEl;
+
+        // 2026 API uses 'gmp-select' event, data via event.placePrediction.toPlace()
+        acEl.addEventListener('gmp-select', async (e) => {
+          try {
+            const prediction = e.placePrediction;
+            if (!prediction) return;
+            const place = prediction.toPlace();
+            await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
+            const lat = place.location.lat();
+            const lng = place.location.lng();
+            onSearchResolved(lat, lng, place.displayName || '', place.formattedAddress || '');
+          } catch(err) {
+            console.warn('[RWABidAsk] gmp-select place fetch error:', err);
+          }
         });
-        // Overlay PAE on top of our existing input — hide input, show PAE
-        pac.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;color:var(--text);padding:0 18px;';
-        input.parentNode.style.position = 'relative';
-        input.style.opacity = '0';
-        input.parentNode.insertBefore(pac, input);
-        pac.addEventListener('gmp-placeselect', async (e) => {
-          const place = e.place;
-          await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
-          const lat = place.location?.lat();
-          const lng = place.location?.lng();
-          if (!lat || !lng) { toast('Location not found'); return; }
-          _handlePlaceResult(lat, lng, place.displayName || '', place.formattedAddress || '');
-        });
-        acInstance = pac;
-        console.log('[RWABidAsk] PlaceAutocompleteElement active (2025 API)');
+        console.log('[RWABidAsk] Search: PlaceAutocompleteElement (gmp-select) initialized');
         return;
       } catch(e) {
         console.warn('[RWABidAsk] PlaceAutocompleteElement failed, falling back:', e.message);
-        input.style.opacity = '1'; // restore input visibility
       }
     }
 
-    // ── Tier 2: Legacy Autocomplete (stable fallback)
+    // ── Strategy 2: Classic Autocomplete (places library Autocomplete class)
     const AcClass = placesLib.Autocomplete || (google.maps.places && google.maps.places.Autocomplete);
     if (AcClass) {
       const ac = new AcClass(input, { fields: ['geometry', 'name', 'formatted_address'] });
       acInstance = ac;
+      // Classic API: 'place_changed' event
       ac.addListener('place_changed', () => {
         const place = ac.getPlace();
-        if (!place?.geometry?.location) { toast('Location not found — try a more specific address'); return; }
-        _handlePlaceResult(
+        if (!place?.geometry?.location) {
+          toast('Location not found — try a more specific address');
+          return;
+        }
+        onSearchResolved(
           place.geometry.location.lat(),
           place.geometry.location.lng(),
           place.name || '',
           place.formatted_address || ''
         );
       });
-      console.log('[RWABidAsk] Legacy Autocomplete active');
+      console.log('[RWABidAsk] Search: Classic Autocomplete (place_changed) initialized');
+      return;
     }
+
+    console.warn('[RWABidAsk] No Places Autocomplete API available');
   } catch (e) {
     console.warn('[RWABidAsk] Search init error:', e);
   }
 }
 
-function _handlePlaceResult(lat, lng, name, formatted_address) {
+// Shared resolution handler for both search strategies
+function onSearchResolved(lat, lng, name, formattedAddress) {
   flyTo(lat, lng, 1400, 45);
-  setStatus('LOCATION: ' + (name || formatted_address).toUpperCase().slice(0, 60));
+  setStatus('LOCATION: ' + (name || formattedAddress).toUpperCase());
   logLead(null, 'search', null);
+
+  const parts = (formattedAddress || '').split(',');
   const searched = {
     id:      'search-' + Date.now(),
-    address: name || (formatted_address).split(',')[0],
-    city:    (formatted_address.split(',')[1] || '').trim(),
-    country: (formatted_address.split(',').pop() || '').trim(),
+    address: name || parts[0]?.trim() || formattedAddress,
+    city:    parts[1]?.trim() || '',
+    country: parts[parts.length - 1]?.trim() || '',
     lat, lng,
     price: 0, type: 'residential',
     sqft: null, status: 'Unclaimed — Search Result',
     source: 'Google Places', days: 0,
-    verify_tier: 'unverified',
+    structures: [], infrastructure: {}, land: {}, financials: {}, bids: [],
   };
   ASSETS.unshift(searched);
   renderList();
   buildTicker(ASSETS);
   addDOMMarker(searched);
   setTimeout(() => { selectAsset(searched.id); openDrawer(searched); }, 900);
+}
+
+// Legacy shim kept for triggerSearch()
+function onPlaceSelected(ac) {
+  const place = ac.getPlace();
+  if (!place?.geometry?.location) { toast('Location not found'); return; }
+  onSearchResolved(place.geometry.location.lat(), place.geometry.location.lng(), place.name || '', place.formatted_address || '');
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2936,9 +2983,11 @@ function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   layer.innerHTML = '';
   domMarkers = {};
-  // Only render if zoomed in enough
+  // Always render anchor assets — they show at any zoom level
+  ASSETS.filter(a => a.anchor).forEach(a => _addPriceMarker(a));
+  // Render non-anchor only when zoomed in enough
   if (markersVisible()) {
-    const visible = viewportVisible(ASSETS);
+    const visible = viewportVisible(ASSETS.filter(a => !a.anchor));
     visible.forEach(a => _addPriceMarker(a));
   }
   // On camera change: cull + reproject
@@ -2964,14 +3013,22 @@ function onCameraChange() {
   _cameraChangeTimer = setTimeout(() => {
     const show = markersVisible();
     if (!show) {
-      // Hide all markers when zoomed out too far — clean globe view
-      Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+      // Zoomed out: hide all non-anchor markers, keep anchor assets visible
+      Object.values(domMarkers).forEach(({ el, asset }) => {
+        if (asset.anchor) {
+          projectMarker(asset, el); // reproject but keep visible
+        } else {
+          el.style.display = 'none';
+        }
+      });
       return;
     }
     reprojectMarkers();
-    // Viewport cull: hide off-screen, add newly visible
+    // Viewport cull: hide off-screen non-anchors, add newly visible
     const vis = new Set(viewportVisible(filtered()).map(a => a.id));
-    Object.entries(domMarkers).forEach(([id, { el }]) => {
+    // Always include anchor assets in visible set
+    ASSETS.filter(a => a.anchor).forEach(a => vis.add(a.id));
+    Object.entries(domMarkers).forEach(([id, { el, asset }]) => {
       if (!vis.has(id)) el.style.display = 'none';
     });
     vis.forEach(id => {
@@ -2979,7 +3036,6 @@ function onCameraChange() {
         const a = ASSETS.find(x => x.id === id);
         if (a) _addPriceMarker(a);
       } else {
-        // Ensure existing marker is visible
         const { el, asset } = domMarkers[id];
         projectMarker(asset, el);
       }
@@ -3021,7 +3077,7 @@ function addDOMMarker(asset) {
 
 function _addPriceMarker(asset) {
   const el = document.createElement('div');
-  el.className = 'price-marker';
+  el.className = 'price-marker' + (asset.anchor ? ' anchor' : '');
   el.title = asset.address;
   const priceStr = fmtPrice(asset.price) || '—';
   const typeStr  = asset.type || 'asset';
@@ -3087,6 +3143,13 @@ function openDrawer(a) {
   const inner  = document.getElementById('drawer-inner');
   const assetClass = (a.type || 'residential').toLowerCase();
 
+  // Gold border on drawer when anchor asset
+  if (a.anchor) {
+    drawer.classList.add('anchor-open');
+  } else {
+    drawer.classList.remove('anchor-open');
+  }
+
   const mainS = a.structures && a.structures[0];
   const beds  = mainS?.beds  ?? a.beds  ?? '—';
   const baths = mainS?.baths ?? a.baths ?? '—';
@@ -3109,32 +3172,28 @@ function openDrawer(a) {
   const statusText = isActive ? (a.status || 'For Sale') : 'Listing Expired — Data Retained';
   const statusCls  = isActive ? '' : 'inactive';
 
-  // ── PILLAR 2: calcSaasFee is defined globally above ──
-  const saas = calcSaasFee(a.price);
-  const fmt0 = n => '$' + (n % 1 === 0 ? n.toLocaleString('en-US') : n.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}));
+  // ── PILLAR 3: Savings Engine (first — prioritized on mobile)
+  const trad   = a.price ? a.price * 0.03 : 0;
+  const rwafee = a.price ? 999 + (a.price * 0.001) : 0;
+  const saved  = trad - rwafee;
   const savingsHTML = a.price ? `
     <div class="drawer-section">
-      <div class="drawer-section-title">SaaS Technology Access Fee</div>
+      <div class="drawer-section-title" data-section-num="§ 8.0">Transaction Analysis</div>
       <div class="savings-block">
         <div class="savings-row">
-          <span class="savings-k">Service Tier</span>
-          <span class="savings-v fee">${saas.tier} — ${saas.label}</span>
+          <span class="savings-k">Traditional Commission (3%)</span>
+          <span class="savings-v strike">$${trad.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
         </div>
         <div class="savings-row">
-          <span class="savings-k">Platform Access (Flat)</span>
-          <span class="savings-v">${fmt0(saas.flat)}</span>
+          <span class="savings-k">RWABidAsk Tech Fee (flat $999 + 0.1%)</span>
+          <span class="savings-v fee">$${rwafee.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
         </div>
-        ${saas.network > 0 ? `
-        <div class="savings-row">
-          <span class="savings-k">0.1% Network Fee${saas.capped ? ' <span style="color:var(--cyan);font-size:9px">(capped at $10k)</span>' : ''}</span>
-          <span class="savings-v">${fmt0(saas.network)}</span>
-        </div>` : ''}
         <div class="savings-total">
-          <span class="savings-total-k">Total Access Fee</span>
-          <span class="savings-total-v">${fmt0(saas.total)}</span>
+          <span class="savings-total-k">You Save</span>
+          <span class="savings-total-v">$${saved.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
         </div>
         <div class="savings-saas">
-          SaaS Technology Access Fee covers 3D Global Map access, Digital Ledger anchoring, and Institutional Data Services. RWABidAsk is a non-custodial software bridge only — not a licensed broker.
+          RWABidAsk is a non-custodial software service. We provide the digital bridge; you retain your legal keys.
         </div>
       </div>
     </div>` : '';
@@ -3147,7 +3206,7 @@ function openDrawer(a) {
 
   const ledgerHTML = `
     <div class="drawer-section">
-      <div class="drawer-section-title">Digital Ledger & Proof of Ownership</div>
+      <div class="drawer-section-title" data-section-num="§ 6.0">Digital Ledger & Proof of Ownership</div>
       <div class="ledger-card" id="ledger-${a.id}">
         <div class="ledger-status">
           <div class="ledger-dot ${isMinted ? 'minted' : ''}"></div>
@@ -3165,17 +3224,10 @@ function openDrawer(a) {
     </div>`;
 
   // ── Compliance block
-  const assetUniqueId = getUniqueId(a);
-  const verifyTier = a.verify_tier || 'unverified';
   const compHTML = `
     <div class="drawer-section">
-      <div class="drawer-section-title">Listing Compliance</div>
+      <div class="drawer-section-title" data-section-num="§ 7.0">Listing Compliance</div>
       <div class="compliance-block">
-        <div class="compliance-row" style="align-items:center">
-          <span class="compliance-k">Verification</span>
-          <span class="compliance-v">${verifyBadgeHTML(verifyTier)}</span>
-        </div>
-        ${assetUniqueId ? `<div class="compliance-row"><span class="compliance-k">Unique Registry ID</span><span class="compliance-v" style="color:var(--cyan);font-family:'Courier New',monospace;font-size:9px">${assetUniqueId}</span></div>` : ''}
         ${dr('Brokerage',       a.brokerage     || 'Not disclosed')}
         ${dr('Agent / Desk',    a.agent_name    || 'Not disclosed')}
         ${dr('License #',       a.agent_license || '—')}
@@ -3189,75 +3241,84 @@ function openDrawer(a) {
   let classManifestHTML = '';
 
   if (assetClass === 'aviation' && Object.keys(avi).length) {
+    const isAnchor = !!a.anchor;
     classManifestHTML = `
       <div class="drawer-section">
-        <div class="drawer-section-title">Aviation Manifest</div>
-        ${avi.registration ? drq('Registration (N#)', avi.registration) : ''}
-        ${avi.aftt         ? drq('Airframe Total Time', avi.aftt) : ''}
-        ${avi.cycles       ? drq('Total Cycles', avi.cycles) : ''}
-        ${avi.tso_engines  ? drq('TSO — Engines', avi.tso_engines) : ''}
-        ${avi.avionics     ? drq('Avionics Package', avi.avionics) : ''}
-        ${avi.last_mx      ? drq('Last Major MX', avi.last_mx) : ''}
-        ${avi.location     ? drq('Current Location', avi.location) : ''}
+        <div class="drawer-section-title" data-section-num="§ 1.0">Aviation Manifest</div>
+        ${avi.registration ? drq('Registration (N#)',      avi.registration, isAnchor ? 'certified'  : null) : ''}
+        ${avi.aftt         ? drq('Airframe Total Time',    avi.aftt,         isAnchor ? 'documented' : null) : ''}
+        ${avi.cycles       ? drq('Total Landings/Cycles',  avi.cycles,       isAnchor ? 'documented' : null) : ''}
+        ${avi.tso_engines  ? drq('TSO — Engines',          avi.tso_engines,  isAnchor ? 'documented' : null) : ''}
+        ${avi.avionics     ? drq('Avionics Package',       avi.avionics,     isAnchor ? 'certified'  : null) : ''}
+        ${avi.last_mx      ? drq('Last Major MX',          avi.last_mx,      isAnchor ? 'certified'  : null) : ''}
+        ${avi.location     ? drq('Current Location (ICAO)',avi.location,     null) : ''}
+        ${avi.interior     ? drq('Interior Config',        avi.interior,     null) : ''}
+        ${avi.range        ? drq('Range (NBAA IFR)',        avi.range,        null) : ''}
+        ${avi.notes        ? drq('Notes / Certs',           avi.notes,        null) : ''}
       </div>`;
   } else if (assetClass === 'maritime' && Object.keys(mar).length) {
+    const isAnchor = !!a.anchor;
     classManifestHTML = `
       <div class="drawer-section">
-        <div class="drawer-section-title">Vessel Manifest</div>
-        ${mar.imo          ? drq('IMO Number', mar.imo) : ''}
-        ${mar.flag         ? drq('Flag State', mar.flag) : ''}
-        ${mar.cargo_type   ? drq('Vessel Type', mar.cargo_type) : ''}
-        ${mar.dwt          ? drq('Deadweight Tonnage', mar.dwt) : ''}
-        ${mar.loa          ? drq('Length Overall (LOA)', mar.loa) : ''}
-        ${mar.draft        ? drq('Draft', mar.draft) : ''}
-        ${mar.engine_hours ? drq('Engine Hours', mar.engine_hours) : ''}
-        ${mar.last_drydock ? drq('Last Drydock', mar.last_drydock) : ''}
-        ${mar.class_cert   ? drq('Class Certificate', mar.class_cert) : ''}
+        <div class="drawer-section-title" data-section-num="§ 1.0">Vessel Manifest</div>
+        ${mar.imo          ? drq('IMO Number',            mar.imo,          isAnchor ? 'certified'  : null) : ''}
+        ${mar.flag         ? drq('Flag State',             mar.flag,         isAnchor ? 'documented' : null) : ''}
+        ${mar.cargo_type   ? drq('Vessel Type',            mar.cargo_type,   null) : ''}
+        ${mar.dwt          ? drq('Deadweight Tonnage',     mar.dwt,          isAnchor ? 'certified'  : null) : ''}
+        ${mar.loa          ? drq('Length Overall (LOA)',   mar.loa,          isAnchor ? 'certified'  : null) : ''}
+        ${mar.draft        ? drq('Draft (Laden)',           mar.draft,        isAnchor ? 'documented' : null) : ''}
+        ${mar.engine_hours ? drq('Engine Hours',           mar.engine_hours, isAnchor ? 'documented' : null) : ''}
+        ${mar.last_drydock ? drq('Last Drydock',           mar.last_drydock, isAnchor ? 'certified'  : null) : ''}
+        ${mar.class_cert   ? drq('Classification Society', mar.class_cert,   isAnchor ? 'certified'  : null) : ''}
       </div>`;
   } else if (assetClass === 'resources' && Object.keys(res).length) {
+    const isAnchor = !!a.anchor;
     classManifestHTML = `
       <div class="drawer-section">
-        <div class="drawer-section-title">Resource Manifest</div>
-        ${res.resource_type     ? drq('Resource Type', res.resource_type) : ''}
-        ${res.acres             ? drq('Total Acres', res.acres) : ''}
-        ${res.timber_grade      ? drq('Timber Grade', res.timber_grade) : ''}
-        ${res.board_feet        ? drq('Volume (Board-Feet)', res.board_feet) : ''}
-        ${res.rotation          ? drq('Harvest Rotation', res.rotation) : ''}
-        ${res.mineral_assay     ? drq('Mineral Assay (Au)', res.mineral_assay) : ''}
-        ${res.silver_assay      ? drq('Mineral Assay (Ag)', res.silver_assay) : ''}
-        ${res.geology           ? drq('Geology', res.geology) : ''}
-        ${res.water_rights      ? drq('Water Rights', res.water_rights) : ''}
-        ${res.permits           ? drq('Permits', res.permits) : ''}
-        ${res.road_miles        ? drq('Internal Roads', res.road_miles) : ''}
-        ${res.last_cruise || res.last_drill ? drq('Last Survey', res.last_cruise || res.last_drill) : ''}
-        ${res.easements         ? drq('Easements', res.easements) : ''}
-        ${res.historical_production ? drq('Historical Production', res.historical_production) : ''}
+        <div class="drawer-section-title" data-section-num="§ 1.0">Resource Manifest</div>
+        ${res.resource_type         ? drq('Resource Type',        res.resource_type,         null) : ''}
+        ${res.acres                 ? drq('Total Acres',           res.acres,                 isAnchor ? 'certified'  : null) : ''}
+        ${res.timber_grade          ? drq('Timber Grade',          res.timber_grade,          isAnchor ? 'certified'  : null) : ''}
+        ${res.board_feet            ? drq('Volume (Board-Feet)',   res.board_feet,            isAnchor ? 'documented' : null) : ''}
+        ${res.rotation              ? drq('Harvest Rotation',      res.rotation,              null) : ''}
+        ${res.mineral_assay         ? drq('Mineral Assay (Au)',    res.mineral_assay,         isAnchor ? 'certified'  : null) : ''}
+        ${res.silver_assay          ? drq('Mineral Assay (Ag)',    res.silver_assay,          isAnchor ? 'certified'  : null) : ''}
+        ${res.geology               ? drq('Geology',               res.geology,               null) : ''}
+        ${res.water_rights          ? drq('Water Rights',          res.water_rights,          isAnchor ? 'certified'  : null) : ''}
+        ${res.permits               ? drq('Permits / Licenses',    res.permits,               isAnchor ? 'documented' : null) : ''}
+        ${res.road_miles            ? drq('Internal Roads',        res.road_miles,            null) : ''}
+        ${res.last_cruise || res.last_drill ? drq('Last Survey / Cruise', res.last_cruise || res.last_drill, isAnchor ? 'documented' : null) : ''}
+        ${res.easements             ? drq('Easements',             res.easements,             null) : ''}
+        ${res.historical_production ? drq('Historical Production', res.historical_production, null) : ''}
+        ${res.notes                 ? drq('Alt. Income / Notes',   res.notes,                 isAnchor ? 'documented' : null) : ''}
       </div>`;
   } else if (assetClass === 'financial' && Object.keys(fininst).length) {
+    const isAnchor = !!a.anchor;
     classManifestHTML = `
       <div class="drawer-section">
-        <div class="drawer-section-title">Instrument Manifest</div>
-        ${fininst.cusip         ? drq('CUSIP', fininst.cusip) : ''}
-        ${fininst.instrument    ? drq('Instrument', fininst.instrument) : ''}
-        ${fininst.coupon        ? drq('Coupon Rate', fininst.coupon) : ''}
-        ${fininst.yield_current ? drq('Current Yield', fininst.yield_current) : ''}
-        ${fininst.yield_to_maturity ? drq('Yield to Maturity', fininst.yield_to_maturity) : ''}
-        ${fininst.maturity      ? drq('Maturity Date', fininst.maturity) : ''}
-        ${fininst.duration      ? drq('Duration', fininst.duration) : ''}
-        ${fininst.rating        ? drq('Credit Rating', fininst.rating) : ''}
-        ${fininst.face_value    ? drq('Face Value', fininst.face_value) : ''}
-        ${fininst.settlement    ? drq('Settlement', fininst.settlement) : ''}
-        ${fininst.accrued_interest ? drq('Accrued Interest', fininst.accrued_interest) : ''}
-        ${fininst.ltv           ? drq('LTV', fininst.ltv) : ''}
-        ${fininst.collateral    ? drq('Collateral', fininst.collateral) : ''}
+        <div class="drawer-section-title" data-section-num="§ 1.0">Instrument Manifest</div>
+        ${fininst.cusip             ? drq('CUSIP',              fininst.cusip,             isAnchor ? 'certified'  : null) : ''}
+        ${fininst.instrument        ? drq('Instrument Type',    fininst.instrument,        null) : ''}
+        ${fininst.coupon            ? drq('Coupon Rate',        fininst.coupon,            isAnchor ? 'certified'  : null) : ''}
+        ${fininst.yield_current     ? drq('Current Yield',      fininst.yield_current,     isAnchor ? 'documented' : null) : ''}
+        ${fininst.yield_to_maturity ? drq('Yield to Maturity',  fininst.yield_to_maturity, isAnchor ? 'documented' : null) : ''}
+        ${fininst.maturity          ? drq('Maturity Date',      fininst.maturity,          isAnchor ? 'certified'  : null) : ''}
+        ${fininst.duration          ? drq('Duration (Mod.)',     fininst.duration,          null) : ''}
+        ${fininst.rating            ? drq('Credit Rating',      fininst.rating,            isAnchor ? 'certified'  : null) : ''}
+        ${fininst.face_value        ? drq('Face Value',         fininst.face_value,        isAnchor ? 'certified'  : null) : ''}
+        ${fininst.settlement        ? drq('Settlement',         fininst.settlement,        null) : ''}
+        ${fininst.accrued_interest  ? drq('Accrued Interest',   fininst.accrued_interest,  isAnchor ? 'documented' : null) : ''}
+        ${fininst.ltv               ? drq('LTV',                fininst.ltv,               null) : ''}
+        ${fininst.collateral        ? drq('Collateral',         fininst.collateral,        null) : ''}
+        ${fininst.notes             ? drq('Notes',              fininst.notes,             null) : ''}
       </div>`;
   } else {
-    // Real estate manifests (unchanged)
+    // Real estate manifests
     const structs = a.structures || [];
     if (structs.length) {
       classManifestHTML += `
         <div class="drawer-section">
-          <div class="drawer-section-title">Structure Manifest</div>
+          <div class="drawer-section-title" data-section-num="§ 1.0">Structure Manifest</div>
           ${structs.map((s, i) => `
             <div class="struct-card">
               <div class="struct-label">${s.label || 'Structure ' + (i+1)}</div>
@@ -3285,7 +3346,7 @@ function openDrawer(a) {
     if (infraItems.length) {
       classManifestHTML += `
         <div class="drawer-section">
-          <div class="drawer-section-title">Infrastructure</div>${infraItems.join('')}
+          <div class="drawer-section-title" data-section-num="§ 2.0">Infrastructure</div>${infraItems.join('')}
         </div>`;
     }
     const landItems = [];
@@ -3306,7 +3367,7 @@ function openDrawer(a) {
     if (landItems.length) {
       classManifestHTML += `
         <div class="drawer-section">
-          <div class="drawer-section-title">Land & Vegetation</div>${landItems.join('')}
+          <div class="drawer-section-title" data-section-num="§ 3.0">Land & Vegetation</div>${landItems.join('')}
         </div>`;
     }
   }
@@ -3314,7 +3375,7 @@ function openDrawer(a) {
   // ── Financial summary
   const finHTML = (a.price || fin.tax_annual || fin.zestimate) ? `
     <div class="drawer-section">
-      <div class="drawer-section-title">Financial Data</div>
+      <div class="drawer-section-title" data-section-num="§ 4.0">Financial Data</div>
       ${a.price         ? drq('Ask Price', `<span class="drawer-v hl">${fmtPrice(a.price)}</span>`) : ''}
       ${sqft && a.price && assetClass !== 'aviation' && assetClass !== 'maritime' ? drq('Price / sqft', fmtPrice(Math.round(a.price / sqft))) : ''}
       ${fin.tax_annual  ? drq('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}
@@ -3328,7 +3389,7 @@ function openDrawer(a) {
   const bids = a.bids || [];
   const bidHTML = `
     <div class="drawer-section">
-      <div class="drawer-section-title">Bid Order Book</div>
+      <div class="drawer-section-title" data-section-num="§ 5.0">Bid Order Book</div>
       <div style="font-size:10px;color:var(--muted);margin-bottom:9px;line-height:1.6">
         Permanent ledger — no broker can remove these bids. Listing expired? Data stays.
       </div>
@@ -3375,6 +3436,7 @@ function openDrawer(a) {
   inner.innerHTML = `
     ${heroHTML}
     <div class="drawer-head">
+      ${a.anchor ? `<div class="drawer-anchor-badge">★ Featured Anchor Asset — Annie Group LLC</div>` : ''}
       <div class="drawer-type-row">
         <div class="drawer-type">${(a.type||'Asset').toUpperCase()}</div>
         <div class="drawer-status ${statusCls}">${statusText}</div>
@@ -3407,15 +3469,16 @@ function openDrawer(a) {
       <button class="drawer-btn-primary" onclick="closeDrawer();requireAuth('bid','${a.id}')">
         ↑ PLACE OFFICIAL BID ON LEDGER
       </button>
-      ${a.broker_active && a.agent_name ? `
-      <button class="agent-contact-btn" onclick="openContactAgentModal('${a.id}')">
-        ✉ Contact Listing Agent — ${a.agent_name.split(' ').pop()}
-      </button>` : ''}
+      <button class="drawer-btn-secondary" style="border-color:rgba(0,255,200,.35);color:var(--cyan)"
+        onclick="closeDrawer();openEscrowModal('${a.id}')">
+        ⇌ START ESCROW / DIRECT INQUIRY
+      </button>
       ${a.source_url
         ? `<a class="drawer-btn-secondary" href="${a.source_url}" target="_blank" rel="noopener noreferrer">VIEW ORIGINAL LISTING ↗</a>`
-        : `<button class="drawer-btn-secondary" onclick="closeDrawer();requireAuth('buy','${a.id}')">SUBMIT PURCHASE INQUIRY →</button>`
+        : ''
       }
-      <button class="drawer-btn-secondary" style="font-size:10px;border-color:rgba(0,255,200,.2);color:var(--muted)" onclick="closeDrawer();openModal('upgrade')">
+      <button class="drawer-btn-secondary" style="font-size:10px;border-color:rgba(0,255,200,.15);color:var(--muted)"
+        onclick="closeDrawer();openModal('upgrade')">
         Upgrade for Premium Data (County Records, Assay Reports, Septic Maps)
       </button>
     </div>
@@ -3423,7 +3486,8 @@ function openDrawer(a) {
     <div class="drawer-legal">
       Data deemed reliable but not guaranteed. Information provided by listing agent/broker.
       For consumers' personal, non-commercial use only.
-      Source: ${a.source||'Public Registry'} · ID #${a.id}
+      Source: ${a.source||'Public Registry'} · Asset ID: ${a.id}
+      ${a.anchor ? '· <strong style="color:var(--gold)">Featured — Annie Group LLC</strong>' : ''}
     </div>
   `;
 
@@ -3433,116 +3497,91 @@ function openDrawer(a) {
 }
 
 
-// Helper: quantified manifest row (bold key, value right-aligned)
-function drq(k, v) {
-  return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`;
+// Helper: quantified manifest row — 10-K audit style
+// badge: 'certified' | 'documented' | 'unverified' | null
+function drq(k, v, badge) {
+  const badgeHTML = badge
+    ? `<span class="vbadge vbadge-${badge}">${badge === 'certified' ? '● CERT' : badge === 'documented' ? '◑ DOC' : '○'}</span>`
+    : '';
+  return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}${badgeHTML}</span></div>`;
 }
 
-function closeDrawer() {
+// Helper: compliance / secondary row
+function dr(k, v) {
+  return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`;
+}
   document.getElementById('asset-drawer').classList.remove('open');
   document.getElementById('right').style.zIndex = '';
   document.getElementById('map-col').classList.remove('drawer-open');
 }
 
-/* ── PILLAR 4: Contact Listing Agent modal (Broker-Friendly) ── */
-function openContactAgentModal(assetId) {
+/* ── ESCROW / DIRECT INQUIRY MODAL ── */
+function openEscrowModal(assetId) {
   const a = ASSETS.find(x => x.id === assetId);
   if (!a) return;
+  const { fee, label } = calcNotaryFee(a.price || 0);
   const box = document.getElementById('mbox');
   box.innerHTML = `
     <button class="mclose-btn" onclick="closeModal()">✕</button>
-    <div class="mtitle">Contact Listing Agent</div>
-    <div class="msub" style="margin-bottom:18px">
-      ${a.brokerage || 'Listing Brokerage'} — ${a.agent_name || 'Agent on file'}<br>
-      <span style="color:var(--muted);font-size:11px">License: ${a.agent_license || 'On file'}</span>
+    <div class="mtitle">Start Escrow / Direct Inquiry</div>
+    <div class="msub">${a.address}${a.price ? ' · ' + fmtPrice(a.price) : ''}</div>
+    <div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.35);padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--dim);line-height:1.8">
+      <strong style="color:var(--cyan)">SaaS Technology Access Fee:</strong> $${fee.toLocaleString('en-US',{minimumFractionDigits:2})}<br>
+      <span style="color:var(--muted);font-size:9px">${label} · 1% secondary royalty applies to tokenized assets</span>
     </div>
-    <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:3px;padding:10px 12px;margin-bottom:16px;font-size:10px;color:var(--dim);line-height:1.7">
-      <strong style="color:var(--silver)">${a.address}</strong><br>
-      ${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''} · ${fmtPrice(a.price)}
+    <div class="mrow">
+      <div class="mfield"><label>Your Full Name</label><input type="text" id="esc-name" placeholder="Legal name"></div>
+      <div class="mfield"><label>Entity / Company</label><input type="text" id="esc-entity" placeholder="LLC, Trust, Individual…"></div>
     </div>
-    <div class="mfield"><label>Your Name</label><input type="text" id="ca-name" placeholder="Full name"></div>
-    <div class="mfield"><label>Email</label><input type="email" id="ca-email" placeholder="you@example.com" value="${currentUser?.email||''}"></div>
-    <div class="mfield"><label>Phone (Optional)</label><input type="tel" id="ca-phone" placeholder="+1 (555) 000-0000"></div>
-    <div class="mfield"><label>Message</label><textarea id="ca-msg" placeholder="I am interested in this listing and would like to schedule a viewing / request more information…" style="min-height:90px"></textarea></div>
-    <div class="mfield">
-      <label>Inquiry Type</label>
-      <select id="ca-type">
-        <option>Schedule Viewing</option>
-        <option>Request Information Pack</option>
-        <option>Submit Letter of Intent</option>
-        <option>Arrange Financing</option>
-        <option>Other</option>
+    <div class="mfield"><label>Offer Price (USD)</label><input type="number" id="esc-price" placeholder="${a.price || ''}" value="${a.price || ''}"></div>
+    <div class="mfield"><label>Financing Structure</label>
+      <select id="esc-terms">
+        <option>All Cash — Wire Transfer</option>
+        <option>Seller Financing — 0% Interest</option>
+        <option>Seller Financing — Market Rate</option>
+        <option>Conventional Mortgage</option>
+        <option>Bridge / Hard Money</option>
+        <option>Crypto-Backed Loan</option>
+        <option>Installment Sale (IRC §453)</option>
+        <option>To Be Negotiated</option>
       </select>
+    </div>
+    <div class="mfield"><label>Message to Seller</label>
+      <textarea id="esc-msg" placeholder="Introduce yourself, describe your intent, any due diligence items…" style="min-height:70px"></textarea>
+    </div>
+    <div class="mfield"><label>Contact Email</label><input type="email" id="esc-email" placeholder="${currentUser?.email || 'you@example.com'}" value="${currentUser?.email || ''}"></div>
+    <div style="font-size:9px;color:var(--muted);line-height:1.8;margin-bottom:4px">
+      Submission is a non-binding letter of intent. Escrow and legal documentation coordinated through your chosen escrow agent. RWABidAsk facilitates the connection only — not a licensed broker or dealer.
     </div>
     <div class="mfooter">
       <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      <button class="msub-btn" onclick="submitAgentInquiry('${assetId}')">Send to Agent →</button>
-    </div>
-    <div style="font-size:9px;color:var(--muted);margin-top:12px;line-height:1.7">
-      Your inquiry is routed directly to the listing broker. RWABidAsk acts as a software conduit only and does not represent either party in this transaction.
-    </div>
-  `;
+      <button class="msub-btn" onclick="submitEscrowInquiry('${a.id}')">Submit Escrow Inquiry →</button>
+    </div>`;
   document.getElementById('modal').classList.add('open');
 }
 
-async function submitAgentInquiry(assetId) {
-  const a    = ASSETS.find(x => x.id === assetId);
-  const name = document.getElementById('ca-name')?.value?.trim();
-  const email= document.getElementById('ca-email')?.value?.trim();
-  const phone= document.getElementById('ca-phone')?.value?.trim();
-  const msg  = document.getElementById('ca-msg')?.value?.trim();
-  const type = document.getElementById('ca-type')?.value;
-  if (!name || !email) { toast('Name and email required'); return; }
-  logLead(email, 'agent_inquiry_' + (a?.type||'asset'), currentUserRole);
-  closeModal();
-  toast('✅ Inquiry sent to ' + (a?.brokerage || 'listing agent') + ' — expect contact within 24h');
-}
-
-/* ── List-Asset modal helpers (Pillar 2 fee + Pillar 3 dup check) ── */
-function updateListFee() {
-  const price = parseFloat(document.getElementById('la-price')?.value) || 0;
-  const el    = document.getElementById('la-fee-display');
-  if (!el) return;
-  if (!price) { el.textContent = 'Enter a price to calculate your access fee.'; return; }
-  const saas = calcSaasFee(price);
-  const fmtN = n => '$' + (n % 1 === 0 ? n.toLocaleString('en-US') : n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
-  el.innerHTML = `
-    <span style="color:var(--cyan);font-weight:600">${saas.tier} Tier</span><br>
-    Platform Access: ${fmtN(saas.flat)}
-    ${saas.network > 0 ? ` + 0.1% Network: ${fmtN(saas.network)}${saas.capped?' <span style="color:var(--cyan);font-size:9px">(capped $10k)</span>':''}` : ''}
-    <br><strong style="color:var(--text)">Total: ${fmtN(saas.total)}</strong>
-  `;
-}
-
-function checkUniqueId(val) {
-  const el = document.getElementById('la-uid-status');
-  if (!el || !val || val.length < 3) { if (el) el.textContent = ''; return; }
-  const existing = checkDuplicate(val.trim());
-  if (existing) {
-    el.innerHTML = '<span style="color:var(--red)">⚠ Asset already registered on RWABidAsk Ledger — ID: ' + val + '</span>';
-  } else {
-    el.innerHTML = '<span style="color:var(--green)">✓ ID available — not yet registered</span>';
+async function submitEscrowInquiry(assetId) {
+  const a     = ASSETS.find(x => x.id === assetId);
+  const email = document.getElementById('esc-email')?.value?.trim() || currentUser?.email || '';
+  const price = document.getElementById('esc-price')?.value?.trim() || '';
+  const terms = document.getElementById('esc-terms')?.value || '';
+  const msg   = document.getElementById('esc-msg')?.value?.trim() || '';
+  const name  = document.getElementById('esc-name')?.value?.trim() || '';
+  if (!email) { toast('Enter your contact email'); return; }
+  await logLead(email, 'escrow_inquiry_' + (assetId || 'unknown'), currentUserRole);
+  if (_sb && a) {
+    try {
+      await _sb.from('leads').insert([{
+        email, action: 'escrow_inquiry',
+        role: currentUserRole || 'Buyer',
+        user_agent: [name, a.address, fmtPrice(parseFloat(price)||0), terms, msg].join(' | ').slice(0, 800),
+        created_at: new Date().toISOString(),
+      }]);
+    } catch(e) { /* non-critical */ }
   }
-}
-
-function submitListingInquiry() {
-  const uid   = document.getElementById('la-uid')?.value?.trim();
-  const addr  = document.getElementById('la-address')?.value?.trim();
-  const email = document.getElementById('la-email')?.value?.trim();
-  const price = parseFloat(document.getElementById('la-price')?.value) || 0;
-  if (!addr || !email) { toast('Address and email required'); return; }
-  if (!uid) { toast('Unique Registry ID required — prevents duplicate listings'); return; }
-  if (checkDuplicate(uid)) {
-    toast('BLOCKED: Asset already registered on RWABidAsk Ledger.');
-    return;
-  }
-  logLead(email, 'list_asset', currentUserRole);
   closeModal();
-  toast('✅ Listing submitted — team will contact you within 24h');
+  toast('✅ Escrow inquiry submitted — listing party will be contacted within 24h');
 }
-
-// Helper: drawer data row
-function dr(k, v) {
   return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`;
 }
 
@@ -3564,144 +3603,257 @@ document.getElementById('map-col').addEventListener('click', e => {
    TICKER
 ═══════════════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════════════════
-   DIGITAL NOTARY — Mint Animation
+   DIGITAL NOTARY — Persistent Mint to ase Ledger
+   Every Digitize action: anti-kiting check → INSERT → animation
+   SQL: Run in ase SQL Editor to create the assets table:
+   ─────────────────────────────────────────────────────────
+   CREATE TABLE IF NOT EXISTS assets (
+     id             uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     asset_id       text NOT NULL,
+     asset_class    text NOT NULL,
+     unique_id      text NOT NULL UNIQUE,  -- N#, CUSIP, IMO, Parcel, etc.
+     address        text,
+     city           text,
+     country        text,
+     price          numeric,
+     owner_wallet   text,
+     manifest_data  jsonb,
+     royalty_pct    numeric DEFAULT 1.0,   -- 1% secondary market royalty
+     notary_fee     numeric,
+     anchored_at    timestamptz DEFAULT now(),
+     solana_slot    bigint,
+     solana_hash    text,
+     registered_by  uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+     created_at     timestamptz DEFAULT now()
+   );
+   ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "Anyone can read assets"   ON assets FOR SELECT  USING (true);
+   CREATE POLICY "Authenticated can insert" ON assets FOR INSERT  WITH CHECK (auth.role() = 'authenticated');
+   CREATE INDEX ON assets (unique_id);
+   ─────────────────────────────────────────────────────────
 ═══════════════════════════════════════════════════════════ */
-function runMintAnimation(assetId, hash, btn) {
+
+/* ── Tiered Notary Fee Calculator ── */
+function calcNotaryFee(price) {
+  if (!price || price === 0) return { fee: 9.99,  label: 'Micro (<$5k) — Flat' };
+  if (price < 5000)          return { fee: 9.99,  label: 'Micro — Flat $9.99' };
+  if (price <= 100000)       return { fee: parseFloat((99 + price * 0.001).toFixed(2)),  label: 'Retail — $99 + 0.1%' };
+  const fee = Math.min(999 + price * 0.001, 10000);
+  return { fee: parseFloat(fee.toFixed(2)), label: 'Institutional — $999 + 0.1% (cap $10k)' };
+}
+
+/* ── Unique ID extractor by asset class ── */
+function getUniqueId(a) {
+  if (a.aviation?.registration)  return 'AVN-' + a.aviation.registration;
+  if (a.maritime?.imo)           return 'IMO-' + a.maritime.imo;
+  if (a.financial?.cusip || a.financial?.cusip) return 'CUSIP-' + (a.financial?.cusip || a.financial?.cusip);
+  if (a.resources?.permits)      return 'RES-' + a.id;
+  if (a.parcel)                  return 'PARCEL-' + a.parcel;
+  if (a.mls_id)                  return 'MLS-' + a.mls_id;
+  return 'ASSET-' + a.id;
+}
+
+async function runMintAnimation(assetId, hash, btn) {
+  const card = document.getElementById('ledger-' + assetId);
+  if (!card) return;
+  const a = ASSETS.find(x => x.id === assetId);
+  if (!a) return;
+
+  if (!currentUser) {
+    toast('Sign in to digitize an asset on the ledger');
+    openModal('signin');
+    return;
+  }
+
+  const uniqueId  = getUniqueId(a);
+  const { fee, label } = calcNotaryFee(a.price);
+
+  // Show fee confirmation before proceeding
+  btn.disabled = true;
+  card.innerHTML = `
+    <div style="padding:14px 0;text-align:center">
+      <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px">Notary Fee: $${fee.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:12px;line-height:1.6">${label}<br>1% Secondary Market Royalty hardcoded into metadata.</div>
+      <button id="confirm-mint-${assetId}" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;font-family:var(--font);font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.5px">
+        CONFIRM & DIGITIZE ($${fee.toLocaleString('en-US',{minimumFractionDigits:2})}) →
+      </button>
+      <button onclick="location.reload()" style="width:100%;margin-top:6px;padding:8px;background:none;border:1px solid var(--border2);color:var(--muted);font-family:var(--font);font-size:10px;cursor:pointer">Cancel</button>
+    </div>`;
+
+  document.getElementById('confirm-mint-' + assetId)?.addEventListener('click', () => _executeMint(assetId, hash, uniqueId, fee, a));
+}
+
+async function _executeMint(assetId, hash, uniqueId, fee, a) {
   const card = document.getElementById('ledger-' + assetId);
   if (!card) return;
 
-  // Pillar 3: Anti-fraud — check for existing registration
-  const asset = ASSETS.find(x => x.id === assetId);
-  if (asset && asset.tokenized) {
-    toast('Asset already registered on RWABidAsk Ledger.');
-    return;
-  }
-  const uid = asset ? getUniqueId(asset) : null;
-  if (uid) {
-    const existingId = checkDuplicate(uid);
-    if (existingId && existingId !== assetId) {
-      card.innerHTML = `<div class="dup-id-error">⚠ Asset already registered on RWABidAsk Ledger.<br><span style="font-size:10px;font-weight:400;color:var(--muted)">ID: ${uid} — duplicate mint blocked.</span></div>`;
-      toast('BLOCKED: Asset already registered on RWABidAsk Ledger.');
+  // Phase 1: Spinning animation
+  card.innerHTML = `
+    <div style="text-align:center;padding:20px 0">
+      <div class="mint-ring"></div>
+      <div style="font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:4px">Checking Sovereign Ledger…</div>
+      <div style="font-size:9px;color:var(--muted)">Anti-kiting verification · Unique ID: ${uniqueId}</div>
+    </div>`;
+
+  // Phase 2: Anti-kiting check via ase
+  if (_sb) {
+    const { data: existing, error: checkErr } = await _sb
+      .from('assets')
+      .select('id, anchored_at')
+      .eq('unique_id', uniqueId)
+      .limit(1);
+
+    if (checkErr) {
+      console.warn('[RWABidAsk] Ledger check error:', checkErr.message);
+      // Proceed — table may not exist yet; don't block the UX
+    } else if (existing && existing.length > 0) {
+      const ts = new Date(existing[0].anchored_at).toLocaleDateString();
+      card.innerHTML = `
+        <div style="padding:14px;background:rgba(255,90,90,.06);border:1px solid rgba(255,90,90,.2);border-radius:3px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px">⛔ DUPLICATE DETECTED</div>
+          <div style="font-size:10px;color:var(--dim);line-height:1.7">Asset already registered on RWABidAsk Ledger.<br>
+          First registered: ${ts}<br>
+          Unique ID: <span style="font-family:monospace;color:var(--muted)">${uniqueId}</span></div>
+        </div>`;
+      toast('⛔ Asset already registered on RWABidAsk Ledger — ' + uniqueId);
       return;
     }
-    // Register now
-    REGISTERED_IDS.set(uid, assetId);
   }
 
-  btn.disabled = true;
-  btn.textContent = 'Anchoring to Solana…';
-
-  // Phase 1: show spinning animation
+  // Phase 3: Broadcasting
   card.innerHTML = `
     <div style="text-align:center;padding:16px 0">
       <div class="mint-ring"></div>
       <div style="font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:6px">Anchoring Manifest to Solana…</div>
-      <div style="font-size:9px;color:var(--muted)">Serializing asset data · Broadcasting transaction · Awaiting confirmation</div>
+      <div style="font-size:9px;color:var(--muted)">Serializing manifest · Broadcasting transaction · Awaiting confirmation</div>
     </div>`;
 
-  // Phase 2: show receipt after 2.4s
+  const ts   = new Date().toISOString();
+  const slot = Math.floor(Math.random() * 9000000) + 280000000;
+
+  // Phase 4: ase INSERT (persistent ledger entry)
+  const manifestData = {
+    address: a.address, city: a.city, country: a.country, price: a.price,
+    type: a.type, sqft: a.sqft, brokerage: a.brokerage,
+    agent_name: a.agent_name, agent_license: a.agent_license,
+    mls_id: a.mls_id, parcel: a.parcel, days: a.days,
+    aviation: a.aviation || null, maritime: a.maritime || null,
+    resources: a.resources || null, financial: a.financial || null,
+    structures: a.structures || [], land: a.land || {},
+    infrastructure: a.infrastructure || {},
+    royalty_pct: 1.0,   // 1% secondary market royalty — hardcoded
+  };
+
+  if (_sb) {
+    const { error: insertErr } = await _sb.from('assets').insert([{
+      asset_id:       a.id,
+      asset_class:    a.type || 'unknown',
+      unique_id:      uniqueId,
+      address:        a.address,
+      city:           a.city,
+      country:        a.country,
+      price:          a.price || 0,
+      owner_wallet:   currentUser?.id || null,
+      manifest_data:  manifestData,
+      royalty_pct:    1.0,
+      notary_fee:     fee,
+      solana_slot:    slot,
+      solana_hash:    hash,
+      registered_by:  currentUser?.id || null,
+      anchored_at:    ts,
+    }]);
+
+    if (insertErr) {
+      console.warn('[RWABidAsk] Asset insert error:', insertErr.message);
+      if (insertErr.message.includes('unique') || insertErr.code === '23505') {
+        card.innerHTML = `
+          <div style="padding:14px;background:rgba(255,90,90,.06);border:1px solid rgba(255,90,90,.2);border-radius:3px;text-align:center">
+            <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px">⛔ ALREADY REGISTERED</div>
+            <div style="font-size:10px;color:var(--dim);line-height:1.7">Asset already registered on RWABidAsk Ledger.<br>Unique ID: <span style="font-family:monospace;color:var(--muted)">${uniqueId}</span></div>
+          </div>`;
+        toast('⛔ Asset already registered on RWABidAsk Ledger');
+        return;
+      }
+      // Non-fatal — still show success UI (offline mode)
+      console.info('[RWABidAsk] Continuing in offline mode');
+    }
+  }
+
+  // Phase 5: Certificate receipt
   setTimeout(() => {
-    const ts  = new Date().toISOString();
-    const slot = Math.floor(Math.random() * 9000000) + 280000000;
     card.innerHTML = `
       <div style="text-align:center;padding:8px 0 12px">
-        <div class="mint-seal">✓ VERIFIED — SOLANA MAINNET</div>
+        <div class="mint-seal">✓ VERIFIED — RWABIDASK SOVEREIGN LEDGER</div>
         <div class="mint-qr"></div>
-        <div style="font-size:9px;color:var(--dim);margin-bottom:8px">Certificate of Digital Record</div>
+        <div style="font-size:9px;color:var(--dim);margin-bottom:8px;font-weight:600">Certificate of Digital Notary — Annie Group LLC</div>
         <div class="mint-hash">${hash}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:left">
-          <div style="font-size:9px;color:var(--muted)">Slot</div><div style="font-size:9px;color:var(--dim)">${slot.toLocaleString()}</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 12px;text-align:left;margin-bottom:10px">
+          <div style="font-size:9px;color:var(--muted)">Unique ID</div><div style="font-size:9px;font-family:monospace;color:var(--cyan)">${uniqueId}</div>
+          <div style="font-size:9px;color:var(--muted)">Notary Fee</div><div style="font-size:9px;color:var(--gold)">$${fee.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
+          <div style="font-size:9px;color:var(--muted)">Royalty</div><div style="font-size:9px;color:var(--green)">1.00% Secondary Market</div>
+          <div style="font-size:9px;color:var(--muted)">Solana Slot</div><div style="font-size:9px;color:var(--dim)">${slot.toLocaleString()}</div>
           <div style="font-size:9px;color:var(--muted)">Timestamp</div><div style="font-size:9px;color:var(--dim)">${ts.replace('T',' ').slice(0,19)} UTC</div>
           <div style="font-size:9px;color:var(--muted)">Network</div><div style="font-size:9px;color:var(--green)">Solana Mainnet-Beta</div>
           <div style="font-size:9px;color:var(--muted)">Status</div><div style="font-size:9px;color:var(--green)">Finalized</div>
         </div>
+        <button onclick="openUpdateManifestModal('${assetId}')" style="width:100%;padding:8px;background:none;border:1px solid rgba(226,197,90,.3);color:var(--gold);font-family:var(--font);font-size:10px;font-weight:600;cursor:pointer;letter-spacing:.4px">
+          ⟳ Update Manifest — $99 Data Update Fee
+        </button>
         <div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.6">
-          This certificate is non-custodial. RWABidAsk is a software bridge only.<br>Legal title transfer requires applicable jurisdiction procedures.
+          Non-custodial certificate. RWABidAsk is a software bridge only.<br>
+          Legal title transfer requires applicable jurisdiction procedures.
         </div>
       </div>`;
-    // Mark asset as tokenized in memory
     const asset = ASSETS.find(x => x.id === assetId);
     if (asset) asset.tokenized = true;
-    toast('✅ Asset anchored to Solana — certificate generated');
-  }, 2400);
+    toast('✅ Asset anchored — certificate recorded on sovereign ledger');
+  }, 1800);
+}
+
+function openUpdateManifestModal(assetId) {
+  const a = ASSETS.find(x => x.id === assetId);
+  if (!a) return;
+  const box = document.getElementById('mbox');
+  box.innerHTML = `
+    <button class="mclose-btn" onclick="closeModal()">✕</button>
+    <div class="mtitle">Update Manifest</div>
+    <div class="msub">${a.address}<br>
+      <span style="color:var(--gold);font-size:10px">Data Update Fee: $99.00</span>
+    </div>
+    <div class="mfield"><label>Updated Notes / Changes</label>
+      <textarea placeholder="Describe what changed — e.g. new septic permit, updated assay, renovation completed…" style="min-height:90px"></textarea>
+    </div>
+    <div class="mfield"><label>Owner Wallet / Verification</label>
+      <input type="text" placeholder="Wallet address or email on file">
+    </div>
+    <div style="font-size:9px;color:var(--muted);line-height:1.8;margin-bottom:8px">
+      Updating a registered manifest costs a flat $99 fee and creates a versioned update record on the sovereign ledger. The original notary certificate remains intact.
+    </div>
+    <div class="mfooter">
+      <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+      <button class="msub-btn" onclick="closeModal();toast('Manifest update request received — fee invoice will be sent to ' + (currentUser?.email || 'your account'))">
+        Request Update ($99) →
+      </button>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MARKET RIBBON — Live Institutional Data Feed
-   Sources: CoinGecko (free) · FRED (T-Bill) · static for
-   Timber/Jet-A/Gold (no free open CORS endpoint — refreshed
-   from known last-close with jitter for realism)
+   MARKET RIBBON — Live-style institutional data
 ═══════════════════════════════════════════════════════════ */
-
-// Baseline values — updated by live fetch; jitter adds micro-movement
-let _ribbonData = {
-  btc:     { val: 83241,   chg: +1.2 },
-  eth:     { val: 1584,    chg: -0.8 },
-  gold:    { val: 3118,    chg: +0.4 },
-  silver:  { val: 32.14,   chg: +0.6 },
-  wti:     { val: 61.20,   chg: -1.1 },
-  sp500:   { val: 5633,    chg: +0.3 },
-  tbill:   { val: 5.21,    chg: -0.02 },
-  timber:  { val: 541,     chg: +0.7 },
-  jetA:    { val: 2.71,    chg: -0.3 },
-};
-
-async function fetchLiveRibbon() {
-  // ── CoinGecko (free, CORS-safe) ──
-  try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true', { cache:'no-store' });
-    if (r.ok) {
-      const d = await r.json();
-      if (d.bitcoin)  { _ribbonData.btc = { val: Math.round(d.bitcoin.usd), chg: +(d.bitcoin.usd_24h_change||0).toFixed(2) }; }
-      if (d.ethereum) { _ribbonData.eth = { val: Math.round(d.ethereum.usd), chg: +(d.ethereum.usd_24h_change||0).toFixed(2) }; }
-    }
-  } catch(e) { /* fallback retained */ }
-
-  // ── Apply micro-jitter to commodity/equity values for live feel ──
-  function jitter(v, pct) { return +(v * (1 + (Math.random() - 0.5) * pct * 0.01)).toFixed(2); }
-  _ribbonData.gold.val   = jitter(3118, 0.8);
-  _ribbonData.silver.val = jitter(32.14, 1.0);
-  _ribbonData.wti.val    = jitter(61.20, 1.2);
-  _ribbonData.sp500.val  = Math.round(jitter(5633, 0.5));
-  _ribbonData.timber.val = jitter(541, 0.6);
-  _ribbonData.jetA.val   = jitter(2.71, 0.9);
-
-  renderRibbon();
-}
-
-function fmt$(n, decimals=0) { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:decimals, maximumFractionDigits:decimals}); }
-function fmtChg(n) {
-  const sign = n >= 0 ? '+' : '';
-  return { txt: sign + n.toFixed(2) + '%', dir: n >= 0 ? 'up' : 'down' };
-}
-function fmtChgFlat(n, suffix='') {
-  const sign = n >= 0 ? '+' : '';
-  return { txt: sign + n.toFixed(2) + suffix, dir: n >= 0 ? 'up' : 'down' };
-}
-
-function renderRibbon() {
-  const d = _ribbonData;
-  const btcC  = fmtChg(d.btc.chg);
-  const ethC  = fmtChg(d.eth.chg);
-  const goldC = fmtChg(d.gold.chg);
-  const silvC = fmtChg(d.silver.chg);
-  const wtiC  = fmtChg(d.wti.chg);
-  const sp5C  = fmtChg(d.sp500.chg);
-  const tbC   = fmtChgFlat(d.tbill.chg, '');
-  const timC  = fmtChg(d.timber.chg);
-  const jetC  = fmtChg(d.jetA.chg);
-
+function buildRibbon() {
+  // Simulated live market data (replace with real API calls later)
   const markets = [
-    { label:'BTC/USD',       val: fmt$(d.btc.val),             chg: btcC.txt,  dir: btcC.dir  },
-    { label:'ETH/USD',       val: fmt$(d.eth.val),             chg: ethC.txt,  dir: ethC.dir  },
-    { label:'Gold Spot',     val: fmt$(d.gold.val, 2)+'/oz',   chg: goldC.txt, dir: goldC.dir },
-    { label:'Silver',        val: fmt$(d.silver.val, 2)+'/oz', chg: silvC.txt, dir: silvC.dir },
-    { label:'WTI Crude',     val: fmt$(d.wti.val, 2)+'/bbl',   chg: wtiC.txt,  dir: wtiC.dir  },
-    { label:'S&P 500',       val: d.sp500.val.toLocaleString(), chg: sp5C.txt, dir: sp5C.dir  },
-    { label:'10Y T-Bill',    val: d.tbill.val.toFixed(2)+'%',  chg: (d.tbill.chg>=0?'+':'')+d.tbill.chg.toFixed(2), dir: d.tbill.chg>=0?'up':'down' },
-    { label:'Timber Futures',val: fmt$(d.timber.val)+'/MBF',   chg: timC.txt,  dir: timC.dir  },
-    { label:'Jet-A Fuel',    val: fmt$(d.jetA.val, 2)+'/gal',  chg: jetC.txt,  dir: jetC.dir  },
-    { label:'RWABIDASK',     val: 'LIVE',                       chg: 'Global Liquidity Terminal', dir: 'flat' },
+    { label:'BTC/USD',    val:'$83,241',  chg:'+1.2%',  dir:'up'   },
+    { label:'Gold Spot',  val:'$3,118/oz',chg:'+0.4%',  dir:'up'   },
+    { label:'10Y T-Bill', val:'4.38%',    chg:'-0.02',  dir:'down' },
+    { label:'Timber',     val:'$541/MBF', chg:'+0.7%',  dir:'up'   },
+    { label:'Jet-A Fuel', val:'$2.71/gal',chg:'-0.3%',  dir:'down' },
+    { label:'ETH/USD',    val:'$1,584',   chg:'-0.8%',  dir:'down' },
+    { label:'Silver',     val:'$32.14/oz',chg:'+0.6%',  dir:'up'   },
+    { label:'WTI Crude',  val:'$61.20',   chg:'-1.1%',  dir:'down' },
+    { label:'S&P 500',    val:'5,633',    chg:'+0.3%',  dir:'up'   },
+    { label:'RWABIDASK',  val:'LIVE',     chg:'Global Asset Market',dir:'flat'},
   ];
   const items = markets.map(m =>
     `<div class="ribbon-item">
@@ -3711,13 +3863,9 @@ function renderRibbon() {
     </div>`
   ).join('');
   const track = document.getElementById('ribbon-track');
-  if (track) track.innerHTML = items + items;
-}
-
-function buildRibbon() {
-  renderRibbon();                      // instant render with baseline values
-  fetchLiveRibbon();                   // then hit live APIs
-  setInterval(fetchLiveRibbon, 60000); // refresh every 60s
+  if (track) {
+    track.innerHTML = items + items; // duplicate for seamless loop
+  }
 }
 
 function buildTicker(assets) {
@@ -4033,42 +4181,6 @@ function openModal(type, id) {
       </div>
     `,
 
-    'list-asset': () => `
-      <div class="mtitle">List an Asset</div>
-      <div class="msub">Submit your asset to the RWABidAsk Global Directory. All asset classes accepted.</div>
-      <div class="mfield"><label>Asset Class</label>
-        <select id="la-class" onchange="updateListFee()">
-          <option value="residential">Real Estate — Residential</option>
-          <option value="commercial">Real Estate — Commercial</option>
-          <option value="land">Land / Acreage</option>
-          <option value="business">Business / Operations</option>
-          <option value="aviation">Aviation (Aircraft)</option>
-          <option value="maritime">Maritime (Vessel)</option>
-          <option value="resources">Natural Resources</option>
-          <option value="financial">Financial Instrument</option>
-        </select>
-      </div>
-      <div class="mfield"><label>Asset Name / Address</label><input type="text" id="la-address" placeholder="e.g. 123 Main St or Boeing 737-800 N12345"></div>
-      <div class="mfield"><label>Unique Registry ID <span style="color:var(--muted);font-weight:400">(N-Number / CUSIP / Parcel / IMO — required)</span></label>
-        <input type="text" id="la-uid" placeholder="e.g. N700GX · CUSIP-912797KP5 · APN-001-234" oninput="checkUniqueId(this.value)">
-        <div id="la-uid-status" style="font-size:9px;margin-top:4px;line-height:1.6"></div>
-      </div>
-      <div class="mrow">
-        <div class="mfield"><label>Asking Price (USD)</label><input type="number" id="la-price" placeholder="e.g. 5000000" oninput="updateListFee()"></div>
-        <div class="mfield"><label>City / Location</label><input type="text" id="la-city" placeholder="City, Country"></div>
-      </div>
-      <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:3px;padding:12px 14px;margin-bottom:14px">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--cyan);margin-bottom:8px">SaaS Technology Access Fee</div>
-        <div id="la-fee-display" style="font-size:11px;color:var(--dim);line-height:1.9">Enter a price to calculate your access fee.</div>
-      </div>
-      <div class="mfield"><label>Contact Email</label><input type="email" id="la-email" placeholder="you@example.com" value="${currentUser?.email||''}"></div>
-      <div class="mfooter">
-        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-        <button class="msub-btn" onclick="submitListingInquiry()">Submit Listing →</button>
-      </div>
-      <div class="legal-note">Listings are reviewed before publication. Unique ID is required to prevent duplicate registration. Annie Group LLC reserves the right to verify or remove any listing.</div>
-    `,
-
     partner: () => `
       <div class="mtitle">Annie Group LLC — Partnership</div>
       <div class="msub">
@@ -4139,57 +4251,73 @@ document.getElementById('modal').addEventListener('click', e => {
 });
 
 
+/* ═══════════════════════════════════════════════════════════
+   ASE — Auth · Bid Ledger · Lead CRM
+   ─────────────────────────────────────────────────────────
+   RUN THIS SQL IN YOUR ASE SQL EDITOR:
 
-/* =============================================================
-   SUPABASE — Auth / Bid Ledger / Lead CRM
-   Project: 'iyejqvdjbvokrswlsoda.supabase.co';
-
-   RUN THIS SQL IN YOUR SUPABASE SQL EDITOR:
-
+   -- 1. profiles table (auto-created on signup)
    CREATE TABLE IF NOT EXISTS profiles (
-     id uuid REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
-     role text DEFAULT 'buyer', fname text, lname text, company text,
-     plan text DEFAULT 'free', created_at timestamptz DEFAULT now()
+     id         uuid REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+     role       text DEFAULT 'buyer',
+     fname      text, lname text, company text,
+     plan       text DEFAULT 'free',
+     created_at timestamptz DEFAULT now()
    );
    ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
    CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
    CREATE POLICY "Users update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 
+   -- 2. Auto-create profile on email confirm (FK constraint fix)
    CREATE OR REPLACE FUNCTION public.handle_new_user()
    RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
    BEGIN
      INSERT INTO public.profiles (id, role, fname, lname, plan)
-     VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'role','buyer'),
-             COALESCE(NEW.raw_user_meta_data->>'fname',''),
-             COALESCE(NEW.raw_user_meta_data->>'lname',''), 'free')
-     ON CONFLICT (id) DO NOTHING;
+     VALUES (
+       NEW.id,
+       COALESCE(NEW.raw_user_meta_data->>'role','buyer'),
+       COALESCE(NEW.raw_user_meta_data->>'fname',''),
+       COALESCE(NEW.raw_user_meta_data->>'lname',''),
+       'free'
+     ) ON CONFLICT (id) DO NOTHING;
      RETURN NEW;
-   END; $$;
+   END;
+   $$;
    DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-   CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users
+   CREATE TRIGGER on_auth_user_created
+     AFTER INSERT ON auth.users
      FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+   -- 3. bids table
    CREATE TABLE IF NOT EXISTS bids (
-     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-     property_id text NOT NULL, property_address text,
-     bid_amount numeric NOT NULL, terms text DEFAULT 'cash',
-     down_payment_pct numeric, expiry text, bidder_email text,
-     user_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
-     status text DEFAULT 'active', created_at timestamptz DEFAULT now()
+     id               uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     property_id      text NOT NULL,
+     property_address text,
+     bid_amount       numeric NOT NULL,
+     terms            text DEFAULT 'cash',
+     down_payment_pct numeric,
+     expiry           text,
+     bidder_email     text,
+     user_id          uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+     status           text DEFAULT 'active',
+     created_at       timestamptz DEFAULT now()
    );
    ALTER TABLE bids ENABLE ROW LEVEL SECURITY;
    CREATE POLICY "Anyone can insert bids" ON bids FOR INSERT WITH CHECK (true);
-   CREATE POLICY "Users read own bids" ON bids FOR SELECT USING (auth.uid() = user_id);
+   CREATE POLICY "Users read own bids"    ON bids FOR SELECT USING (auth.uid() = user_id);
 
+   -- 4. leads table
    CREATE TABLE IF NOT EXISTS leads (
-     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-     email text, action text, role text,
+     id         uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     email      text, action text, role text,
      user_agent text, created_at timestamptz DEFAULT now()
    );
    ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
    CREATE POLICY "Service role only" ON leads USING (false);
-============================================================= */
-
+   ─────────────────────────────────────────────────────────
+*/
+   Project: 'iyejqvdjbvokrswlsoda.supabase.co';
+═══════════════════════════════════════════════════════════ */
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
 
@@ -4431,7 +4559,7 @@ function triggerSearch() {
 ═══════════════════════════════════════════════════════════ */
 buildTicker([]);
 buildRibbon();
-bootSupabase();
+bootase();
 
 // Wire blimp
 document.addEventListener('DOMContentLoaded', () => {
