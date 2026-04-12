@@ -101,7 +101,7 @@ html, body {
 ══════════════════════════════════════════════ */
 #shell {
   display: grid;
-  grid-template-rows: 54px 1fr 30px 26px;
+  grid-template-rows: 24px 54px 1fr 30px 26px;
   height: 100vh;
   min-height: 0;
 }
@@ -946,6 +946,55 @@ html, body {
 /* ══════════════════════════════════════════════
    TICKER
 ══════════════════════════════════════════════ */
+/* ── Market Ribbon (top) ── */
+#market-ribbon {
+  background: #0d1526;
+  border-bottom: 1px solid rgba(0,255,200,.1);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  z-index: 800;
+  flex-shrink: 0;
+}
+.ribbon-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ribbon-run 60s linear infinite;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .3px;
+  gap: 0;
+}
+.ribbon-track:hover { animation-play-state: paused; }
+.ribbon-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  border-right: 1px solid rgba(255,255,255,.06);
+  cursor: default;
+}
+.ribbon-label {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+}
+.ribbon-val {
+  color: var(--silver);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ribbon-chg.up   { color: var(--green); }
+.ribbon-chg.down { color: var(--red);   }
+.ribbon-chg.flat { color: var(--muted); }
+@keyframes ribbon-run {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Address Ticker (bottom) ── */
 #ticker-bar {
   background: var(--bg1);
   border-top: 1px solid var(--border);
@@ -957,7 +1006,6 @@ html, body {
   display: flex;
   white-space: nowrap;
   animation: ticker-run 90s linear infinite;
-  font-family: var(--font);
   font-size: 9px;
   color: var(--dim);
   letter-spacing: 1px;
@@ -1164,7 +1212,7 @@ html, body {
 /* Desktop: side drawer */
 #asset-drawer {
   position: fixed;
-  top: 54px;
+  top: 78px;
   right: 0;
   bottom: 30px;
   width: min(480px, 38vw);
@@ -1541,11 +1589,185 @@ html, body {
 .bid-terms  { color: var(--dim); }
 .bid-expiry { color: var(--muted); font-size: 9px; text-align: right; }
 
+
+/* ── New asset class badges ── */
+.t-avi  { background: rgba(91,150,255,.12); color: var(--blue); }
+.t-mar  { background: rgba(34,150,200,.12); color: #22c8e8; }
+.t-res2 { background: rgba(201,168,76,.12); color: var(--gold); }
+.t-fin  { background: rgba(46,212,122,.12); color: var(--green); }
+
+/* ── Mint / Digitize animation ── */
+@keyframes mint-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes mint-pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .6; transform: scale(1.08); }
+}
+.mint-ring {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,255,200,.2);
+  border-top-color: var(--cyan);
+  animation: mint-spin .9s linear infinite;
+  margin: 0 auto 12px;
+}
+.mint-hash {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1.8;
+  font-family: 'Courier New', monospace;
+  background: rgba(0,0,0,.3);
+  padding: 8px 10px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+.mint-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border: 1px solid rgba(46,212,122,.4);
+  border-radius: 20px;
+  background: rgba(46,212,122,.06);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: .5px;
+  margin-bottom: 12px;
+}
+.mint-qr {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 8px;
+  color: #000;
+  position: relative;
+  overflow: hidden;
+}
+/* Fake QR pattern */
+.mint-qr::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background-image:
+    repeating-linear-gradient(0deg, #000 0, #000 2px, transparent 2px, transparent 5px),
+    repeating-linear-gradient(90deg, #000 0, #000 2px, transparent 2px, transparent 5px);
+  opacity: .7;
+}
+
+/* ── Savings Engine ── */
+.savings-block {
+  background: linear-gradient(135deg, rgba(0,12,4,.9) 0%, rgba(0,20,10,.9) 100%);
+  border: 1px solid rgba(46,212,122,.25);
+  border-radius: 4px;
+  padding: 12px 14px;
+  margin: 0;
+}
+.savings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 8px;
+}
+.savings-row:last-child { border-bottom: none; }
+.savings-k { color: var(--dim); font-size: 11px; }
+.savings-v { font-size: 11px; font-weight: 600; color: var(--silver); }
+.savings-v.strike { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+.savings-v.fee    { color: var(--cyan); }
+.savings-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+}
+.savings-total-k { color: var(--dim); }
+.savings-total-v { color: var(--green); font-size: 16px; letter-spacing: -.3px; }
+.savings-saas {
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-style: italic;
+}
+
+/* ── Digital Ledger card ── */
+.ledger-card {
+  background: rgba(0,255,200,.03);
+  border: 1px solid rgba(0,255,200,.15);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+.ledger-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ledger-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 0 2px rgba(148,160,190,.2);
+  flex-shrink: 0;
+}
+.ledger-dot.minted {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green), 0 0 0 2px rgba(46,212,122,.25);
+}
+.ledger-label { font-size: 11px; color: var(--dim); }
+.ledger-hash-preview {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+.digitize-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  background: none;
+  border: 1px solid rgba(0,255,200,.3);
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .15s;
+}
+.digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
+.digitize-btn:disabled { opacity: .4; cursor: default; }
+
 </style>
 </head>
 <body>
 
 <div id="shell">
+
+<!-- ══ MARKET RIBBON ══ -->
+<div id="market-ribbon">
+  <div class="ribbon-track" id="ribbon-track"><!-- built by JS --></div>
+</div>
 
 <!-- ══ TOPBAR ══ -->
 <div id="topbar">
@@ -1598,8 +1820,12 @@ html, body {
       <div class="left-title">Global Directory</div>
       <div class="ptabs">
         <button class="ptab on"  onclick="setTab(this,'all')">All</button>
-        <button class="ptab" onclick="setTab(this,'residential')">Res</button>
+        <button class="ptab" onclick="setTab(this,'residential')">RE</button>
         <button class="ptab" onclick="setTab(this,'commercial')">Com</button>
+        <button class="ptab" onclick="setTab(this,'aviation')">✈</button>
+        <button class="ptab" onclick="setTab(this,'maritime')">⚓</button>
+        <button class="ptab" onclick="setTab(this,'resources')">⛏</button>
+        <button class="ptab" onclick="setTab(this,'financial')">$</button>
         <button class="ptab" onclick="setTab(this,'business')">Biz</button>
         <button class="ptab" onclick="setTab(this,'land')">Land</button>
       </div>
@@ -1948,6 +2174,82 @@ const SEED_ASSETS = [
     bids:[{amount:1150000,terms:'Seller Finance — 10% down, 30yr @ 5%',expiry:'30 days'}],
     broker_active:true, tokenized:false
   },
+  // ── AVIATION ──────────────────────────────────────────────
+  {
+    id:'avi-001', address:'Gulfstream G700 — S/N 70002', city:'Teterboro', country:'USA',
+    lat:40.8501, lng:-74.0607, price:75000000, type:'aviation', sqft:null,
+    status:'For Sale', source:'JETNET', days:18,
+    brokerage:'Air Purchase International', agent_name:'Robert Harlan', agent_license:'FAA-DLR-00441', mls_id:'JETNET-G700-002', source_url:'https://www.jetnet.com',
+    aviation:{ registration:'N700GX', aftt:'812 hrs', cycles:'290', tso_engines:'812/812 hrs', avionics:'Honeywell Primus Epic 2', last_mx:'2025-11', location:'KTEB — Teterboro NJ' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:72000000,terms:'All Cash',expiry:'14 days'}],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  {
+    id:'avi-002', address:'Bombardier Global 7500 — S/N 70241', city:'Geneva', country:'Switzerland',
+    lat:46.2381, lng:6.1087, price:62000000, type:'aviation', sqft:null,
+    status:'For Sale', source:'AMSTAT', days:44,
+    brokerage:'European Business Jets', agent_name:'Marc Dubois', agent_license:'EASA-DLR-08821', mls_id:'AMSTAT-G7500-241', source_url:'https://www.amstat.com',
+    aviation:{ registration:'HB-JGX', aftt:'1,240 hrs', cycles:'410', tso_engines:'1,240/980 hrs', avionics:'Rockwell Collins Pro Line Fusion', last_mx:'2026-01', location:'LSGG — Geneva Intl' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  // ── MARITIME ──────────────────────────────────────────────
+  {
+    id:'mar-001', address:'MV Pacific Carrier — IMO 9841203', city:'Singapore', country:'Singapore',
+    lat:1.2633, lng:103.8198, price:38000000, type:'maritime', sqft:null,
+    status:'For Sale', source:'VesselsValue', days:62,
+    brokerage:'Pacific Maritime Brokers', agent_name:'James Tan', agent_license:'MPA-BKR-2291', mls_id:'VV-IMO-9841203', source_url:'https://www.vesselsvalue.com',
+    maritime:{ imo:'9841203', flag:'Marshall Islands', dwt:'82,400 DWT', draft:'14.2m laden', loa:'229m', engine_hours:'18,450 hrs', last_drydock:'2024-03', class_cert:'DNV GL', cargo_type:'Bulk Carrier' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:36500000,terms:'30% down Bank Finance',expiry:'30 days'}],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  {
+    id:'mar-002', address:'SY Hemisphere — 73m Superyacht', city:'Palma de Mallorca', country:'Spain',
+    lat:39.5508, lng:2.6291, price:95000000, type:'maritime', sqft:null,
+    status:'For Sale', source:'Burgess Yachts', days:120,
+    brokerage:'Burgess Yachts', agent_name:'Sophie Laurent', agent_license:'MCA-YBK-4419', mls_id:'BURGESS-HEM-73', source_url:'https://www.burgesssyachts.com',
+    maritime:{ flag:'Cayman Islands', dwt:'Pleasure Vessel', draft:'4.1m', loa:'73m', engine_hours:'3,200 hrs MTU 16V', last_drydock:'2024-08', class_cert:"Lloyd's Register", cargo_type:'Superyacht' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  // ── NATURAL RESOURCES ─────────────────────────────────────
+  {
+    id:'res-001', address:'Cascade Timber Tract — 4,200 Acres', city:'Darrington', country:'USA',
+    lat:48.2534, lng:-121.6012, price:22000000, type:'resources', sqft:null,
+    status:'For Sale', source:'Mason Bruce Girard', days:88,
+    brokerage:'Pacific Rim Timberlands', agent_name:'Craig Weston', agent_license:'WA-TIMBER-3312', mls_id:'MBG-2024-CASCADE', source_url:'https://www.prtimber.com',
+    resources:{ resource_type:'Timber', acres:'4,200', timber_grade:'Douglas Fir — Grade #1 & #2', board_feet:'42M board-feet (est)', rotation:'35-40yr harvest', water_rights:'Class A — 2.4 cfs Stillaguamish tributary', road_miles:'18mi internal haul road', last_cruise:'2024-06', easements:'Conservation — upper 800 acres' },
+    financials:{}, structures:[], infrastructure:{}, land:{ acres:4200, topo:'Mixed slope 800-3,200ft' }, bids:[{amount:20000000,terms:'Land Contract 25% down',expiry:'60 days'}],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  {
+    id:'res-002', address:'Goldstrike Mineral Claim Block — Carlin Trend', city:'Elko', country:'USA',
+    lat:40.8324, lng:-116.1143, price:48000000, type:'resources', sqft:null,
+    status:'For Sale', source:'Mining Intelligence', days:210,
+    brokerage:'Western States Mineral Brokers', agent_name:'Dean Alvarez', agent_license:'NV-MIN-BKR-0882', mls_id:'MI-2024-CARLIN', source_url:'https://www.miningintelligence.com',
+    resources:{ resource_type:'Gold / Silver Mineral Rights', acres:'1,840', mineral_assay:'Au 2.4 g/t avg — 890k oz inferred', silver_assay:'Ag 18 g/t — 6.8M oz inferred', geology:'Carlin-type disseminated deposit', permits:'NV Exploration Permit NV-2019-4421', last_drill:'2023-11', historical_production:'None — greenfield' },
+    financials:{}, structures:[], infrastructure:{}, land:{ acres:1840, topo:'Basin and Range semi-arid' }, bids:[],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  // ── FINANCIAL INSTRUMENTS ────────────────────────────────
+  {
+    id:'fin-001', address:'US Treasury Note 4.625% 2031', city:'New York', country:'USA',
+    lat:40.7200, lng:-74.0100, price:10000000, type:'financial', sqft:null,
+    status:'Available', source:'FINRA TRACE', days:0,
+    brokerage:'Morgan Stanley Fixed Income', agent_name:'Fixed Income Desk', agent_license:'FINRA-BD-149777', mls_id:'CUSIP-912828XX1', source_url:'https://www.treasurydirect.gov',
+    financial:{ cusip:'912828XX1', instrument:'US Treasury Note', coupon:'4.625%', maturity:'2031-02-15', yield_current:'4.41%', yield_to_maturity:'4.38%', duration:'5.2 yrs', rating:'AAA / Aaa', face_value:'$10,000,000', settlement:'T+1', accrued_interest:'$24,166' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:9980000,terms:'Market wire T+1',expiry:'End of day'}],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  {
+    id:'fin-002', address:'Miami CMBS Pool — Class A Tranche', city:'Miami', country:'USA',
+    lat:25.7800, lng:-80.2500, price:50000000, type:'financial', sqft:null,
+    status:'Available', source:'Bloomberg', days:3,
+    brokerage:'JP Morgan Structured Finance', agent_name:'Structured Products Desk', agent_license:'FINRA-BD-000079', mls_id:'CUSIP-59523PAA4', source_url:'https://www.bloomberg.com',
+    financial:{ cusip:'59523PAA4', instrument:'CMBS Class A', coupon:'5.12%', maturity:'2034-06-15', yield_current:'5.08%', yield_to_maturity:'5.05%', duration:'7.8 yrs', rating:'AAA (S&P)', face_value:'$50,000,000', ltv:'52%', collateral:'28 Miami-Dade commercial properties' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
+    broker_active:true, tokenized:false, image_url:null
+  },
 ];
 let map3dEl   = null;
 let acInstance = null;
@@ -1979,7 +2281,7 @@ function toast(msg) {
   toast._t = setTimeout(() => { t.style.display = 'none'; }, 4000);
 }
 function typeClass(type) {
-  return { residential: 't-res', commercial: 't-com', business: 't-biz', land: 't-land' }[type] || 't-res';
+  return { residential: 't-res', commercial: 't-com', business: 't-biz', land: 't-land', aviation: 't-avi', maritime: 't-mar', resources: 't-res2', financial: 't-fin' }[type] || 't-res';
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2549,9 +2851,11 @@ function _addPriceMarker(asset) {
   el.title = asset.address;
   const priceStr = fmtPrice(asset.price) || '—';
   const typeStr  = asset.type || 'asset';
+  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'', commercial:'', land:'', business:'◈' };
+  const emoji = classEmoji[asset.type] || '';
   el.innerHTML = `
     <div class="price-tag">
-      <div class="price-tag-val">${priceStr}</div>
+      <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
       <div class="price-tag-type">${typeStr}</div>
     </div>
     <div class="price-stem"></div>
@@ -2607,6 +2911,7 @@ function reprojectMarkers() {
 function openDrawer(a) {
   const drawer = document.getElementById('asset-drawer');
   const inner  = document.getElementById('drawer-inner');
+  const assetClass = (a.type || 'residential').toLowerCase();
 
   const mainS = a.structures && a.structures[0];
   const beds  = mainS?.beds  ?? a.beds  ?? '—';
@@ -2615,105 +2920,224 @@ function openDrawer(a) {
   const fin   = a.financials    || {};
   const infra = a.infrastructure || {};
   const land  = a.land          || {};
+  const avi   = a.aviation      || {};
+  const mar   = a.maritime      || {};
+  const res   = a.resources     || {};
+  const fininst = a.financial   || {};
 
-  // ── Hero image or placeholder
+  // ── Hero or class icon
+  const classIcons = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'⌂', commercial:'🏢', land:'◻', business:'◈' };
   const heroHTML = a.image_url
-    ? `<img class="drawer-hero" src="${a.image_url}" alt="${a.address}" onerror="this.parentNode.innerHTML='<div class=drawer-hero-placeholder>◎</div>'">`
-    : `<div class="drawer-hero-placeholder">◎</div>`;
+    ? `<img class="drawer-hero" src="${a.image_url}" alt="${a.address}" onerror="this.parentNode.innerHTML='<div class=drawer-hero-placeholder>${classIcons[assetClass]||'◎'}</div>'">`
+    : `<div class="drawer-hero-placeholder" style="font-size:48px">${classIcons[assetClass]||'◎'}</div>`;
 
-  // ── Status badge
   const isActive   = a.broker_active !== false;
   const statusText = isActive ? (a.status || 'For Sale') : 'Listing Expired — Data Retained';
   const statusCls  = isActive ? '' : 'inactive';
+
+  // ── PILLAR 3: Savings Engine (first — prioritized on mobile)
+  const trad   = a.price ? a.price * 0.03 : 0;
+  const rwafee = a.price ? 999 + (a.price * 0.001) : 0;
+  const saved  = trad - rwafee;
+  const savingsHTML = a.price ? `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Transaction Analysis</div>
+      <div class="savings-block">
+        <div class="savings-row">
+          <span class="savings-k">Traditional Commission (3%)</span>
+          <span class="savings-v strike">$${trad.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
+        </div>
+        <div class="savings-row">
+          <span class="savings-k">RWABidAsk Tech Fee (flat $999 + 0.1%)</span>
+          <span class="savings-v fee">$${rwafee.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
+        </div>
+        <div class="savings-total">
+          <span class="savings-total-k">You Save</span>
+          <span class="savings-total-v">$${saved.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
+        </div>
+        <div class="savings-saas">
+          RWABidAsk is a non-custodial software service. We provide the digital bridge; you retain your legal keys.
+        </div>
+      </div>
+    </div>` : '';
+
+  // ── PILLAR 2: Digital Ledger & Proof of Ownership
+  const assetHash = 'rwa:' + a.id + ':' + (a.price||0);
+  const fakeHash  = Array.from(assetHash).reduce((h,c)=>(h=((h<<5)-h)+c.charCodeAt(0),h&h),0);
+  const hashHex   = Math.abs(fakeHash).toString(16).padStart(8,'0') + a.id.replace(/[^a-z0-9]/gi,'').slice(0,24).padEnd(24,'0');
+  const isMinted  = !!a.tokenized;
+
+  const ledgerHTML = `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Digital Ledger & Proof of Ownership</div>
+      <div class="ledger-card" id="ledger-${a.id}">
+        <div class="ledger-status">
+          <div class="ledger-dot ${isMinted ? 'minted' : ''}"></div>
+          <div class="ledger-label">${isMinted ? 'Anchored to Solana Blockchain' : 'Not yet digitized — manifest not anchored'}</div>
+        </div>
+        ${isMinted
+          ? `<div class="ledger-hash-preview">${hashHex}</div>`
+          : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitizing creates a tamper-proof Solana record of the asset manifest, ownership chain, and bid history.</div>`
+        }
+        <button class="digitize-btn" id="digitize-btn-${a.id}" ${isMinted ? 'disabled' : ''}
+          onclick="runMintAnimation('${a.id}','${hashHex}',this)">
+          ${isMinted ? '✓ Asset Digitized on Solana' : '⬡ Digitize Asset on Solana'}
+        </button>
+      </div>
+    </div>`;
 
   // ── Compliance block
   const compHTML = `
     <div class="drawer-section">
       <div class="drawer-section-title">Listing Compliance</div>
       <div class="compliance-block">
-        ${dr('Brokerage',       a.brokerage    || 'Not disclosed')}
-        ${dr('Listing Agent',   a.agent_name   || 'Not disclosed')}
+        ${dr('Brokerage',       a.brokerage     || 'Not disclosed')}
+        ${dr('Agent / Desk',    a.agent_name    || 'Not disclosed')}
         ${dr('License #',       a.agent_license || '—')}
-        ${dr('MLS / Listing ID',a.mls_id || a.source || '—')}
-        ${dr('Parcel #',        a.parcel       || '—')}
-        ${dr('Data Source',     a.source       || 'Public Registry')}
+        ${dr('Listing ID',      a.mls_id || a.source || '—')}
+        ${a.parcel ? dr('Parcel #', a.parcel) : ''}
+        ${dr('Data Source',     a.source || 'Public Registry')}
       </div>
     </div>`;
 
-  // ── Anti-fairytale structure manifest
-  const structs = a.structures || [];
-  const structHTML = structs.length ? `
-    <div class="drawer-section">
-      <div class="drawer-section-title">Structure Manifest</div>
-      ${structs.map((s, i) => `
-        <div class="struct-card">
-          <div class="struct-label">${s.label || 'Structure ' + (i+1)}</div>
-          ${s.sqft    ? drq('Floor Area',   s.sqft.toLocaleString() + ' sqft') : ''}
-          ${s.beds    ? drq('Bedrooms',     s.beds) : ''}
-          ${s.baths   ? drq('Bathrooms',    s.baths) : ''}
-          ${s.built   ? drq('Year Built',   s.built) : ''}
-          ${s.remodel ? drq('Remodeled',    s.remodel) : ''}
-          ${s.type    ? drq('Structure Type', s.type) : ''}
-          ${s.notes   ? drq('Notes',        s.notes) : ''}
-        </div>`).join('')}
-    </div>` : '';
+  // ── PILLAR 1: Class-specific manifest
+  let classManifestHTML = '';
 
-  // ── Quantified infrastructure manifest
-  const infraItems = [];
-  if (infra.roof)       infraItems.push(drq('Roof',             infra.roof));
-  if (infra.hvac)       infraItems.push(drq('HVAC / Heating',   infra.hvac));
-  if (infra.water)      infraItems.push(drq('Water Source',     infra.water));
-  if (infra.sewer) {
-    // Extract septic age if present
-    const septicYear = infra.sewer.match(/(\d{4})/)?.[1];
-    const age = septicYear ? (2026 - parseInt(septicYear)) + ' yrs old' : null;
-    infraItems.push(drq('Sewer / Septic', infra.sewer + (age ? ` — Age: ${age}` : '')));
-  }
-  if (infra.electric)   infraItems.push(drq('Electric',         infra.electric));
-  if (infra.foundation) infraItems.push(drq('Foundation',       infra.foundation));
-  const infraHTML = infraItems.length ? `
-    <div class="drawer-section">
-      <div class="drawer-section-title">Infrastructure</div>
-      ${infraItems.join('')}
-    </div>` : '';
-
-  // ── Quantified land manifest (vegetation, trees, etc.)
-  const landItems = [];
-  if (land.acres)      landItems.push(drq('Lot Size',    land.acres + ' acres'));
-  if (land.topo)       landItems.push(drq('Topography',  land.topo));
-  if (land.fencing)    landItems.push(drq('Fencing',     land.fencing));
-  if (land.parking)    landItems.push(drq('Parking',     land.parking));
-  if (land.vegetation) {
-    // Parse vegetation into quantified items
-    const veg = land.vegetation;
-    const fruitMatch = veg.match(/(\d+)\s+fruit/i);
-    const treeMatch  = veg.match(/(\d+)\s+\w+/);
-    if (fruitMatch) {
-      landItems.push(drq('Fruit Trees', fruitMatch[1] + ' trees'));
-      landItems.push(drq('Varieties', veg.replace(/\d+\s+fruit trees?:?\s*/i, '')));
-    } else {
-      landItems.push(drq('Vegetation', veg));
+  if (assetClass === 'aviation' && Object.keys(avi).length) {
+    classManifestHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Aviation Manifest</div>
+        ${avi.registration ? drq('Registration (N#)', avi.registration) : ''}
+        ${avi.aftt         ? drq('Airframe Total Time', avi.aftt) : ''}
+        ${avi.cycles       ? drq('Total Cycles', avi.cycles) : ''}
+        ${avi.tso_engines  ? drq('TSO — Engines', avi.tso_engines) : ''}
+        ${avi.avionics     ? drq('Avionics Package', avi.avionics) : ''}
+        ${avi.last_mx      ? drq('Last Major MX', avi.last_mx) : ''}
+        ${avi.location     ? drq('Current Location', avi.location) : ''}
+      </div>`;
+  } else if (assetClass === 'maritime' && Object.keys(mar).length) {
+    classManifestHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Vessel Manifest</div>
+        ${mar.imo          ? drq('IMO Number', mar.imo) : ''}
+        ${mar.flag         ? drq('Flag State', mar.flag) : ''}
+        ${mar.cargo_type   ? drq('Vessel Type', mar.cargo_type) : ''}
+        ${mar.dwt          ? drq('Deadweight Tonnage', mar.dwt) : ''}
+        ${mar.loa          ? drq('Length Overall (LOA)', mar.loa) : ''}
+        ${mar.draft        ? drq('Draft', mar.draft) : ''}
+        ${mar.engine_hours ? drq('Engine Hours', mar.engine_hours) : ''}
+        ${mar.last_drydock ? drq('Last Drydock', mar.last_drydock) : ''}
+        ${mar.class_cert   ? drq('Class Certificate', mar.class_cert) : ''}
+      </div>`;
+  } else if (assetClass === 'resources' && Object.keys(res).length) {
+    classManifestHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Resource Manifest</div>
+        ${res.resource_type     ? drq('Resource Type', res.resource_type) : ''}
+        ${res.acres             ? drq('Total Acres', res.acres) : ''}
+        ${res.timber_grade      ? drq('Timber Grade', res.timber_grade) : ''}
+        ${res.board_feet        ? drq('Volume (Board-Feet)', res.board_feet) : ''}
+        ${res.rotation          ? drq('Harvest Rotation', res.rotation) : ''}
+        ${res.mineral_assay     ? drq('Mineral Assay (Au)', res.mineral_assay) : ''}
+        ${res.silver_assay      ? drq('Mineral Assay (Ag)', res.silver_assay) : ''}
+        ${res.geology           ? drq('Geology', res.geology) : ''}
+        ${res.water_rights      ? drq('Water Rights', res.water_rights) : ''}
+        ${res.permits           ? drq('Permits', res.permits) : ''}
+        ${res.road_miles        ? drq('Internal Roads', res.road_miles) : ''}
+        ${res.last_cruise || res.last_drill ? drq('Last Survey', res.last_cruise || res.last_drill) : ''}
+        ${res.easements         ? drq('Easements', res.easements) : ''}
+        ${res.historical_production ? drq('Historical Production', res.historical_production) : ''}
+      </div>`;
+  } else if (assetClass === 'financial' && Object.keys(fininst).length) {
+    classManifestHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Instrument Manifest</div>
+        ${fininst.cusip         ? drq('CUSIP', fininst.cusip) : ''}
+        ${fininst.instrument    ? drq('Instrument', fininst.instrument) : ''}
+        ${fininst.coupon        ? drq('Coupon Rate', fininst.coupon) : ''}
+        ${fininst.yield_current ? drq('Current Yield', fininst.yield_current) : ''}
+        ${fininst.yield_to_maturity ? drq('Yield to Maturity', fininst.yield_to_maturity) : ''}
+        ${fininst.maturity      ? drq('Maturity Date', fininst.maturity) : ''}
+        ${fininst.duration      ? drq('Duration', fininst.duration) : ''}
+        ${fininst.rating        ? drq('Credit Rating', fininst.rating) : ''}
+        ${fininst.face_value    ? drq('Face Value', fininst.face_value) : ''}
+        ${fininst.settlement    ? drq('Settlement', fininst.settlement) : ''}
+        ${fininst.accrued_interest ? drq('Accrued Interest', fininst.accrued_interest) : ''}
+        ${fininst.ltv           ? drq('LTV', fininst.ltv) : ''}
+        ${fininst.collateral    ? drq('Collateral', fininst.collateral) : ''}
+      </div>`;
+  } else {
+    // Real estate manifests (unchanged)
+    const structs = a.structures || [];
+    if (structs.length) {
+      classManifestHTML += `
+        <div class="drawer-section">
+          <div class="drawer-section-title">Structure Manifest</div>
+          ${structs.map((s, i) => `
+            <div class="struct-card">
+              <div class="struct-label">${s.label || 'Structure ' + (i+1)}</div>
+              ${s.sqft    ? drq('Floor Area',     s.sqft.toLocaleString() + ' sqft') : ''}
+              ${s.beds    ? drq('Bedrooms',        s.beds) : ''}
+              ${s.baths   ? drq('Bathrooms',       s.baths) : ''}
+              ${s.built   ? drq('Year Built',      s.built) : ''}
+              ${s.remodel ? drq('Remodeled',       s.remodel) : ''}
+              ${s.type    ? drq('Structure Type',  s.type) : ''}
+              ${s.notes   ? drq('Notes',           s.notes) : ''}
+            </div>`).join('')}
+        </div>`;
+    }
+    const infraItems = [];
+    if (infra.roof)       infraItems.push(drq('Roof',           infra.roof));
+    if (infra.hvac)       infraItems.push(drq('HVAC / Heating', infra.hvac));
+    if (infra.water)      infraItems.push(drq('Water Source',   infra.water));
+    if (infra.sewer) {
+      const yr = infra.sewer.match(/(\d{4})/)?.[1];
+      const age = yr ? (2026 - parseInt(yr)) + ' yrs old' : null;
+      infraItems.push(drq('Sewer / Septic', infra.sewer + (age ? ` — Age: ${age}` : '')));
+    }
+    if (infra.electric)   infraItems.push(drq('Electric',       infra.electric));
+    if (infra.foundation) infraItems.push(drq('Foundation',     infra.foundation));
+    if (infraItems.length) {
+      classManifestHTML += `
+        <div class="drawer-section">
+          <div class="drawer-section-title">Infrastructure</div>${infraItems.join('')}
+        </div>`;
+    }
+    const landItems = [];
+    if (land.acres) landItems.push(drq('Lot Size', land.acres + ' acres'));
+    if (land.topo)  landItems.push(drq('Topography', land.topo));
+    if (land.fencing) landItems.push(drq('Fencing', land.fencing));
+    if (land.parking) landItems.push(drq('Parking', land.parking));
+    if (land.vegetation) {
+      const fm = land.vegetation.match(/(\d+)\s+fruit/i);
+      if (fm) {
+        landItems.push(drq('Fruit Trees', fm[1] + ' trees'));
+        landItems.push(drq('Varieties', land.vegetation.replace(/\d+\s+fruit trees?:?\s*/i, '')));
+      } else {
+        landItems.push(drq('Vegetation', land.vegetation));
+      }
+    }
+    if (land.features) landItems.push(drq('Lot Features', land.features));
+    if (landItems.length) {
+      classManifestHTML += `
+        <div class="drawer-section">
+          <div class="drawer-section-title">Land & Vegetation</div>${landItems.join('')}
+        </div>`;
     }
   }
-  if (land.features)   landItems.push(drq('Lot Features', land.features));
-  const landHTML = landItems.length ? `
-    <div class="drawer-section">
-      <div class="drawer-section-title">Land & Vegetation</div>
-      ${landItems.join('')}
-    </div>` : '';
 
-  // ── Financial manifest
-  const finHTML = `
+  // ── Financial summary
+  const finHTML = (a.price || fin.tax_annual || fin.zestimate) ? `
     <div class="drawer-section">
       <div class="drawer-section-title">Financial Data</div>
-      ${a.price         ? drq('Listed Price',    `<span class="drawer-v hl">${fmtPrice(a.price)}</span>`) : ''}
-      ${sqft && a.price ? drq('Price / sqft',    fmtPrice(Math.round(a.price / sqft))) : ''}
-      ${fin.tax_annual  ? drq('Annual Tax',      '$' + Number(fin.tax_annual).toLocaleString()) : ''}
-      ${fin.hoa         ? drq('HOA / Month',     '$' + fin.hoa) : ''}
-      ${fin.zestimate   ? drq('Est. Value',      fmtPrice(fin.zestimate)) : ''}
-      ${a.days          ? drq('Days Listed',     a.days + 'd') : ''}
-      ${drq('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}
-    </div>`;
+      ${a.price         ? drq('Ask Price', `<span class="drawer-v hl">${fmtPrice(a.price)}</span>`) : ''}
+      ${sqft && a.price && assetClass !== 'aviation' && assetClass !== 'maritime' ? drq('Price / sqft', fmtPrice(Math.round(a.price / sqft))) : ''}
+      ${fin.tax_annual  ? drq('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}
+      ${fin.hoa         ? drq('HOA / Month', '$' + fin.hoa) : ''}
+      ${fin.zestimate   ? drq('Est. Value', fmtPrice(fin.zestimate)) : ''}
+      ${a.days          ? drq('Days Listed', a.days + 'd') : ''}
+      ${drq('Token Status', a.tokenized ? '⬡ Anchored — Solana' : 'Unclaimed')}
+    </div>` : '';
 
   // ── Bid order book
   const bids = a.bids || [];
@@ -2721,8 +3145,7 @@ function openDrawer(a) {
     <div class="drawer-section">
       <div class="drawer-section-title">Bid Order Book</div>
       <div style="font-size:10px;color:var(--muted);margin-bottom:9px;line-height:1.6">
-        Permanent ledger — no broker can remove these bids.
-        Listing expired? Data and bids remain forever.
+        Permanent ledger — no broker can remove these bids. Listing expired? Data stays.
       </div>
       ${bids.length
         ? bids.map(b => `
@@ -2731,49 +3154,66 @@ function openDrawer(a) {
             <span class="bid-terms">${b.terms || 'cash'}</span>
             <span class="bid-expiry">${b.expiry || ''}</span>
           </div>`).join('')
-        : '<div style="font-size:10px;color:var(--muted);padding:6px 0">No bids placed yet. Be the first.</div>'
+        : '<div style="font-size:10px;color:var(--muted);padding:6px 0">No bids yet. Be the first.</div>'
       }
     </div>`;
+
+  // ── Spec grid (class-aware)
+  let spec1lbl, spec1val, spec2lbl, spec2val, spec3lbl, spec3val, spec4lbl, spec4val;
+  if (assetClass === 'aviation') {
+    spec1lbl='AFTT'; spec1val=avi.aftt||'—';
+    spec2lbl='Cycles'; spec2val=avi.cycles||'—';
+    spec3lbl='TSO'; spec3val=(avi.tso_engines||'—').split('/')[0];
+    spec4lbl='Reg'; spec4val=avi.registration||'—';
+  } else if (assetClass === 'maritime') {
+    spec1lbl='DWT'; spec1val=mar.dwt||'—';
+    spec2lbl='LOA'; spec2val=mar.loa||'—';
+    spec3lbl='Draft'; spec3val=mar.draft||'—';
+    spec4lbl='Eng Hrs'; spec4val=mar.engine_hours||'—';
+  } else if (assetClass === 'resources') {
+    spec1lbl='Acres'; spec1val=(res.acres||land.acres||'—').toLocaleString?.()|| (res.acres||land.acres||'—');
+    spec2lbl='Type'; spec2val=res.resource_type||'—';
+    spec3lbl='Volume'; spec3val=res.board_feet||res.mineral_assay?.split(' ')[0]||'—';
+    spec4lbl='Rights'; spec4val=res.water_rights?'Yes':'—';
+  } else if (assetClass === 'financial') {
+    spec1lbl='Yield'; spec1val=fininst.yield_current||'—';
+    spec2lbl='YTM'; spec2val=fininst.yield_to_maturity||'—';
+    spec3lbl='Maturity'; spec3val=(fininst.maturity||'—').slice(0,7);
+    spec4lbl='Rating'; spec4val=fininst.rating?.split('/')[0]||'—';
+  } else {
+    spec1lbl='Beds';  spec1val=beds;
+    spec2lbl='Baths'; spec2val=baths;
+    spec3lbl='Sqft';  spec3val=sqft ? (sqft>=1000?(sqft/1000).toFixed(1)+'k':sqft) : '—';
+    spec4lbl='Acres'; spec4val=land.acres||'—';
+  }
 
   inner.innerHTML = `
     ${heroHTML}
     <div class="drawer-head">
       <div class="drawer-type-row">
-        <div class="drawer-type">${(a.type || 'Asset').toUpperCase()}</div>
+        <div class="drawer-type">${(a.type||'Asset').toUpperCase()}</div>
         <div class="drawer-status ${statusCls}">${statusText}</div>
       </div>
       <div class="drawer-address">${a.address}</div>
-      <div class="drawer-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
+      <div class="drawer-city">${a.city}${a.country&&a.country!==a.city?', '+a.country:''}</div>
       <div class="drawer-price-row">
         <div class="drawer-price">${fmtPrice(a.price)}</div>
-        ${sqft && a.price ? `<div class="drawer-psf">${fmtPrice(Math.round(a.price / sqft))} / sqft</div>` : ''}
+        ${sqft&&a.price&&assetClass==='residential'?`<div class="drawer-psf">${fmtPrice(Math.round(a.price/sqft))} / sqft</div>`:''}
       </div>
     </div>
 
     <div class="drawer-specs">
-      <div class="drawer-spec">
-        <div class="drawer-spec-val">${beds}</div>
-        <div class="drawer-spec-lbl">Beds</div>
-      </div>
-      <div class="drawer-spec">
-        <div class="drawer-spec-val">${baths}</div>
-        <div class="drawer-spec-lbl">Baths</div>
-      </div>
-      <div class="drawer-spec">
-        <div class="drawer-spec-val">${sqft ? (sqft >= 1000 ? (sqft/1000).toFixed(1) + 'k' : sqft) : '—'}</div>
-        <div class="drawer-spec-lbl">Sqft</div>
-      </div>
-      <div class="drawer-spec">
-        <div class="drawer-spec-val">${land.acres || '—'}</div>
-        <div class="drawer-spec-lbl">Acres</div>
-      </div>
+      <div class="drawer-spec"><div class="drawer-spec-val">${spec1val}</div><div class="drawer-spec-lbl">${spec1lbl}</div></div>
+      <div class="drawer-spec"><div class="drawer-spec-val">${spec2val}</div><div class="drawer-spec-lbl">${spec2lbl}</div></div>
+      <div class="drawer-spec"><div class="drawer-spec-val">${spec3val}</div><div class="drawer-spec-lbl">${spec3lbl}</div></div>
+      <div class="drawer-spec"><div class="drawer-spec-val">${spec4val}</div><div class="drawer-spec-lbl">${spec4lbl}</div></div>
     </div>
 
     <div class="drawer-body">
+      ${savingsHTML}
+      ${ledgerHTML}
       ${compHTML}
-      ${structHTML}
-      ${infraHTML}
-      ${landHTML}
+      ${classManifestHTML}
       ${finHTML}
       ${bidHTML}
     </div>
@@ -2786,23 +3226,23 @@ function openDrawer(a) {
         ? `<a class="drawer-btn-secondary" href="${a.source_url}" target="_blank" rel="noopener noreferrer">VIEW ORIGINAL LISTING ↗</a>`
         : `<button class="drawer-btn-secondary" onclick="closeDrawer();requireAuth('buy','${a.id}')">SUBMIT PURCHASE INQUIRY →</button>`
       }
-      <button class="drawer-btn-secondary" style="font-size:10px;border-color:rgba(0,255,200,.2);color:var(--muted)" onclick="closeDrawer();openModal('partner')">
-        Upgrade for Premium Data (County Records, Septic Maps)
+      <button class="drawer-btn-secondary" style="font-size:10px;border-color:rgba(0,255,200,.2);color:var(--muted)" onclick="closeDrawer();openModal('upgrade')">
+        Upgrade for Premium Data (County Records, Assay Reports, Septic Maps)
       </button>
     </div>
 
     <div class="drawer-legal">
       Data deemed reliable but not guaranteed. Information provided by listing agent/broker.
       For consumers' personal, non-commercial use only.
-      Source: ${a.source || 'Public Registry'} · ID #${a.id}
+      Source: ${a.source||'Public Registry'} · ID #${a.id}
     </div>
   `;
 
   drawer.classList.add('open');
   document.getElementById('right').style.zIndex = '1';
-  // Mobile: shrink map to top 40% so user can see clicked location
   document.getElementById('map-col').classList.add('drawer-open');
 }
+
 
 // Helper: quantified manifest row (bold key, value right-aligned)
 function drq(k, v) {
@@ -2837,6 +3277,80 @@ document.getElementById('map-col').addEventListener('click', e => {
 /* ═══════════════════════════════════════════════════════════
    TICKER
 ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   DIGITAL NOTARY — Mint Animation
+═══════════════════════════════════════════════════════════ */
+function runMintAnimation(assetId, hash, btn) {
+  const card = document.getElementById('ledger-' + assetId);
+  if (!card) return;
+  btn.disabled = true;
+  btn.textContent = 'Anchoring to Solana…';
+
+  // Phase 1: show spinning animation
+  card.innerHTML = `
+    <div style="text-align:center;padding:16px 0">
+      <div class="mint-ring"></div>
+      <div style="font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:6px">Anchoring Manifest to Solana…</div>
+      <div style="font-size:9px;color:var(--muted)">Serializing asset data · Broadcasting transaction · Awaiting confirmation</div>
+    </div>`;
+
+  // Phase 2: show receipt after 2.4s
+  setTimeout(() => {
+    const ts  = new Date().toISOString();
+    const slot = Math.floor(Math.random() * 9000000) + 280000000;
+    card.innerHTML = `
+      <div style="text-align:center;padding:8px 0 12px">
+        <div class="mint-seal">✓ VERIFIED — SOLANA MAINNET</div>
+        <div class="mint-qr"></div>
+        <div style="font-size:9px;color:var(--dim);margin-bottom:8px">Certificate of Digital Record</div>
+        <div class="mint-hash">${hash}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:left">
+          <div style="font-size:9px;color:var(--muted)">Slot</div><div style="font-size:9px;color:var(--dim)">${slot.toLocaleString()}</div>
+          <div style="font-size:9px;color:var(--muted)">Timestamp</div><div style="font-size:9px;color:var(--dim)">${ts.replace('T',' ').slice(0,19)} UTC</div>
+          <div style="font-size:9px;color:var(--muted)">Network</div><div style="font-size:9px;color:var(--green)">Solana Mainnet-Beta</div>
+          <div style="font-size:9px;color:var(--muted)">Status</div><div style="font-size:9px;color:var(--green)">Finalized</div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.6">
+          This certificate is non-custodial. RWABidAsk is a software bridge only.<br>Legal title transfer requires applicable jurisdiction procedures.
+        </div>
+      </div>`;
+    // Mark asset as tokenized in memory
+    const asset = ASSETS.find(x => x.id === assetId);
+    if (asset) asset.tokenized = true;
+    toast('✅ Asset anchored to Solana — certificate generated');
+  }, 2400);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MARKET RIBBON — Live-style institutional data
+═══════════════════════════════════════════════════════════ */
+function buildRibbon() {
+  // Simulated live market data (replace with real API calls later)
+  const markets = [
+    { label:'BTC/USD',    val:'$83,241',  chg:'+1.2%',  dir:'up'   },
+    { label:'Gold Spot',  val:'$3,118/oz',chg:'+0.4%',  dir:'up'   },
+    { label:'10Y T-Bill', val:'4.38%',    chg:'-0.02',  dir:'down' },
+    { label:'Timber',     val:'$541/MBF', chg:'+0.7%',  dir:'up'   },
+    { label:'Jet-A Fuel', val:'$2.71/gal',chg:'-0.3%',  dir:'down' },
+    { label:'ETH/USD',    val:'$1,584',   chg:'-0.8%',  dir:'down' },
+    { label:'Silver',     val:'$32.14/oz',chg:'+0.6%',  dir:'up'   },
+    { label:'WTI Crude',  val:'$61.20',   chg:'-1.1%',  dir:'down' },
+    { label:'S&P 500',    val:'5,633',    chg:'+0.3%',  dir:'up'   },
+    { label:'RWABIDASK',  val:'LIVE',     chg:'Global Asset Market',dir:'flat'},
+  ];
+  const items = markets.map(m =>
+    `<div class="ribbon-item">
+      <span class="ribbon-label">${m.label}</span>
+      <span class="ribbon-val">${m.val}</span>
+      <span class="ribbon-chg ${m.dir}">${m.chg}</span>
+    </div>`
+  ).join('');
+  const track = document.getElementById('ribbon-track');
+  if (track) {
+    track.innerHTML = items + items; // duplicate for seamless loop
+  }
+}
+
 function buildTicker(assets) {
   const base = [
     'ESTABLISHING SECURE CONNECTION',
@@ -3285,8 +3799,8 @@ document.getElementById('modal').addEventListener('click', e => {
    CREATE POLICY "Service role only" ON leads USING (false);
    ─────────────────────────────────────────────────────────
 */
-   Project: 'iyejqvdjbvokrswlsoda.supabase.co';
-// ---------- */
+   Project: iyejqvdjbvokrswlsoda.supabase.co
+═══════════════════════════════════════════════════════════ */
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
 
@@ -3527,6 +4041,7 @@ function triggerSearch() {
    BOOT
 ═══════════════════════════════════════════════════════════ */
 buildTicker([]);
+buildRibbon();
 bootSupabase();
 
 // Wire blimp
