@@ -3,6 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1200, initial-scale=0.3, maximum-scale=1.0">
+  <script>
+  function adjustZoom() {
+    const targetWidth = 1200; // Your desktop layout width
+    const deviceWidth = window.innerWidth;
+    const scale = deviceWidth / targetWidth;
+    
+    // This forces the viewport to match the scale perfectly
+    const meta = document.querySelector('meta[name="viewport"]');
+    meta.setAttribute('content', `width=${targetWidth}, initial-scale=${scale}, maximum-scale=1.0, user-scalable=no`);
+  }
+  
+  // Run it immediately and whenever the phone rotates
+  adjustZoom();
+  window.addEventListener('resize', adjustZoom);
+</script>
 <title>RWABidAsk — Global Asset Market | Institutional Digitization Platform</title>
 <meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, energy infrastructure, IP, minerals, and aviation on the Persistent Ledger.">
 
