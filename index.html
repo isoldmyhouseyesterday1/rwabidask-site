@@ -1928,6 +1928,20 @@ html, body {
     height: auto !important;
   }
 }
+
+@media (max-width: 850px) {
+  #shell {
+    /* This zooms the UI out so the sidebars don't crush the map */
+    zoom: 0.5; 
+    -moz-transform: scale(0.5);
+    -moz-transform-origin: 0 0;
+  }
+  #main-row {
+    /* Keeps your 3 columns visible */
+    grid-template-columns: 288px 1fr 320px !important; 
+    width: 200% !important; 
+  }
+}
   
 </style>
 </head>
