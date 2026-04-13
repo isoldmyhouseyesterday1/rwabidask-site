@@ -5074,10 +5074,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // Google Maps "Handshake" — This starts the 3D Engine
 window.__initRWA = initMap;
 
-// Trigger first render for visibility
+// Trigger first render for visibility (The "Jumpstart")
 setTimeout(() => { 
-  if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); 
-}, 500);
+  console.log("[RWABidAsk] BOOT SEQUENCE: Forcing Marker Render...");
+  if(typeof renderDOMMarkers === 'function') {
+    renderDOMMarkers(); 
+  }
+}, 1000); // 1000ms ensures the 3D map is fully stable first
 
 // Fallback for immediate initialization if Maps is already ready
 if (window.__googleMapsLoaded) {
