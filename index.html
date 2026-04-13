@@ -3186,7 +3186,7 @@ function renderDOMMarkers() {
   console.log("Current Map Range:", range);
 
   // 1. REGIONAL VIEW (≤ 300km)
-  if (range <= 300000) {
+  if (range <= 25000000) {
     const premiums = ASSETS.filter(a => a.anchor);
     // DIAGNOSTIC LOG 2: Check if we found any gold assets
     console.log("Found Premium Assets:", premiums.length);
@@ -3206,10 +3206,7 @@ let cameraTimer;
 // 2. Wrap the event listeners in a Debounce function
 if (map3dEl) {
   const stabilizedCameraChange = () => {
-    // Clear the previous timer so we don't fire 100 times
     clearTimeout(cameraTimer);
-    
-    // Only run the logic after 100ms of "silence" (no moving)
     cameraTimer = setTimeout(() => {
       onCameraChange();
     }, 100); 
@@ -3221,28 +3218,27 @@ if (map3dEl) {
   map3dEl.addEventListener('gmp-headingchange', stabilizedCameraChange);
 }
 
-const RANGE_ALL     = 50000;   // 50km  — show ALL assets
-const RANGE_PREMIUM = 300000;  // 300km — show anchor/gold only
-// Legacy alias (used by syncMarkerVisibility)
+// 3. OPEN THE GATES (Set to 25 Million so markers show up now)
+const RANGE_ALL     = 25000000; 
+const RANGE_PREMIUM = 25000000; 
 const MARKER_RANGE_THRESHOLD = RANGE_ALL;
 
 function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_ALL; }
 function premiumMarkersVisible() { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_PREMIUM; }
 
 function onCameraChange() {
-  clearTimeout(_cameraChangeTimer);
-  _cameraChangeTimer = setTimeout(() => {
-    const range = map3dEl?.range || 22000000;
-    const showAll     = range <= RANGE_ALL;      // ≤50km: everything
-    const showPremium = range <= RANGE_PREMIUM;  // ≤300km: anchors only
-    // anchors always reproject regardless of zoom
-    Object.values(domMarkers).forEach(({ el, asset }) => {
-      if (asset.anchor) {
-        projectMarker(asset, el);
-      } else {
-        el.style.display = 'none'; // default hide; re-shown below if zoom allows
-      }
-    });
+  // We use the 'cameraTimer' from above now to stay stabilized
+  const range = map3dEl?.range || 22000000;
+  
+  // CRITICAL: This rebuilds the markers in the DOM
+  renderDOMMarkers(); 
+
+  // Position the markers and force them to show
+  Object.values(domMarkers).forEach(({ el, asset }) => {
+    el.style.display = 'flex'; // Force visibility override
+    projectMarker(asset, el);
+  });
+}
 
     if (showAll) {
       // ≤50km: show all viewport assets + anchors
