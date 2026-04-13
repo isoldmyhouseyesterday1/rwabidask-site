@@ -1903,34 +1903,29 @@ html, body {
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
 
-/* ── INSTITUTIONAL MOBILE GRID (NO SMUSHING) ── */
+/* ── INSTITUTIONAL MOBILE SCALING ── */
 @media (max-width: 850px) {
-  /* 1. Adjust the grid columns to be proportional instead of fixed pixels */
   #main-row {
-    display: grid !important;
-    /* Give sidebars 20% each, Map gets 60% of the width */
-    grid-template-columns: 20% 1fr 20% !important; 
-    height: 100% !important;
-    width: 100vw !important;
-    overflow: hidden;
+    /* Keep the 3-column audit look but tighten the margins */
+    grid-template-columns: 22% 1fr 22% !important; 
   }
 
-  /* 2. Shrink the font size so the "10-K" data still fits in skinnier columns */
+  /* Shrink text so 10-K data fits in skinnier columns */
   #left, #right {
-    font-size: 9px !important; 
-    padding: 4px !important;
-    min-width: 0 !important; /* Prevents panels from forcing a width */
-  }
-
-  /* 3. Ensure the globe stays centered and visible */
-  #map-col {
+    font-size: 8px !important;
+    padding: 2px !important;
     min-width: 0 !important;
-    height: 100% !important;
   }
 
-  /* 4. Hide non-essential icons in the panels to save space */
-  #left .asset-icon, #right .stat-icon {
+  /* Hide non-essential icons to save horizontal space */
+  .asset-icon, .stat-icon {
     display: none !important;
+  }
+
+  /* Ensure the ticker and headers don't wrap awkwardly */
+  #ticker-row, #ribbon {
+    font-size: 10px !important;
+    height: auto !important;
   }
 }
   
