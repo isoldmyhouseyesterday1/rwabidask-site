@@ -3182,21 +3182,19 @@ function renderDOMMarkers() {
 
   const range = map3dEl?.range || 22000000;
 
-  // DIAGNOSTIC LOG 1: Check if the map is giving us a range
-  console.log("Current Map Range:", range);
+  // 1. SPACE VIEW: If higher than 300km, stay clinical and empty.
+  if (range > 300000) return;
 
-  // 1. REGIONAL VIEW (≤ 300km)
-  if (range <= 25000000) {
+  // 2. REGIONAL VIEW (50km to 300km): Show ONLY Premium/Anchors.
+  if (range <= 300000 && range > 50000) {
     const premiums = ASSETS.filter(a => a.anchor);
-    // DIAGNOSTIC LOG 2: Check if we found any gold assets
-    console.log("Found Premium Assets:", premiums.length);
+    // Note: No viewport filter here yet so they pop in reliably
     premiums.forEach(a => _addPriceMarker(a));
   }
 
-  // 2. LOCAL VIEW (≤ 50km)
+  // 3. LOCAL VIEW (≤ 50km): Show EVERYTHING.
   if (range <= 50000) {
-    const regulars = ASSETS.filter(a => !a.anchor);
-    regulars.forEach(a => _addPriceMarker(a));
+    ASSETS.forEach(a => _addPriceMarker(a));
   }
 }
   
