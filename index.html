@@ -3172,21 +3172,22 @@ function renderDOMMarkers() {
   layer.innerHTML = '';
   domMarkers = {};
 
+  // Get current camera range
   const range = map3dEl?.range || 22000000;
 
-  // 1. REGIONAL VIEW (≤300km): Show ONLY Premium/Gold
+  // 1. REGIONAL VIEW (≤ 300km): Show Gold/Premium only
   if (range <= 300000) {
     const premiums = ASSETS.filter(a => a.anchor);
     viewportVisible(premiums).forEach(a => _addPriceMarker(a));
   }
 
-  // 2. LOCAL VIEW (≤50km): Show EVERYTHING
+  // 2. LOCAL VIEW (≤ 50km): Show all regular assets
   if (range <= 50000) {
     const regulars = ASSETS.filter(a => !a.anchor);
     viewportVisible(regulars).forEach(a => _addPriceMarker(a));
   }
 }
-
+  
 // 1. Create a timer variable at the top of this block
 let cameraTimer;
 
