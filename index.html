@@ -5001,7 +5001,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bl) bl.addEventListener('click', blimpClick);
 });
 
-/* ═══════════════════════════════════════════════════════════
+  /* ═══════════════════════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════════════════════ */
 buildTicker([]);
@@ -5014,10 +5014,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bl) bl.addEventListener('click', blimpClick);
 });
 
-// Google Maps boot 
+// Google Maps boot
 window.__initRWA = initMap;
 
-// Trigger first render
+// Manually trigger the first render so the map isn't empty on start
 setTimeout(() => { 
   if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); 
 }, 500);
