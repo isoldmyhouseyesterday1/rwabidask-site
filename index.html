@@ -1367,6 +1367,16 @@ html, body {
     bottom: 60%; /* map shows top 40% of remaining height */
   }
 
+  /* ── Glass UI sits above the 3D map (which renders at z=0 inside shadow DOM) ── */
+  #topbar        { position: relative; z-index: 1000; }
+  #ticker-bar    { position: relative; z-index: 1000; }
+  #footer        { position: relative; z-index: 1000; }
+  .map-ctl-panel { z-index: 1000; }
+  #overlay-layer { z-index: 500; }
+  #map3d-container { z-index: 0; }
+  /* Ensure shell rows stack correctly */
+  #shell { isolation: isolate; }
+
   /* ── Bottom sheet drawer ── */
   #asset-drawer {
     position: fixed;
@@ -2067,7 +2077,7 @@ html, body {
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="mailto:ops@rwabidask.com">ops@rwabidask.com</a>
+    <a href="/cdn-cgi/l/email-protection#d2bda2a192a0a5b3b0bbb6b3a1b9fcb1bdbf"><span class="__cf_email__" data-cfemail="c5aab5b685b7b2a4a7aca1a4b6aeeba6aaa8">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -2088,7 +2098,7 @@ html, body {
 <!-- ══ TOAST ══ -->
 <div id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 'use strict';
 
 /* ═══════════════════════════════════════════════════════════
@@ -3146,16 +3156,17 @@ function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   layer.innerHTML = '';
   domMarkers = {};
-  
-  // Anchor assets always visible — render first regardless of zoom level
+
+  // Anchor assets always visible at any zoom — render first
   ANCHOR_ASSETS.forEach(a => _addPriceMarker(a));
-  
-  // Non-anchor markers only when zoomed in enough
+
+  // 50km or closer: show all assets in viewport
   if (markersVisible()) {
-    const nonAnchors = ASSETS.filter(a => !a.anchor);
-    viewportVisible(nonAnchors).forEach(a => _addPriceMarker(a));
+    viewportVisible(ASSETS.filter(a => !a.anchor)).forEach(a => _addPriceMarker(a));
   }
-} // <--- THIS IS THE BRACKET THAT WAS MISSING
+  // 300km or closer (but > 50km): anchors already rendered above — nothing else added here
+  // > 300km: anchors only (cluster logic handles the bubble display)
+}
 
 // 1. Create a timer variable at the top of this block
 let cameraTimer;
@@ -3178,45 +3189,62 @@ if (map3dEl) {
   map3dEl.addEventListener('gmp-headingchange', stabilizedCameraChange);
 }
 
-const MARKER_RANGE_THRESHOLD = 50000; // 50km — hide non-anchor tags above this altitude
+const RANGE_ALL     = 50000;   // 50km  — show ALL assets
+const RANGE_PREMIUM = 300000;  // 300km — show anchor/gold only
+// Legacy alias (used by syncMarkerVisibility)
+const MARKER_RANGE_THRESHOLD = RANGE_ALL;
 
-function markersVisible() {
-  if (!map3dEl) return false;
-  const range = map3dEl.range || 22000000;
-  return range <= MARKER_RANGE_THRESHOLD;
-}
+function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_ALL; }
+function premiumMarkersVisible() { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_PREMIUM; }
 
 function onCameraChange() {
   clearTimeout(_cameraChangeTimer);
   _cameraChangeTimer = setTimeout(() => {
-    const show = markersVisible();
-    if (!show) {
-      // Zoomed out: hide non-anchors, keep anchors visible + reprojected
-      Object.values(domMarkers).forEach(({ el, asset }) => {
-        if (asset.anchor) {
-          projectMarker(asset, el);
-        } else {
-          el.style.display = 'none';
-        }
-      });
-      return;
-    }
-    reprojectMarkers();
-    // Build visible set — always include anchors
-    const vis = new Set(viewportVisible(filtered()).map(a => a.id));
-    ANCHOR_ASSETS.forEach(a => vis.add(a.id));
-    Object.entries(domMarkers).forEach(([id, { el }]) => {
-      if (!vis.has(id)) el.style.display = 'none';
-    });
-    vis.forEach(id => {
-      if (!domMarkers[id]) {
-        const a = ASSETS.find(x => x.id === id);
-        if (a) _addPriceMarker(a);
-      } else {
-        const { el, asset } = domMarkers[id];
+    const range = map3dEl?.range || 22000000;
+    const showAll     = range <= RANGE_ALL;      // ≤50km: everything
+    const showPremium = range <= RANGE_PREMIUM;  // ≤300km: anchors only
+    // anchors always reproject regardless of zoom
+    Object.values(domMarkers).forEach(({ el, asset }) => {
+      if (asset.anchor) {
         projectMarker(asset, el);
+      } else {
+        el.style.display = 'none'; // default hide; re-shown below if zoom allows
       }
     });
+
+    if (showAll) {
+      // ≤50km: show all viewport assets + anchors
+      reprojectMarkers();
+      const vis = new Set(viewportVisible(filtered()).map(a => a.id));
+      ANCHOR_ASSETS.forEach(a => vis.add(a.id));
+      Object.entries(domMarkers).forEach(([id, { el }]) => {
+        el.style.display = vis.has(id) ? 'flex' : 'none';
+      });
+      vis.forEach(id => {
+        if (!domMarkers[id]) {
+          const a = ASSETS.find(x => x.id === id);
+          if (a) _addPriceMarker(a);
+        } else {
+          const { el, asset } = domMarkers[id];
+          projectMarker(asset, el);
+        }
+      });
+      buildTicker(viewportVisible(ASSETS)); // viewport-only ticker
+    } else if (showPremium) {
+      // 50km–300km: anchors only, no clusters, no non-anchor markers
+      ANCHOR_ASSETS.forEach(a => {
+        if (!domMarkers[a.id]) _addPriceMarker(a);
+        else projectMarker(a, domMarkers[a.id].el);
+      });
+      buildTicker(viewportVisible(ANCHOR_ASSETS)); // anchor-only ticker
+    } else {
+      // >300km: anchors only + cluster bubbles
+      ANCHOR_ASSETS.forEach(a => {
+        if (!domMarkers[a.id]) _addPriceMarker(a);
+        else projectMarker(a, domMarkers[a.id].el);
+      });
+      buildTicker([]); // base-only ticker when fully zoomed out
+    }
   }, 80);
 }
 
@@ -3942,17 +3970,24 @@ function buildTicker(assets) {
     'RWABIDASK.COM',
     'BID · ASK · BUY · FINANCE',
     'ANNIE GROUP LLC',
-    'TOKENIZATION AVAILABLE',
+    'ASSET DIGITIZATION PLATFORM',
     'TIMESHARES · LEASES · NEW DEVELOPMENTS',
     'ops@rwabidask.com',
   ];
-  const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 40);
-  const all   = [...base, ...addrs, ...base, ...addrs];
-  const html  = all.map(s =>
+  // Only show addresses from assets currently in viewport — no global bleed
+  const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 30);
+  const segments = addrs.length > 0 ? [...base, ...addrs] : [...base];
+  const all = [...segments, ...segments]; // double for seamless loop
+  const html = all.map(s =>
     `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${s}</span><span class="sep">·</span></span>`
   ).join('');
   const track = document.getElementById('ticker-track');
-  track.innerHTML = html + html; // double for seamless loop
+  if (!track) return;
+  track.innerHTML = html;
+  // Reset animation so it doesn't jump when content changes
+  track.style.animation = 'none';
+  track.offsetHeight; // reflow trigger
+  track.style.animation = 'ticker-run 90s linear infinite';
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -4839,11 +4874,11 @@ function buildClusters(assets, mapRect) {
   if (!layer || !map3dEl) return;
 
   const range = map3dEl.range || 22000000;
-  if (range <= CLUSTER_THRESHOLD) return; // zoomed in enough — show individual markers
+  if (range <= CLUSTER_THRESHOLD) return; // zoomed in enough — individual markers shown
 
-  // Project all assets to screen coords
+  // assets arg is already viewport-culled — project to screen
   const projected = assets
-    .filter(a => !a.anchor) // anchors always show individually
+    .filter(a => !a.anchor)
     .map(a => {
       const pos = _projectToScreen(a, mapRect);
       return pos ? { a, x: pos.x, y: pos.y } : null;
@@ -4912,8 +4947,9 @@ function _projectToScreen(asset, mapRect) {
 }
 
 // Hook clustering into onCameraChange — rebuild clusters on every camera move
+// NOTE: onCameraChange already defined above with full tier logic.
+// We extend it here to handle cluster rendering for the >300km tier.
 const _origOnCameraChange = onCameraChange;
-// Patch onCameraChange to also run clustering
 let _clusterTimer = null;
 function onCameraChange() {
   _origOnCameraChange();
@@ -4922,13 +4958,10 @@ function onCameraChange() {
     const mapRect = document.getElementById('map-col')?.getBoundingClientRect();
     const range = map3dEl?.range || 22000000;
     if (range > CLUSTER_THRESHOLD) {
-      // Hide individual non-anchor markers, show clusters instead
-      Object.values(domMarkers).forEach(({ el, asset }) => {
-        if (!asset.anchor) el.style.display = 'none';
-      });
-      buildClusters(ASSETS.filter(a => !a.anchor), mapRect);
+      // >300km: show viewport-only cluster bubbles for non-anchors
+      buildClusters(viewportVisible(ASSETS.filter(a => !a.anchor)), mapRect);
     } else {
-      clearClusters(); // clusters cleared when zoomed in
+      clearClusters(); // ≤300km: individual markers take over
     }
   }, 120);
 }
@@ -5007,16 +5040,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Google Maps "Handshake" — This starts the 3D Engine
 window.__initRWA = initMap;
 
-// Manually trigger the first render so the map isn't empty on start
-setTimeout(() => { 
-  if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); 
-}, 500);
-
-// Fallback for immediate initialization
-if (window.__googleMapsLoaded) {
-  initMap();
-}
-
-</script>
-</body>
-</html>
+// Manually trigger the first render so th
