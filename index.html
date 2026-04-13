@@ -1914,7 +1914,7 @@ html, body {
   </div>
 
   <div class="topbar-right">
-    <div class="tstat" title="Total value of all assets registered on RWABidAsk Persistent Ledger">
+    <div class="tstat" title="Total value of all assets registered on RWABidAsk Permanent Ledger">
       <div class="tstat-l">GMC</div>
       <div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div>
     </div>
@@ -2684,7 +2684,7 @@ function csvRow(line) {
 }
 
 function onDataReady() {
-  setStatus('RWABidAsk PERSISTENT LEDGER LIVE — ' + ASSETS.length + ' ASSETS');
+  setStatus('RWABidAsk PERAMANET LEDGER LIVE — ' + ASSETS.length + ' ASSETS');
   document.getElementById('s-assets').textContent = ASSETS.length;
   document.getElementById('s-status').textContent = 'LIVE';
   document.getElementById('s-bids').textContent = Math.floor(ASSETS.length * 4.2);
@@ -3415,7 +3415,7 @@ R
 R
         ${isMinted
           ? `<div class="ledger-hash-preview">${hashHex}</div>`
-          : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitization creates a permanent, immutable record of the asset manifest, ownership chain, and bid history on the RWABidAsk Persistent Ledger.</div>`
+          : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitization creates a permanent, immutable record of the asset manifest, ownership chain, and bid history on the RWABidAsk Permanent Ledger.</div>`
         }
         <button class="digitize-btn" id="digitize-btn-${a.id}" ${isMinted ? 'disabled' : ''}
           onclick="${isMinted ? '' : `initiateDigitizePayment('${a.id}','${hashHex}')`}">
@@ -3912,14 +3912,14 @@ function runMintAnimation(assetId, hash, btn) {
     const ledgerEntryId = 'RWABidAsk-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
     card.innerHTML = `
       <div style="text-align:center;padding:8px 0 12px">
-        <div class="mint-seal">✓ VERIFIED — RWABidAsk PERSISTENT LEDGER</div>
+        <div class="mint-seal">✓ VERIFIED — RWABidAsk PERMANENT LEDGER</div>
         <div class="mint-qr"></div>
         <div style="font-size:9px;color:var(--dim);margin-bottom:8px">Certificate of Digital Record</div>
         <div class="mint-hash">${hash}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:left">
           <div style="font-size:9px;color:var(--muted)">Ledger Entry ID</div><div style="font-size:9px;color:var(--dim)">${ledgerEntryId}</div>
           <div style="font-size:9px;color:var(--muted)">Timestamp</div><div style="font-size:9px;color:var(--dim)">${ts.replace('T',' ').slice(0,19)} UTC</div>
-          <div style="font-size:9px;color:var(--muted)">Platform</div><div style="font-size:9px;color:var(--green)">RWABidAsk Persistent Ledger — Annie Group LLC</div>
+          <div style="font-size:9px;color:var(--muted)">Platform</div><div style="font-size:9px;color:var(--green)">RWABidAsk Permanent Ledger — Annie Group LLC</div>
           <div style="font-size:9px;color:var(--muted)">Status</div><div style="font-size:9px;color:var(--green)">Finalized</div>
         </div>
         <div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.6">
@@ -4006,7 +4006,7 @@ function openModal(type, id) {
         <strong style="color:var(--silver)">§1 — Non-Custodial Service</strong><br>
         RWABidAsk is a software service and digital notary. We do not hold, manage, custody, or move user funds, digital assets, or physical property at any time. All transactions are arranged directly between principals.<br><br>
         <strong style="color:var(--silver)">§2 — Data Permanence (The Moat)</strong><br>
-        All data uploaded to the RWABidAsk Persistent Ledger — including photographs, legal documents, assay reports, and deeds — becomes a permanent part of the RWABidAsk Ledger record. Listings may expire or be withdrawn, but the underlying historical data record is perpetual and non-erasable.<br><br>
+        All data uploaded to the RWABidAsk Permanent Ledger — including photographs, legal documents, assay reports, and deeds — becomes a permanent part of the RWABidAsk Ledger record. Listings may expire or be withdrawn, but the underlying historical data record is perpetual and non-erasable.<br><br>
         <strong style="color:var(--silver)">§3 — Metadata Monetization License</strong><br>
         By registering an asset, users grant RWABidAsk (Annie Group LLC) an irrevocable, worldwide, royalty-free license to aggregate, anonymize, and monetize manifest metadata for market intelligence, index publication, and institutional data products. No personally identifiable information is sold.<br><br>
         <strong style="color:var(--silver)">§4 — Not a Broker or Dealer</strong><br>
