@@ -1367,9 +1367,6 @@ html, body {
 }
 #asset-drawer.open { transform: translateX(0); }
 
-/* Mobile: bottom sheet */
-@media (max-width: 767px) {
-
   /* ── Topbar: strip non-essentials ── */
   .tstat    { display: none; }
   .logo-tag { display: none; }
@@ -1918,43 +1915,37 @@ html, body {
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
 
-/* ── INSTITUTIONAL MOBILE SCALING ── */
+/* ── THE MASTER "AUDIT" MOBILE FIX ── */
 @media (max-width: 850px) {
-  #main-row {
-    /* Keep the 3-column audit look but tighten the margins */
-    grid-template-columns: 22% 1fr 22% !important; 
-  }
-
-  /* Shrink text so 10-K data fits in skinnier columns */
-  #left, #right {
-    font-size: 8px !important;
-    padding: 2px !important;
-    min-width: 0 !important;
-  }
-
-  /* Hide non-essential icons to save horizontal space */
-  .asset-icon, .stat-icon {
-    display: none !important;
-  }
-
-  /* Ensure the ticker and headers don't wrap awkwardly */
-  #ticker-row, #ribbon {
-    font-size: 10px !important;
-    height: auto !important;
-  }
-}
-
-@media (max-width: 850px) {
+  /* 1. Force the layout to stay wide like a desktop */
   #shell {
-    /* This zooms the UI out so the sidebars don't crush the map */
-    zoom: 0.5; 
-    -moz-transform: scale(0.5);
-    -moz-transform-origin: 0 0;
+    width: 1400px !important; 
+    height: 100vh !important;
+    display: grid !important;
+    /* Taller header/footer rows so they are easy to see */
+    grid-template-rows: 40px 70px 1fr 40px 35px !important;
+    overflow: hidden !important;
   }
+
+  /* 2. Lock the 3 columns so the globe has room in the middle */
   #main-row {
-    /* Keeps your 3 columns visible */
-    grid-template-columns: 288px 1fr 320px !important; 
-    width: 200% !important; 
+    display: grid !important;
+    grid-template-columns: 320px 1fr 350px !important;
+    height: 100% !important;
+    width: 1400px !important;
+  }
+
+  /* 3. BIG UI: Make the text readable (10-K Data at 15px) */
+  #left, #right, .asset-row, .market-data, .ticker-item {
+    font-size: 15px !important; 
+    line-height: 1.5 !important;
+    padding: 6px !important;
+  }
+
+  /* 4. Ensure the Map column doesn't collapse */
+  #map-col {
+    min-width: 0 !important;
+    height: 100% !important;
   }
 }
   
