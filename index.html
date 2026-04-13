@@ -3154,18 +3154,24 @@ function toggleHeat(btn) {
 ═══════════════════════════════════════════════════════════ */
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
+  if (!layer) return;
   layer.innerHTML = '';
   domMarkers = {};
 
-  // Anchor assets always visible at any zoom — render first
-  ANCHOR_ASSETS.forEach(a => _addPriceMarker(a));
+  const range = map3dEl?.range || 22000000;
 
-  // 50km or closer: show all assets in viewport
-  if (markersVisible()) {
-    viewportVisible(ASSETS.filter(a => !a.anchor)).forEach(a => _addPriceMarker(a));
+  // 1. REGIONAL VIEW (≤300km): Show ONLY Premium/Gold
+  // We moved the Anchor logic inside this check so they hide when you zoom out
+  if (range <= RANGE_PREMIUM) {
+    const premiums = ASSETS.filter(a => a.anchor);
+    viewportVisible(premiums).forEach(a => _addPriceMarker(a));
   }
-  // 300km or closer (but > 50km): anchors already rendered above — nothing else added here
-  // > 300km: anchors only (cluster logic handles the bubble display)
+
+  // 2. LOCAL VIEW (≤50km): Show EVERYTHING else
+  if (range <= RANGE_ALL) {
+    const regulars = ASSETS.filter(a => !a.anchor);
+    viewportVisible(regulars).forEach(a => _addPriceMarker(a));
+  }
 }
 
 // 1. Create a timer variable at the top of this block
