@@ -5002,6 +5002,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // __initRWA is set here; __mapReady calls it when Maps API is fully loaded
 window.__initRWA = initMap;
 
+} // Closes viewportVisible (or whichever function was last)
+
 // Fallback: if Maps somehow loaded before this script ran
 if (window.__googleMapsLoaded) initMap();
 
