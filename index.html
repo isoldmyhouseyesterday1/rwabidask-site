@@ -3174,8 +3174,7 @@ if (map3dEl) {
   map3dEl.addEventListener('gmp-headingchange', stabilizedCameraChange);
 }
 
-let _cameraChangeTimer = null;
-const MARKER_RANGE_THRESHOLD = 500; // 500km — hide non-anchor tags above this altitude
+const MARKER_RANGE_THRESHOLD = 50000; // 50km — hide non-anchor tags above this altitude
 
 function markersVisible() {
   if (!map3dEl) return false;
