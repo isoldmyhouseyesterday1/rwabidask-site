@@ -3227,53 +3227,39 @@ function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22000
 function premiumMarkersVisible() { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_PREMIUM; }
 
 function onCameraChange() {
-  // We use the 'cameraTimer' from above now to stay stabilized
-  const range = map3dEl?.range || 22000000;
-  
-  // CRITICAL: This rebuilds the markers in the DOM
-  renderDOMMarkers(); 
+  // Clear any existing timer to prevent overlapping calls
+  if (typeof _cameraChangeTimer !== 'undefined') {
+    clearTimeout(_cameraChangeTimer);
+  }
 
-  // Position the markers and force them to show
-  Object.values(domMarkers).forEach(({ el, asset }) => {
-    el.style.display = 'flex'; // Force visibility override
-    projectMarker(asset, el);
-  });
-}
+  // Wrap everything in a single, clean setTimeout
+  _cameraChangeTimer = setTimeout(() => {
+    if (!map3dEl) return;
 
-    if (showAll) {
-      // ≤50km: show all viewport assets + anchors
-      reprojectMarkers();
-      const vis = new Set(viewportVisible(filtered()).map(a => a.id));
-      ANCHOR_ASSETS.forEach(a => vis.add(a.id));
-      Object.entries(domMarkers).forEach(([id, { el }]) => {
-        el.style.display = vis.has(id) ? 'flex' : 'none';
-      });
-      vis.forEach(id => {
-        if (!domMarkers[id]) {
-          const a = ASSETS.find(x => x.id === id);
-          if (a) _addPriceMarker(a);
-        } else {
-          const { el, asset } = domMarkers[id];
-          projectMarker(asset, el);
-        }
-      });
-      buildTicker(viewportVisible(ASSETS)); // viewport-only ticker
-    } else if (showPremium) {
-      // 50km–300km: anchors only, no clusters, no non-anchor markers
-      ANCHOR_ASSETS.forEach(a => {
-        if (!domMarkers[a.id]) _addPriceMarker(a);
-        else projectMarker(a, domMarkers[a.id].el);
-      });
-      buildTicker(viewportVisible(ANCHOR_ASSETS)); // anchor-only ticker
+    const range = map3dEl.range || 22000000;
+    
+    // 1. Re-render the markers based on the current zoom
+    renderDOMMarkers(); 
+
+    // 2. Position all active markers and ensure they are visible
+    Object.values(domMarkers).forEach(({ el, asset }) => {
+      if (el) {
+        // Force display to 'flex' so we override the 'none' from CSS
+        el.style.display = 'flex'; 
+        projectMarker(asset, el);
+      }
+    });
+
+    // 3. Update the ticker based on what's visible
+    // If range is high, show premium; if low, show all visible
+    if (range <= 50000) {
+      buildTicker(viewportVisible(ASSETS));
     } else {
-      // >300km: anchors only + cluster bubbles
-      ANCHOR_ASSETS.forEach(a => {
-        if (!domMarkers[a.id]) _addPriceMarker(a);
-        else projectMarker(a, domMarkers[a.id].el);
-      });
-      buildTicker([]); // base-only ticker when fully zoomed out
+      const premiums = ASSETS.filter(a => a.anchor);
+      buildTicker(viewportVisible(premiums));
     }
-  }, 80);
+
+  }, 80); // This is the '80' that was causing the error!
 }
 
 // Returns assets visible in the current map viewport (approximate)
