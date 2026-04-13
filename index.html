@@ -5040,4 +5040,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // Google Maps "Handshake" — This starts the 3D Engine
 window.__initRWA = initMap;
 
-// Manually trigger the first render so th
+// Trigger first render for visibility
+setTimeout(() => { 
+  if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); 
+}, 500);
+
+// Fallback for immediate initialization if Maps is already ready
+if (window.__googleMapsLoaded) {
+  initMap();
+}
+
+</script>
+</body>
+</html>
