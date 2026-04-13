@@ -538,14 +538,13 @@ html, body {
   50%      { opacity: .25; }
 }
 
-/* ── PRICE TAG MARKERS ── */
+  /* ── PRICE TAG MARKERS ── */
 .price-marker {
   position: absolute;
-  /* 1. Hidden by default so they don't clutter the globe on load */
+  /* 1. Set to none so markers don't appear until you zoom in */
   display: none; 
-  /* 2. Anchors the bottom-center of the marker to the ground */
+  /* 2. Anchors the marker 'feet' to the map instead of the center */
   transform: translate(-50%, -100%);
-  /* 3. Keeps movement buttery smooth during 3D rotation */
   will-change: transform, left, top;
   
   pointer-events: all;
@@ -556,7 +555,12 @@ html, body {
   transition: filter .2s, transform .15s;
   z-index: 10;
 }
-.price-marker:hover { filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); transform: translate(-50%,-100%) scale(1.06); }
+
+.price-marker:hover { 
+  filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); 
+  transform: translate(-50%,-100%) scale(1.06); 
+}
+
 .price-tag {
   background: rgba(14,22,46,.97);
   border: 1px solid rgba(0,255,200,.55);
@@ -567,12 +571,14 @@ html, body {
   backdrop-filter: blur(8px);
   box-shadow: 0 2px 12px rgba(0,0,0,.5);
 }
+
 .price-tag-val {
   font-size: 12px;
   font-weight: 800;
   color: var(--cyan);
   letter-spacing: .1px;
 }
+
 .price-tag-type {
   font-size: 8px;
   color: var(--muted);
@@ -580,11 +586,13 @@ html, body {
   letter-spacing: .8px;
   margin-top: 1px;
 }
+
 .price-stem {
   width: 1px;
   height: 20px;
   background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0));
 }
+
 .price-dot {
   width: 6px;
   height: 6px;
@@ -593,6 +601,7 @@ html, body {
   box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5);
   margin-top: -1px;
 }
+  
 /* Heat mode overrides */
 .price-marker.heat-warm .price-tag { border-color: rgba(255,180,0,.6); }
 .price-marker.heat-warm .price-tag-val { color: #ffb400; }
