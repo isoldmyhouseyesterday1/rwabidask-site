@@ -5004,6 +5004,9 @@ window.__initRWA = initMap;
 
 } // Closes viewportVisible (or whichever function was last)
 
+  // Manually trigger the first render so the map isn't empty on start
+setTimeout(() => { if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); }, 500);
+  
 // Fallback: if Maps somehow loaded before this script ran
 if (window.__googleMapsLoaded) initMap();
 
