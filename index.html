@@ -1381,16 +1381,24 @@ html, body {
     bottom: 60%; /* map shows top 40% of remaining height */
   }
 
-  /* ── Glass UI sits above the 3D map (which renders at z=0 inside shadow DOM) ── */
-  #topbar        { position: relative; z-index: 1000; }
-  #ticker-bar    { position: relative; z-index: 1000; }
-  #footer        { position: relative; z-index: 1000; }
-  .map-ctl-panel { z-index: 1000; }
-  #overlay-layer { z-index: 500; }
+/* ── Glass UI sits above the 3D map ── */
+  #topbar          { position: relative; z-index: 1000; }
+  #ticker-bar      { position: relative; z-index: 1000; }
+  #footer          { position: relative; z-index: 1000; }
+  .map-ctl-panel   { z-index: 1000; }
+  
+  /* FIXED: Set to 999 to ensure markers are above the map but below the topbar */
+  #overlay-layer   { 
+    position: absolute; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    z-index: 999; 
+    pointer-events: none; 
+  }
+  
   #map3d-container { z-index: 0; }
-  /* Ensure shell rows stack correctly */
   #shell { isolation: isolate; }
-
+  
   /* ── Bottom sheet drawer ── */
   #asset-drawer {
     position: fixed;
