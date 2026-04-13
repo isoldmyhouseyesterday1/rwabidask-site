@@ -5011,13 +5011,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bl) bl.addEventListener('click', blimpClick);
 });
 
-// Google Maps boot
-// This links the API callback to your internal initMap function
+// Google Maps boot 
 window.__initRWA = initMap;
 
-// If you added extra brackets for debugging, close them HERE:
-// } 
-// } 
+// Trigger first render
+setTimeout(() => { 
+  if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); 
+}, 500);
 
-</script> </body>
+</script>
+</body>
 </html>
