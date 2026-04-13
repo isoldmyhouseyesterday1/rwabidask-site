@@ -1915,37 +1915,47 @@ html, body {
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
 
-/* ── THE MASTER "AUDIT" MOBILE FIX ── */
+/* ── THE CLEAN SLATE MASTER FIX ── */
 @media (max-width: 850px) {
-  /* 1. Force the layout to stay wide like a desktop */
-  #shell {
-    width: 1400px !important; 
+  /* 1. Reset everything to fill the phone screen exactly */
+  html, body, #shell {
+    width: 100vw !important;
     height: 100vh !important;
-    display: grid !important;
-    /* Taller header/footer rows so they are easy to see */
-    grid-template-rows: 40px 70px 1fr 40px 35px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
-  /* 2. Lock the 3 columns so the globe has room in the middle */
+  /* 2. Stack the rows vertically so nothing is 'smushed' */
+  #ticker-row, #ribbon, #footer-row, #status-bar {
+    width: 100% !important;
+    flex-shrink: 0;
+  }
+
+  /* 3. This is the 'CEO View' fix for the 3 columns */
   #main-row {
     display: grid !important;
-    grid-template-columns: 320px 1fr 350px !important;
+    /* Give sidebars just enough room for the text, Map gets the rest */
+    grid-template-columns: 80px 1fr 90px !important; 
+    flex-grow: 1 !important;
     height: 100% !important;
-    width: 1400px !important;
+    width: 100% !important;
   }
 
-  /* 3. BIG UI: Make the text readable (10-K Data at 15px) */
-  #left, #right, .asset-row, .market-data, .ticker-item {
-    font-size: 15px !important; 
-    line-height: 1.5 !important;
-    padding: 6px !important;
+  /* 4. Make the text readable but compact */
+  #left, #right {
+    font-size: 10px !important;
+    padding: 2px !important;
+    background: #000 !important;
+    overflow-x: hidden !important;
   }
 
-  /* 4. Ensure the Map column doesn't collapse */
+  /* 5. Force the Globe to stay large in the center */
   #map-col {
-    min-width: 0 !important;
     height: 100% !important;
+    width: 100% !important;
   }
 }
   
