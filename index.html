@@ -1902,6 +1902,23 @@ html, body {
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
 
+  /* ── MOBILE RESPONSIVE OVERRIDE ── */
+@media (max-width: 850px) {
+  #shell {
+    grid-template-rows: 24px 54px 1fr 0px 0px !important;
+  }
+  #main-row {
+    grid-template-columns: 1fr !important;
+  }
+  #left, #right {
+    display: none !important;
+  }
+  #map-col {
+    height: 100%;
+    width: 100vw;
+  }
+}
+  
 </style>
 </head>
 <body>
