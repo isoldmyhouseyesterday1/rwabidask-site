@@ -3186,13 +3186,13 @@ function renderDOMMarkers() {
   // 1. REGIONAL VIEW (≤ 300km): Show Gold/Premium only
   if (range <= 300000) {
     const premiums = ASSETS.filter(a => a.anchor);
-    viewportVisible(premiums).forEach(a => _addPriceMarker(a));
+    premiums.forEach(a => _addPriceMarker(a));
   }
 
   // 2. LOCAL VIEW (≤ 50km): Show all regular assets
   if (range <= 50000) {
     const regulars = ASSETS.filter(a => !a.anchor);
-    viewportVisible(regulars).forEach(a => _addPriceMarker(a));
+    regulars.forEach(a => _addPriceMarker(a));
   }
 }
   
