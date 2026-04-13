@@ -3343,7 +3343,7 @@ function projectMarker(asset, el) {
     const lat = parseFloat(asset.lat);
     const lng = parseFloat(asset.lng);
     
-    const point = map3dEl.project({ lat, lng, altitude: 0 });
+    const point = map3dEl.project({ lat, lng, altitude: 20 });
 
     // 2. The "Monopoly House" Logic
     if (point && !point.behind) {
