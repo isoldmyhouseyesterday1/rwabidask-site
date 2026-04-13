@@ -3293,14 +3293,23 @@ function addDOMMarker(asset) {
 }
 
 function _addPriceMarker(asset) {
+  const layer = document.getElementById('overlay-layer');
+  if (!layer) return;
+
   const el = document.createElement('div');
-  // Anchor assets always get gold glow class
+  // 1. Maintain your branding: Anchor assets get gold glow
   el.className = 'price-marker' + (asset.anchor ? ' anchor' : '');
-  el.title = asset.address;
-  const priceStr = fmtPrice(asset.price) || '—';
+  el.title = asset.address || 'Asset';
+
+  const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : `$${asset.price}`;
   const typeStr  = asset.type || 'asset';
-  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'', commercial:'', land:'', business:'◈', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
+  
+  const classEmoji = { 
+    aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', 
+    business:'◈', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' 
+  };
   const emoji = classEmoji[asset.type] || '';
+
   el.innerHTML = `
     <div class="price-tag">
       <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
@@ -3309,14 +3318,26 @@ function _addPriceMarker(asset) {
     <div class="price-stem"></div>
     <div class="price-dot"></div>
   `;
+
+  // 2. Interaction logic
   el.addEventListener('click', (e) => {
     e.stopPropagation();
-    openDrawer(asset);
-    selectAsset(asset.id);
+    if (typeof openDrawer === 'function') openDrawer(asset);
+    if (typeof selectAsset === 'function') selectAsset(asset.id);
   });
-  document.getElementById('overlay-layer').appendChild(el);
+
+  // 3. Force the physical display before calculating position
+  el.style.display = 'flex'; 
+  el.style.visibility = 'visible';
+  
+  layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
-  projectMarker(asset, el);
+
+  // 4. THE CRITICAL JUMP: Manually fire the projection
+  // We wrap it in a tiny timeout to ensure the DOM has painted the element
+  setTimeout(() => {
+    projectMarker(asset, el);
+  }, 0);
 }
 
 function projectMarker(asset, el) {
