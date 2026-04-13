@@ -3152,17 +3152,30 @@ function renderDOMMarkers() {
     const nonAnchors = ASSETS.filter(a => !a.anchor);
     viewportVisible(nonAnchors).forEach(a => _addPriceMarker(a));
   }
-  // Camera event listeners
-  if (map3dEl) {
-    map3dEl.addEventListener('gmp-centerchange',  onCameraChange);
-    map3dEl.addEventListener('gmp-rangechange',   onCameraChange);
-    map3dEl.addEventListener('gmp-tiltchange',    onCameraChange);
-    map3dEl.addEventListener('gmp-headingchange', onCameraChange);
-  }
+  
+  // 1. Create a timer variable at the top of this block
+let cameraTimer;
+
+// 2. Wrap the event listeners in a Debounce function
+if (map3dEl) {
+  const stabilizedCameraChange = () => {
+    // Clear the previous timer so we don't fire 100 times
+    clearTimeout(cameraTimer);
+    
+    // Only run the logic after 100ms of "silence" (no moving)
+    cameraTimer = setTimeout(() => {
+      onCameraChange();
+    }, 100); 
+  };
+
+  map3dEl.addEventListener('gmp-centerchange',  stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-rangechange',   stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-tiltchange',    stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-headingchange', stabilizedCameraChange);
 }
 
 let _cameraChangeTimer = null;
-const MARKER_RANGE_THRESHOLD = 500000; // 500km — hide non-anchor tags above this altitude
+const MARKER_RANGE_THRESHOLD = 500; // 500km — hide non-anchor tags above this altitude
 
 function markersVisible() {
   if (!map3dEl) return false;
