@@ -115,11 +115,13 @@ html, body {
 }
 #main-row {
   display: grid;
-  grid-template-columns: 288px 1fr 320px;
+  /* Use percentages so they shrink/grow with the window */
+  grid-template-columns: 20% 1fr 20%; 
   min-height: 0;
   overflow: hidden;
+  width: 100%;
 }
-
+  
 /* ══════════════════════════════════════════════
    TOPBAR
 ══════════════════════════════════════════════ */
