@@ -3341,24 +3341,35 @@ function _addPriceMarker(asset) {
 }
 
 function projectMarker(asset, el) {
-  if (!map3dEl) return;
-  try {
-    // This tells Google to calculate the exact X/Y on the 3D surface
-    const point = map3dEl.project({ lat: asset.lat, lng: asset.lng, altitude: 0 });
+  if (!map3dEl || !el) return;
 
-    if (!point || point.behind) {
-      el.style.display = 'none';
-    } else {
-      // If we are within the correct zoom tier, show the marker
+  try {
+    // 1. Get the 3D pixel coordinates from Google
+    const lat = parseFloat(asset.lat);
+    const lng = parseFloat(asset.lng);
+    
+    const point = map3dEl.project({ lat, lng, altitude: 0 });
+
+    // 2. The "Monopoly House" Logic
+    if (point && !point.behind) {
+      // Force it to be visible
       el.style.display = 'flex';
-      el.style.left = point.x + 'px';
-      el.style.top = point.y + 'px';
+      el.style.visibility = 'visible';
+      el.style.opacity = '1';
+
+      // Position the tag exactly on the map
+      // We use 'translate' because it's smoother for 3D performance
+      el.style.transform = `translate(-50%, -100%) translate(${point.x}px, ${point.y}px)`;
       
-      // Depth sorting: keeps markers behind the globe hidden
+      // Depth sorting: keeps closer houses on top of far ones
       el.style.zIndex = Math.floor(1000000 - point.distance);
+    } else {
+      // It's on the other side of the planet
+      el.style.display = 'none';
     }
-  } catch(e) { 
-    el.style.display = 'none'; 
+  } catch (err) {
+    console.error("Marker Projection Error:", err);
+    el.style.display = 'none';
   }
 }
 
