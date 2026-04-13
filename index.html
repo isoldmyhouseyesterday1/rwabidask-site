@@ -1902,20 +1902,34 @@ html, body {
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
 
-  /* ── MOBILE RESPONSIVE OVERRIDE ── */
+/* ── INSTITUTIONAL MOBILE GRID (NO SMUSHING) ── */
 @media (max-width: 850px) {
-  #shell {
-    grid-template-rows: 24px 54px 1fr 0px 0px !important;
-  }
+  /* 1. Adjust the grid columns to be proportional instead of fixed pixels */
   #main-row {
-    grid-template-columns: 1fr !important;
+    display: grid !important;
+    /* Give sidebars 20% each, Map gets 60% of the width */
+    grid-template-columns: 20% 1fr 20% !important; 
+    height: 100% !important;
+    width: 100vw !important;
+    overflow: hidden;
   }
+
+  /* 2. Shrink the font size so the "10-K" data still fits in skinnier columns */
   #left, #right {
-    display: none !important;
+    font-size: 9px !important; 
+    padding: 4px !important;
+    min-width: 0 !important; /* Prevents panels from forcing a width */
   }
+
+  /* 3. Ensure the globe stays centered and visible */
   #map-col {
-    height: 100%;
-    width: 100vw;
+    min-width: 0 !important;
+    height: 100% !important;
+  }
+
+  /* 4. Hide non-essential icons in the panels to save space */
+  #left .asset-icon, #right .stat-icon {
+    display: none !important;
   }
 }
   
