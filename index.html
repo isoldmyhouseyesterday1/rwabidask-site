@@ -541,13 +541,12 @@ html, body {
   /* ── PRICE TAG MARKERS ── */
 .price-marker {
   position: absolute;
-  display: flex !important;  /* never overridden by stylesheet */
-  left: 0; top: 0;           /* explicit origin so transform:translate works correctly */
+  display: flex !important;
+  left: 0; top: 0;
   pointer-events: auto;
   z-index: 10;
   will-change: transform;
-  /* start off-screen; projectMarker moves it into place */
-  transform: translate(-50%, -100%) translate(-9999px, -9999px);
+  transform: translate(-50%,-100%) translate(-9999px,-9999px);
 }
 
 .price-marker:hover { 
@@ -1352,45 +1351,42 @@ html, body {
 }
 #asset-drawer.open { transform: translateX(0); }
 
-/* ── OVERLAY LAYER — price markers above map on ALL screen sizes ──────── */
+/* ── OVERLAY: markers above map on ALL screen sizes ── */
 #overlay-layer {
   position: absolute;
   inset: 0;
   z-index: 999;
   pointer-events: none;
-  overflow: visible; /* don't clip markers near edges */
+  overflow: visible;
 }
 
-/* ═══════════════════════════════════════════
-   MOBILE — Portrait + Landscape
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   MOBILE — Portrait & Landscape
+   Globe shrinks into the 1fr row so topbar/ticker/footer always show
+═══════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
 
-  /* Shell: use dvh so iOS Safari toolbar doesn't cut the bottom row */
+  /* Shell rows explicit: every UI strip gets its own row.
+     100dvh = real visible height on iOS Safari */
   #shell {
-    grid-template-rows: 44px 48px 1fr 26px 22px;
+    grid-template-rows: 24px 48px 1fr 26px 26px;
     height: 100dvh;
     isolation: isolate;
   }
 
-  /* Topbar: always visible, compact */
-  #topbar {
-    position: relative;
-    z-index: 1000;
-    height: 48px;
-    padding: 0 8px;
-  }
+  /* Topbar: always visible */
+  #topbar { position: relative; z-index: 1000; padding: 0 8px; }
   .tstat    { display: none; }
   .logo-tag { display: none; }
   .logo     { padding: 0 12px; }
-  #search-input { font-size: 13px; min-width: 0; }
+  #search-input { font-size: 12px; min-width: 0; flex: 1; }
   .tbtn     { padding: 0 8px; font-size: 10px; }
 
-  /* Ticker + footer: always visible at bottom */
+  /* Ticker + footer always visible */
   #ticker-bar { position: relative; z-index: 1000; }
   #footer     { position: relative; z-index: 1000; font-size: 9px; }
 
-  /* Map row */
+  /* Main row: single column, fills 1fr */
   #main-row {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
@@ -1400,19 +1396,15 @@ html, body {
   }
   #left, #right { display: none; }
 
-  /* Map column fills its grid cell entirely */
-  #map-col {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
+  /* Map column: fills its grid row.
+     MUST use position:relative (not absolute/inset:0) so the grid row stays allocated */
+  #map-col { position: relative; width: 100%; height: 100%; overflow: hidden; }
   #map3d-container { position: absolute; inset: 0; z-index: 0; }
 
   /* Map controls */
   .map-ctl-panel { z-index: 1000; top: 8px; right: 8px; }
 
-  /* Price markers: bigger tap targets */
+  /* Price markers */
   .price-marker   { z-index: 500 !important; }
   .price-tag      { padding: 5px 9px; }
   .price-tag-val  { font-size: 11px; }
@@ -1422,41 +1414,31 @@ html, body {
   #asset-drawer {
     position: fixed;
     top: auto; left: 0; right: 0; bottom: 0;
-    width: 100%;
-    height: 65vh;
-    max-height: 65vh;
+    width: 100%; height: 65vh; max-height: 65vh;
     border-left: none;
     border-top: 2px solid rgba(0,255,200,.3);
     border-radius: 16px 16px 0 0;
     transform: translateY(105%);
     transition: transform .3s cubic-bezier(.4,0,.2,1);
     box-shadow: 0 -12px 50px rgba(0,0,0,.8);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    will-change: transform;
-    z-index: 2000;
-    background: var(--bg1);
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; will-change: transform;
+    z-index: 2000; background: var(--bg1);
   }
   #asset-drawer.open { transform: translateY(0); }
-
-  /* Pull handle */
   #asset-drawer::before {
-    content: '';
-    display: block;
+    content: ''; display: block;
     width: 40px; height: 4px;
     background: rgba(255,255,255,.2);
-    border-radius: 2px;
-    margin: 10px auto 4px;
+    border-radius: 2px; margin: 10px auto 4px;
   }
-
   .drawer-head    { padding: 8px 14px; }
   .drawer-section { padding: 8px 14px; }
   .drawer-actions { padding: 8px 14px 24px; }
   .drawer-legal   { padding: 6px 14px 28px; }
   .drawer-btn-primary,
   .drawer-btn-secondary { min-height: 48px; font-size: 14px; }
-  .drawer-close   { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+  .drawer-close { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
 }
 
 /* Landscape phone: reclaim vertical space */
@@ -2960,9 +2942,9 @@ async function initMap() {
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
 
-    // Wire camera events HERE — map3dEl is live in the DOM now
-    // (The if(map3dEl) block at parse time runs before initMap, so map3dEl was null)
-    const _onCam = () => { clearTimeout(cameraTimer); cameraTimer = setTimeout(() => onCameraChange(), 100); };
+    // Wire camera events here — map3dEl is live in DOM now
+    // (The old if(map3dEl) block at parse time ran before initMap so map3dEl was null)
+    const _onCam = () => { clearTimeout(cameraTimer); cameraTimer = setTimeout(onCameraChange, 100); };
     map3dEl.addEventListener('gmp-centerchange',  _onCam);
     map3dEl.addEventListener('gmp-rangechange',   _onCam);
     map3dEl.addEventListener('gmp-tiltchange',    _onCam);
@@ -3189,51 +3171,35 @@ function toggleHeat(btn) {
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
-
   layer.innerHTML = '';
   domMarkers = {};
-
   const range = map3dEl.range || 22000000;
-
-  // REGION GATE: above 300km the board stays empty (space view)
-  // Zoom inside 300km → whole board populates at once, gold + cyan together
-  if (range > RANGE_GATE) return;
-
+  if (range > RANGE_GATE) return; // space view — board empty
   viewportVisible(ASSETS).forEach(a => _addPriceMarker(a));
 }
 
-// ── RANGE CONSTANTS ──────────────────────────────────────────────────────
-// Single 300km gate: below = full board, above = empty
-const RANGE_GATE             = 300000;
+const RANGE_GATE             = 300000; // 300km unified gate
 const RANGE_ALL              = RANGE_GATE;
 const RANGE_PREMIUM          = RANGE_GATE;
 const MARKER_RANGE_THRESHOLD = RANGE_GATE;
+let cameraTimer;
 
 function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22e6) <= RANGE_GATE; }
 function premiumMarkersVisible() { return markersVisible(); }
 
-// Camera debounce — listeners wired in initMap() after map3dEl exists
-let cameraTimer;
-
 function onCameraChange() {
   if (typeof _cameraChangeTimer !== 'undefined') clearTimeout(_cameraChangeTimer);
-
   _cameraChangeTimer = setTimeout(() => {
     if (!map3dEl) return;
     const range = map3dEl.range || 22e6;
-
     if (range > RANGE_GATE) {
-      // Space view: park all markers off-screen
       Object.values(domMarkers).forEach(({ el }) => {
         el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
       });
       return;
     }
-
-    // Inside region: build board on first entry, then reproject every tick
     if (Object.keys(domMarkers).length === 0) renderDOMMarkers();
     reprojectMarkers();
-
     buildTicker(viewportVisible(ASSETS));
   }, 80);
 }
@@ -3273,20 +3239,13 @@ function addDOMMarker(asset) {
 function _addPriceMarker(asset) {
   const layer = document.getElementById('overlay-layer');
   if (!layer) return;
-
   const el = document.createElement('div');
-  // Gold (.anchor) vs Cyan (.standard) — CSS handles all color theming
   el.className = 'price-marker' + (asset.anchor ? ' anchor' : ' standard');
   el.title = asset.address || 'Asset';
-
   const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : '$' + asset.price;
   const typeStr  = asset.type || 'asset';
-  const classEmoji = {
-    aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$',
-    business:'◈', energy:'⚡', minerals:'💎', ip:'©', debt:'📋'
-  };
+  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', business:'◈', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
   const emoji = classEmoji[asset.type] || '';
-
   el.innerHTML = `
     <div class="price-tag">
       <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
@@ -3295,17 +3254,13 @@ function _addPriceMarker(asset) {
     <div class="price-stem"></div>
     <div class="price-dot"></div>
   `;
-
   el.addEventListener('click', (e) => {
     e.stopPropagation();
     if (typeof openDrawer === 'function') openDrawer(asset);
     if (typeof selectAsset === 'function') selectAsset(asset.id);
   });
-
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
-
-  // rAF ensures element is in DOM with dimensions before we project
   requestAnimationFrame(() => projectMarker(asset, el));
 }
 
@@ -3314,20 +3269,16 @@ function projectMarker(asset, el) {
   try {
     const lat = parseFloat(asset.lat);
     const lng = parseFloat(asset.lng);
-
-    // altitude:20 floats tags above terrain and 3D buildings
     const point = map3dEl.project({ lat, lng, altitude: 20 });
-
     if (point && !point.behind) {
       el.style.transform = `translate(-50%, -100%) translate(${point.x}px, ${point.y}px)`;
-      el.style.zIndex    = String(Math.floor(1000000 - (point.distance || 0)));
+      el.style.zIndex = String(Math.floor(1000000 - (point.distance || 0)));
     } else {
-      // Behind globe — park off-screen (avoids reflow from display:none toggling)
-      el.style.transform = 'translate(-50%, -100%) translate(-9999px, -9999px)';
+      el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
     }
   } catch (err) {
     console.warn('[RWABidAsk] projectMarker:', err.message);
-    el.style.transform = 'translate(-50%, -100%) translate(-9999px, -9999px)';
+    el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
   }
 }
 
