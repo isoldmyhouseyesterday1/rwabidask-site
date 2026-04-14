@@ -2388,6 +2388,7 @@ document.getElementById('auth-gate')?.addEventListener('click', (e) => {
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
   if (isCameraProcessing) return;
+  
   cameraDebounceTimer = setTimeout(() => {
     isCameraProcessing = true;
     try {
@@ -2597,7 +2598,7 @@ document.getElementById('map-col').addEventListener('click', (e) => {
     }
   }
 });
-
+  
   /* ═══════════════════════════════════════════════════════════
    INSTITUTIONAL ASSET DRAWER (Desktop)
 ═══════════════════════════════════════════════════════════ */
