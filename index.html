@@ -3197,73 +3197,99 @@ function toggleHeat(btn) {
    we place markers via CSS absolute positioning recalculated
    on camera change events.
 ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   RWABidAsk — FIXED MARKER ENGINE (PHYSICAL ONLY)
+═══════════════════════════════════════════════════════════ */
+
+let isUpdating = false; 
+let cameraTimer;
+
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
   layer.innerHTML = '';
   domMarkers = {};
-  // Show ALL assets at every zoom level — projectMarker hides ones behind globe
-  ASSETS.forEach(a => _addPriceMarker(a));
+
+  // HIDE NON-PHYSICAL: Only show assets with actual locations
+  const physicalTypes = ['real_estate', 'energy', 'aviation', 'maritime', 'resources', 'minerals', 'infrastructure'];
+  const mapAssets = ASSETS.filter(a => physicalTypes.includes(a.type) || a.anchor === true);
+
+  mapAssets.forEach(a => _addPriceMarker(a));
 }
-  
-// Camera debounce timer — wired inside initMap() after map3dEl exists
-let cameraTimer;
-
-// 300km unified gate
-const RANGE_GATE             = 300000;
-const RANGE_ALL              = RANGE_GATE;
-const RANGE_PREMIUM          = RANGE_GATE;
-const MARKER_RANGE_THRESHOLD = RANGE_GATE;
-
-function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22e6) <= RANGE_GATE; }
-function premiumMarkersVisible() { return markersVisible(); }
 
 function onCameraChange() {
-  if (isProjecting) return; // Stop the infinite loop
+  if (isUpdating) return; // THE LOOP BREAKER
   
   if (cameraTimer) clearTimeout(cameraTimer);
   cameraTimer = setTimeout(() => {
-    isProjecting = true;
+    isUpdating = true;
     reprojectMarkers();
     if (typeof buildTicker === 'function') {
       buildTicker(viewportVisible(ASSETS));
     }
-    isProjecting = false;
-  }, 50); // Small delay to let the 3D tiles settle
+    isUpdating = false;
+  }, 60); 
+}
+
+function reprojectMarkers() {
+  // SAFETY: Ensure Google 3D Engine is fully awake
+  if (!map3dEl || typeof map3dEl.viewportToElementCoordinates !== 'function') return;
+
+  const currentRange = map3dEl.range || 2000000;
+  const isVisibleAtZoom = currentRange < 400000; // 400km Visibility Gate
+
+  Object.values(domMarkers).forEach(({ el, asset }) => {
+    const pos = map3dEl.viewportToElementCoordinates({
+      lat: parseFloat(asset.lat),
+      lng: parseFloat(asset.lng),
+      altitude: asset.type === 'premium' ? 45 : 20
+    });
+
+    // If marker is behind globe or zoomed out too far, hide it
+    if (!pos || !isVisibleAtZoom) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = 'flex';
+      // PIN PRECISION: translate(-50%, -100%) keeps it glued to the runway
+      el.style.transform = `translate(-50%, -100%) translate(${pos.x}px, ${pos.y}px)`;
+      el.style.zIndex = Math.floor(1000000 - currentRange/1000);
+    }
+  });
+}
+
+function viewportVisible(assets) {
+  // Only return assets that are actually rendered and visible on screen
+  return assets.filter(a => domMarkers[a.id] && domMarkers[a.id].el.style.display !== 'none');
+}
+
+function _addPriceMarker(asset) {
+  const layer = document.getElementById('overlay-layer');
+  if (!layer) return;
+  const el = document.createElement('div');
+  el.className = 'price-marker' + (asset.anchor ? ' premium' : ' standard');
+  
+  const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : '$' + asset.price;
+  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', energy:'⚡', minerals:'💎' };
+  const emoji = classEmoji[asset.type] || '◈';
+
+  el.innerHTML = `
+    <div class="price-tag">
+      <div class="price-tag-val">${emoji} ${priceStr}</div>
+      <div class="price-tag-type">${asset.type || 'asset'}</div>
+    </div>
+    <div class="price-stem"></div>
+    <div class="price-dot"></div>
+  `;
+
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (typeof openDrawer === 'function') openDrawer(asset);
+  });
+
+  layer.appendChild(el);
+  domMarkers[asset.id] = { el, asset };
 }
   
-// Returns assets visible in the current map viewport (approximate)
-function viewportVisible(assets) {
-  if (!map3dEl) return assets;
-  try {
-    const center = map3dEl.center || { lat: 20, lng: 10 };
-    const range  = map3dEl.range  || 22000000;
-    // Convert range (meters from camera) to approximate degree spread
-    const degSpread = Math.min(180, (range / 111000) * 1.6);
-    const latMin = (center.lat || 0) - degSpread;
-    const latMax = (center.lat || 0) + degSpread;
-    const lngSpread = degSpread / Math.max(0.1, Math.cos((center.lat || 0) * Math.PI / 180));
-    const lngMin = (center.lng || 0) - lngSpread;
-    const lngMax = (center.lng || 0) + lngSpread;
-    return assets.filter(a =>
-      a.lat >= latMin && a.lat <= latMax &&
-      a.lng >= lngMin && a.lng <= lngMax
-    );
-  } catch(e) {
-    return assets;
-  }
-}
-
-let lastSearchMarkerId = null;
-function addDOMMarker(asset) {
-  if (lastSearchMarkerId && domMarkers[lastSearchMarkerId]) {
-    domMarkers[lastSearchMarkerId].el.remove();
-    delete domMarkers[lastSearchMarkerId];
-  }
-  lastSearchMarkerId = asset.id;
-  _addPriceMarker(asset);
-}
-
 function _addPriceMarker(asset) {
   const layer = document.getElementById('overlay-layer');
   if (!layer) return;
