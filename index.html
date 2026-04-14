@@ -3232,26 +3232,38 @@ function onCameraChange() {
 }
 
 function reprojectMarkers() {
-  // SAFETY: Ensure Google 3D Engine is fully awake
+  // 1. SAFETY: Ensure Google 3D Engine is fully awake
   if (!map3dEl || typeof map3dEl.viewportToElementCoordinates !== 'function') return;
 
+  // 2. RANGE CHECK: 400km is the limit for "Clean Space" view
   const currentRange = map3dEl.range || 2000000;
-  const isVisibleAtZoom = currentRange < 400000; // 400km Visibility Gate
+  const isVisibleAtZoom = currentRange < 400000; 
 
   Object.values(domMarkers).forEach(({ el, asset }) => {
+    // 3. NATIVE PROJECTION: This handles the "Bolted" coordinates
     const pos = map3dEl.viewportToElementCoordinates({
       lat: parseFloat(asset.lat),
       lng: parseFloat(asset.lng),
       altitude: asset.type === 'premium' ? 45 : 20
     });
 
-    // If marker is behind globe or zoomed out too far, hide it
+    // 4. CURVATURE & VISIBILITY LOGIC
+    // pos is null if the coordinate is behind the horizon
     if (!pos || !isVisibleAtZoom) {
       el.style.display = 'none';
+      el.style.opacity = '0';
     } else {
       el.style.display = 'flex';
-      // PIN PRECISION: translate(-50%, -100%) keeps it glued to the runway
+      
+      // FADE EFFECT: They get clearer as you get closer
+      // Starts fading in at 400km, fully solid at 100km
+      const opacity = Math.min(1, (400000 - currentRange) / 300000);
+      el.style.opacity = opacity;
+
+      // PIN PRECISION: translate(-50%, -100%) is the industry standard for pins
       el.style.transform = `translate(-50%, -100%) translate(${pos.x}px, ${pos.y}px)`;
+      
+      // DEPTH: Ensure they don't overlap weirdly
       el.style.zIndex = Math.floor(1000000 - currentRange/1000);
     }
   });
