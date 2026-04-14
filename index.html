@@ -3230,18 +3230,22 @@ function renderDOMMarkers() {
 }
 
 function onCameraChange() {
-  // 2. LOOP BREAKER: Stops the "Maximum Call Stack" crash
   if (isMapUpdating) return; 
   
   if (cameraTimer) clearTimeout(cameraTimer);
   cameraTimer = setTimeout(() => {
-    isMapUpdating = true;
-    reprojectMarkers();
-    if (typeof buildTicker === 'function') {
-      buildTicker(viewportVisible(ASSETS));
+    try {
+      isMapUpdating = true;
+      reprojectMarkers();
+      if (typeof buildTicker === 'function') {
+        buildTicker(viewportVisible(ASSETS));
+      }
+    } catch (err) {
+      console.error("[RWABidAsk] Reproject failed:", err);
+    } finally {
+      isMapUpdating = false; 
     }
-    isMapUpdating = false;
-  }, 60); 
+  }, 100);
 }
 
 function reprojectMarkers() {
