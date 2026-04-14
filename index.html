@@ -1885,7 +1885,7 @@ body { min-width: 900px; overflow-x: auto; }
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#d2bda2a192a0a5b3b0bbb6b3a1b9fcb1bdbf"><span class="__cf_email__" data-cfemail="c5aab5b685b7b2a4a7aca1a4b6aeeba6aaa8">[email&#160;protected]</span></a>
+    <a href="/cdn-cgi/l/email-protection#c2adb2a182b0b5a3a0aba6a3b1a9eca1adaf"><span class="__cf_email__" data-cfemail="c1aeb5b681b3b6a0a3a8a5a0b2aaefa2aeac">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -2345,7 +2345,7 @@ function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn);
 ═══════════════════════════════════════════════════════════ */
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-const MARKER_VISIBLE_RANGE = 2500000; // 2,500km for billion-scale performance
+const MARKER_VISIBLE_RANGE = 600000; // 600km: only render when zoomed in close (regional level)
 let markersHaveBeenShown = false;
 let isAuthenticated = false;
 
@@ -2436,7 +2436,11 @@ function onCameraChange() {
         
         reprojectMarkersWithMatrix();
       } else {
-        Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+        // CRITICAL FIX: Force all markers to be hidden when zoomed out globally
+        Object.values(domMarkers).forEach(({ el }) => { 
+          el.style.display = 'none';
+          el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+        });
       }
       const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
       buildTicker(viewportList);
@@ -2451,7 +2455,8 @@ function getVisibleAssetsInViewport(assets) {
     const center = map3dEl.center || { lat: 20, lng: 10 };
     const range = map3dEl.range || 22000000;
     
-    const degSpread = Math.min(180, (range / 111000) * 1.4);
+    // Calculate bounding box based on camera range (km to degrees)
+    const degSpread = Math.min(30, (range / 111000) * 1.2); // limit to 30 degrees max
     const latMin = center.lat - degSpread;
     const latMax = center.lat + degSpread;
     const lngSpread = degSpread / Math.max(0.2, Math.cos(center.lat * Math.PI / 180));
@@ -2463,6 +2468,7 @@ function getVisibleAssetsInViewport(assets) {
       a.lng >= lngMin && a.lng <= lngMax
     );
     
+    // Frustum culling: only assets in front of camera (dot product)
     const camLatRad = center.lat * Math.PI / 180;
     const camLngRad = center.lng * Math.PI / 180;
     const viewDir = { x: Math.cos(camLatRad) * Math.cos(camLngRad), y: Math.sin(camLatRad), z: Math.cos(camLatRad) * Math.sin(camLngRad) };
@@ -2472,7 +2478,7 @@ function getVisibleAssetsInViewport(assets) {
       const assetLngRad = a.lng * Math.PI / 180;
       const assetVec = { x: Math.cos(assetLatRad) * Math.cos(assetLngRad), y: Math.sin(assetLatRad), z: Math.cos(assetLatRad) * Math.sin(assetLngRad) };
       const dot = viewDir.x * assetVec.x + viewDir.y * assetVec.y + viewDir.z * assetVec.z;
-      return dot > -0.2;
+      return dot > -0.15; // less strict than original
     });
   } catch(e) { return assets.slice(0, 100); }
 }
@@ -2485,7 +2491,11 @@ function renderDOMMarkers() {
   domMarkers = {};
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
   physicalAssets.forEach(a => _addPriceMarker(a));
-  Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+  // CRITICAL FIX: Initially all markers hidden (globe starts blank)
+  Object.values(domMarkers).forEach(({ el }) => { 
+    el.style.display = 'none';
+    el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+  });
 }
 function addDOMMarker(asset) { _addPriceMarker(asset); }
 function _addPriceMarker(asset) {
@@ -2600,7 +2610,7 @@ document.getElementById('map-col').addEventListener('click', (e) => {
 });
   
 /* ═══════════════════════════════════════════════════════════
-   INSTITUTIONAL ASSET DRAWER (Desktop)
+   INSTITUTIONAL ASSET DRAWER (Desktop) - truncated for brevity
 ═══════════════════════════════════════════════════════════ */
 function openDrawer(a) {
   const drawer = document.getElementById('asset-drawer');
