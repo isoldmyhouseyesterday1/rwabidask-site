@@ -112,17 +112,13 @@ html, body {
   grid-template-rows: 24px 54px 1fr 30px 26px;
   height: 100vh;
   min-height: 0;
-  min-width: 900px;   /* hard floor — below this, scroll rather than collapse */
 }
 #main-row {
   display: grid;
   grid-template-columns: 288px 1fr 320px;
   min-height: 0;
   overflow: hidden;
-  min-width: 0;
 }
-/* Body scrolls horizontally on tiny windows rather than crushing the layout */
-body { min-width: 900px; overflow-x: auto; }
 
 /* ══════════════════════════════════════════════
    TOPBAR
@@ -542,21 +538,20 @@ body { min-width: 900px; overflow-x: auto; }
   50%      { opacity: .25; }
 }
 
-  /* ── PRICE TAG MARKERS ── */
+/* ── PRICE TAG MARKERS ── */
 .price-marker {
   position: absolute;
-  top: 0;
-  left: 0;
-  will-change: transform;
-  pointer-events: auto;
-  transition: none !important; /* Forces the marker to stay glued to the spot */
+  transform: translate(-50%, -100%);
+  pointer-events: all;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,.7));
+  transition: filter .2s, transform .15s;
+  z-index: 10;
 }
-
-.price-marker:hover { 
-  filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); 
-  transform: translate(-50%,-100%) scale(1.06); 
-}
-
+.price-marker:hover { filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); transform: translate(-50%,-100%) scale(1.06); }
 .price-tag {
   background: rgba(14,22,46,.97);
   border: 1px solid rgba(0,255,200,.55);
@@ -567,14 +562,12 @@ body { min-width: 900px; overflow-x: auto; }
   backdrop-filter: blur(8px);
   box-shadow: 0 2px 12px rgba(0,0,0,.5);
 }
-
 .price-tag-val {
   font-size: 12px;
   font-weight: 800;
   color: var(--cyan);
   letter-spacing: .1px;
 }
-
 .price-tag-type {
   font-size: 8px;
   color: var(--muted);
@@ -582,13 +575,11 @@ body { min-width: 900px; overflow-x: auto; }
   letter-spacing: .8px;
   margin-top: 1px;
 }
-
 .price-stem {
   width: 1px;
   height: 20px;
   background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0));
 }
-
 .price-dot {
   width: 6px;
   height: 6px;
@@ -597,7 +588,6 @@ body { min-width: 900px; overflow-x: auto; }
   box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5);
   margin-top: -1px;
 }
-  
 /* Heat mode overrides */
 .price-marker.heat-warm .price-tag { border-color: rgba(255,180,0,.6); }
 .price-marker.heat-warm .price-tag-val { color: #ffb400; }
@@ -607,12 +597,6 @@ body { min-width: 900px; overflow-x: auto; }
 .price-marker.heat-hot  .price-tag-val { color: #ff5a5a; }
 .price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,80,80,.6), transparent); }
 .price-marker.heat-hot  .price-dot  { background: #ff5a5a; box-shadow: 0 0 6px #ff5a5a; }
-
-/* ── STANDARD assets — cyan style ── */
-.price-marker.standard .price-tag     { border-color: rgba(0,255,200,.55); }
-.price-marker.standard .price-tag-val { color: var(--cyan); }
-.price-marker.standard .price-stem    { background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0)); }
-.price-marker.standard .price-dot     { background: var(--cyan); box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5); }
 
 /* ── ANCHOR / FEATURED — pulsing gold glow ────────────────── */
 @keyframes anchor-glow {
@@ -1354,124 +1338,108 @@ body { min-width: 900px; overflow-x: auto; }
 }
 #asset-drawer.open { transform: translateX(0); }
 
-/* ── OVERLAY: marker layer above map, ALL viewports ── */
-#overlay-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 999;
-  pointer-events: none;
-  overflow: visible;
-}
-
-/* ═══════════════════════════════════════════════════
-   MOBILE (≤767px) — Portrait & Landscape
-   Globe is in the 1fr center row.
-   Side panels hidden; bottom-sheet drawer replaces them.
-   Topbar / ticker / footer always occupy their grid rows.
-═══════════════════════════════════════════════════ */
+/* Mobile: bottom sheet */
 @media (max-width: 767px) {
 
-  /* 100dvh = actual visible area on iOS Safari.
-     100vh includes the browser chrome and clips bottom rows. */
-  #shell {
-    grid-template-rows: 24px 48px 1fr 26px 26px;
-    height: 100dvh;
-    isolation: isolate;
-    min-width: unset; /* remove the desktop 900px floor */
-  }
-
-  body { min-width: unset; overflow-x: hidden; }
-
-  /* Topbar: always visible */
-  #topbar {
-    position: relative;
-    z-index: 1000;
-    padding: 0 8px;
-    height: 48px;
-  }
+  /* ── Topbar: strip non-essentials ── */
   .tstat    { display: none; }
   .logo-tag { display: none; }
-  .logo     { padding: 0 10px; }
-  #search-input { font-size: 12px; min-width: 0; flex: 1; }
-  .tbtn     { padding: 0 8px; font-size: 10px; }
+  #search-input { font-size: 12px; }
+  .tbtn     { padding: 0 10px; font-size: 10px; }
 
-  /* Ticker: always visible */
-  #ticker-bar { position: relative; z-index: 1000; }
-
-  /* Footer: always visible */
-  #footer { position: relative; z-index: 1000; font-size: 9px; }
-
-  /* Main row: single column */
+  /* ── Full-screen map layout ── */
   #main-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr;   /* one column — map only */
     grid-template-rows: 1fr;
     position: relative;
-    min-height: 0;
-    overflow: hidden;
   }
-  #left, #right { display: none; }
+  #left, #right { display: none; } /* panels hidden; drawer takes over */
 
-  /* Map column: MUST be position:relative so it stays inside
-     the 1fr grid row and doesn't cover topbar/ticker/footer.
-     position:absolute;inset:0 was the root cause of the off-center globe. */
+  /* ── Map column: occupies full area by default,
+        shrinks to top 40% when drawer is open ── */
   #map-col {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+    position: absolute;
+    inset: 0;
+    transition: bottom .32s cubic-bezier(.4,0,.2,1);
   }
-  #map3d-container { position: absolute; inset: 0; z-index: 0; }
+  /* JS adds .drawer-open class to #map-col when drawer opens */
+  #map-col.drawer-open {
+    bottom: 60%; /* map shows top 40% of remaining height */
+  }
 
-  /* Map controls */
-  .map-ctl-panel { z-index: 1000; top: 8px; right: 8px; }
+  /* ── Glass UI sits above the 3D map (which renders at z=0 inside shadow DOM) ── */
+  #topbar        { position: relative; z-index: 1000; }
+  #ticker-bar    { position: relative; z-index: 1000; }
+  #footer        { position: relative; z-index: 1000; }
+  .map-ctl-panel { z-index: 1000; }
+  #overlay-layer { z-index: 500; }
+  #map3d-container { z-index: 0; }
+  /* Ensure shell rows stack correctly */
+  #shell { isolation: isolate; }
 
-  /* Price markers */
-  .price-marker   { z-index: 500 !important; }
-  .price-tag      { padding: 5px 9px; }
-  .price-tag-val  { font-size: 11px; }
-  .price-tag-type { font-size: 7px; }
-
-  /* Asset drawer: bottom sheet */
+  /* ── Bottom sheet drawer ── */
   #asset-drawer {
     position: fixed;
-    top: auto; left: 0; right: 0; bottom: 0;
-    width: 100%; height: 65vh; max-height: 65vh;
+    top: auto;       /* ignore top */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 60vh;    /* exactly 60% of viewport — map gets the other 40% */
+    max-height: 60vh;
     border-left: none;
     border-top: 2px solid rgba(0,255,200,.3);
-    border-radius: 16px 16px 0 0;
-    transform: translateY(105%);
-    transition: transform .3s cubic-bezier(.4,0,.2,1);
-    box-shadow: 0 -12px 50px rgba(0,0,0,.8);
+    border-radius: 18px 18px 0 0;
+    transform: translateY(105%);  /* starts fully below screen */
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 -12px 50px rgba(0,0,0,.75);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     will-change: transform;
-    z-index: 2000;
-    background: var(--bg1);
   }
-  #asset-drawer.open { transform: translateY(0); }
-  #asset-drawer::before {
-    content: ''; display: block;
-    width: 40px; height: 4px;
-    background: rgba(255,255,255,.2);
-    border-radius: 2px; margin: 10px auto 4px;
+  #asset-drawer.open {
+    transform: translateY(0); /* slides up into view */
   }
-  .drawer-head    { padding: 8px 14px; }
-  .drawer-section { padding: 8px 14px; }
-  .drawer-actions { padding: 8px 14px 24px; }
-  .drawer-legal   { padding: 6px 14px 28px; }
-  .drawer-btn-primary,
-  .drawer-btn-secondary { min-height: 48px; font-size: 14px; }
-  .drawer-close { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
-}
 
-/* Landscape phone */
-@media (max-width: 767px) and (orientation: landscape) {
-  #shell      { grid-template-rows: 40px 1fr 22px; }
-  #ticker-bar { display: none; }
-  #footer     { display: none; }
-  #asset-drawer { height: 80vh; max-height: 80vh; }
-  .price-tag-val { font-size: 10px; }
+  /* ── Pull handle ── */
+  #asset-drawer::before {
+    content: '';
+    display: block;
+    width: 44px;
+    height: 4px;
+    background: rgba(255,255,255,.18);
+    border-radius: 2px;
+    margin: 12px auto 6px;
+  }
+
+  /* ── Touch-friendly buttons ── */
+  .drawer-btn-primary,
+  .drawer-btn-secondary {
+    min-height: 52px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+  .drawer-close {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Tighten drawer padding on small screens ── */
+  .drawer-head    { padding: 10px 14px 10px; }
+  .drawer-section { padding: 10px 14px; }
+  .drawer-actions { padding: 10px 14px 20px; } /* extra bottom for home bar */
+  .drawer-legal   { padding: 8px 14px 24px; }  /* safe-area buffer */
+
+  /* ── Price tags: slightly larger tap target on mobile ── */
+  .price-tag {
+    padding: 6px 12px;
+  }
+  .price-tag-val { font-size: 13px; }
+  .price-marker  { z-index: 20; } /* above map controls on mobile */
 }
 
 .drawer-close {
@@ -1946,7 +1914,7 @@ body { min-width: 900px; overflow-x: auto; }
   </div>
 
   <div class="topbar-right">
-    <div class="tstat" title="Total value of all assets registered on RWABidAsk Permanent Ledger">
+    <div class="tstat" title="Total value of all assets registered on RWABidAsk Persistent Ledger">
       <div class="tstat-l">GMC</div>
       <div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div>
     </div>
@@ -2019,7 +1987,7 @@ body { min-width: 900px; overflow-x: auto; }
     <div id="map3d-container"></div>
 
     <!-- Marker & Info Window layer -->
-    <div id="overlay-layer"></div>
+    <div id="overlay-layer" style="position:absolute;inset:0;pointer-events:none;z-index:300;"></div>
 
     <!-- Map controls -->
     <div class="map-ctl-panel">
@@ -2716,7 +2684,7 @@ function csvRow(line) {
 }
 
 function onDataReady() {
-  setStatus('RWABidAsk PERAMANET LEDGER LIVE — ' + ASSETS.length + ' ASSETS');
+  setStatus('RWABidAsk PERSISTENT LEDGER LIVE — ' + ASSETS.length + ' ASSETS');
   document.getElementById('s-assets').textContent = ASSETS.length;
   document.getElementById('s-status').textContent = 'LIVE';
   document.getElementById('s-bids').textContent = Math.floor(ASSETS.length * 4.2);
@@ -2966,53 +2934,24 @@ async function initMap() {
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
 
- // 1. Wire camera events with the "Circuit Breaker"
-// This part stays inside your initMap function
-const _onCam = () => { 
-    // This matches the lock in the Master function
-    if (typeof globalCameraLock !== 'undefined' && globalCameraLock) return; 
-    
-    if (typeof globalCameraTimer !== 'undefined') {
-        clearTimeout(globalCameraTimer); 
-        globalCameraTimer = setTimeout(onCameraChange, 150); 
-    }
-};
-
-if (map3dEl) {
-    map3dEl.addEventListener('gmp-centerchange',  _onCam);
-    map3dEl.addEventListener('gmp-rangechange',   _onCam);
-    // Heading/Tilt remain disabled for stability
-}
-
-    // 2. Wait for element to attach, then gentle tilt
+    // Wait one frame for element to attach, then gentle tilt
     requestAnimationFrame(() => {
-      setTimeout(() => { 
-        try { 
-            isMapUpdating = true; // Lock before manual tilt
-            map3dEl.tilt = 15; 
-            setTimeout(() => { isMapUpdating = false; }, 500); // Unlock after tilt
-        } catch(e){} 
-      }, 1200);
+      setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200);
     });
 
     setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
 
-    // 3. Load CSV data
+    // Load CSV data
     await loadMarketData();
 
-    // 4. THE CLEAN BOOT: Initial Render
-    // We wrap this in a lock so it doesn't trigger the onCam loop
-    isMapUpdating = true;
-    renderDOMMarkers();
-    
-    // Final pass after map has settled
-    setTimeout(() => { 
-        reprojectMarkers(); 
-        isMapUpdating = false; // FINALLY UNLOCK for the user
-    }, 1000);
-
-    // 5. Init Places search
+    // Init Places search (must come after map loads)
     initSearch();
+
+  } catch (err) {
+    console.error('[RWABidAsk] Map3DElement init error:', err);
+    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING');
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════
    SEARCH — 2026 Alpha: gmp-select + classic place_changed fallback
@@ -3213,89 +3152,122 @@ function toggleHeat(btn) {
    we place markers via CSS absolute positioning recalculated
    on camera change events.
 ═══════════════════════════════════════════════════════════ */
-/* ═══════════════════════════════════════════════════════════
-   RWABidAsk — STABLE MARKER ENGINE (FINAL)
-═══════════════════════════════════════════════════════════ */
-
-// GLOBAL LOCKS
-let isMapUpdating = false; 
-let cameraTimer;
-
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
-  if (!layer || !map3dEl) return;
   layer.innerHTML = '';
   domMarkers = {};
 
-  // 1. FILTER: Only show physical assets on the map (Hide stocks/bonds/debt)
-  const physicalTypes = ['real_estate', 'energy', 'aviation', 'maritime', 'resources', 'minerals', 'infrastructure'];
-  const mapAssets = ASSETS.filter(a => physicalTypes.includes(a.type) || a.anchor === true);
+  // Anchor assets always visible at any zoom — render first
+  ANCHOR_ASSETS.forEach(a => _addPriceMarker(a));
 
-  mapAssets.forEach(a => _addPriceMarker(a));
+  // 50km or closer: show all assets in viewport
+  if (markersVisible()) {
+    viewportVisible(ASSETS.filter(a => !a.anchor)).forEach(a => _addPriceMarker(a));
+  }
+  // 300km or closer (but > 50km): anchors already rendered above — nothing else added here
+  // > 300km: anchors only (cluster logic handles the bubble display)
 }
 
-function reprojectMarkers() {
-  // 3. HANDSHAKE: Ensure Google 3D math is ready
-  if (!map3dEl || typeof map3dEl.viewportToElementCoordinates !== 'function') return;
+// 1. Create a timer variable at the top of this block
+let cameraTimer;
 
-  const currentRange = map3dEl.range || 2000000;
-  // 4. SPACE GATE: Hide everything if higher than 400km
-  const isVisibleAtZoom = currentRange < 400000; 
+// 2. Wrap the event listeners in a Debounce function
+if (map3dEl) {
+  const stabilizedCameraChange = () => {
+    // Clear the previous timer so we don't fire 100 times
+    clearTimeout(cameraTimer);
+    
+    // Only run the logic after 100ms of "silence" (no moving)
+    cameraTimer = setTimeout(() => {
+      onCameraChange();
+    }, 100); 
+  };
 
-  Object.values(domMarkers).forEach(({ el, asset }) => {
-    const pos = map3dEl.viewportToElementCoordinates({
-      lat: parseFloat(asset.lat),
-      lng: parseFloat(asset.lng),
-      altitude: asset.type === 'premium' ? 45 : 20
+  map3dEl.addEventListener('gmp-centerchange',  stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-rangechange',   stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-tiltchange',    stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-headingchange', stabilizedCameraChange);
+}
+
+const RANGE_ALL     = 50000;   // 50km  — show ALL assets
+const RANGE_PREMIUM = 300000;  // 300km — show anchor/gold only
+// Legacy alias (used by syncMarkerVisibility)
+const MARKER_RANGE_THRESHOLD = RANGE_ALL;
+
+function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_ALL; }
+function premiumMarkersVisible() { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_PREMIUM; }
+
+function onCameraChange() {
+  clearTimeout(_cameraChangeTimer);
+  _cameraChangeTimer = setTimeout(() => {
+    const range = map3dEl?.range || 22000000;
+    const showAll     = range <= RANGE_ALL;      // ≤50km: everything
+    const showPremium = range <= RANGE_PREMIUM;  // ≤300km: anchors only
+    // anchors always reproject regardless of zoom
+    Object.values(domMarkers).forEach(({ el, asset }) => {
+      if (asset.anchor) {
+        projectMarker(asset, el);
+      } else {
+        el.style.display = 'none'; // default hide; re-shown below if zoom allows
+      }
     });
 
-    if (!pos || !isVisibleAtZoom) {
-      el.style.display = 'none';
-      el.style.opacity = '0';
+    if (showAll) {
+      // ≤50km: show all viewport assets + anchors
+      reprojectMarkers();
+      const vis = new Set(viewportVisible(filtered()).map(a => a.id));
+      ANCHOR_ASSETS.forEach(a => vis.add(a.id));
+      Object.entries(domMarkers).forEach(([id, { el }]) => {
+        el.style.display = vis.has(id) ? 'flex' : 'none';
+      });
+      vis.forEach(id => {
+        if (!domMarkers[id]) {
+          const a = ASSETS.find(x => x.id === id);
+          if (a) _addPriceMarker(a);
+        } else {
+          const { el, asset } = domMarkers[id];
+          projectMarker(asset, el);
+        }
+      });
+      buildTicker(viewportVisible(ASSETS)); // viewport-only ticker
+    } else if (showPremium) {
+      // 50km–300km: anchors only, no clusters, no non-anchor markers
+      ANCHOR_ASSETS.forEach(a => {
+        if (!domMarkers[a.id]) _addPriceMarker(a);
+        else projectMarker(a, domMarkers[a.id].el);
+      });
+      buildTicker(viewportVisible(ANCHOR_ASSETS)); // anchor-only ticker
     } else {
-      el.style.display = 'flex';
-      
-      // 5. FADE LOGIC: Smoothly appear as you zoom in
-      const fade = Math.max(0, Math.min(1, (400000 - currentRange) / 300000));
-      el.style.opacity = fade;
-
-      // 6. PIN PRECISION: Tips stay on the coordinate
-      el.style.transform = `translate(-50%, -100%) translate(${pos.x}px, ${pos.y}px)`;
-      el.style.zIndex = Math.floor(1000000 - currentRange/1000);
+      // >300km: anchors only + cluster bubbles
+      ANCHOR_ASSETS.forEach(a => {
+        if (!domMarkers[a.id]) _addPriceMarker(a);
+        else projectMarker(a, domMarkers[a.id].el);
+      });
+      buildTicker([]); // base-only ticker when fully zoomed out
     }
-  });
+  }, 80);
 }
 
+// Returns assets visible in the current map viewport (approximate)
 function viewportVisible(assets) {
-  return assets.filter(a => domMarkers[a.id] && domMarkers[a.id].el.style.display !== 'none');
-}
-
-function _addPriceMarker(asset) {
-  const layer = document.getElementById('overlay-layer');
-  if (!layer) return;
-  const el = document.createElement('div');
-  el.className = 'price-marker' + (asset.anchor ? ' premium' : ' standard');
-  
-  const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : '$' + asset.price;
-  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', energy:'⚡', minerals:'💎', real_estate:'🏠' };
-  const emoji = classEmoji[asset.type] || '◈';
-
-  el.innerHTML = `
-    <div class="price-tag">
-      <div class="price-tag-val">${emoji} ${priceStr}</div>
-      <div class="price-tag-type">${asset.type || 'asset'}</div>
-    </div>
-    <div class="price-stem"></div>
-    <div class="price-dot"></div>
-  `;
-
-  el.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (typeof openDrawer === 'function') openDrawer(asset);
-  });
-
-  layer.appendChild(el);
-  domMarkers[asset.id] = { el, asset };
+  if (!map3dEl) return assets;
+  try {
+    const center = map3dEl.center || { lat: 20, lng: 10 };
+    const range  = map3dEl.range  || 22000000;
+    // Convert range (meters from camera) to approximate degree spread
+    const degSpread = Math.min(180, (range / 111000) * 1.6);
+    const latMin = (center.lat || 0) - degSpread;
+    const latMax = (center.lat || 0) + degSpread;
+    const lngSpread = degSpread / Math.max(0.1, Math.cos((center.lat || 0) * Math.PI / 180));
+    const lngMin = (center.lng || 0) - lngSpread;
+    const lngMax = (center.lng || 0) + lngSpread;
+    return assets.filter(a =>
+      a.lat >= latMin && a.lat <= latMax &&
+      a.lng >= lngMin && a.lng <= lngMax
+    );
+  } catch(e) {
+    return assets;
+  }
 }
 
 let lastSearchMarkerId = null;
@@ -3307,7 +3279,68 @@ function addDOMMarker(asset) {
   lastSearchMarkerId = asset.id;
   _addPriceMarker(asset);
 }
-  
+
+function _addPriceMarker(asset) {
+  const el = document.createElement('div');
+  // Anchor assets always get gold glow class
+  el.className = 'price-marker' + (asset.anchor ? ' anchor' : '');
+  el.title = asset.address;
+  const priceStr = fmtPrice(asset.price) || '—';
+  const typeStr  = asset.type || 'asset';
+  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'', commercial:'', land:'', business:'◈', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
+  const emoji = classEmoji[asset.type] || '';
+  el.innerHTML = `
+    <div class="price-tag">
+      <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
+      <div class="price-tag-type">${typeStr}</div>
+    </div>
+    <div class="price-stem"></div>
+    <div class="price-dot"></div>
+  `;
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openDrawer(asset);
+    selectAsset(asset.id);
+  });
+  document.getElementById('overlay-layer').appendChild(el);
+  domMarkers[asset.id] = { el, asset };
+  projectMarker(asset, el);
+}
+
+function projectMarker(asset, el) {
+  if (!map3dEl) return;
+  try {
+    const mapRect = document.getElementById('map-col').getBoundingClientRect();
+    const w = mapRect.width, h = mapRect.height;
+    const camCenter = map3dEl.center || { lat: 20, lng: 10 };
+    const camRange  = map3dEl.range  || 22000000;
+    const camTilt   = map3dEl.tilt   || 0;
+    const camHead   = map3dEl.heading || 0;
+    const dLat = asset.lat - (camCenter.lat || 0);
+    const dLng = asset.lng - (camCenter.lng || 0);
+    const ppd = Math.max(0.1, (w / 2) / (camRange / 111000));
+    const cos = Math.cos((camCenter.lat || 0) * Math.PI / 180);
+    const headRad = camHead * Math.PI / 180;
+    const rx = dLng * cos * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
+    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cos * ppd * Math.sin(headRad);
+    const tiltFactor = Math.cos(camTilt * Math.PI / 180);
+    const screenX = w / 2 + rx;
+    const screenY = h / 2 + ry * tiltFactor;
+    const pad = 60;
+    if (screenX < -pad || screenX > w + pad || screenY < -pad || screenY > h + pad) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = 'flex';
+      el.style.left = screenX + 'px';
+      el.style.top  = screenY + 'px';
+    }
+  } catch(e) { el.style.display = 'none'; }
+}
+
+function reprojectMarkers() {
+  Object.values(domMarkers).forEach(({ el, asset }) => projectMarker(asset, el));
+}
+
 /* ═══════════════════════════════════════════════════════════
    INSTITUTIONAL ASSET DRAWER
 ═══════════════════════════════════════════════════════════ */
@@ -3382,7 +3415,7 @@ R
 R
         ${isMinted
           ? `<div class="ledger-hash-preview">${hashHex}</div>`
-          : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitization creates a permanent, immutable record of the asset manifest, ownership chain, and bid history on the RWABidAsk Permanent Ledger.</div>`
+          : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitization creates a permanent, immutable record of the asset manifest, ownership chain, and bid history on the RWABidAsk Persistent Ledger.</div>`
         }
         <button class="digitize-btn" id="digitize-btn-${a.id}" ${isMinted ? 'disabled' : ''}
           onclick="${isMinted ? '' : `initiateDigitizePayment('${a.id}','${hashHex}')`}">
@@ -3879,14 +3912,14 @@ function runMintAnimation(assetId, hash, btn) {
     const ledgerEntryId = 'RWABidAsk-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
     card.innerHTML = `
       <div style="text-align:center;padding:8px 0 12px">
-        <div class="mint-seal">✓ VERIFIED — RWABidAsk PERMANENT LEDGER</div>
+        <div class="mint-seal">✓ VERIFIED — RWABidAsk PERSISTENT LEDGER</div>
         <div class="mint-qr"></div>
         <div style="font-size:9px;color:var(--dim);margin-bottom:8px">Certificate of Digital Record</div>
         <div class="mint-hash">${hash}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:left">
           <div style="font-size:9px;color:var(--muted)">Ledger Entry ID</div><div style="font-size:9px;color:var(--dim)">${ledgerEntryId}</div>
           <div style="font-size:9px;color:var(--muted)">Timestamp</div><div style="font-size:9px;color:var(--dim)">${ts.replace('T',' ').slice(0,19)} UTC</div>
-          <div style="font-size:9px;color:var(--muted)">Platform</div><div style="font-size:9px;color:var(--green)">RWABidAsk Permanent Ledger — Annie Group LLC</div>
+          <div style="font-size:9px;color:var(--muted)">Platform</div><div style="font-size:9px;color:var(--green)">RWABidAsk Persistent Ledger — Annie Group LLC</div>
           <div style="font-size:9px;color:var(--muted)">Status</div><div style="font-size:9px;color:var(--green)">Finalized</div>
         </div>
         <div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.6">
@@ -3973,7 +4006,7 @@ function openModal(type, id) {
         <strong style="color:var(--silver)">§1 — Non-Custodial Service</strong><br>
         RWABidAsk is a software service and digital notary. We do not hold, manage, custody, or move user funds, digital assets, or physical property at any time. All transactions are arranged directly between principals.<br><br>
         <strong style="color:var(--silver)">§2 — Data Permanence (The Moat)</strong><br>
-        All data uploaded to the RWABidAsk Permanent Ledger — including photographs, legal documents, assay reports, and deeds — becomes a permanent part of the RWABidAsk Ledger record. Listings may expire or be withdrawn, but the underlying historical data record is perpetual and non-erasable.<br><br>
+        All data uploaded to the RWABidAsk Persistent Ledger — including photographs, legal documents, assay reports, and deeds — becomes a permanent part of the RWABidAsk Ledger record. Listings may expire or be withdrawn, but the underlying historical data record is perpetual and non-erasable.<br><br>
         <strong style="color:var(--silver)">§3 — Metadata Monetization License</strong><br>
         By registering an asset, users grant RWABidAsk (Annie Group LLC) an irrevocable, worldwide, royalty-free license to aggregate, anonymize, and monetize manifest metadata for market intelligence, index publication, and institutional data products. No personally identifiable information is sold.<br><br>
         <strong style="color:var(--silver)">§4 — Not a Broker or Dealer</strong><br>
@@ -4913,6 +4946,26 @@ function _projectToScreen(asset, mapRect) {
   } catch(e) { return null; }
 }
 
+// Hook clustering into onCameraChange — rebuild clusters on every camera move
+// NOTE: onCameraChange already defined above with full tier logic.
+// We extend it here to handle cluster rendering for the >300km tier.
+const _origOnCameraChange = onCameraChange;
+let _clusterTimer = null;
+function onCameraChange() {
+  _origOnCameraChange();
+  clearTimeout(_clusterTimer);
+  _clusterTimer = setTimeout(() => {
+    const mapRect = document.getElementById('map-col')?.getBoundingClientRect();
+    const range = map3dEl?.range || 22000000;
+    if (range > CLUSTER_THRESHOLD) {
+      // >300km: show viewport-only cluster bubbles for non-anchors
+      buildClusters(viewportVisible(ASSETS.filter(a => !a.anchor)), mapRect);
+    } else {
+      clearClusters(); // ≤300km: individual markers take over
+    }
+  }, 120);
+}
+
 /* ── STRIPE PAYMENT WALL — $999 before ledger write ── */
 // Called from the Digitize button before runMintAnimation
 function initiateDigitizePayment(assetId, hash) {
@@ -4987,63 +5040,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Google Maps "Handshake" — This starts the 3D Engine
 window.__initRWA = initMap;
 
-// Trigger first render for visibility (The "Jumpstart")
-setTimeout(() => { 
-  console.log("[RWABidAsk] BOOT SEQUENCE: Forcing Marker Render...");
-  if(typeof renderDOMMarkers === 'function') {
-    renderDOMMarkers(); 
-  }
-}, 1000); // 1000ms ensures the 3D map is fully stable first
-
-// Fallback for immediate initialization if Maps is already ready
-if (window.__googleMapsLoaded) {
-  initMap();
-}
-
-/* ═══════════════════════════════════════════════════════════
-   THE CLEAN MASTER ENGINE
-═══════════════════════════════════════════════════════════ */
-
-var globalCameraLock = false;
-var globalCameraTimer = null;
-
-function onCameraChange() {
-    if (globalCameraLock) return;
-    if (globalCameraTimer) clearTimeout(globalCameraTimer);
-    
-    globalCameraTimer = setTimeout(() => {
-        try {
-            globalCameraLock = true; 
-            
-            // 1. Position individual markers
-            if (typeof reprojectMarkers === 'function') {
-                reprojectMarkers();
-            }
-            
-            // 2. Space Clusters
-            const currentRange = (window.map3dEl) ? map3dEl.range : 2000000;
-            if (currentRange > 300000) { 
-                if (typeof buildClusters === 'function') {
-                    const mapRect = document.getElementById('map-col')?.getBoundingClientRect();
-                    buildClusters(viewportVisible(ASSETS.filter(a => !a.anchor)), mapRect);
-                }
-            } else {
-                if (typeof clearClusters === 'function') clearClusters();
-            }
-            
-            // 3. Update the Ticker
-            if (typeof buildTicker === 'function' && typeof viewportVisible === 'function') {
-                buildTicker(viewportVisible(ASSETS));
-            }
-            
-        } catch (err) {
-            console.warn("Engine hiccup:", err);
-        } finally {
-            setTimeout(() => { globalCameraLock = false; }, 100);
-        }
-    }, 150); 
-}
-
-</script>
-</body>
-</html>
+// Manually trigger the first render so th
