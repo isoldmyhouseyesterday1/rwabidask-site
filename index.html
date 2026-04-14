@@ -1060,7 +1060,8 @@ body { min-width: 900px; overflow-x: auto; }
     grid-template-rows: 48px 1fr;
     height: 100dvh;
     min-width: unset;
-    width: 100%;
+    width: 100vw;
+    overflow-x: hidden !important;
   }
   #market-ribbon, #ticker-bar, #footer, #left {
     display: none !important;
@@ -1132,6 +1133,10 @@ body { min-width: 900px; overflow-x: auto; }
   .logo-text { font-size: 14px; }
   .search-wrap { margin-left: 8px; flex: 1; }
   #search-input { font-size: 12px; }
+  body, #main-row {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+  }
   #main-row {
     grid-template-columns: 1fr !important;
     width: 100vw !important;
@@ -1141,7 +1146,7 @@ body { min-width: 900px; overflow-x: auto; }
   #map-col {
     position: relative !important;
     left: 0 !important;
-    width: 100% !important;
+    width: 100vw !important;
     height: 100% !important;
     overflow: hidden;
   }
@@ -1658,6 +1663,94 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
+
+/* INSTITUTIONAL AUTHENTICATION GATE — Full-screen overlay before access */
+.auth-gate {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(12, 18, 34, 0.96);
+  backdrop-filter: blur(12px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  transition: opacity 0.3s ease;
+}
+.auth-gate.hidden {
+  display: none;
+}
+.auth-gate-card {
+  background: var(--bg1);
+  border: 1px solid var(--border2);
+  padding: 40px 48px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+.auth-gate-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  background: var(--cyan-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--cyan);
+}
+.auth-gate-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--silver);
+  margin-bottom: 12px;
+}
+.auth-gate-sub {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+.auth-gate-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.auth-gate-btn {
+  padding: 12px 28px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.auth-gate-btn.primary {
+  background: var(--cyan);
+  color: #000;
+}
+.auth-gate-btn.primary:hover {
+  background: #00e6b4;
+}
+.auth-gate-btn.secondary {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--silver);
+}
+.auth-gate-btn.secondary:hover {
+  border-color: var(--border3);
+  color: var(--text);
+  background: rgba(255,255,255,.03);
+}
 </style>
 </head>
 <body>
@@ -1807,6 +1900,19 @@ body { min-width: 900px; overflow-x: auto; }
   <button class="view-toggle-btn" data-view="list">📋 LIST</button>
 </div>
 <div class="list-view" id="mobile-list-view"></div>
+
+<!-- INSTITUTIONAL AUTHENTICATION GATE -->
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-gate-card">
+    <div class="auth-gate-icon">🔒</div>
+    <div class="auth-gate-title">INSTITUTIONAL ACCESS REQUIRED</div>
+    <div class="auth-gate-sub">RWABidAsk is a licensed institutional asset platform. Sign in or request access to view global asset inventory, bid on properties, and access the Persistent Ledger.</div>
+    <div class="auth-gate-buttons">
+      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('tos_gate')">Request Access</button>
+      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button>
+    </div>
+  </div>
+</div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script>
@@ -2199,11 +2305,32 @@ function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn);
    CLEAN BOOT: NO MARKERS ON LOAD — only after zoom or search
    ALTITUDE LOCK: Pins anchored to surface (Z=0, not floating)
    VIEWPORT CULLING: Only markers in visible frustum are rendered
+   AUTH GATE: Markers only appear if user is authenticated
 ═══════════════════════════════════════════════════════════ */
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
 const MARKER_VISIBLE_RANGE = 3000000;
 let markersHaveBeenShown = false;
+let isAuthenticated = false;
+
+// Check authentication status
+async function checkAuthAndShowGate() {
+  if (!_sb) return;
+  const { data } = await _sb.auth.getSession();
+  if (data?.session?.user) {
+    isAuthenticated = true;
+    document.getElementById('auth-gate').classList.add('hidden');
+    // Re-render markers now that user is authenticated
+    if (map3dEl) {
+      onCameraChange();
+    }
+  } else {
+    isAuthenticated = false;
+    document.getElementById('auth-gate').classList.remove('hidden');
+    // Hide all markers when not authenticated
+    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+  }
+}
 
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
@@ -2212,6 +2339,14 @@ function onCameraChange() {
     isCameraProcessing = true;
     try {
       if (!map3dEl) return;
+      
+      // If not authenticated, hide all markers and return
+      if (!isAuthenticated) {
+        Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+        isCameraProcessing = false;
+        return;
+      }
+      
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
@@ -2600,6 +2735,13 @@ document.addEventListener('DOMContentLoaded', () => { const bl = document.getEle
 window.__initRWA = initMap;
 setTimeout(() => { console.log("[RWABidAsk] BOOT SEQUENCE: Forcing Marker Render..."); if (typeof renderDOMMarkers === 'function') renderDOMMarkers(); }, 1000);
 if (window.__googleMapsLoaded) initMap();
+
+// Override restoreSession to check auth gate
+const originalRestore = restoreSession;
+restoreSession = async function() {
+  await originalRestore();
+  await checkAuthAndShowGate();
+};
 </script>
 </body>
 </html>
