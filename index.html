@@ -3232,38 +3232,36 @@ function onCameraChange() {
 }
 
 function reprojectMarkers() {
-  // 1. SAFETY: Ensure Google 3D Engine is fully awake
+  // 1. SAFETY: If Google 3D isn't ready, don't run
   if (!map3dEl || typeof map3dEl.viewportToElementCoordinates !== 'function') return;
 
-  // 2. RANGE CHECK: 400km is the limit for "Clean Space" view
+  // 2. RANGE CHECK: 400km (400,000 meters) is the limit
   const currentRange = map3dEl.range || 2000000;
   const isVisibleAtZoom = currentRange < 400000; 
 
   Object.values(domMarkers).forEach(({ el, asset }) => {
-    // 3. NATIVE PROJECTION: This handles the "Bolted" coordinates
+    // 3. GET 3D POSITION: This bolts it to the lat/lng
     const pos = map3dEl.viewportToElementCoordinates({
       lat: parseFloat(asset.lat),
       lng: parseFloat(asset.lng),
       altitude: asset.type === 'premium' ? 45 : 20
     });
 
-    // 4. CURVATURE & VISIBILITY LOGIC
-    // pos is null if the coordinate is behind the horizon
+    // 4. HIDE IF: behind globe OR too far away in space
     if (!pos || !isVisibleAtZoom) {
       el.style.display = 'none';
       el.style.opacity = '0';
     } else {
       el.style.display = 'flex';
       
-      // FADE EFFECT: They get clearer as you get closer
-      // Starts fading in at 400km, fully solid at 100km
-      const opacity = Math.min(1, (400000 - currentRange) / 300000);
-      el.style.opacity = opacity;
+      // Calculate fade: 1.0 when close, 0.0 at the 400km limit
+      const fade = Math.max(0, Math.min(1, (400000 - currentRange) / 200000));
+      el.style.opacity = fade;
 
-      // PIN PRECISION: translate(-50%, -100%) is the industry standard for pins
+      // PIN PRECISION: This places the marker TIP on the runway
       el.style.transform = `translate(-50%, -100%) translate(${pos.x}px, ${pos.y}px)`;
       
-      // DEPTH: Ensure they don't overlap weirdly
+      // Depth layering
       el.style.zIndex = Math.floor(1000000 - currentRange/1000);
     }
   });
