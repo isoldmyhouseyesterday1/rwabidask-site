@@ -3220,15 +3220,19 @@ function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22e6)
 function premiumMarkersVisible() { return markersVisible(); }
 
 function onCameraChange() {
-  if (typeof _cameraChangeTimer !== 'undefined') clearTimeout(_cameraChangeTimer);
-  _cameraChangeTimer = setTimeout(() => {
-    if (!map3dEl) return;
-    if (Object.keys(domMarkers).length === 0) renderDOMMarkers();
+  if (isProjecting) return; // Stop the infinite loop
+  
+  if (cameraTimer) clearTimeout(cameraTimer);
+  cameraTimer = setTimeout(() => {
+    isProjecting = true;
     reprojectMarkers();
-    buildTicker(viewportVisible(ASSETS));
-  }, 80);
+    if (typeof buildTicker === 'function') {
+      buildTicker(viewportVisible(ASSETS));
+    }
+    isProjecting = false;
+  }, 50); // Small delay to let the 3D tiles settle
 }
-
+  
 // Returns assets visible in the current map viewport (approximate)
 function viewportVisible(assets) {
   if (!map3dEl) return assets;
@@ -3342,9 +3346,32 @@ function projectMarker(asset, el) {
 }
 
 function reprojectMarkers() {
-  // Only reproject markers that are currently in the DOM
+  if (!map3dEl) return;
+  
+  // The Switzerland/Airport Fix: Get the current zoom level (range)
+  const currentRange = map3dEl.range || 2000000;
+  
+  // ONLY show markers if we are zoomed in closer than 300km (300,000 meters)
+  const isVisibleAtThisZoom = currentRange < 300000;
+
   Object.values(domMarkers).forEach(({ el, asset }) => {
-    projectMarker(asset, el);
+    // 1. Use the native Google 3D projection (no manual math)
+    const pos = map3dEl.viewportToElementCoordinates({ 
+      lat: parseFloat(asset.lat), 
+      lng: parseFloat(asset.lng), 
+      altitude: asset.type === 'premium' ? 40 : 20 
+    });
+
+    // 2. Curvature & Range Check
+    // If pos is null, the airport is behind the curvature of the earth
+    if (!pos || !isVisibleAtThisZoom) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = 'flex';
+      // 3. The "Pin" Fix: translate(-50%, -100%) puts the tip of the marker on the spot
+      el.style.transform = `translate(-50%, -100%) translate(${pos.x}px, ${pos.y}px)`;
+      el.style.zIndex = Math.floor(1000000 - currentRange/1000);
+    }
   });
 }
   
