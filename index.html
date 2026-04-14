@@ -3198,154 +3198,91 @@ function toggleHeat(btn) {
    we place markers via CSS absolute positioning recalculated
    on camera change events.
 ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   RWABidAsk — DYNAMIC MARKER ENGINE (3D NATIVE)
+═══════════════════════════════════════════════════════════ */
+
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
+  
+  // Clear and rebuild only if empty or data changed
   layer.innerHTML = '';
   domMarkers = {};
-  // Show ALL assets at every zoom level — projectMarker hides ones behind globe
-  ASSETS.forEach(a => _addPriceMarker(a));
-}
   
-// Camera debounce timer — wired inside initMap() after map3dEl exists
-let cameraTimer;
+  ASSETS.forEach(asset => {
+    const el = document.createElement('div');
+    // Identify premium/gold assets for the gold glow
+    const isPremium = asset.type === 'premium' || asset.id.includes('lon');
+    el.className = 'price-marker' + (isPremium ? ' premium' : ' standard');
+    
+    const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : '$' + asset.price;
+    const emoji = { aviation:'✈', energy:'⚡', minerals:'💎', ip:'©' }[asset.type] || '◈';
+    
+    el.innerHTML = `
+      <div class="price-tag">
+        <div class="price-tag-val">${emoji} ${priceStr}</div>
+        <div class="price-tag-type">${asset.type || 'asset'}</div>
+      </div>
+      <div class="price-stem"></div>
+      <div class="price-dot"></div>
+    `;
 
-// 300km unified gate
-const RANGE_GATE             = 300000;
-const RANGE_ALL              = RANGE_GATE;
-const RANGE_PREMIUM          = RANGE_GATE;
-const MARKER_RANGE_THRESHOLD = RANGE_GATE;
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof openDrawer === 'function') openDrawer(asset);
+    });
 
-function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22e6) <= RANGE_GATE; }
-function premiumMarkersVisible() { return markersVisible(); }
-
-function onCameraChange() {
-  if (typeof _cameraChangeTimer !== 'undefined') clearTimeout(_cameraChangeTimer);
-  _cameraChangeTimer = setTimeout(() => {
-    if (!map3dEl) return;
-    if (Object.keys(domMarkers).length === 0) renderDOMMarkers();
-    reprojectMarkers();
-    buildTicker(viewportVisible(ASSETS));
-  }, 80);
-}
-
-// Returns assets visible in the current map viewport (approximate)
-function viewportVisible(assets) {
-  if (!map3dEl) return assets;
-  try {
-    const center = map3dEl.center || { lat: 20, lng: 10 };
-    const range  = map3dEl.range  || 22000000;
-    // Convert range (meters from camera) to approximate degree spread
-    const degSpread = Math.min(180, (range / 111000) * 1.6);
-    const latMin = (center.lat || 0) - degSpread;
-    const latMax = (center.lat || 0) + degSpread;
-    const lngSpread = degSpread / Math.max(0.1, Math.cos((center.lat || 0) * Math.PI / 180));
-    const lngMin = (center.lng || 0) - lngSpread;
-    const lngMax = (center.lng || 0) + lngSpread;
-    return assets.filter(a =>
-      a.lat >= latMin && a.lat <= latMax &&
-      a.lng >= lngMin && a.lng <= lngMax
-    );
-  } catch(e) {
-    return assets;
-  }
-}
-
-let lastSearchMarkerId = null;
-function addDOMMarker(asset) {
-  if (lastSearchMarkerId && domMarkers[lastSearchMarkerId]) {
-    domMarkers[lastSearchMarkerId].el.remove();
-    delete domMarkers[lastSearchMarkerId];
-  }
-  lastSearchMarkerId = asset.id;
-  _addPriceMarker(asset);
-}
-
-function _addPriceMarker(asset) {
-  const layer = document.getElementById('overlay-layer');
-  if (!layer) return;
-  const el = document.createElement('div');
-  el.className = 'price-marker' + (asset.anchor ? ' anchor' : ' standard');
-  el.title = asset.address || 'Asset';
-  const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : '$' + asset.price;
-  const typeStr  = asset.type || 'asset';
-  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', business:'◈', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
-  const emoji = classEmoji[asset.type] || '';
-  el.innerHTML = `
-    <div class="price-tag">
-      <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
-      <div class="price-tag-type">${typeStr}</div>
-    </div>
-    <div class="price-stem"></div>
-    <div class="price-dot"></div>
-  `;
-  el.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (typeof openDrawer === 'function') openDrawer(asset);
-    if (typeof selectAsset === 'function') selectAsset(asset.id);
+    layer.appendChild(el);
+    domMarkers[asset.id] = { el, asset };
   });
-  layer.appendChild(el);
-  domMarkers[asset.id] = { el, asset };
-  requestAnimationFrame(() => projectMarker(asset, el));
-}
-
-function projectMarker(asset, el) {
-  if (!map3dEl || !el) return;
-  try {
-    const mapCol  = document.getElementById('map-col');
-    if (!mapCol) return;
-    const rect = mapCol.getBoundingClientRect();
-    const W = rect.width, H = rect.height;
-    if (!W || !H) return;
-
-    const camCenter = map3dEl.center  || { lat: 20, lng: 10 };
-    const camRange  = map3dEl.range   || 22000000;
-    const camTilt   = map3dEl.tilt    || 0;
-    const camHead   = map3dEl.heading || 0;
-
-    const assetLat = parseFloat(asset.lat);
-    const assetLng = parseFloat(asset.lng);
-
-    const dLat = assetLat - (camCenter.lat || 0);
-    const dLng = assetLng - (camCenter.lng || 0);
-
-    // Pixels-per-degree based on range (meters) and viewport width
-    const ppd = (W / 2) / Math.max(1, camRange / 111320);
-    const cosLat = Math.cos((camCenter.lat || 0) * Math.PI / 180);
-    const headRad = camHead * Math.PI / 180;
-
-    // Rotate for heading
-    const rx = dLng * cosLat * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
-    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cosLat * ppd * Math.sin(headRad);
-
-    // Apply tilt foreshortening
-    const tiltFactor = Math.max(0.1, Math.cos(camTilt * Math.PI / 180));
-    const sx = W / 2 + rx;
-    const sy = H / 2 + ry * tiltFactor;
-
-    // Check if roughly behind the globe (very far from center at global zoom)
-    const globeRadius = Math.min(W, H) * 0.48;
-    const dx = sx - W / 2, dy = sy - H / 2;
-    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
-    const isBehindGlobe = camRange > 3000000 && distFromCenter > globeRadius * 1.1;
-
-    if (isBehindGlobe) {
-      el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
-    } else {
-      el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`;
-      // Depth: closer assets (smaller distFromCenter) on top
-      el.style.zIndex = String(Math.floor(1000 - distFromCenter / 10));
-    }
-  } catch (err) {
-    console.warn('[RWABidAsk] projectMarker:', err.message);
-  }
+  
+  // Immediately place them
+  reprojectMarkers();
 }
 
 function reprojectMarkers() {
-  // Only reproject markers that are currently in the DOM
+  if (!map3dEl) return;
+  
+  const currentRange = map3dEl.range || 20000000;
+  // RANGE GATE: Hide markers if we are zoomed out too far (e.g., higher than 200km)
+  const isTooHigh = currentRange > 200000; 
+
   Object.values(domMarkers).forEach(({ el, asset }) => {
-    projectMarker(asset, el);
+    // Use the native Google 3D math instead of manual RX/RY
+    const alt = (asset.type === 'premium' || asset.id.includes('lon')) ? 45 : 20;
+    const pos = map3dEl.viewportToElementCoordinates({ 
+      lat: parseFloat(asset.lat), 
+      lng: parseFloat(asset.lng), 
+      altitude: alt 
+    });
+
+    // If the marker is behind the globe curvature or we are too high, hide it
+    if (!pos || isTooHigh) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = 'flex';
+      // This is the "Fixation": It pins the marker to the exact pixel
+      el.style.transform = `translate(-50%, -100%) translate(${pos.x}px, ${pos.y}px)`;
+      // Proper depth layering
+      el.style.zIndex = Math.floor(1000000 - currentRange/1000);
+    }
   });
+}
+
+// Optimized camera listener
+function onCameraChange() {
+  if (window._camReq) cancelAnimationFrame(window._camReq);
+  window._camReq = requestAnimationFrame(() => {
+    reprojectMarkers();
+    // Only update ticker with what's actually on screen
+    if (typeof buildTicker === 'function') buildTicker(viewportVisible(ASSETS));
+  });
+}
+
+function viewportVisible(assets) {
+  // Simple check: if reprojectMarkers says it's visible, it's in viewport
+  return assets.filter(a => domMarkers[a.id] && domMarkers[a.id].el.style.display !== 'none');
 }
   
 /* ═══════════════════════════════════════════════════════════
