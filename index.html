@@ -2196,13 +2196,14 @@ function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn);
 
 /* ═══════════════════════════════════════════════════════════
    DOM MARKERS — LOCKED TO COORDINATES (Matrix Projection)
-   REGIONAL VIEWPORT CLIPPING: Only markers in visible viewport + range < 3,000,000
-   INITIAL STATE: NO MARKERS ON LOAD — markers only appear after camera movement within range
+   CLEAN BOOT: NO MARKERS ON LOAD — only after zoom or search
+   ALTITUDE LOCK: Pins anchored to surface (Z=0, not floating)
+   VIEWPORT CULLING: Only markers in visible frustum are rendered
 ═══════════════════════════════════════════════════════════ */
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
 const MARKER_VISIBLE_RANGE = 3000000;
-let markersInitialized = false;
+let markersHaveBeenShown = false;
 
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
@@ -2217,7 +2218,6 @@ function onCameraChange() {
       // Clear selection when camera moves (prevents "haunting" marker)
       if (activeId) {
         activeId = null;
-        // Update UI to show no selection
         const rhead = document.getElementById('rhead');
         if (rhead) {
           rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
@@ -2226,16 +2226,19 @@ function onCameraChange() {
         if (rbody) {
           rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
         }
-        // Remove active class from list items
         document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
+        if (window.innerWidth <= 767) {
+          const rightPanel = document.getElementById('right');
+          if (rightPanel) rightPanel.classList.remove('open-drawer');
+          document.body.style.overflow = '';
+        }
       }
       
       if (isZoomedIn) {
-        // Get assets visible in current 3D viewport (frustum culling)
+        markersHaveBeenShown = true;
         const visibleAssets = getVisibleAssetsInViewport(ASSETS);
         const visibleIds = new Set(visibleAssets.map(a => a.id));
         
-        // Update marker visibility based on viewport
         Object.keys(domMarkers).forEach(id => {
           const marker = domMarkers[id];
           const asset = marker.asset;
@@ -2245,7 +2248,7 @@ function onCameraChange() {
         
         reprojectMarkersWithMatrix();
       } else {
-        // Hide all markers when zoomed out beyond 3,000km
+        // Hide all markers when zoomed out beyond 3,000km (clean globe)
         Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
       }
       const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
@@ -2261,7 +2264,6 @@ function getVisibleAssetsInViewport(assets) {
     const center = map3dEl.center || { lat: 20, lng: 10 };
     const range = map3dEl.range || 22000000;
     
-    // Convert range to degrees (rough approximation for bounding box)
     const degSpread = Math.min(180, (range / 111000) * 1.4);
     const latMin = center.lat - degSpread;
     const latMax = center.lat + degSpread;
@@ -2269,15 +2271,11 @@ function getVisibleAssetsInViewport(assets) {
     const lngMin = center.lng - lngSpread;
     const lngMax = center.lng + lngSpread;
     
-    // First filter by bounding box
     const bboxFiltered = assets.filter(a => 
       a.lat >= latMin && a.lat <= latMax &&
       a.lng >= lngMin && a.lng <= lngMax
     );
     
-    // Additional frustum culling: filter out markers behind the globe
-    // For markers on the back face, their screen projection would be behind the camera
-    // We use a simple dot product test with the camera's view direction
     const camLatRad = center.lat * Math.PI / 180;
     const camLngRad = center.lng * Math.PI / 180;
     const viewDir = { x: Math.cos(camLatRad) * Math.cos(camLngRad), y: Math.sin(camLatRad), z: Math.cos(camLatRad) * Math.sin(camLngRad) };
@@ -2287,7 +2285,7 @@ function getVisibleAssetsInViewport(assets) {
       const assetLngRad = a.lng * Math.PI / 180;
       const assetVec = { x: Math.cos(assetLatRad) * Math.cos(assetLngRad), y: Math.sin(assetLatRad), z: Math.cos(assetLatRad) * Math.sin(assetLngRad) };
       const dot = viewDir.x * assetVec.x + viewDir.y * assetVec.y + viewDir.z * assetVec.z;
-      return dot > -0.2; // Only show front-facing hemisphere + small back-face buffer
+      return dot > -0.2;
     });
   } catch(e) { return assets.slice(0, 100); }
 }
@@ -2298,10 +2296,9 @@ function renderDOMMarkers() {
   if (!layer || !map3dEl) return;
   layer.innerHTML = '';
   domMarkers = {};
-  // Initially hide all markers — they will appear via onCameraChange after zoom
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
   physicalAssets.forEach(a => _addPriceMarker(a));
-  // Set all markers to hidden initially (clean globe on load)
+  // INITIAL STATE: ALL MARKERS HIDDEN (clean globe on load)
   Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
 }
 function addDOMMarker(asset) { _addPriceMarker(asset); }
@@ -2398,7 +2395,6 @@ document.getElementById('map-col').addEventListener('click', (e) => {
   if (!e.target.closest('.price-marker')) {
     if (activeId) {
       activeId = null;
-      // Clear right panel
       const rhead = document.getElementById('rhead');
       if (rhead) {
         rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
@@ -2407,9 +2403,7 @@ document.getElementById('map-col').addEventListener('click', (e) => {
       if (rbody) {
         rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
       }
-      // Remove active class from list items
       document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
-      // Close mobile drawer if open
       if (window.innerWidth <= 767) {
         const rightPanel = document.getElementById('right');
         if (rightPanel) rightPanel.classList.remove('open-drawer');
@@ -2418,7 +2412,7 @@ document.getElementById('map-col').addEventListener('click', (e) => {
     }
   }
 });
-
+  
 /* ═══════════════════════════════════════════════════════════
    INSTITUTIONAL ASSET DRAWER (Desktop)
 ═══════════════════════════════════════════════════════════ */
