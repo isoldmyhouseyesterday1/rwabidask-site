@@ -5001,29 +5001,31 @@ if (window.__googleMapsLoaded) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   THE ONE AND ONLY MASTER CAMERA FUNCTION
+   EMERGENCY REPAIR: ONE ENGINE TO RULE THEM ALL
 ═══════════════════════════════════════════════════════════ */
+
+// These three brackets close any accidental "open" code from above
+} catch(e) {} } } 
+
 var globalCameraLock = false;
 var globalCameraTimer = null;
 
 function onCameraChange() {
-    // If the lock is on, quit immediately
     if (globalCameraLock) return;
-
     if (globalCameraTimer) clearTimeout(globalCameraTimer);
     
     globalCameraTimer = setTimeout(() => {
         try {
-            globalCameraLock = true; // Set the lock
+            globalCameraLock = true; 
             
-            // 1. Update Marker Positions
+            // 1. Position individual markers
             if (typeof reprojectMarkers === 'function') {
                 reprojectMarkers();
             }
             
-            // 2. Handle Clustering (Space Bubbles)
-            const range = map3dEl?.range || 22000000;
-            if (range > 300000) { 
+            // 2. Space Clusters
+            const currentRange = (window.map3dEl) ? map3dEl.range : 2000000;
+            if (currentRange > 300000) { 
                 if (typeof buildClusters === 'function') {
                     const mapRect = document.getElementById('map-col')?.getBoundingClientRect();
                     buildClusters(viewportVisible(ASSETS.filter(a => !a.anchor)), mapRect);
@@ -5032,20 +5034,20 @@ function onCameraChange() {
                 if (typeof clearClusters === 'function') clearClusters();
             }
             
-            // 3. Update the Ticker/Sidebar
+            // 3. Update the Ticker
             if (typeof buildTicker === 'function' && typeof viewportVisible === 'function') {
                 buildTicker(viewportVisible(ASSETS));
             }
             
         } catch (err) {
-            console.warn("Camera sync error:", err);
+            console.warn("Engine hiccup:", err);
         } finally {
-            // Unlock after a short delay to keep things smooth
             setTimeout(() => { globalCameraLock = false; }, 100);
         }
     }, 150); 
 }
-    
+
+// FINAL TAGS - DO NOT WRAP THESE IN BRACKETS
 </script>
 </body>
 </html>
