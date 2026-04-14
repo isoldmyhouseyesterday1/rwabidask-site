@@ -1351,7 +1351,7 @@ html, body {
 }
 #asset-drawer.open { transform: translateX(0); }
 
-/* ── OVERLAY: markers above map on ALL screen sizes ── */
+/* ── OVERLAY: marker layer above map on ALL viewports ── */
 #overlay-layer {
   position: absolute;
   inset: 0;
@@ -1361,13 +1361,15 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════════════
-   MOBILE — Portrait & Landscape
-   Globe shrinks into the 1fr row so topbar/ticker/footer always show
+   MOBILE — Portrait
+   The globe takes the 1fr center row.
+   Left/right panels are hidden; asset drawer slides up from bottom.
+   Topbar, ticker, footer always visible in their fixed rows.
 ═══════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
 
-  /* Shell rows explicit: every UI strip gets its own row.
-     100dvh = real visible height on iOS Safari */
+  /* Use 100dvh — iOS Safari's 100vh includes the address bar
+     which causes the bottom rows to be clipped */
   #shell {
     grid-template-rows: 24px 48px 1fr 26px 26px;
     height: 100dvh;
@@ -1375,18 +1377,18 @@ html, body {
   }
 
   /* Topbar: always visible */
-  #topbar { position: relative; z-index: 1000; padding: 0 8px; }
+  #topbar { position: relative; z-index: 1000; padding: 0 8px; height: 48px; }
   .tstat    { display: none; }
   .logo-tag { display: none; }
   .logo     { padding: 0 12px; }
   #search-input { font-size: 12px; min-width: 0; flex: 1; }
-  .tbtn     { padding: 0 8px; font-size: 10px; }
+  .tbtn { padding: 0 8px; font-size: 10px; }
 
-  /* Ticker + footer always visible */
+  /* Ticker + footer: always visible */
   #ticker-bar { position: relative; z-index: 1000; }
   #footer     { position: relative; z-index: 1000; font-size: 9px; }
 
-  /* Main row: single column, fills 1fr */
+  /* Main row: single column, fills the 1fr row */
   #main-row {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
@@ -1394,23 +1396,30 @@ html, body {
     min-height: 0;
     overflow: hidden;
   }
+
+  /* Hide side panels — drawer replaces them */
   #left, #right { display: none; }
 
-  /* Map column: fills its grid row.
-     MUST use position:relative (not absolute/inset:0) so the grid row stays allocated */
-  #map-col { position: relative; width: 100%; height: 100%; overflow: hidden; }
+  /* Map column: MUST stay position:relative so it doesn't escape the grid.
+     position:absolute/inset:0 would cover topbar/ticker/footer. */
+  #map-col {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
   #map3d-container { position: absolute; inset: 0; z-index: 0; }
 
   /* Map controls */
   .map-ctl-panel { z-index: 1000; top: 8px; right: 8px; }
 
-  /* Price markers */
+  /* Price markers on mobile */
   .price-marker   { z-index: 500 !important; }
   .price-tag      { padding: 5px 9px; }
   .price-tag-val  { font-size: 11px; }
   .price-tag-type { font-size: 7px; }
 
-  /* Asset drawer: bottom sheet */
+  /* Asset drawer: bottom sheet, slides up from off-screen */
   #asset-drawer {
     position: fixed;
     top: auto; left: 0; right: 0; bottom: 0;
@@ -1421,9 +1430,12 @@ html, body {
     transform: translateY(105%);
     transition: transform .3s cubic-bezier(.4,0,.2,1);
     box-shadow: 0 -12px 50px rgba(0,0,0,.8);
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain; will-change: transform;
-    z-index: 2000; background: var(--bg1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    will-change: transform;
+    z-index: 2000;
+    background: var(--bg1);
   }
   #asset-drawer.open { transform: translateY(0); }
   #asset-drawer::before {
@@ -1432,6 +1444,7 @@ html, body {
     background: rgba(255,255,255,.2);
     border-radius: 2px; margin: 10px auto 4px;
   }
+
   .drawer-head    { padding: 8px 14px; }
   .drawer-section { padding: 8px 14px; }
   .drawer-actions { padding: 8px 14px 24px; }
@@ -1441,7 +1454,7 @@ html, body {
   .drawer-close { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
 }
 
-/* Landscape phone: reclaim vertical space */
+/* Landscape phone: keep topbar + map, hide ticker/footer for space */
 @media (max-width: 767px) and (orientation: landscape) {
   #shell      { grid-template-rows: 40px 1fr 22px; }
   #ticker-bar { display: none; }
@@ -2942,8 +2955,8 @@ async function initMap() {
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
 
-    // Wire camera events here — map3dEl is live in DOM now
-    // (The old if(map3dEl) block at parse time ran before initMap so map3dEl was null)
+    // Wire camera events HERE - map3dEl is now live in the DOM
+    // (The old if(map3dEl) block at parse-time ran before initMap, map3dEl was null)
     const _onCam = () => { clearTimeout(cameraTimer); cameraTimer = setTimeout(onCameraChange, 100); };
     map3dEl.addEventListener('gmp-centerchange',  _onCam);
     map3dEl.addEventListener('gmp-rangechange',   _onCam);
@@ -3174,15 +3187,19 @@ function renderDOMMarkers() {
   layer.innerHTML = '';
   domMarkers = {};
   const range = map3dEl.range || 22000000;
-  if (range > RANGE_GATE) return; // space view — board empty
+  // Above 300km = empty globe. Inside 300km = full board at once.
+  if (range > RANGE_GATE) return;
   viewportVisible(ASSETS).forEach(a => _addPriceMarker(a));
 }
+  
+// Camera debounce timer — listeners wired inside initMap() after map3dEl exists
+let cameraTimer;
 
-const RANGE_GATE             = 300000; // 300km unified gate
+// 300km unified gate: zoom inside = full board. Outside = empty globe.
+const RANGE_GATE             = 300000;
 const RANGE_ALL              = RANGE_GATE;
 const RANGE_PREMIUM          = RANGE_GATE;
 const MARKER_RANGE_THRESHOLD = RANGE_GATE;
-let cameraTimer;
 
 function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22e6) <= RANGE_GATE; }
 function premiumMarkersVisible() { return markersVisible(); }
@@ -3193,11 +3210,13 @@ function onCameraChange() {
     if (!map3dEl) return;
     const range = map3dEl.range || 22e6;
     if (range > RANGE_GATE) {
+      // Space view: park all markers off-screen
       Object.values(domMarkers).forEach(({ el }) => {
         el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
       });
       return;
     }
+    // Inside region: build board on first entry, reproject every tick
     if (Object.keys(domMarkers).length === 0) renderDOMMarkers();
     reprojectMarkers();
     buildTicker(viewportVisible(ASSETS));
