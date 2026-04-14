@@ -2966,37 +2966,48 @@ async function initMap() {
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
 
-    // Wire camera events HERE — map3dEl now exists in the DOM
-    // The if(map3dEl) block outside ran at parse-time when map3dEl was null
-    const _onCam = () => { clearTimeout(cameraTimer); cameraTimer = setTimeout(onCameraChange, 100); };
-    map3dEl.addEventListener('gmp-centerchange',  _onCam);
-    map3dEl.addEventListener('gmp-rangechange',   _onCam);
-    map3dEl.addEventListener('gmp-tiltchange',    _onCam);
-    map3dEl.addEventListener('gmp-headingchange', _onCam);
+  // 1. Wire camera events with the "Circuit Breaker"
+    const _onCam = () => { 
+        if (isMapUpdating) return; // If we are already drawing, don't trigger again
+        clearTimeout(cameraTimer); 
+        cameraTimer = setTimeout(onCameraChange, 150); 
+    };
 
-    // Wait one frame for element to attach, then gentle tilt
+    if (map3dEl) {
+        map3dEl.addEventListener('gmp-centerchange',  _onCam);
+        map3dEl.addEventListener('gmp-rangechange',   _onCam);
+        // Removed tilt/heading listeners to stop the "Corner Jam" crash
+    }
+
+    // 2. Wait for element to attach, then gentle tilt
     requestAnimationFrame(() => {
-      setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200);
+      setTimeout(() => { 
+        try { 
+            isMapUpdating = true; // Lock before manual tilt
+            map3dEl.tilt = 15; 
+            setTimeout(() => { isMapUpdating = false; }, 500); // Unlock after tilt
+        } catch(e){} 
+      }, 1200);
     });
 
     setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
 
-    // Load CSV data (onDataReady inside will call renderDOMMarkers)
+    // 3. Load CSV data
     await loadMarketData();
 
-    // Render markers now that map3dEl exists — data already loaded above
+    // 4. THE CLEAN BOOT: Initial Render
+    // We wrap this in a lock so it doesn't trigger the onCam loop
+    isMapUpdating = true;
     renderDOMMarkers();
-    // Second pass after 800ms so map has fully painted before projecting
-    setTimeout(() => { renderDOMMarkers(); reprojectMarkers(); }, 800);
+    
+    // Final pass after map has settled
+    setTimeout(() => { 
+        reprojectMarkers(); 
+        isMapUpdating = false; // FINALLY UNLOCK for the user
+    }, 1000);
 
-    // Init Places search (must come after map loads)
+    // 5. Init Places search
     initSearch();
-
-  } catch (err) {
-    console.error('[RWABidAsk] Map3DElement init error:', err);
-    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING');
-  }
-}
 
 /* ═══════════════════════════════════════════════════════════
    SEARCH — 2026 Alpha: gmp-select + classic place_changed fallback
