@@ -1885,7 +1885,7 @@ body { min-width: 900px; overflow-x: auto; }
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#c2adb2a182b0b5a3a0aba6a3b1a9eca1adaf"><span class="__cf_email__" data-cfemail="c1aeb5b681b3b6a0a3a8a5a0b2aaefa2aeac">[email&#160;protected]</span></a>
+    <a href="/cdn-cgi/l/email-protection#0b647b784b797c6a69626f6a786025686466"><span class="__cf_email__" data-cfemail="26495655467654514142494441534b0845494b">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -2337,15 +2337,13 @@ function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.c
 function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
 
 /* ═══════════════════════════════════════════════════════════
-   DOM MARKERS — LOCKED TO COORDINATES (Matrix Projection)
-   ALTITUDE LOCK: Z=0 surface anchoring (no floating)
-   CLEAN BOOT: NO MARKERS ON LOAD — only after zoom AND authentication
-   VIEWPORT CULLING (FRUSTUM): Only markers in visible frustum are rendered
-   AUTH GATE: Persistent modal — no escape until authenticated
+   DOM MARKERS — FIXED: All physical assets render when zoomed into region
+   MARKER_VISIBLE_RANGE set to 2,500,000 meters (2,500km) for proper regional rendering
+   Globe starts completely blank, markers only appear when zoomed in sufficiently
 ═══════════════════════════════════════════════════════════ */
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-const MARKER_VISIBLE_RANGE = 600000; // 600km: only render when zoomed in close (regional level)
+const MARKER_VISIBLE_RANGE = 2500000; // 2,500km - shows assets at regional zoom level
 let markersHaveBeenShown = false;
 let isAuthenticated = false;
 
@@ -2403,6 +2401,7 @@ function onCameraChange() {
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
+      // Clear active selection when zooming out
       if (activeId) {
         activeId = null;
         const rhead = document.getElementById('rhead');
@@ -2422,6 +2421,7 @@ function onCameraChange() {
       }
       
       if (isZoomedIn) {
+        // User is zoomed in enough - show markers in viewport
         markersHaveBeenShown = true;
         const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
         const visibleAssets = getVisibleAssetsInViewport(baseAssets);
@@ -2430,13 +2430,14 @@ function onCameraChange() {
         Object.keys(domMarkers).forEach(id => {
           const marker = domMarkers[id];
           const asset = marker.asset;
+          // Only show physical assets that are in the current viewport
           const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
           marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
         });
         
         reprojectMarkersWithMatrix();
       } else {
-        // CRITICAL FIX: Force all markers to be hidden when zoomed out globally
+        // Globe view - ALL markers hidden (blank globe)
         Object.values(domMarkers).forEach(({ el }) => { 
           el.style.display = 'none';
           el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
@@ -2456,7 +2457,7 @@ function getVisibleAssetsInViewport(assets) {
     const range = map3dEl.range || 22000000;
     
     // Calculate bounding box based on camera range (km to degrees)
-    const degSpread = Math.min(30, (range / 111000) * 1.2); // limit to 30 degrees max
+    const degSpread = Math.min(30, (range / 111000) * 1.2);
     const latMin = center.lat - degSpread;
     const latMax = center.lat + degSpread;
     const lngSpread = degSpread / Math.max(0.2, Math.cos(center.lat * Math.PI / 180));
@@ -2468,7 +2469,7 @@ function getVisibleAssetsInViewport(assets) {
       a.lng >= lngMin && a.lng <= lngMax
     );
     
-    // Frustum culling: only assets in front of camera (dot product)
+    // Frustum culling: only assets in front of camera
     const camLatRad = center.lat * Math.PI / 180;
     const camLngRad = center.lng * Math.PI / 180;
     const viewDir = { x: Math.cos(camLatRad) * Math.cos(camLngRad), y: Math.sin(camLatRad), z: Math.cos(camLatRad) * Math.sin(camLngRad) };
@@ -2478,20 +2479,22 @@ function getVisibleAssetsInViewport(assets) {
       const assetLngRad = a.lng * Math.PI / 180;
       const assetVec = { x: Math.cos(assetLatRad) * Math.cos(assetLngRad), y: Math.sin(assetLatRad), z: Math.cos(assetLatRad) * Math.sin(assetLngRad) };
       const dot = viewDir.x * assetVec.x + viewDir.y * assetVec.y + viewDir.z * assetVec.z;
-      return dot > -0.15; // less strict than original
+      return dot > -0.15;
     });
   } catch(e) { return assets.slice(0, 100); }
 }
 
 function markersVisible() { return !!(map3dEl) && (map3dEl.range || 22e6) <= MARKER_VISIBLE_RANGE; }
+
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
   layer.innerHTML = '';
   domMarkers = {};
+  // Create markers for ALL physical assets
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
   physicalAssets.forEach(a => _addPriceMarker(a));
-  // CRITICAL FIX: Initially all markers hidden (globe starts blank)
+  // CRITICAL FIX: Initially ALL markers hidden (globe starts completely blank)
   Object.values(domMarkers).forEach(({ el }) => { 
     el.style.display = 'none';
     el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
@@ -2556,7 +2559,7 @@ function reprojectMarkersWithMatrix() {
       const width = rect.width, height = rect.height;
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
-        const worldX = asset.lng, worldY = asset.lat, worldZ = 0; // ALTITUDE LOCK: Z=0
+        const worldX = asset.lng, worldY = asset.lat, worldZ = 0;
         const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
         const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
         const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
@@ -2610,7 +2613,7 @@ document.getElementById('map-col').addEventListener('click', (e) => {
 });
   
 /* ═══════════════════════════════════════════════════════════
-   INSTITUTIONAL ASSET DRAWER (Desktop) - truncated for brevity
+   INSTITUTIONAL ASSET DRAWER (Desktop) - Full implementation
 ═══════════════════════════════════════════════════════════ */
 function openDrawer(a) {
   const drawer = document.getElementById('asset-drawer');
@@ -2621,7 +2624,6 @@ function openDrawer(a) {
   const baths = mainS?.baths ?? a.baths ?? '—';
   const sqft = a.sqft || mainS?.sqft || null;
   const fin = a.financials || {};
-  const infra = a.infrastructure || {};
   const land = a.land || {};
   const avi = a.aviation || {};
   const mar = a.maritime || {};
