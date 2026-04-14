@@ -112,13 +112,17 @@ html, body {
   grid-template-rows: 24px 54px 1fr 30px 26px;
   height: 100vh;
   min-height: 0;
+  min-width: 900px;   /* hard floor — below this, scroll rather than collapse */
 }
 #main-row {
   display: grid;
   grid-template-columns: 288px 1fr 320px;
   min-height: 0;
   overflow: hidden;
+  min-width: 0;
 }
+/* Body scrolls horizontally on tiny windows rather than crushing the layout */
+body { min-width: 900px; overflow-x: auto; }
 
 /* ══════════════════════════════════════════════
    TOPBAR
@@ -542,7 +546,7 @@ html, body {
 .price-marker {
   position: absolute;
   display: flex !important;
-  left: 0; top: 0;
+  left: 0; top: 0;            /* transform needs an explicit origin */
   pointer-events: auto;
   z-index: 10;
   will-change: transform;
@@ -605,7 +609,7 @@ html, body {
 .price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,80,80,.6), transparent); }
 .price-marker.heat-hot  .price-dot  { background: #ff5a5a; box-shadow: 0 0 6px #ff5a5a; }
 
-/* ── STANDARD assets — explicit cyan style ── */
+/* ── STANDARD assets — cyan style ── */
 .price-marker.standard .price-tag     { border-color: rgba(0,255,200,.55); }
 .price-marker.standard .price-tag-val { color: var(--cyan); }
 .price-marker.standard .price-stem    { background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0)); }
@@ -1351,7 +1355,7 @@ html, body {
 }
 #asset-drawer.open { transform: translateX(0); }
 
-/* ── OVERLAY: marker layer above map on ALL viewports ── */
+/* ── OVERLAY: marker layer above map, ALL viewports ── */
 #overlay-layer {
   position: absolute;
   inset: 0;
@@ -1360,35 +1364,45 @@ html, body {
   overflow: visible;
 }
 
-/* ═══════════════════════════════════════════════════════
-   MOBILE — Portrait
-   The globe takes the 1fr center row.
-   Left/right panels are hidden; asset drawer slides up from bottom.
-   Topbar, ticker, footer always visible in their fixed rows.
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   MOBILE (≤767px) — Portrait & Landscape
+   Globe is in the 1fr center row.
+   Side panels hidden; bottom-sheet drawer replaces them.
+   Topbar / ticker / footer always occupy their grid rows.
+═══════════════════════════════════════════════════ */
 @media (max-width: 767px) {
 
-  /* Use 100dvh — iOS Safari's 100vh includes the address bar
-     which causes the bottom rows to be clipped */
+  /* 100dvh = actual visible area on iOS Safari.
+     100vh includes the browser chrome and clips bottom rows. */
   #shell {
     grid-template-rows: 24px 48px 1fr 26px 26px;
     height: 100dvh;
     isolation: isolate;
+    min-width: unset; /* remove the desktop 900px floor */
   }
 
+  body { min-width: unset; overflow-x: hidden; }
+
   /* Topbar: always visible */
-  #topbar { position: relative; z-index: 1000; padding: 0 8px; height: 48px; }
+  #topbar {
+    position: relative;
+    z-index: 1000;
+    padding: 0 8px;
+    height: 48px;
+  }
   .tstat    { display: none; }
   .logo-tag { display: none; }
-  .logo     { padding: 0 12px; }
+  .logo     { padding: 0 10px; }
   #search-input { font-size: 12px; min-width: 0; flex: 1; }
-  .tbtn { padding: 0 8px; font-size: 10px; }
+  .tbtn     { padding: 0 8px; font-size: 10px; }
 
-  /* Ticker + footer: always visible */
+  /* Ticker: always visible */
   #ticker-bar { position: relative; z-index: 1000; }
-  #footer     { position: relative; z-index: 1000; font-size: 9px; }
 
-  /* Main row: single column, fills the 1fr row */
+  /* Footer: always visible */
+  #footer { position: relative; z-index: 1000; font-size: 9px; }
+
+  /* Main row: single column */
   #main-row {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
@@ -1396,12 +1410,11 @@ html, body {
     min-height: 0;
     overflow: hidden;
   }
-
-  /* Hide side panels — drawer replaces them */
   #left, #right { display: none; }
 
-  /* Map column: MUST stay position:relative so it doesn't escape the grid.
-     position:absolute/inset:0 would cover topbar/ticker/footer. */
+  /* Map column: MUST be position:relative so it stays inside
+     the 1fr grid row and doesn't cover topbar/ticker/footer.
+     position:absolute;inset:0 was the root cause of the off-center globe. */
   #map-col {
     position: relative;
     width: 100%;
@@ -1413,13 +1426,13 @@ html, body {
   /* Map controls */
   .map-ctl-panel { z-index: 1000; top: 8px; right: 8px; }
 
-  /* Price markers on mobile */
+  /* Price markers */
   .price-marker   { z-index: 500 !important; }
   .price-tag      { padding: 5px 9px; }
   .price-tag-val  { font-size: 11px; }
   .price-tag-type { font-size: 7px; }
 
-  /* Asset drawer: bottom sheet, slides up from off-screen */
+  /* Asset drawer: bottom sheet */
   #asset-drawer {
     position: fixed;
     top: auto; left: 0; right: 0; bottom: 0;
@@ -1444,7 +1457,6 @@ html, body {
     background: rgba(255,255,255,.2);
     border-radius: 2px; margin: 10px auto 4px;
   }
-
   .drawer-head    { padding: 8px 14px; }
   .drawer-section { padding: 8px 14px; }
   .drawer-actions { padding: 8px 14px 24px; }
@@ -1454,7 +1466,7 @@ html, body {
   .drawer-close { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
 }
 
-/* Landscape phone: keep topbar + map, hide ticker/footer for space */
+/* Landscape phone */
 @media (max-width: 767px) and (orientation: landscape) {
   #shell      { grid-template-rows: 40px 1fr 22px; }
   #ticker-bar { display: none; }
@@ -2955,8 +2967,8 @@ async function initMap() {
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
 
-    // Wire camera events HERE - map3dEl is now live in the DOM
-    // (The old if(map3dEl) block at parse-time ran before initMap, map3dEl was null)
+    // Wire camera events HERE — map3dEl now exists in the DOM
+    // The if(map3dEl) block outside ran at parse-time when map3dEl was null
     const _onCam = () => { clearTimeout(cameraTimer); cameraTimer = setTimeout(onCameraChange, 100); };
     map3dEl.addEventListener('gmp-centerchange',  _onCam);
     map3dEl.addEventListener('gmp-rangechange',   _onCam);
@@ -3187,15 +3199,14 @@ function renderDOMMarkers() {
   layer.innerHTML = '';
   domMarkers = {};
   const range = map3dEl.range || 22000000;
-  // Above 300km = empty globe. Inside 300km = full board at once.
-  if (range > RANGE_GATE) return;
+  if (range > RANGE_GATE) return; // space view — board stays empty
   viewportVisible(ASSETS).forEach(a => _addPriceMarker(a));
 }
   
-// Camera debounce timer — listeners wired inside initMap() after map3dEl exists
+// Camera debounce timer — wired inside initMap() after map3dEl exists
 let cameraTimer;
 
-// 300km unified gate: zoom inside = full board. Outside = empty globe.
+// 300km unified gate
 const RANGE_GATE             = 300000;
 const RANGE_ALL              = RANGE_GATE;
 const RANGE_PREMIUM          = RANGE_GATE;
@@ -3210,13 +3221,11 @@ function onCameraChange() {
     if (!map3dEl) return;
     const range = map3dEl.range || 22e6;
     if (range > RANGE_GATE) {
-      // Space view: park all markers off-screen
       Object.values(domMarkers).forEach(({ el }) => {
         el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
       });
       return;
     }
-    // Inside region: build board on first entry, reproject every tick
     if (Object.keys(domMarkers).length === 0) renderDOMMarkers();
     reprojectMarkers();
     buildTicker(viewportVisible(ASSETS));
