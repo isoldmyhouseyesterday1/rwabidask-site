@@ -2966,18 +2966,23 @@ async function initMap() {
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
 
-  // 1. Wire camera events with the "Circuit Breaker"
-    const _onCam = () => { 
-        if (isMapUpdating) return; // If we are already drawing, don't trigger again
-        clearTimeout(cameraTimer); 
-        cameraTimer = setTimeout(onCameraChange, 150); 
-    };
-
-    if (map3dEl) {
-        map3dEl.addEventListener('gmp-centerchange',  _onCam);
-        map3dEl.addEventListener('gmp-rangechange',   _onCam);
-        // Removed tilt/heading listeners to stop the "Corner Jam" crash
+ // 1. Wire camera events with the "Circuit Breaker"
+// This part stays inside your initMap function
+const _onCam = () => { 
+    // This matches the lock in the Master function
+    if (typeof globalCameraLock !== 'undefined' && globalCameraLock) return; 
+    
+    if (typeof globalCameraTimer !== 'undefined') {
+        clearTimeout(globalCameraTimer); 
+        globalCameraTimer = setTimeout(onCameraChange, 150); 
     }
+};
+
+if (map3dEl) {
+    map3dEl.addEventListener('gmp-centerchange',  _onCam);
+    map3dEl.addEventListener('gmp-rangechange',   _onCam);
+    // Heading/Tilt remain disabled for stability
+}
 
     // 2. Wait for element to attach, then gentle tilt
     requestAnimationFrame(() => {
@@ -3227,25 +3232,6 @@ function renderDOMMarkers() {
   const mapAssets = ASSETS.filter(a => physicalTypes.includes(a.type) || a.anchor === true);
 
   mapAssets.forEach(a => _addPriceMarker(a));
-}
-
-function onCameraChange() {
-  if (isMapUpdating) return; 
-  
-  if (cameraTimer) clearTimeout(cameraTimer);
-  cameraTimer = setTimeout(() => {
-    try {
-      isMapUpdating = true;
-      reprojectMarkers();
-      if (typeof buildTicker === 'function') {
-        buildTicker(viewportVisible(ASSETS));
-      }
-    } catch (err) {
-      console.error("[RWABidAsk] Reproject failed:", err);
-    } finally {
-      isMapUpdating = false; 
-    }
-  }, 100);
 }
 
 function reprojectMarkers() {
@@ -4927,26 +4913,6 @@ function _projectToScreen(asset, mapRect) {
   } catch(e) { return null; }
 }
 
-// Hook clustering into onCameraChange — rebuild clusters on every camera move
-// NOTE: onCameraChange already defined above with full tier logic.
-// We extend it here to handle cluster rendering for the >300km tier.
-const _origOnCameraChange = onCameraChange;
-let _clusterTimer = null;
-function onCameraChange() {
-  _origOnCameraChange();
-  clearTimeout(_clusterTimer);
-  _clusterTimer = setTimeout(() => {
-    const mapRect = document.getElementById('map-col')?.getBoundingClientRect();
-    const range = map3dEl?.range || 22000000;
-    if (range > CLUSTER_THRESHOLD) {
-      // >300km: show viewport-only cluster bubbles for non-anchors
-      buildClusters(viewportVisible(ASSETS.filter(a => !a.anchor)), mapRect);
-    } else {
-      clearClusters(); // ≤300km: individual markers take over
-    }
-  }, 120);
-}
-
 /* ── STRIPE PAYMENT WALL — $999 before ledger write ── */
 // Called from the Digitize button before runMintAnimation
 function initiateDigitizePayment(assetId, hash) {
@@ -5034,6 +5000,53 @@ if (window.__googleMapsLoaded) {
   initMap();
 }
 
+/* ═══════════════════════════════════════════════════════════
+   THE ONE AND ONLY MASTER CAMERA FUNCTION
+═══════════════════════════════════════════════════════════ */
+var globalCameraLock = false;
+var globalCameraTimer = null;
+
+function onCameraChange() {
+    // If the lock is on, quit immediately
+    if (globalCameraLock) return;
+
+    if (globalCameraTimer) clearTimeout(globalCameraTimer);
+    
+    globalCameraTimer = setTimeout(() => {
+        try {
+            globalCameraLock = true; // Set the lock
+            
+            // 1. Update Marker Positions
+            if (typeof reprojectMarkers === 'function') {
+                reprojectMarkers();
+            }
+            
+            // 2. Handle Clustering (Space Bubbles)
+            const range = map3dEl?.range || 22000000;
+            if (range > 300000) { 
+                if (typeof buildClusters === 'function') {
+                    const mapRect = document.getElementById('map-col')?.getBoundingClientRect();
+                    buildClusters(viewportVisible(ASSETS.filter(a => !a.anchor)), mapRect);
+                }
+            } else {
+                if (typeof clearClusters === 'function') clearClusters();
+            }
+            
+            // 3. Update the Ticker/Sidebar
+            if (typeof buildTicker === 'function' && typeof viewportVisible === 'function') {
+                buildTicker(viewportVisible(ASSETS));
+            }
+            
+        } catch (err) {
+            console.warn("Camera sync error:", err);
+        } finally {
+            // Unlock after a short delay to keep things smooth
+            setTimeout(() => { globalCameraLock = false; }, 100);
+        }
+    }, 150); 
+}
+// Pinned right at the end of the file
+    
 </script>
 </body>
 </html>
