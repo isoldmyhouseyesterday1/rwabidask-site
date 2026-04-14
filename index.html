@@ -3198,10 +3198,11 @@ function toggleHeat(btn) {
    on camera change events.
 ═══════════════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════════════════
-   RWABidAsk — FIXED MARKER ENGINE (PHYSICAL ONLY)
+   RWABidAsk — STABLE MARKER ENGINE (FINAL)
 ═══════════════════════════════════════════════════════════ */
 
-let isUpdating = false; 
+// GLOBAL LOCKS
+let isMapUpdating = false; 
 let cameraTimer;
 
 function renderDOMMarkers() {
@@ -3210,7 +3211,7 @@ function renderDOMMarkers() {
   layer.innerHTML = '';
   domMarkers = {};
 
-  // HIDE NON-PHYSICAL: Only show assets with actual locations
+  // 1. FILTER: Only show physical assets on the map (Hide stocks/bonds/debt)
   const physicalTypes = ['real_estate', 'energy', 'aviation', 'maritime', 'resources', 'minerals', 'infrastructure'];
   const mapAssets = ASSETS.filter(a => physicalTypes.includes(a.type) || a.anchor === true);
 
@@ -3218,57 +3219,53 @@ function renderDOMMarkers() {
 }
 
 function onCameraChange() {
-  if (isUpdating) return; // THE LOOP BREAKER
+  // 2. LOOP BREAKER: Stops the "Maximum Call Stack" crash
+  if (isMapUpdating) return; 
   
   if (cameraTimer) clearTimeout(cameraTimer);
   cameraTimer = setTimeout(() => {
-    isUpdating = true;
+    isMapUpdating = true;
     reprojectMarkers();
     if (typeof buildTicker === 'function') {
       buildTicker(viewportVisible(ASSETS));
     }
-    isUpdating = false;
+    isMapUpdating = false;
   }, 60); 
 }
 
 function reprojectMarkers() {
-  // 1. SAFETY: If Google 3D isn't ready, don't run
+  // 3. HANDSHAKE: Ensure Google 3D math is ready
   if (!map3dEl || typeof map3dEl.viewportToElementCoordinates !== 'function') return;
 
-  // 2. RANGE CHECK: 400km (400,000 meters) is the limit
   const currentRange = map3dEl.range || 2000000;
+  // 4. SPACE GATE: Hide everything if higher than 400km
   const isVisibleAtZoom = currentRange < 400000; 
 
   Object.values(domMarkers).forEach(({ el, asset }) => {
-    // 3. GET 3D POSITION: This bolts it to the lat/lng
     const pos = map3dEl.viewportToElementCoordinates({
       lat: parseFloat(asset.lat),
       lng: parseFloat(asset.lng),
       altitude: asset.type === 'premium' ? 45 : 20
     });
 
-    // 4. HIDE IF: behind globe OR too far away in space
     if (!pos || !isVisibleAtZoom) {
       el.style.display = 'none';
       el.style.opacity = '0';
     } else {
       el.style.display = 'flex';
       
-      // Calculate fade: 1.0 when close, 0.0 at the 400km limit
-      const fade = Math.max(0, Math.min(1, (400000 - currentRange) / 200000));
+      // 5. FADE LOGIC: Smoothly appear as you zoom in
+      const fade = Math.max(0, Math.min(1, (400000 - currentRange) / 300000));
       el.style.opacity = fade;
 
-      // PIN PRECISION: This places the marker TIP on the runway
+      // 6. PIN PRECISION: Tips stay on the coordinate
       el.style.transform = `translate(-50%, -100%) translate(${pos.x}px, ${pos.y}px)`;
-      
-      // Depth layering
       el.style.zIndex = Math.floor(1000000 - currentRange/1000);
     }
   });
 }
 
 function viewportVisible(assets) {
-  // Only return assets that are actually rendered and visible on screen
   return assets.filter(a => domMarkers[a.id] && domMarkers[a.id].el.style.display !== 'none');
 }
 
@@ -3279,7 +3276,7 @@ function _addPriceMarker(asset) {
   el.className = 'price-marker' + (asset.anchor ? ' premium' : ' standard');
   
   const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : '$' + asset.price;
-  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', energy:'⚡', minerals:'💎' };
+  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', energy:'⚡', minerals:'💎', real_estate:'🏠' };
   const emoji = classEmoji[asset.type] || '◈';
 
   el.innerHTML = `
@@ -3299,115 +3296,15 @@ function _addPriceMarker(asset) {
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
 }
-  
-function _addPriceMarker(asset) {
-  const layer = document.getElementById('overlay-layer');
-  if (!layer) return;
-  const el = document.createElement('div');
-  el.className = 'price-marker' + (asset.anchor ? ' anchor' : ' standard');
-  el.title = asset.address || 'Asset';
-  const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : '$' + asset.price;
-  const typeStr  = asset.type || 'asset';
-  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', business:'◈', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
-  const emoji = classEmoji[asset.type] || '';
-  el.innerHTML = `
-    <div class="price-tag">
-      <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
-      <div class="price-tag-type">${typeStr}</div>
-    </div>
-    <div class="price-stem"></div>
-    <div class="price-dot"></div>
-  `;
-  el.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (typeof openDrawer === 'function') openDrawer(asset);
-    if (typeof selectAsset === 'function') selectAsset(asset.id);
-  });
-  layer.appendChild(el);
-  domMarkers[asset.id] = { el, asset };
-  requestAnimationFrame(() => projectMarker(asset, el));
-}
 
-function projectMarker(asset, el) {
-  if (!map3dEl || !el) return;
-  try {
-    const mapCol  = document.getElementById('map-col');
-    if (!mapCol) return;
-    const rect = mapCol.getBoundingClientRect();
-    const W = rect.width, H = rect.height;
-    if (!W || !H) return;
-
-    const camCenter = map3dEl.center  || { lat: 20, lng: 10 };
-    const camRange  = map3dEl.range   || 22000000;
-    const camTilt   = map3dEl.tilt    || 0;
-    const camHead   = map3dEl.heading || 0;
-
-    const assetLat = parseFloat(asset.lat);
-    const assetLng = parseFloat(asset.lng);
-
-    const dLat = assetLat - (camCenter.lat || 0);
-    const dLng = assetLng - (camCenter.lng || 0);
-
-    // Pixels-per-degree based on range (meters) and viewport width
-    const ppd = (W / 2) / Math.max(1, camRange / 111320);
-    const cosLat = Math.cos((camCenter.lat || 0) * Math.PI / 180);
-    const headRad = camHead * Math.PI / 180;
-
-    // Rotate for heading
-    const rx = dLng * cosLat * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
-    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cosLat * ppd * Math.sin(headRad);
-
-    // Apply tilt foreshortening
-    const tiltFactor = Math.max(0.1, Math.cos(camTilt * Math.PI / 180));
-    const sx = W / 2 + rx;
-    const sy = H / 2 + ry * tiltFactor;
-
-    // Check if roughly behind the globe (very far from center at global zoom)
-    const globeRadius = Math.min(W, H) * 0.48;
-    const dx = sx - W / 2, dy = sy - H / 2;
-    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
-    const isBehindGlobe = camRange > 3000000 && distFromCenter > globeRadius * 1.1;
-
-    if (isBehindGlobe) {
-      el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
-    } else {
-      el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`;
-      // Depth: closer assets (smaller distFromCenter) on top
-      el.style.zIndex = String(Math.floor(1000 - distFromCenter / 10));
-    }
-  } catch (err) {
-    console.warn('[RWABidAsk] projectMarker:', err.message);
+let lastSearchMarkerId = null;
+function addDOMMarker(asset) {
+  if (lastSearchMarkerId && domMarkers[lastSearchMarkerId]) {
+    domMarkers[lastSearchMarkerId].el.remove();
+    delete domMarkers[lastSearchMarkerId];
   }
-}
-
-function reprojectMarkers() {
-  if (!map3dEl) return;
-  
-  // The Switzerland/Airport Fix: Get the current zoom level (range)
-  const currentRange = map3dEl.range || 2000000;
-  
-  // ONLY show markers if we are zoomed in closer than 300km (300,000 meters)
-  const isVisibleAtThisZoom = currentRange < 300000;
-
-  Object.values(domMarkers).forEach(({ el, asset }) => {
-    // 1. Use the native Google 3D projection (no manual math)
-    const pos = map3dEl.viewportToElementCoordinates({ 
-      lat: parseFloat(asset.lat), 
-      lng: parseFloat(asset.lng), 
-      altitude: asset.type === 'premium' ? 40 : 20 
-    });
-
-    // 2. Curvature & Range Check
-    // If pos is null, the airport is behind the curvature of the earth
-    if (!pos || !isVisibleAtThisZoom) {
-      el.style.display = 'none';
-    } else {
-      el.style.display = 'flex';
-      // 3. The "Pin" Fix: translate(-50%, -100%) puts the tip of the marker on the spot
-      el.style.transform = `translate(-50%, -100%) translate(${pos.x}px, ${pos.y}px)`;
-      el.style.zIndex = Math.floor(1000000 - currentRange/1000);
-    }
-  });
+  lastSearchMarkerId = asset.id;
+  _addPriceMarker(asset);
 }
   
 /* ═══════════════════════════════════════════════════════════
