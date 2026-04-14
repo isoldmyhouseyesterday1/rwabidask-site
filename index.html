@@ -545,12 +545,11 @@ body { min-width: 900px; overflow-x: auto; }
   /* ── PRICE TAG MARKERS ── */
 .price-marker {
   position: absolute;
-  display: flex !important;
-  left: 0; top: 0;            /* transform needs an explicit origin */
-  pointer-events: auto;
-  z-index: 10;
+  top: 0;
+  left: 0;
   will-change: transform;
-  transform: translate(-50%,-100%) translate(-9999px,-9999px);
+  pointer-events: auto;
+  transition: none !important; /* Forces the marker to stay glued to the spot */
 }
 
 .price-marker:hover { 
