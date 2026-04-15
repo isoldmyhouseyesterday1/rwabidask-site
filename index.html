@@ -2597,40 +2597,39 @@ window.__initRWA = initMap;
 if (window.__googleMapsLoaded) initMap();
 
 // ============================================================
-// UNIVERSAL ASSET MARKER ENGINE (The "Safety Net" Version)
+// UNIVERSAL MARKER ENGINE (The Loop Breaker)
 // ============================================================
-
 async function render3DMarkers() {
   const { Marker3DElement } = await google.maps.importLibrary("maps3d");
   
-  // 1. Clear old markers
+  // Wipe the slate clean
   document.querySelectorAll('gmp-marker-3d').forEach(el => el.remove());
 
+  // If Supabase failed to give us a list, stop here
   if (!assets || assets.length === 0) {
-    console.warn("⚠️ No assets in memory to render.");
+    console.error("🛑 STOP: No assets found in the 'assets' variable.");
     return;
   }
 
   let count = 0;
-
   assets.forEach(asset => {
-    // SAFETY NET: This finds the location even if the name is "lat" or "latitude"
-    const lat = parseFloat(asset.lat || asset.latitude);
-    const lng = parseFloat(asset.lng || asset.longitude);
-    const localPrice = parseFloat(asset.price_local || asset.price || 0);
+    // THE "SMART" CHECK: Try every possible name for latitude/longitude
+    const lat = parseFloat(asset.lat || asset.latitude || asset.Latitude || 0);
+    const lng = parseFloat(asset.lng || asset.longitude || asset.Longitude || 0);
+    const price = parseFloat(asset.price_local || asset.price || 0);
     const currency = asset.currency_code || 'USD';
 
-    // If coordinates are missing, we skip this one and log an error
-    if (isNaN(lat) || isNaN(lng) || lat === 0) {
-      console.error("❌ Asset missing valid coordinates:", asset.address || "Unknown Address");
-      return; 
+    // If the coordinates are 0 or missing, we log a warning but don't crash
+    if (lat === 0 || lng === 0) {
+      console.warn("⚠️ Skipping asset because Lat/Lng is zero:", asset.address);
+      return;
     }
 
-    const priceLabel = `${currency === 'GBP' ? '£' : '$'}${(localPrice / 1000000).toFixed(1)}M`;
+    const displayPrice = `${currency === 'GBP' ? '£' : '$'}${(price / 1000000).toFixed(1)}M`;
     
     const marker = new Marker3DElement({
-      position: { lat: lat, lng: lng, altitude: 40 }, // Altitude 40 to keep it above hills
-      label: priceLabel,
+      position: { lat: lat, lng: lng, altitude: 45 }, // High altitude to clear hills
+      label: displayPrice,
       extruded: true,
       altitudeMode: "RELATIVE_TO_GROUND"
     });
@@ -2639,22 +2638,21 @@ async function render3DMarkers() {
     if (mapTag) {
       mapTag.append(marker);
       count++;
-      console.log(`✅ Marker Placed: ${asset.address || 'Asset'} at ${lat}, ${lng}`);
+      console.log(`✅ SUCCESS: Placed ${displayPrice} marker at ${lat}, ${lng}`);
     }
   });
 
-  console.log(`[Total] Markers live on map: ${count}`);
+  console.log(`🏁 FINISHED: Created ${count} markers.`);
 }
 
-// THE PULSE: This triggers the render
+// THE HAND-HOLD: Only start drawing when the map is solid
 const mapTag = document.querySelector('gmp-map-3d');
 if (mapTag) {
   mapTag.addEventListener('gmp-steadystate', () => {
-    console.log("3D Map Stable. Attempting to render markers...");
+    console.log("3D Map Solid. Handing off to Marker Engine...");
     render3DMarkers();
   });
 }
-  
 </script>
 </body>
 </html>
