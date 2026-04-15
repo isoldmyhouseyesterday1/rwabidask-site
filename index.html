@@ -478,11 +478,11 @@ body { min-width: 900px; overflow-x: auto; }
   pointer-events: auto;
   z-index: 10;
   will-change: transform;
-  transform: translate(-50%,-100%) translate(-9999px,-9999px);
+  cursor: pointer;
 }
 .price-marker:hover { 
   filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); 
-  transform: translate(-50%,-100%) scale(1.06); 
+  transform: scale(1.06); 
 }
 .price-tag {
   background: rgba(14,22,46,.97);
@@ -511,6 +511,7 @@ body { min-width: 900px; overflow-x: auto; }
   width: 1px;
   height: 20px;
   background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0));
+  margin: 0 auto;
 }
 .price-dot {
   width: 6px;
@@ -518,6 +519,7 @@ body { min-width: 900px; overflow-x: auto; }
   border-radius: 50%;
   background: var(--cyan);
   box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5);
+  margin: 0 auto;
   margin-top: -1px;
 }
 .price-marker.heat-warm .price-tag { border-color: rgba(255,180,0,.6); }
@@ -1885,7 +1887,7 @@ body { min-width: 900px; overflow-x: auto; }
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#c1aeb5b681b3b6a0a3a8a5a0b2aaefa2aeac"><span class="__cf_email__" data-cfemail="dbb4abac9ba9acbab9b2bfbaa8b0f5b8b4b6">[email&#160;protected]</span></a>
+    <a href="/cdn-cgi/l/email-protection#0f607f7c4f7d786e6d666b6e7c64216c6062"><span class="__cf_email__" data-cfemail="3f504f4c7f4d485e5d565b5e4c54115c5052">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -1896,8 +1898,8 @@ body { min-width: 900px; overflow-x: auto; }
 <div id="toast"></div>
 
 <div class="view-toggle" id="mobile-view-toggle">
-  <button class="view-toggle-btn active" data-view="globe">🌍 GLOBE</button>
-  <button class="view-toggle-btn" data-view="list">📋 LIST</button>
+  <button class="view-toggle-btn active" data-view="globe">GLOBE</button>
+  <button class="view-toggle-btn" data-view="list">LIST</button>
 </div>
 <div class="list-view" id="mobile-list-view"></div>
 
@@ -1918,7 +1920,7 @@ body { min-width: 900px; overflow-x: auto; }
 'use strict';
 
 // ============================================================
-// FIX: Marker persistence flags
+// MARKER PERSISTENCE FLAGS
 // ============================================================
 let isMapReady = false;
 let markersRendered = false;
@@ -1966,8 +1968,8 @@ let domMarkers = {};
 
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-// FIX: Increased marker visible range to 5,000,000 meters (5,000km)
-const MARKER_VISIBLE_RANGE = 5000000;
+// FIX: Show markers when zoomed in enough (range <= 6000km)
+const MARKER_VISIBLE_RANGE = 6000000;
 let isAuthenticated = false;
 
 // Supabase config
@@ -2005,29 +2007,40 @@ async function fetchListingsFromSupabase() {
       return [];
     }
     
-    const transformed = data.map(row => ({
-      id: row.id,
-      address: row.address || row.property_address || 'Address not specified',
-      city: row.city || 'Unknown',
-      country: row.country || 'Global',
-      lat: parseFloat(row.latitude) || parseFloat(row.lat) || 0,
-      lng: parseFloat(row.longitude) || parseFloat(row.lng) || 0,
-      price: parseFloat(row.price) || 0,
-      type: (row.asset_type || row.type || 'residential').toLowerCase(),
-      sqft: row.sqft ? parseInt(row.sqft) : null,
-      status: row.listing_status || 'For Sale',
-      source: 'Supabase Ledger',
-      days: row.days_on_market || 0,
-      broker_active: row.broker_active !== false,
-      tokenized: row.tokenized === true,
-      structures: row.structures || [],
-      infrastructure: row.infrastructure || {},
-      land: row.land || {},
-      financials: row.financials || {},
-      bids: row.bids || [],
-      image_url: row.image_url || null,
-      description: row.description || null
-    })).filter(a => a.lat !== 0 && a.lng !== 0);
+    const transformed = data.map(row => {
+      // UNIVERSAL COORDINATE NORMALIZATION
+      const lat = parseFloat(row.lat ?? row.latitude ?? row.Latitude ?? row.lat_coord);
+      const lng = parseFloat(row.lng ?? row.longitude ?? row.Longitude ?? row.lon_coord ?? row.lng_coord);
+      
+      if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
+        console.warn(`[RWABidAsk] Skipping asset ${row.id} - invalid coordinates`);
+        return null;
+      }
+      
+      return {
+        id: row.id,
+        address: row.address || row.property_address || 'Address not specified',
+        city: row.city || 'Unknown',
+        country: row.country || 'Global',
+        lat: lat,
+        lng: lng,
+        price: parseFloat(row.price) || 0,
+        type: (row.asset_type || row.type || 'residential').toLowerCase(),
+        sqft: row.sqft ? parseInt(row.sqft) : null,
+        status: row.listing_status || 'For Sale',
+        source: 'Supabase Ledger',
+        days: row.days_on_market || 0,
+        broker_active: row.broker_active !== false,
+        tokenized: row.tokenized === true,
+        structures: row.structures || [],
+        infrastructure: row.infrastructure || {},
+        land: row.land || {},
+        financials: row.financials || {},
+        bids: row.bids || [],
+        image_url: row.image_url || null,
+        description: row.description || null
+      };
+    }).filter(Boolean);
     
     console.log(`[RWABidAsk] Loaded ${transformed.length} listings from Supabase`);
     return transformed;
@@ -2230,13 +2243,14 @@ function syncMarkersToSearch(assetsToShow) {
 }
 
 // ============================================================
-// GOOGLE MAPS 3D with gmp-steadystate fix AND WATCHDOG TIMER
+// GOOGLE MAPS 3D - FULLY ZOOMED OUT GLOBE VIEW
 // ============================================================
 async function initMap() {
   try {
     const maps3dLib = await google.maps.importLibrary('maps3d');
     const Map3DElement = maps3dLib.Map3DElement;
-    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 12000000, tilt: 0, heading: 0 });
+    // FIX: Set initial range to 22000000 (full globe view - zoomed out)
+    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 22000000, tilt: 0, heading: 0 });
     try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
     const container = document.getElementById('map3d-container');
     container.style.cssText = 'position:absolute;inset:0;';
@@ -2327,30 +2341,27 @@ async function initPlacesSearch() {
   } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
 }
 
-function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 25 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 25 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
-function flyGlobe() { flyTo(20, 10, 12000000, 0); }
+function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 45 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
+function flyGlobe() { flyTo(20, 10, 22000000, 0); }
 function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
 function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
 function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
 
 // ============================================================
-// DOM MARKERS - CRITICAL FIX: Working marker projection
+// DOM MARKERS - WORKING PROJECTION
 // ============================================================
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
   if (isCameraProcessing) return;
-  
   cameraDebounceTimer = setTimeout(() => {
     isCameraProcessing = true;
     try {
       if (!map3dEl) return;
-      
       if (!isAuthenticated) {
         Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
         isCameraProcessing = false;
         return;
       }
-      
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
@@ -2383,8 +2394,6 @@ function onCameraChange() {
           const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
           marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
         });
-        
-        // CRITICAL: Reproject markers after visibility update
         reprojectMarkersWithMatrix();
       } else {
         Object.values(domMarkers).forEach(({ el }) => { 
@@ -2418,16 +2427,13 @@ function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
   
-  // Clear existing markers
   layer.innerHTML = '';
   domMarkers = {};
   
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
   
-  // Add markers for all physical assets
   physicalAssets.forEach(a => addPriceMarker(a));
   
-  // Initially hide all markers
   Object.values(domMarkers).forEach(({ el }) => { 
     el.style.display = 'none';
     el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
@@ -2453,7 +2459,7 @@ function addPriceMarker(asset) {
   requestAnimationFrame(() => projectMarkerLegacy(asset, el));
 }
 
-// CRITICAL FIX: This is the working marker projection function
+// WORKING MARKER PROJECTION
 function projectMarkerLegacy(asset, el) {
   if (!map3dEl || !el) return;
   try {
@@ -2497,7 +2503,7 @@ function reprojectMarkersWithMatrix() {
       const width = rect.width, height = rect.height;
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
-        const worldX = asset.lng, worldY = asset.lat, worldZ = 25;
+        const worldX = asset.lng, worldY = asset.lat, worldZ = 45;
         const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
         const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
         const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
@@ -2547,7 +2553,7 @@ document.getElementById('map-col').addEventListener('click', (e) => {
 });
 
 // ============================================================
-// DRAWER FUNCTIONS (Full original)
+// DRAWER FUNCTIONS
 // ============================================================
 function openDrawer(a) {
   const drawer = document.getElementById('asset-drawer');
@@ -2570,7 +2576,10 @@ function renderMobileListView(assets) {
   const container = document.getElementById('mobile-list-view');
   if (!container) return;
   const physicalAssets = assets.filter(a => isPhysicalAsset(a.type));
-  container.innerHTML = physicalAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
+  const resultCount = physicalAssets.length;
+  const resultHeader = `<div style="padding:8px 12px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
+  container.innerHTML = resultHeader + physicalAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
+  if (physicalAssets.length === 0) { container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No assets match current filters</div>`; }
 }
 
 // ============================================================
@@ -2615,15 +2624,29 @@ function initMobileUI() {
   const viewToggle = document.getElementById('mobile-view-toggle');
   const listView = document.getElementById('mobile-list-view');
   const mapCol = document.getElementById('map-col');
+  const rightPanel = document.getElementById('right');
   if (viewToggle) {
     viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const view = btn.dataset.view;
-        if (view === 'globe') { mapCol.style.display = 'block'; listView.classList.remove('active'); }
-        else { mapCol.style.display = 'none'; listView.classList.add('active'); renderMobileListView(ASSETS); }
+        viewToggle.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (view === 'globe') { 
+          mapCol.style.display = 'block'; 
+          listView.classList.remove('active'); 
+          rightPanel.classList.remove('open-drawer');
+          if (map3dEl && markersRendered) reprojectMarkersWithMatrix();
+        } else { 
+          mapCol.style.display = 'none'; 
+          listView.classList.add('active'); 
+          rightPanel.classList.remove('open-drawer');
+          const filtered = SEARCH_ACTIVE ? filterAssets(SEARCH_RESULTS) : filterAssets(ASSETS);
+          renderMobileListView(filtered);
+        }
       });
     });
   }
+  document.addEventListener('click', (e) => { if (rightPanel && rightPanel.classList.contains('open-drawer') && !rightPanel.contains(e.target) && !e.target.closest('.price-marker') && !e.target.closest('.list-tile') && !e.target.closest('.pcard')) { rightPanel.classList.remove('open-drawer'); document.body.style.overflow = ''; } });
 }
 
 // ============================================================
@@ -2632,7 +2655,7 @@ function initMobileUI() {
 buildTicker([]);
 buildRibbon();
 bootSupabase();
-document.addEventListener('DOMContentLoaded', () => { initMobileUI(); });
+document.addEventListener('DOMContentLoaded', () => { const bl = document.getElementById('blimp-el'); if (bl) bl.addEventListener('click', () => openModal('partner')); initMobileUI(); });
 window.__initRWA = initMap;
 if (window.__googleMapsLoaded) initMap();
 </script>
