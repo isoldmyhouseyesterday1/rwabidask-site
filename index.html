@@ -25,54 +25,9 @@
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady" async defer></script>
 <style>
-  /* ── Google Maps Alpha / Development UI Suppression ────────────────────────
-     Targets every known variant of the "For development purposes only" banner,
-     the dismiss button, watermark overlays, and error containers.
-     Uses !important + multiple selectors for maximum surface coverage.       */
-
-  /* Attribute-based dismiss button (most common in alpha builds) */
-  .dismissButton,
-  [class*="dismissButton"],
-  [class*="dismiss-button"],
-  [id*="dismissButton"],
-  [aria-label*="dismiss" i],
-  [aria-label*="Dismiss" i] {
-    display: none !important;
-    pointer-events: none !important;
-  }
-
-  /* High z-index dev banners injected via inline style */
-  div[style*="z-index: 1000000"],
-  div[style*="z-index:1000000"],
-  div[style*="z-index: 999999"],
-  div[style*="z-index:999999"] {
-    display: none !important;
-  }
-
-  /* Named Google Maps dev/error UI classes */
-  .gm-style-pbc,
-  .gm-err-container,
-  .gm-err-content,
-  .gm-err-message,
-  .gm-style-cc,
-  .gm-svpc,
-  .gm-fullscreen-control,
-  .gm-bundled-control { 
-    display: none !important; 
-  }
-
-  /* 3D / Alpha watermark and terms overlay inside shadow DOM pierce attempts */
-  gmp-map-3d::part(attribution),
-  gmp-map-3d::part(dismiss),
-  gmp-map-3d::part(dev-banner) {
-    display: none !important;
-  }
-
-  /* Any fixed-position full-width bar near the bottom (the "for dev" ribbon) */
-  body > div[style*="position: fixed"][style*="bottom"],
-  body > div[style*="position:fixed"][style*="bottom"] {
-    display: none !important;
-  }
+  .dismissButton, [class*="dismissButton"],
+  div[style*="z-index: 1000000"], div[style*="z-index:1000000"],
+  .gm-style-pbc, .gm-err-container { display: none !important; }
 </style>
 
 <style>
@@ -449,15 +404,6 @@ body { min-width: 900px; overflow-x: auto; }
 #map3d-container {
   position: absolute;
   inset: 0;
-}
-
-/* Overlay layer must be a full-size, pointer-passthrough sibling of the 3D canvas */
-#overlay-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none; /* let clicks fall through to the map except on markers */
-  z-index: 10;
-  overflow: hidden;
 }
 .map-ctl-panel {
   position: absolute;
@@ -1113,14 +1059,12 @@ body { min-width: 900px; overflow-x: auto; }
   will-change: transform;
 }
 #asset-drawer.open { transform: translateX(0); }
-/* overlay-layer — authoritative rule defined earlier in the file; this is kept
-   in sync. z-index 10 keeps it under .map-ctl-panel (400) but above the 3D canvas. */
 #overlay-layer {
   position: absolute;
   inset: 0;
-  z-index: 10;
+  z-index: 999;
   pointer-events: none;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* MOBILE "ZILLOW" UI (≤767px) — Centered Globe + 75vh Slide-up Drawer */
@@ -2061,38 +2005,39 @@ async function fetchListingsFromSupabase() {
     }
     
     const transformed = data.map(row => {
-      // ── Safety Net: resolve coordinates regardless of column naming ──
-      const coords = normalizeCoords(row);
-      if (!coords) {
-        console.warn(`[RWABidAsk] Skipping asset #${row.id} — no valid coordinates found`, row);
+      // UNIVERSAL COORDINATE NORMALIZATION - FIXES THE ISSUE
+      const lat = parseFloat(row.lat ?? row.latitude ?? row.Latitude ?? row.lat_coord);
+      const lng = parseFloat(row.lng ?? row.longitude ?? row.Longitude ?? row.lon_coord ?? row.lng_coord);
+      
+      if (isNaN(lat) || isNaN(lng) || lat === 0 && lng === 0) {
+        console.warn(`[RWABidAsk] Skipping asset ${row.id} - invalid coordinates`);
         return null;
       }
+      
       return {
-        id:           row.id,
-        address:      row.address || row.property_address || 'Address not specified',
-        city:         row.city || 'Unknown',
-        country:      row.country || row.country_name || 'Global',
-        country_code: row.country_code || row.iso_country || '',
-        currency:     row.currency || row.currency_code || null,
-        lat:          coords.lat,
-        lng:          coords.lng,
-        price:        parseFloat(row.price) || 0,
-        type:         (row.asset_type || row.type || 'residential').toLowerCase(),
-        sqft:         row.sqft ? parseInt(row.sqft) : null,
-        status:       row.listing_status || 'For Sale',
-        source:       'Supabase Ledger',
-        days:         row.days_on_market || 0,
+        id: row.id,
+        address: row.address || row.property_address || 'Address not specified',
+        city: row.city || 'Unknown',
+        country: row.country || 'Global',
+        lat: lat,
+        lng: lng,
+        price: parseFloat(row.price) || 0,
+        type: (row.asset_type || row.type || 'residential').toLowerCase(),
+        sqft: row.sqft ? parseInt(row.sqft) : null,
+        status: row.listing_status || 'For Sale',
+        source: 'Supabase Ledger',
+        days: row.days_on_market || 0,
         broker_active: row.broker_active !== false,
-        tokenized:    row.tokenized === true,
-        structures:   row.structures   || [],
+        tokenized: row.tokenized === true,
+        structures: row.structures || [],
         infrastructure: row.infrastructure || {},
-        land:         row.land         || {},
-        financials:   row.financials   || {},
-        bids:         row.bids         || [],
-        image_url:    row.image_url    || null,
-        description:  row.description  || null,
+        land: row.land || {},
+        financials: row.financials || {},
+        bids: row.bids || [],
+        image_url: row.image_url || null,
+        description: row.description || null
       };
-    }).filter(Boolean); // remove null entries (bad coords)
+    }).filter(Boolean);
     
     console.log(`[RWABidAsk] Loaded ${transformed.length} listings from Supabase`);
     return transformed;
@@ -2110,7 +2055,7 @@ async function loadMarketData() {
 }
 
 // ============================================================
-// FIX: onDataReady — delegates to shared render gate
+// FIX: onDataReady waits for map readiness
 // ============================================================
 function onDataReady() {
   const assetCount = ASSETS.length;
@@ -2123,9 +2068,12 @@ function onDataReady() {
   renderList(ASSETS);
   buildTicker(ASSETS);
   if (window.innerWidth <= 767) renderMobileListView(ASSETS);
-
-  // Let the central gate decide whether map is also ready
-  _tryRenderMarkers('onDataReady');
+  
+  // FIX: Only render markers if map is ready and not already rendered
+  if (isMapReady && !markersRendered && ASSETS.length > 0) {
+    renderDOMMarkers();
+    markersRendered = true;
+  }
 }
 
 function fmtPrice(n) {
@@ -2296,184 +2244,58 @@ function syncMarkersToSearch(assetsToShow) {
 }
 
 // ============================================================
-// COORDINATE SAFETY NET
-// Accepts any reasonable coordinate naming convention from
-// scrapers: lat/lng, latitude/longitude, lat_coord/lon_coord,
-// x/y, or even nested {lat, lon} objects.
-// Returns { lat, lng } as validated floats, or null if invalid.
-// ============================================================
-function normalizeCoords(row) {
-  const candidates = [
-    // Standard pair
-    { lat: row.lat,       lng: row.lng },
-    { lat: row.lat,       lng: row.lon },
-    // Long-form
-    { lat: row.latitude,  lng: row.longitude },
-    { lat: row.latitude,  lng: row.lon },
-    // Suffixed
-    { lat: row.lat_coord, lng: row.lng_coord },
-    { lat: row.lat_coord, lng: row.lon_coord },
-    // GeoJSON-style arrays  [lng, lat]
-    row.coordinates && Array.isArray(row.coordinates)
-      ? { lat: row.coordinates[1], lng: row.coordinates[0] }
-      : null,
-    // Nested location object
-    row.location && typeof row.location === 'object'
-      ? { lat: row.location.lat ?? row.location.latitude,
-          lng: row.location.lng ?? row.location.longitude ?? row.location.lon }
-      : null,
-  ].filter(Boolean);
-
-  for (const c of candidates) {
-    const lat = parseFloat(c.lat);
-    const lng = parseFloat(c.lng);
-    if (!isNaN(lat) && !isNaN(lng) &&
-        lat >= -90 && lat <= 90 &&
-        lng >= -180 && lng <= 180 &&
-        !(lat === 0 && lng === 0)) {          // reject null-island
-      return { lat, lng };
-    }
-  }
-  return null; // caller must discard this asset
-}
-
-// ============================================================
-// CURRENCY FORMATTER
-// Detects asset country and emits the correct local symbol.
-// Extend COUNTRY_CURRENCY_MAP for full global coverage.
-// ============================================================
-const COUNTRY_CURRENCY_MAP = {
-  'UK': '£', 'GB': '£', 'United Kingdom': '£', 'England': '£',
-  'Scotland': '£', 'Wales': '£',
-  'EU': '€', 'France': '€', 'Germany': '€', 'Italy': '€',
-  'Spain': '€', 'Portugal': '€', 'Netherlands': '€',
-  'Greece': '€', 'Austria': '€', 'Belgium': '€',
-  'JP': '¥', 'Japan': '¥',
-  'CN': '¥', 'China': '¥',
-  'AU': 'A$', 'Australia': 'A$',
-  'CA': 'C$', 'Canada': 'C$',
-  'CH': 'CHF ', 'Switzerland': 'CHF ',
-  'SG': 'S$', 'Singapore': 'S$',
-  'AE': 'AED ', 'UAE': 'AED ', 'United Arab Emirates': 'AED ',
-  'SA': 'SAR ', 'Saudi Arabia': 'SAR ',
-  'IN': '₹', 'India': '₹',
-  'BR': 'R$', 'Brazil': 'R$',
-  'MX': 'MX$', 'Mexico': 'MX$',
-};
-
-function fmtLocalPrice(asset) {
-  const n = asset.price;
-  if (!n || n === 0) return '—';
-  // Prefer explicit currency field, then derive from country
-  const rawCurrency = asset.currency ||
-    COUNTRY_CURRENCY_MAP[asset.country] ||
-    COUNTRY_CURRENCY_MAP[asset.country_code] ||
-    '$';
-  const sym = rawCurrency;
-  if (n >= 1e9)  return sym + (n / 1e9).toFixed(2) + 'B';
-  if (n >= 1e6)  return sym + (n / 1e6).toFixed(2) + 'M';
-  if (n >= 1e3)  return sym + (n / 1e3).toFixed(0) + 'K';
-  return sym + n.toLocaleString();
-}
-
-// ============================================================
-// GOOGLE MAPS 3D — BULLETPROOF INIT
-// Strategy:
-//   1. Import the maps3d library.
-//   2. Construct Map3DElement and append to container.
-//   3. Listen for ONE `gmp-steadystate` event — this fires when
-//      the 3D world tiles have fully loaded and the scene is
-//      stable. Only then do we render DOM markers.
-//   4. A 5-second safety-valve setTimeout fires in case
-//      gmp-steadystate never fires (observed on some alpha builds
-//      behind VPNs / restricted networks).
-//   5. Load Supabase data in parallel; whichever finishes last
-//      (map ready OR data ready) triggers the first marker render.
+// GOOGLE MAPS 3D with gmp-steadystate fix AND WATCHDOG TIMER
 // ============================================================
 async function initMap() {
   try {
-    // ── 1. Load the 3D library ──────────────────────────────
     const maps3dLib = await google.maps.importLibrary('maps3d');
-    const { Map3DElement, MapMode } = maps3dLib;
-
-    // ── 2. Construct the element ────────────────────────────
-    map3dEl = new Map3DElement({
-      center:  { lat: 20, lng: 10, altitude: 0 },
-      range:   12000000,
-      tilt:    0,
-      heading: 0,
-    });
-
-    // Apply satellite mode safely
-    try { if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
-
+    const Map3DElement = maps3dLib.Map3DElement;
+    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 12000000, tilt: 0, heading: 0 });
+    try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
     const container = document.getElementById('map3d-container');
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
-
-    // ── 3. gmp-steadystate handshake ───────────────────────
-    // { once: true } guarantees this handler fires exactly once.
-    // We set isMapReady, then check whether data is also ready.
-    map3dEl.addEventListener('gmp-steadystate', () => {
-      console.log('[RWABidAsk] ✓ gmp-steadystate — 3D world confirmed stable');
-      isMapReady = true;
-      _tryRenderMarkers('steadystate');
-    }, { once: true });
-
-    // ── 4. Safety valve: if steadystate never fires ─────────
-    // Some alpha builds omit this event. 5 s is conservative but
-    // long enough for slow connections to tile in.
-    const steadyStateGuard = setTimeout(() => {
-      if (!isMapReady) {
-        console.warn('[RWABidAsk] gmp-steadystate never fired — activating 5s safety valve');
+    
+    // WATCHDOG TIMER: Force render after 4 seconds if steadystate never fires
+    const watchdogTimer = setTimeout(() => {
+      if (!markersRendered && ASSETS.length > 0) {
+        console.log('[RWABidAsk] WATCHDOG: Forcing marker render after 4s timeout');
         isMapReady = true;
-        _tryRenderMarkers('timeout-guard');
+        renderDOMMarkers();
+        markersRendered = true;
       }
-    }, 5000);
-
-    // Clear the guard if steadystate fires normally
-    map3dEl.addEventListener('gmp-steadystate', () => clearTimeout(steadyStateGuard), { once: true });
-
-    // ── 5. Camera event plumbing ───────────────────────────
-    const _onCam = () => {
-      if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
-      cameraDebounceTimer = setTimeout(onCameraChange, 100);
-    };
-    map3dEl.addEventListener('gmp-centerchange',  _onCam);
-    map3dEl.addEventListener('gmp-rangechange',   _onCam);
-    map3dEl.addEventListener('gmp-tiltchange',    _onCam);
-    map3dEl.addEventListener('gmp-headingchange', _onCam);
-
-    // Subtle tilt reveal after initial load
-    requestAnimationFrame(() => {
-      setTimeout(() => { try { map3dEl.tilt = 15; } catch(e) {} }, 1200);
+    }, 4000);
+    
+    // CRITICAL FIX: Wait for steady state before rendering markers
+    map3dEl.addEventListener('gmp-steadystate', () => {
+      console.log('[RWABidAsk] Map steady state reached');
+      clearTimeout(watchdogTimer);
+      isMapReady = true;
+      if (ASSETS.length > 0 && !markersRendered) {
+        renderDOMMarkers();
+        markersRendered = true;
+      }
     });
-
+    
+    const _onCam = () => { if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(onCameraChange, 100); };
+    map3dEl.addEventListener('gmp-centerchange', _onCam);
+    map3dEl.addEventListener('gmp-rangechange', _onCam);
+    map3dEl.addEventListener('gmp-tiltchange', _onCam);
+    map3dEl.addEventListener('gmp-headingchange', _onCam);
+    
+    requestAnimationFrame(() => { setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200); });
     setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
-
-    // ── 6. Fetch Supabase data (runs in parallel with map load)
     await loadMarketData();
-
-    // initPlacesSearch is non-blocking; failures are handled internally
+    
+    // FIX: If map is already ready, render markers
+    if (isMapReady && ASSETS.length > 0 && !markersRendered) {
+      renderDOMMarkers();
+      markersRendered = true;
+    }
+    
+    setTimeout(() => { if (map3dEl && ASSETS.length > 0 && !markersRendered) { renderDOMMarkers(); markersRendered = true; } }, 800);
     initPlacesSearch();
-
-  } catch (err) {
-    console.error('[RWABidAsk] Map3DElement init error:', err);
-    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING');
-  }
-}
-
-// ── Central "both gates must be open" render trigger ──────────
-// Called from: gmp-steadystate handler, timeout guard, onDataReady.
-// Guards: isMapReady && ASSETS.length > 0 && !markersRendered.
-function _tryRenderMarkers(source) {
-  if (markersRendered) return;
-  if (!isMapReady)      return;
-  if (!ASSETS.length)   return;
-
-  console.log(`[RWABidAsk] ✓ Rendering markers — triggered by: ${source}`);
-  renderDOMMarkers();
-  markersRendered = true;
+  } catch (err) { console.error('[RWABidAsk] Map3DElement init error:', err); setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING'); }
 }
 
 async function initPlacesSearch() {
@@ -2520,7 +2342,7 @@ async function initPlacesSearch() {
   } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
 }
 
-function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 25 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 25 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
+function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 45 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
 function flyGlobe() { flyTo(20, 10, 12000000, 0); }
 function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
 function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
@@ -2584,33 +2406,33 @@ function getVisibleAssetsInViewport(assets) {
   } catch(e) { return assets.slice(0, 100); }
 }
 
-// ============================================================
-// DOM MARKERS — FIXED: Always wipes and rebuilds from ASSETS.
-// Called only after both gmp-steadystate AND data are ready.
-// ============================================================
+// FIX: Simplified renderDOMMarkers
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
-  if (!layer || !map3dEl) {
-    console.warn('[RWABidAsk] renderDOMMarkers: layer or map not available');
-    return;
+  if (!layer || !map3dEl) return;
+  
+  // Clear existing markers only on first render
+  if (!markersRendered) {
+    layer.innerHTML = '';
+    domMarkers = {};
   }
-
-  // Full reset — guarantees no stale markers from previous data loads
-  layer.innerHTML = '';
-  domMarkers = {};
-
+  
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
-
-  physicalAssets.forEach(a => addPriceMarker(a));
-
-  // Start all markers off-screen; onCameraChange will make them visible
-  // when the user zooms in to MARKER_VISIBLE_RANGE
-  Object.values(domMarkers).forEach(({ el }) => {
-    el.style.display    = 'none';
-    el.style.transform  = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+  
+  // Add markers for all physical assets
+  physicalAssets.forEach(a => {
+    if (!domMarkers[a.id]) {
+      addPriceMarker(a);
+    }
   });
-
-  console.log(`[RWABidAsk] ✓ ${Object.keys(domMarkers).length} markers mounted (${physicalAssets.length} physical assets)`);
+  
+  // Initially hide all markers
+  Object.values(domMarkers).forEach(({ el }) => { 
+    el.style.display = 'none';
+    el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+  });
+  
+  console.log(`Markers rendered: ${Object.keys(domMarkers).length} markers created`);
 }
 
 function addPriceMarker(asset) {
@@ -2619,31 +2441,12 @@ function addPriceMarker(asset) {
   const el = document.createElement('div');
   el.className = 'price-marker standard';
   el.title = asset.address || 'Asset';
-
-  // Currency-aware price label (e.g. £2.1M for UK castles)
-  const priceStr = fmtLocalPrice(asset);
-  const typeStr  = asset.type || 'asset';
+  const priceStr = fmtPrice(asset.price);
+  const typeStr = asset.type || 'asset';
   const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
   const emoji = classEmoji[asset.type] || '';
-
-  el.innerHTML = `
-    <div class="price-tag">
-      <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
-      <div class="price-tag-type">${typeStr}</div>
-    </div>
-    <div class="price-stem"></div>
-    <div class="price-dot"></div>`;
-
-  // pointer-events: auto so clicks register even though overlay-layer is none
-  el.style.pointerEvents = 'auto';
-
-  el.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (window.innerWidth <= 767) openMobileDrawer(asset);
-    else openDrawer(asset);
-    selectAsset(asset.id);
-  });
-
+  el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
+  el.addEventListener('click', (e) => { e.stopPropagation(); if (window.innerWidth <= 767) openMobileDrawer(asset); else openDrawer(asset); selectAsset(asset.id); });
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
   requestAnimationFrame(() => projectMarkerLegacy(asset, el));
@@ -2692,7 +2495,7 @@ function reprojectMarkersWithMatrix() {
       const width = rect.width, height = rect.height;
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
-        const worldX = asset.lng, worldY = asset.lat, worldZ = 25;
+        const worldX = asset.lng, worldY = asset.lat, worldZ = 45; // ALTITUDE FIX: 45 meters above ground
         const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
         const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
         const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
@@ -2761,7 +2564,12 @@ function openDrawer(a) {
 }
 function closeDrawer() { document.getElementById('asset-drawer').classList.remove('open'); }
 function openMobileDrawer(a) { renderDetail(a); document.getElementById('right').classList.add('open-drawer'); document.body.style.overflow = 'hidden'; }
-function renderMobileListView(assets) { /* kept for mobile compatibility */ }
+function renderMobileListView(assets) { 
+  const container = document.getElementById('mobile-list-view');
+  if (!container) return;
+  const physicalAssets = assets.filter(a => isPhysicalAsset(a.type));
+  container.innerHTML = physicalAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
+}
 
 // ============================================================
 // TICKER & RIBBON
@@ -2801,7 +2609,20 @@ function openModal(type, id) { toast('Auth system ready — ' + type + ' modal w
 function closeModal() {}
 function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
 function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
-function initMobileUI() { /* mobile UI handler stub */ }
+function initMobileUI() { 
+  const viewToggle = document.getElementById('mobile-view-toggle');
+  const listView = document.getElementById('mobile-list-view');
+  const mapCol = document.getElementById('map-col');
+  if (viewToggle) {
+    viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        if (view === 'globe') { mapCol.style.display = 'block'; listView.classList.remove('active'); }
+        else { mapCol.style.display = 'none'; listView.classList.add('active'); renderMobileListView(ASSETS); }
+      });
+    });
+  }
+}
 
 // ============================================================
 // BOOT SEQUENCE
