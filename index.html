@@ -74,7 +74,7 @@ html, body {
 }
 #main-row {
   display: grid;
-  grid-template-columns: 288px 1fr;
+  grid-template-columns: 288px 1fr 320px;
   min-height: 0;
   overflow: hidden;
   min-width: 0;
@@ -479,7 +479,6 @@ body { min-width: 900px; overflow-x: auto; }
   z-index: 10;
   will-change: transform;
   transform: translate(-50%,-100%) translate(-9999px,-9999px);
-  cursor: pointer;
 }
 .price-marker:hover { 
   filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); 
@@ -635,29 +634,17 @@ body { min-width: 900px; overflow-x: auto; }
 }
 
 #right {
-  position: fixed;
-  right: 0;
-  top: 78px;
-  bottom: 30px;
-  width: 420px;
   background: var(--bg1);
   border-left: 1px solid var(--border);
-  transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 700;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: -4px 0 20px rgba(0,0,0,0.3);
-}
-#right.open {
-  transform: translateX(0);
+  min-height: 0;
 }
 .rhead {
-  padding: 16px 20px;
+  padding: 16px 16px 14px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  position: relative;
 }
 .rtype {
   font-size: 9px;
@@ -669,12 +656,11 @@ body { min-width: 900px; overflow-x: auto; }
   margin-bottom: 6px;
 }
 .rname {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.35;
   margin-bottom: 4px;
-  padding-right: 30px;
 }
 .rcity {
   font-size: 12px;
@@ -687,7 +673,7 @@ body { min-width: 900px; overflow-x: auto; }
   align-items: flex-end;
 }
 .rprice {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--cyan);
   letter-spacing: -.5px;
@@ -697,29 +683,13 @@ body { min-width: 900px; overflow-x: auto; }
   font-size: 10px;
   color: var(--muted);
 }
-.drawer-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 20px;
-  cursor: pointer;
-  z-index: 10;
-  line-height: 1;
-  transition: color .15s;
-  padding: 4px;
-}
-.drawer-close:hover { color: var(--text); }
 .rbody {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  padding: 16px 20px;
 }
-.rbody::-webkit-scrollbar { width: 3px; }
-.rbody::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.rbody::-webkit-scrollbar { width: 2px; }
+.rbody::-webkit-scrollbar-thumb { background: var(--border2); }
 .r-empty {
   display: flex;
   flex-direction: column;
@@ -743,23 +713,23 @@ body { min-width: 900px; overflow-x: auto; }
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.rinner { width: 100%; }
-.rsect { margin-bottom: 24px; }
+.rinner { padding: 14px 16px; }
+.rsect { margin-bottom: 18px; }
 .rsect-title {
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.8px;
   color: var(--cyan);
-  margin-bottom: 12px;
+  margin-bottom: 9px;
   border-bottom: 1px solid rgba(0,255,200,.2);
-  padding-bottom: 6px;
+  padding-bottom: 5px;
   opacity: .9;
 }
 .rrow {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 6px 0;
   border-bottom: 1px solid var(--border);
   font-size: 12px;
   gap: 12px;
@@ -775,8 +745,8 @@ body { min-width: 900px; overflow-x: auto; }
 .act-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 6px;
+  margin-bottom: 16px;
 }
 .abtn {
   padding: 10px 8px;
@@ -785,7 +755,7 @@ body { min-width: 900px; overflow-x: auto; }
   font-weight: 700;
   cursor: pointer;
   border: none;
-  border-radius: 4px;
+  border-radius: 2px;
   letter-spacing: .6px;
   text-transform: uppercase;
   transition: all .15s;
@@ -1051,18 +1021,20 @@ body { min-width: 900px; overflow-x: auto; }
 }
 #toast {
   position: fixed;
-  bottom: 48px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 64px;
+  right: 18px;
+  z-index: 99999;
   background: var(--bg2);
-  border: 1px solid var(--cyan);
-  padding: 8px 20px;
+  border: 1px solid rgba(0,255,200,.3);
+  padding: 12px 18px;
+  font-family: var(--font);
   font-size: 11px;
   color: var(--cyan);
-  border-radius: 4px;
-  z-index: 10000;
   display: none;
-  white-space: nowrap;
+  border-radius: 2px;
+  max-width: 340px;
+  letter-spacing: .3px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.6);
   animation: toast-in .2s ease;
 }
 @keyframes toast-in {
@@ -1071,9 +1043,22 @@ body { min-width: 900px; overflow-x: auto; }
 }
 
 #asset-drawer {
-  display: none;
+  position: fixed;
+  top: 78px;
+  right: 0;
+  bottom: 30px;
+  width: min(480px, 38vw);
+  background: var(--bg1);
+  border-left: 1px solid rgba(0,255,200,.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 700;
+  transform: translateX(105%);
+  transition: transform .32s cubic-bezier(.4,0,.2,1);
+  box-shadow: -20px 0 60px rgba(0,0,0,.6);
+  will-change: transform;
 }
-
+#asset-drawer.open { transform: translateX(0); }
 #overlay-layer {
   position: absolute;
   inset: 0;
@@ -1082,7 +1067,7 @@ body { min-width: 900px; overflow-x: auto; }
   overflow: visible;
 }
 
-/* MOBILE STYLES */
+/* MOBILE "ZILLOW" UI (≤767px) — Centered Globe + 75vh Slide-up Drawer */
 @media (max-width: 767px) {
   #shell {
     grid-template-rows: 48px 1fr;
@@ -1114,7 +1099,7 @@ body { min-width: 900px; overflow-x: auto; }
     -webkit-overflow-scrolling: touch !important;
     display: block !important;
   }
-  #right.open {
+  #right.open-drawer {
     transform: translateY(0) !important;
   }
   #right::before {
@@ -1196,6 +1181,87 @@ body { min-width: 900px; overflow-x: auto; }
     white-space: nowrap;
     background: rgba(0,0,0,.7);
   }
+  .view-toggle {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    background: rgba(14,22,46,.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,255,200,.25);
+    border-radius: 40px;
+    padding: 4px;
+    z-index: 400;
+  }
+  .view-toggle-btn {
+    padding: 8px 20px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    border-radius: 32px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .view-toggle-btn.active {
+    background: var(--cyan);
+    color: #000;
+  }
+  .list-view {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    z-index: 300;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+    padding: 12px;
+    gap: 12px;
+  }
+  .list-view.active {
+    display: flex;
+  }
+  .list-tile {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .list-tile:active { background: var(--bg2); }
+  .list-tile-type {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--cyan);
+    margin-bottom: 6px;
+  }
+  .list-tile-addr {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+  .list-tile-loc {
+    font-size: 10px;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  .list-tile-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+  #asset-drawer { display: none; }
   .price-marker { z-index: 500 !important; }
   .price-tag { padding: 5px 9px; }
   .price-tag-val { font-size: 11px; }
@@ -1222,8 +1288,396 @@ body { min-width: 900px; overflow-x: auto; }
   padding: 4px;
 }
 .drawer-close:hover { color: var(--text); }
+.drawer-hero {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  background: var(--bg3);
+}
+.drawer-hero-placeholder {
+  width: 100%;
+  height: 160px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--border2);
+  font-size: 36px;
+  letter-spacing: 4px;
+}
+.drawer-head {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.drawer-type-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.drawer-type {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--cyan);
+  opacity: .8;
+}
+.drawer-status {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: rgba(46,212,122,.12);
+  color: var(--green);
+  border: 1px solid rgba(46,212,122,.25);
+}
+.drawer-status.inactive {
+  background: rgba(255,90,90,.08);
+  color: var(--red);
+  border-color: rgba(255,90,90,.2);
+}
+.drawer-address {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 2px;
+}
+.drawer-city {
+  font-size: 11px;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+.drawer-price-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.drawer-price {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: -.5px;
+  line-height: 1;
+}
+.drawer-psf {
+  font-size: 11px;
+  color: var(--muted);
+  padding-bottom: 3px;
+}
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  max-height: calc(90vh - 280px);
+  -webkit-overflow-scrolling: touch;
+}
+.drawer-body::-webkit-scrollbar { width: 3px; }
+.drawer-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.drawer-specs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.drawer-spec {
+  padding: 12px 14px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.drawer-spec:last-child { border-right: none; }
+.drawer-spec-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.drawer-spec-lbl {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.drawer-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.drawer-section-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--cyan);
+  margin-bottom: 10px;
+  opacity: .85;
+}
+.drawer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 12px;
+}
+.drawer-row:last-child { border-bottom: none; }
+.drawer-k { font-size: 11px; color: var(--dim); flex-shrink: 0; }
+.drawer-v { font-size: 11px; font-weight: 500; color: var(--silver); text-align: right; word-break: break-word; }
+.drawer-v.hl { color: var(--cyan); font-weight: 700; }
+.compliance-block {
+  background: rgba(0,255,200,.04);
+  border: 1px solid rgba(0,255,200,.12);
+  border-radius: 3px;
+  padding: 10px 12px;
+  margin-bottom: 0;
+}
+.compliance-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 10px;
+  gap: 8px;
+}
+.compliance-k { color: var(--muted); font-size: 10px; }
+.compliance-v { color: var(--silver); font-weight: 600; font-size: 10px; text-align: right; }
+.struct-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 9px 11px;
+  margin-bottom: 7px;
+}
+.struct-card:last-child { margin-bottom: 0; }
+.struct-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.drawer-actions {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+.drawer-btn-primary {
+  width: 100%;
+  min-height: 48px;
+  padding: 13px;
+  background: linear-gradient(135deg, #00c49a 0%, #00ffc8 100%);
+  color: #041a12;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: opacity .15s, transform .1s;
+}
+.drawer-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.drawer-btn-secondary {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .15s;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+}
+.drawer-btn-secondary:hover { border-color: var(--border3); color: var(--text); }
+.drawer-legal {
+  padding: 10px 16px 12px;
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.7;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.bid-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 8px;
+  font-size: 10px;
+}
+.bid-row:last-child { border-bottom: none; }
+.bid-amount { color: var(--cyan); font-weight: 700; font-size: 12px; }
+.bid-terms  { color: var(--dim); }
+.bid-expiry { color: var(--muted); font-size: 9px; text-align: right; }
 
-/* CLINICAL AUTHENTICATION GATE */
+@keyframes mint-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.mint-ring {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,255,200,.2);
+  border-top-color: var(--cyan);
+  animation: mint-spin .9s linear infinite;
+  margin: 0 auto 12px;
+}
+.mint-hash {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1.8;
+  font-family: 'Courier New', monospace;
+  background: rgba(0,0,0,.3);
+  padding: 8px 10px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+.mint-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border: 1px solid rgba(46,212,122,.4);
+  border-radius: 20px;
+  background: rgba(46,212,122,.06);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: .5px;
+  margin-bottom: 12px;
+}
+.mint-qr {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 8px;
+  color: #000;
+  position: relative;
+  overflow: hidden;
+}
+.mint-qr::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background-image:
+    repeating-linear-gradient(0deg, #000 0, #000 2px, transparent 2px, transparent 5px),
+    repeating-linear-gradient(90deg, #000 0, #000 2px, transparent 2px, transparent 5px);
+  opacity: .7;
+}
+.savings-block {
+  background: linear-gradient(135deg, rgba(0,12,4,.9) 0%, rgba(0,20,10,.9) 100%);
+  border: 1px solid rgba(46,212,122,.25);
+  border-radius: 4px;
+  padding: 12px 14px;
+  margin: 0;
+}
+.savings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 8px;
+}
+.savings-row:last-child { border-bottom: none; }
+.savings-k { color: var(--dim); font-size: 11px; }
+.savings-v { font-size: 11px; font-weight: 600; color: var(--silver); }
+.savings-v.strike { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+.savings-v.fee    { color: var(--cyan); }
+.savings-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+}
+.savings-total-k { color: var(--dim); }
+.savings-total-v { color: var(--green); font-size: 16px; letter-spacing: -.3px; }
+.savings-saas {
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-style: italic;
+}
+.ledger-card {
+  background: rgba(0,255,200,.03);
+  border: 1px solid rgba(0,255,200,.15);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+.ledger-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ledger-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 0 2px rgba(148,160,190,.2);
+  flex-shrink: 0;
+}
+.ledger-dot.minted {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green), 0 0 0 2px rgba(46,212,122,.25);
+}
+.ledger-label { font-size: 11px; color: var(--dim); }
+.ledger-hash-preview {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+.digitize-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  background: none;
+  border: 1px solid rgba(0,255,200,.3);
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .15s;
+}
+.digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
+.digitize-btn:disabled { opacity: .4; cursor: default; }
+
+/* CLINICAL AUTHENTICATION GATE — Minimalist, No Escape */
 .auth-gate {
   position: fixed;
   top: 0;
@@ -1397,21 +1851,23 @@ body { min-width: 900px; overflow-x: auto; }
     </div>
   </div>
 
+  <div id="right">
+    <div class="rhead" id="rhead">
+      <div class="rtype">Select an Asset</div>
+      <div class="rname" style="opacity:.25">Click any marker or listing</div>
+      <div class="rcity">—</div>
+    </div>
+    <div class="rbody" id="rbody">
+      <div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>
+    </div>
+  </div>
+
 </div>
 
-<div id="right">
-  <button class="drawer-close" onclick="closeRightPanel()">✕</button>
-  <div class="rhead" id="rhead">
-    <div class="rtype">Select an Asset</div>
-    <div class="rname" style="opacity:.25">Click any marker or listing</div>
-    <div class="rcity">—</div>
-  </div>
-  <div class="rbody" id="rbody">
-    <div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>
-  </div>
+<div id="asset-drawer">
+  <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  <div id="drawer-inner"></div>
 </div>
-
-<div id="asset-drawer"></div>
 
 <div id="ticker-bar">
   <div class="ticker-track" id="ticker-track"></div>
@@ -1429,7 +1885,7 @@ body { min-width: 900px; overflow-x: auto; }
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#610e1112211306313239363311296c212d2f"><span class="__cf_email__" data-cfemail="fc938c8fbc8e8b9d9e95989d8f97d29f9391">[email&#160;protected]</span></a>
+    <a href="/cdn-cgi/l/email-protection#6b041b182b191c0a09020f0a180045080406"><span class="__cf_email__" data-cfemail="b4dbc4c7f4c6c3d5d6ddd0d5c7df9ad7dbd9">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -1439,13 +1895,13 @@ body { min-width: 900px; overflow-x: auto; }
 <div id="modal"><div class="mbox" id="mbox"><button class="mclose-btn" onclick="closeModal()">✕</button></div></div>
 <div id="toast"></div>
 
-<div class="view-toggle" id="mobile-view-toggle" style="display:none;">
+<div class="view-toggle" id="mobile-view-toggle">
   <button class="view-toggle-btn active" data-view="globe">🌍 GLOBE</button>
   <button class="view-toggle-btn" data-view="list">📋 LIST</button>
 </div>
-<div class="list-view" id="mobile-list-view" style="display:none;"></div>
+<div class="list-view" id="mobile-list-view"></div>
 
-<!-- CLINICAL AUTHENTICATION GATE -->
+<!-- CLINICAL AUTHENTICATION GATE — Persistent, No Escape -->
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-card">
     <div class="auth-gate-title">RWABidAsk | Access Terminal</div>
@@ -1462,7 +1918,7 @@ body { min-width: 900px; overflow-x: auto; }
 'use strict';
 
 // ============================================================
-// FIX: Marker persistence flags
+// FIX: Marker persistence flags - ADDED
 // ============================================================
 let isMapReady = false;
 let markersRendered = false;
@@ -1510,7 +1966,7 @@ let domMarkers = {};
 
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-const MARKER_VISIBLE_RANGE = 3500000; // 3500km - shows markers at regional zoom
+const MARKER_VISIBLE_RANGE = 6000000; // FIX: Increased to 6000km - markers show at regional zoom
 let isAuthenticated = false;
 
 // Supabase config
@@ -1521,7 +1977,7 @@ let currentUser = null;
 let currentUserRole = null;
 
 // ============================================================
-// FETCH REAL DATA FROM SUPABASE
+// FETCH REAL DATA FROM SUPABASE 'listings' TABLE
 // ============================================================
 async function fetchListingsFromSupabase() {
   if (!_sb) {
@@ -1587,6 +2043,9 @@ async function loadMarketData() {
   onDataReady();
 }
 
+// ============================================================
+// FIX: onDataReady waits for map readiness
+// ============================================================
 function onDataReady() {
   const assetCount = ASSETS.length;
   setStatus(`RWABidAsk PERMANENT LEDGER — ${assetCount} ASSETS REGISTERED`);
@@ -1597,7 +2056,9 @@ function onDataReady() {
   renderCategories();
   renderList(ASSETS);
   buildTicker(ASSETS);
+  if (window.innerWidth <= 767) renderMobileListView(ASSETS);
   
+  // FIX: Only render markers if map is ready and not already rendered
   if (isMapReady && !markersRendered && ASSETS.length > 0) {
     renderDOMMarkers();
     markersRendered = true;
@@ -1654,6 +2115,7 @@ function setCategory(catId, btn) {
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
+  if (window.innerWidth <= 767) renderMobileListView(filtered);
 }
 
 function filterAssets(assets) {
@@ -1678,6 +2140,7 @@ function setFilter(el, f) {
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
+  if (window.innerWidth <= 767) renderMobileListView(filtered);
 }
 
 function renderList(assetsToShow) {
@@ -1700,61 +2163,24 @@ function selectAsset(id) {
   activeId = id;
   const a = ASSETS.find(x => x.id === id);
   if (!a) return;
-  renderDetailPanel(a);
-  flyTo(a.lat, a.lng);
-  openRightPanel();
+  renderDetail(a);
+  flyTo(a.lat, a.lng, 1400, 45);
+  if (window.innerWidth <= 767) openMobileDrawer(a);
+  else openDrawer(a);
   const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
   renderList(filtered);
 }
 
-// COMPLETE renderDetailPanel with ALL action buttons
-function renderDetailPanel(a) {
-  document.getElementById('rhead').innerHTML = `
-    <button class="drawer-close" onclick="closeRightPanel()">✕</button>
-    <div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div>
-    <div class="rname">${a.address}</div>
-    <div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
-    <div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div></div>
-  `;
-  
+function renderDetail(a) {
+  document.getElementById('rhead').innerHTML = `<div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div><div class="rname">${a.address}</div><div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div></div>`;
   const structs = a.structures || [];
-  const structHTML = structs.length ? `<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s, i) => `<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>${s.sqft ? `<div class="rrow"><span class="rk">Size</span><span class="rv">${s.sqft.toLocaleString()} sqft</span></div>` : ''}${s.beds ? `<div class="rrow"><span class="rk">Beds</span><span class="rv">${s.beds}</span></div>` : ''}${s.baths ? `<div class="rrow"><span class="rk">Baths</span><span class="rv">${s.baths}</span></div>` : ''}${s.built ? `<div class="rrow"><span class="rk">Built</span><span class="rv">${s.built}</span></div>` : ''}</div>`).join('')}</div>` : '';
-  
+  const structHTML = structs.length ? `<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s, i) => `<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>${s.sqft ? rr('Size', s.sqft.toLocaleString() + ' sqft') : ''}${s.beds ? rr('Beds', s.beds) : ''}${s.baths ? rr('Baths', s.baths) : ''}${s.built ? rr('Built', s.built) : ''}${s.remodel ? rr('Remodeled', s.remodel) : ''}${s.type ? rr('Type', s.type) : ''}${s.notes ? rr('Notes', s.notes) : ''}</div>`).join('')}</div>` : '';
   const fin = a.financials || {};
-  const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div>${a.price ? `<div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>` : ''}${a.sqft ? `<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price / a.sqft))}</span></div>` : ''}${fin.tax_annual ? `<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>` : ''}${fin.hoa ? `<div class="rrow"><span class="rk">HOA / mo</span><span class="rv">$${fin.hoa}</span></div>` : ''}${a.days ? `<div class="rrow"><span class="rk">Days Listed</span><span class="rv">${a.days}d</span></div>` : ''}<div class="rrow"><span class="rk">Source</span><span class="rv">${a.source || 'Public Registry'}</span></div></div>`;
-  
-  const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>${(a.bids && a.bids.length) ? a.bids.map(b => `<div class="rrow"><span class="rk">${fmtPrice(b.amount)}</span><span class="rv">${b.terms || 'cash'} · ${b.expiry || ''}</span></div>`).join('') : `<div class="rrow"><span class="rk">No bids yet</span><span class="rv">Be the first</span></div>`}</div>`;
-  
-  document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div><div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div><div class="rrow"><span class="rk">Token Status</span><span class="rv ${a.tokenized ? 'hl' : ''}">${a.tokenized ? '⬡ On-Chain' : 'Unclaimed'}</span></div><div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div></div>${a.description ? `<div class="rsect"><div class="rsect-title">Description</div><div class="rrow"><span class="rv">${a.description}</span></div></div>` : ''}</div>`;
+  const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div>${a.price ? rr('Listed Price', `<span class="rv hl">${fmtPrice(a.price)}</span>`) : ''}${a.sqft ? rr('Price / sqft', fmtPrice(Math.round(a.price / a.sqft))) : ''}${fin.tax_annual ? rr('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}${fin.hoa ? rr('HOA / mo', '$' + fin.hoa) : ''}${fin.zestimate ? rr('Est. Value', fmtPrice(fin.zestimate)) : ''}${a.days ? rr('Days Listed', a.days + 'd') : ''}${rr('Source', a.source || 'Public Registry')}</div>`;
+  const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>${(a.bids && a.bids.length) ? a.bids.map(b => `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px"><span style="color:var(--cyan);font-weight:600">${fmtPrice(b.amount)}</span><span style="color:var(--muted)">${b.terms || 'cash'}</span><span style="color:var(--dim)">${b.expiry || ''}</span></div>`).join('') : `<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>`}</div>`;
+  document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div>${rr('Asset ID', '#' + a.id)}${rr('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}${rr('KYC Required', 'Yes — to bid or buy')}</div></div>`;
 }
-
-function openRightPanel() {
-  document.getElementById('right').classList.add('open');
-}
-
-function closeRightPanel() {
-  document.getElementById('right').classList.remove('open');
-  activeId = null;
-  document.querySelectorAll('.pcard').forEach(c => c.classList.remove('active'));
-  document.getElementById('rhead').innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
-  document.getElementById('rbody').innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
-}
-
-// Swipe to close on mobile
-let touchStartX = 0;
-let touchStartY = 0;
-const rightPanel = document.getElementById('right');
-rightPanel.addEventListener('touchstart', (e) => {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-});
-rightPanel.addEventListener('touchmove', (e) => {
-  const deltaX = e.touches[0].clientX - touchStartX;
-  const deltaY = e.touches[0].clientY - touchStartY;
-  if (deltaX > 50 && Math.abs(deltaY) < 30) {
-    closeRightPanel();
-  }
-});
+function rr(k, v) { return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`; }
 
 // ============================================================
 // SEARCH
@@ -1767,6 +2193,7 @@ function performSearch() {
     const filtered = filterAssets(ASSETS);
     renderList(filtered);
     syncMarkersToSearch(filtered);
+    if (window.innerWidth <= 767) renderMobileListView(filtered);
     setStatus('GLOBAL DIRECTORY — ' + ASSETS.length + ' ASSETS');
     return;
   }
@@ -1780,6 +2207,7 @@ function performSearch() {
   const filteredResults = filterAssets(SEARCH_RESULTS);
   renderList(filteredResults);
   syncMarkersToSearch(filteredResults);
+  if (window.innerWidth <= 767) renderMobileListView(filteredResults);
   setStatus('SEARCH: ' + SEARCH_RESULTS.length + ' assets found');
 }
 document.getElementById('search-input').addEventListener('input', performSearch);
@@ -1837,6 +2265,7 @@ async function initMap() {
     setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
     await loadMarketData();
     
+    // FIX: If map is already ready, render markers
     if (isMapReady && ASSETS.length > 0 && !markersRendered) {
       renderDOMMarkers();
       markersRendered = true;
@@ -1868,7 +2297,7 @@ async function initPlacesSearch() {
             await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
             const lat = place.location.lat();
             const lng = place.location.lng();
-            flyTo(lat, lng);
+            flyTo(lat, lng, 1400, 45);
             setStatus('LOCATION: ' + (place.displayName || '').toUpperCase().slice(0, 60));
           } catch (err) { toast('Location lookup failed'); }
         });
@@ -1884,31 +2313,21 @@ async function initPlacesSearch() {
         if (!place?.geometry?.location) { toast('Location not found'); return; }
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        flyTo(lat, lng);
+        flyTo(lat, lng, 1400, 45);
         setStatus('LOCATION: ' + (place.name || '').toUpperCase().slice(0, 60));
       });
     }
   } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
 }
 
-function flyTo(lat, lng, range = 1400, tilt = 45) { 
-  if (!map3dEl) return; 
-  try { 
-    map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 25 }, tilt: tilt, range: range, heading: 0 }, durationMillis: 1800 }); 
-  } catch(e) { 
-    map3dEl.center = { lat, lng, altitude: 25 }; 
-    map3dEl.range = range; 
-    map3dEl.tilt = tilt; 
-  } 
-}
-
+function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 25 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 25 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
 function flyGlobe() { flyTo(20, 10, 12000000, 0); }
 function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
 function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
 function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
 
 // ============================================================
-// DOM MARKERS - FIXED VISIBILITY
+// DOM MARKERS - FIXED: Simplified visibility logic
 // ============================================================
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
@@ -1923,6 +2342,7 @@ function onCameraChange() {
         return;
       }
       const currentRange = map3dEl.range || 12000000;
+      // FIX: Show markers when zoomed in enough (range <= 6000km)
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
       if (isZoomedIn) {
@@ -1964,10 +2384,12 @@ function getVisibleAssetsInViewport(assets) {
   } catch(e) { return assets.slice(0, 100); }
 }
 
+// FIX: Simplified renderDOMMarkers
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
   
+  // Clear existing markers only on first render
   if (!markersRendered) {
     layer.innerHTML = '';
     domMarkers = {};
@@ -1975,16 +2397,20 @@ function renderDOMMarkers() {
   
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
   
+  // Add markers for all physical assets
   physicalAssets.forEach(a => {
     if (!domMarkers[a.id]) {
       addPriceMarker(a);
     }
   });
   
+  // Initially hide all markers
   Object.values(domMarkers).forEach(({ el }) => { 
     el.style.display = 'none';
     el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
   });
+  
+  console.log(`Markers rendered: ${Object.keys(domMarkers).length} markers created`);
 }
 
 function addPriceMarker(asset) {
@@ -1998,7 +2424,7 @@ function addPriceMarker(asset) {
   const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
   const emoji = classEmoji[asset.type] || '';
   el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
-  el.addEventListener('click', (e) => { e.stopPropagation(); selectAsset(asset.id); });
+  el.addEventListener('click', (e) => { e.stopPropagation(); if (window.innerWidth <= 767) openMobileDrawer(asset); else openDrawer(asset); selectAsset(asset.id); });
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
   requestAnimationFrame(() => projectMarkerLegacy(asset, el));
@@ -2078,9 +2504,45 @@ function markersVisible() { return !!(map3dEl) && (map3dEl.range || 12e6) <= MAR
 
 document.getElementById('map-col').addEventListener('click', (e) => {
   if (!e.target.closest('.price-marker') && activeId) {
-    closeRightPanel();
+    activeId = null;
+    const rhead = document.getElementById('rhead');
+    if (rhead) {
+      rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
+    }
+    const rbody = document.getElementById('rbody');
+    if (rbody) {
+      rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
+    }
+    document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
+    if (window.innerWidth <= 767) {
+      const rightPanel = document.getElementById('right');
+      if (rightPanel) rightPanel.classList.remove('open-drawer');
+      document.body.style.overflow = '';
+    }
   }
 });
+
+// ============================================================
+// DRAWER FUNCTIONS (Full original)
+// ============================================================
+function openDrawer(a) {
+  const drawer = document.getElementById('asset-drawer');
+  const inner = document.getElementById('drawer-inner');
+  const classIcons = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'⌂', commercial:'🏢', land:'◻' };
+  const heroHTML = `<div class="drawer-hero-placeholder" style="font-size:48px">${classIcons[a.type] || '◎'}</div>`;
+  const isActive = a.broker_active !== false;
+  const statusText = isActive ? (a.status || 'For Sale') : 'Listing Expired';
+  const statusCls = isActive ? '' : 'inactive';
+  const assetHash = 'rwa:' + a.id + ':' + (a.price||0);
+  const fakeHash = Array.from(assetHash).reduce((h,c)=>(h=((h<<5)-h)+c.charCodeAt(0),h&h),0);
+  const hashHex = Math.abs(fakeHash).toString(16).padStart(8,'0');
+  const isMinted = !!a.tokenized;
+  inner.innerHTML = `${heroHTML}<div class="drawer-head"><div class="drawer-type-row"><div class="drawer-type">${(a.type||'Asset').toUpperCase()}</div><div class="drawer-status ${statusCls}">${statusText}</div></div><div class="drawer-address">${a.address}</div><div class="drawer-city">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="drawer-price-row"><div class="drawer-price">${fmtPrice(a.price)}</div></div></div><div class="drawer-body"><div class="drawer-section"><div class="drawer-section-title">Digital Ledger</div><div class="ledger-card"><div class="ledger-status"><div class="ledger-dot ${isMinted ? 'minted' : ''}"></div><div class="ledger-label">${isMinted ? 'Recorded on Persistent Ledger' : 'Pending registration'}</div></div>${isMinted ? `<div class="ledger-hash-preview">${hashHex}</div>` : '<div style="font-size:10px;color:var(--muted)">Digitize this asset to create a permanent ledger record.</div>'}</div></div><div class="drawer-section"><div class="drawer-section-title">Asset Details</div>${a.description ? `<div class="drawer-row"><span class="drawer-k">Description</span><span class="drawer-v">${a.description}</span></div>` : ''}${a.sqft ? `<div class="drawer-row"><span class="drawer-k">Size</span><span class="drawer-v">${a.sqft.toLocaleString()} sqft</span></div>` : ''}</div></div><div class="drawer-actions"><button class="drawer-btn-primary" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="drawer-btn-secondary" onclick="openEscrowSequence('${a.id}')">START INQUIRY</button></div><div class="drawer-legal">Source: ${a.source || 'Supabase Ledger'} · ID #${a.id}</div>`;
+  drawer.classList.add('open');
+}
+function closeDrawer() { document.getElementById('asset-drawer').classList.remove('open'); }
+function openMobileDrawer(a) { renderDetail(a); document.getElementById('right').classList.add('open-drawer'); document.body.style.overflow = 'hidden'; }
+function renderMobileListView(assets) { /* kept for mobile compatibility */ }
 
 // ============================================================
 // TICKER & RIBBON
@@ -2120,7 +2582,7 @@ function openModal(type, id) { toast('Auth system ready — ' + type + ' modal w
 function closeModal() {}
 function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
 function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
-function initMobileUI() { }
+function initMobileUI() { /* mobile UI handler stub */ }
 
 // ============================================================
 // BOOT SEQUENCE
