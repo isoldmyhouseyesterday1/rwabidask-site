@@ -2596,41 +2596,54 @@ document.addEventListener('DOMContentLoaded', () => { initMobileUI(); });
 window.__initRWA = initMap;
 if (window.__googleMapsLoaded) initMap();
 
-  // ============================================================
-// ASSET MARKER ENGINE (The "Pulse" Logic)
+// ============================================================
+// UNIVERSAL ASSET MARKER ENGINE (The "Safety Net" Version)
 // ============================================================
 
 async function render3DMarkers() {
   const { Marker3DElement } = await google.maps.importLibrary("maps3d");
   
-  // 1. Wipe clean so we don't get "ghost" markers
+  // Wipe clean
   document.querySelectorAll('gmp-marker-3d').forEach(el => el.remove());
 
-  // 2. Loop through your assets (Supabase data)
+  if (!assets || assets.length === 0) {
+    console.warn("⚠️ No assets found in memory. Checking database connection...");
+    return;
+  }
+
   assets.forEach(asset => {
-    // Determine the label based on the currency rules you set
-    const labelText = `${asset.currency_code === 'GBP' ? '£' : '$'}${(asset.price_local / 1000000).toFixed(1)}M`;
+    // SAFETY NET: Check for different name versions (lat vs latitude)
+    const lat = parseFloat(asset.lat || asset.latitude);
+    const lng = parseFloat(asset.lng || asset.longitude);
+    const localPrice = parseFloat(asset.price_local || asset.price || 0);
+    const currency = asset.currency_code || 'USD';
+
+    if (!lat || !lng) {
+      console.error("❌ Asset missing coordinates:", asset.address);
+      return; 
+    }
+
+    const priceLabel = `${currency === 'GBP' ? '£' : '$'}${(localPrice / 1000000).toFixed(1)}M`;
     
+    console.log(`📍 Placing Marker: ${asset.address} at ${lat}, ${lng}`);
+
     const marker = new Marker3DElement({
-      position: { lat: asset.lat, lng: asset.lng, altitude: 25 },
-      label: labelText,
+      position: { lat: lat, lng: lng, altitude: 35 },
+      label: priceLabel,
       extruded: true,
       altitudeMode: "RELATIVE_TO_GROUND"
     });
 
-    // 3. Attach it to the 3D container
-    const mapElement = document.querySelector('gmp-map-3d');
-    if (mapElement) {
-      mapElement.append(marker);
-    }
+    const mapTag = document.querySelector('gmp-map-3d');
+    if (mapTag) mapTag.append(marker);
   });
 }
 
-// THE HAND-HOLD: This "Pulse" waits for the 3D globe to be stable
-const mapElement = document.querySelector('gmp-map-3d');
-if (mapElement) {
-  mapElement.addEventListener('gmp-steadystate', () => {
-    console.log("3D Map Solid. Rendering Markers...");
+// THE PULSE
+const mapTag = document.querySelector('gmp-map-3d');
+if (mapTag) {
+  mapTag.addEventListener('gmp-steadystate', () => {
+    console.log("3D Map Stable. Attempting to render markers...");
     render3DMarkers();
   });
 }
