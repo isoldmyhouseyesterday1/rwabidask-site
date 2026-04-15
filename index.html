@@ -521,6 +521,118 @@ body { min-width: 900px; overflow-x: auto; }
   box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5);
   margin-top: -1px;
 }
+.price-marker.heat-warm .price-tag { border-color: rgba(255,180,0,.6); }
+.price-marker.heat-warm .price-tag-val { color: #ffb400; }
+.price-marker.heat-warm .price-stem { background: linear-gradient(to bottom, rgba(255,180,0,.6), transparent); }
+.price-marker.heat-warm .price-dot  { background: #ffb400; box-shadow: 0 0 6px #ffb400; }
+.price-marker.heat-hot  .price-tag { border-color: rgba(255,80,80,.6); }
+.price-marker.heat-hot  .price-tag-val { color: #ff5a5a; }
+.price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,80,80,.6), transparent); }
+.price-marker.heat-hot  .price-dot  { background: #ff5a5a; box-shadow: 0 0 6px #ff5a5a; }
+.price-marker.standard .price-tag     { border-color: rgba(0,255,200,.55); }
+.price-marker.standard .price-tag-val { color: var(--cyan); }
+.price-marker.standard .price-stem    { background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0)); }
+.price-marker.standard .price-dot     { background: var(--cyan); box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5); }
+
+@keyframes anchor-glow {
+  0%,100% { filter: drop-shadow(0 0 5px rgba(226,197,90,.8)) drop-shadow(0 4px 16px rgba(0,0,0,.7)); }
+  50%      { filter: drop-shadow(0 0 18px rgba(226,197,90,1)) drop-shadow(0 0 32px rgba(226,197,90,.55)) drop-shadow(0 4px 20px rgba(0,0,0,.8)); }
+}
+@keyframes anchor-ring {
+  0%   { transform: translate(-50%,-50%) scale(.5); opacity: .9; }
+  100% { transform: translate(-50%,-50%) scale(2.6); opacity: 0; }
+}
+.price-marker.anchor {
+  animation: anchor-glow 2.4s ease-in-out infinite;
+  z-index: 50 !important;
+}
+.price-marker.anchor .price-tag {
+  border-color: rgba(226,197,90,.9);
+  background: rgba(8,14,32,.98);
+  box-shadow: 0 0 0 1px rgba(226,197,90,.18), 0 4px 22px rgba(0,0,0,.75);
+}
+.price-marker.anchor .price-tag::before {
+  content: '★ FEATURED';
+  display: block;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  color: var(--gold);
+  margin-bottom: 2px;
+  opacity: .9;
+}
+.price-marker.anchor .price-tag-val  { color: var(--gold); }
+.price-marker.anchor .price-tag-type { color: rgba(226,197,90,.55); }
+.price-marker.anchor .price-stem {
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(226,197,90,.8), rgba(226,197,90,0));
+}
+.price-marker.anchor .price-dot {
+  width: 9px; height: 9px;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold), 0 0 22px rgba(226,197,90,.7);
+  position: relative;
+}
+.price-marker.anchor .price-dot::before,
+.price-marker.anchor .price-dot::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 1px solid rgba(226,197,90,.65);
+  animation: anchor-ring 2.4s ease-out infinite;
+}
+.price-marker.anchor .price-dot::after { animation-delay: 1.2s; }
+
+.map-cluster {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: all;
+  cursor: pointer;
+  z-index: 30;
+}
+.cluster-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,255,200,.25);
+  animation: cluster-breathe 3s ease-in-out infinite;
+}
+@keyframes cluster-breathe {
+  0%,100% { opacity: .4; transform: scale(1); }
+  50%      { opacity: .8; transform: scale(1.08); }
+}
+.cluster-inner {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(14,22,46,.95);
+  border: 1.5px solid rgba(0,255,200,.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(0,255,200,.2), 0 4px 20px rgba(0,0,0,.7);
+  transition: border-color .15s, box-shadow .15s;
+}
+.map-cluster:hover .cluster-inner {
+  border-color: var(--cyan);
+  box-shadow: 0 0 24px rgba(0,255,200,.4), 0 4px 20px rgba(0,0,0,.8);
+}
+.cluster-count {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--cyan);
+  line-height: 1;
+}
+.cluster-val {
+  font-size: 8px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
 
 #right {
   position: fixed;
@@ -813,19 +925,8 @@ body { min-width: 900px; overflow-x: auto; }
   padding: 32px;
   position: relative;
 }
-.mclose-btn {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 18px;
-  cursor: pointer;
-  line-height: 1;
-  transition: color .15s;
-}
-.mclose-btn:hover { color: var(--text); }
+.mbox::-webkit-scrollbar { width: 2px; }
+.mbox::-webkit-scrollbar-thumb { background: var(--border2); }
 .mtitle {
   font-size: 20px;
   font-weight: 700;
@@ -861,10 +962,16 @@ body { min-width: 900px; overflow-x: auto; }
   padding: 10px 12px;
   outline: none;
   border-radius: 3px;
+  transition: border-color .15s, box-shadow .15s;
 }
 .mfield input:focus,
 .mfield select:focus,
-.mfield textarea:focus { border-color: rgba(0,255,200,.5); }
+.mfield textarea:focus { border-color: rgba(0,255,200,.5); box-shadow: 0 0 0 2px rgba(0,255,200,.08); }
+.mfield input::placeholder,
+.mfield textarea::placeholder { color: var(--muted); }
+.mfield select option { background: var(--bg2); }
+.mfield textarea { resize: vertical; min-height: 80px; }
+.mrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .mfooter { display: flex; gap: 8px; margin-top: 24px; }
 .msub-btn {
   flex: 1;
@@ -876,7 +983,9 @@ body { min-width: 900px; overflow-x: auto; }
   font-family: var(--font);
   font-size: 11px;
   font-weight: 700;
-  border-radius: 4px;
+  letter-spacing: .5px;
+  border-radius: 2px;
+  transition: background .15s;
 }
 .msub-btn:hover { background: #00e6b4; }
 .mcan-btn {
@@ -887,10 +996,59 @@ body { min-width: 900px; overflow-x: auto; }
   cursor: pointer;
   font-family: var(--font);
   font-size: 11px;
-  border-radius: 4px;
+  border-radius: 2px;
+  transition: all .15s;
 }
 .mcan-btn:hover { color: var(--text); border-color: var(--border2); }
-
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.role-card {
+  border: 1px solid var(--border);
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+}
+.role-card:hover, .role-card.sel {
+  border-color: rgba(0,255,200,.35);
+  background: var(--cyan-dim);
+}
+.role-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+.role-desc {
+  font-size: 9px;
+  color: var(--dim);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.mclose-btn {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color .15s;
+}
+.mclose-btn:hover { color: var(--text); }
+.legal-note {
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.9;
+  margin-top: 4px;
+}
 #toast {
   position: fixed;
   bottom: 48px;
@@ -905,59 +1063,15 @@ body { min-width: 900px; overflow-x: auto; }
   z-index: 10000;
   display: none;
   white-space: nowrap;
+  animation: toast-in .2s ease;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.auth-gate {
-  position: fixed;
-  inset: 0;
-  background: rgba(10,14,23,0.98);
-  backdrop-filter: blur(8px);
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.auth-gate.hidden { display: none; }
-.auth-gate-card {
-  background: var(--bg1);
-  border: 1px solid var(--border2);
-  padding: 32px 40px;
-  max-width: 400px;
-  text-align: center;
-}
-.auth-gate-title {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-.auth-gate-sub {
-  font-size: 11px;
-  color: var(--muted);
-  margin-bottom: 24px;
-}
-.auth-gate-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-.auth-gate-btn {
-  padding: 10px 24px;
-  font-size: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-}
-.auth-gate-btn.primary {
-  background: var(--cyan);
-  color: #000;
-}
-.auth-gate-btn.secondary {
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--silver);
+#asset-drawer {
+  display: none;
 }
 
 #overlay-layer {
@@ -968,125 +1082,390 @@ body { min-width: 900px; overflow-x: auto; }
   overflow: visible;
 }
 
+/* MOBILE STYLES */
 @media (max-width: 767px) {
   #shell {
     grid-template-rows: 48px 1fr;
     height: 100dvh;
     min-width: unset;
+    width: 100vw;
+    overflow-x: hidden !important;
   }
   #market-ribbon, #ticker-bar, #footer, #left {
     display: none !important;
   }
   #right {
-    width: 100% !important;
-    top: 48px !important;
+    position: fixed !important;
     bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 75vh !important;
+    max-height: 75vh !important;
+    border-left: none !important;
+    border-top: 2px solid rgba(0,255,200,.3) !important;
     border-radius: 16px 16px 0 0 !important;
-    border-top: 2px solid var(--cyan) !important;
+    transform: translateY(100%) !important;
+    transition: transform .3s cubic-bezier(.4,0,.2,1) !important;
+    z-index: 2000 !important;
+    background: var(--bg1) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
   }
-  .rbody { max-height: calc(100vh - 200px); }
+  #right.open {
+    transform: translateY(0) !important;
+  }
+  #right::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,.2);
+    border-radius: 2px;
+    margin: 10px auto 6px;
+  }
+  .rhead, .rinner {
+    padding: 12px 16px;
+  }
+  .rbody {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(75vh - 180px);
+  }
   #topbar {
     height: 48px;
-    padding: 0 12px;
+    padding: 0 8px;
+    background: var(--bg1);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 100;
   }
   .tstat, .logo-tag { display: none; }
+  .tbtn {
+    display: inline-block !important;
+    padding: 0 8px;
+    font-size: 10px;
+    border-left: none;
+    margin-left: 4px;
+  }
+  .tbtn.primary {
+    background: var(--cyan);
+    color: #000;
+    border-radius: 2px;
+    padding: 0 10px;
+    margin-left: 4px;
+  }
+  .logo { padding: 0 12px; border-right: none; }
   .logo-text { font-size: 14px; }
+  .search-wrap { margin-left: 8px; flex: 1; }
+  #search-input { font-size: 12px; }
+  body, #main-row {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+  }
+  #main-row {
+    grid-template-columns: 1fr !important;
+    width: 100vw !important;
+    position: relative;
+    overflow: hidden;
+  }
+  #map-col {
+    position: relative !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100% !important;
+    overflow: hidden;
+  }
+  #map3d-container {
+    position: absolute;
+    inset: 0;
+  }
+  .map-ctl-panel {
+    top: 8px;
+    right: 8px;
+    z-index: 200;
+  }
+  .mctl-group { padding: 3px; gap: 0; }
+  .mctl { padding: 4px 8px; font-size: 8px; }
+  .map-status {
+    bottom: 60px;
+    font-size: 8px;
+    padding: 4px 12px;
+    white-space: nowrap;
+    background: rgba(0,0,0,.7);
+  }
+  .price-marker { z-index: 500 !important; }
+  .price-tag { padding: 5px 9px; }
+  .price-tag-val { font-size: 11px; }
+  .price-tag-type { font-size: 7px; }
+}
+@media (max-width: 767px) and (orientation: landscape) {
+  .view-toggle { bottom: 8px; }
+  .view-toggle-btn { padding: 6px 16px; font-size: 10px; }
+  #right { height: 80vh !important; max-height: 80vh !important; }
+}
+
+.drawer-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 10;
+  line-height: 1;
+  transition: color .15s;
+  padding: 4px;
+}
+.drawer-close:hover { color: var(--text); }
+
+/* CLINICAL AUTHENTICATION GATE */
+.auth-gate {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 14, 23, 0.98);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+}
+.auth-gate.hidden {
+  display: none;
+}
+.auth-gate-card {
+  background: var(--bg1);
+  border: 1px solid var(--border2);
+  padding: 40px 48px;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.auth-gate-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--silver);
+  margin-bottom: 12px;
+}
+.auth-gate-sub {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+.auth-gate-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.auth-gate-btn {
+  padding: 12px 28px;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.auth-gate-btn.primary {
+  background: var(--cyan);
+  color: #000;
+}
+.auth-gate-btn.primary:hover {
+  background: #00e6b4;
+}
+.auth-gate-btn.secondary {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--silver);
+}
+.auth-gate-btn.secondary:hover {
+  border-color: var(--border3);
+  color: var(--text);
+  background: rgba(255,255,255,.03);
 }
 </style>
 </head>
 <body>
 
 <div id="shell">
-<div id="market-ribbon"><div class="ribbon-track" id="ribbon-track"></div></div>
+
+<div id="market-ribbon">
+  <div class="ribbon-track" id="ribbon-track"></div>
+</div>
+
 <div id="topbar">
-  <div class="logo"><div class="logo-mark"></div><div><div class="logo-text">RWABidAsk</div><div class="logo-tag">GLOBAL ASSET MARKET</div></div></div>
+  <div class="logo">
+    <div class="logo-mark"></div>
+    <div>
+      <div class="logo-text">RWABidAsk</div>
+      <div class="logo-tag">GLOBAL ASSET MARKET</div>
+    </div>
+  </div>
   <div class="search-wrap">
-    <input id="search-input" type="text" placeholder="Search by address, city, or region..." autocomplete="off">
-    <button class="search-icon" onclick="performSearch()">🔍</button>
+    <input id="search-input" type="text" placeholder="Global Asset Navigation — search any address, city, or region…" autocomplete="off">
+    <button class="search-icon" onclick="performSearch()" title="Global Asset Navigation" aria-label="Search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
   </div>
   <div class="topbar-right">
-    <div class="tstat"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc">—</div></div>
-    <div class="tstat"><div class="tstat-l">ASSETS</div><div class="tstat-v live" id="s-assets">—</div></div>
-    <div class="tstat"><div class="tstat-l">LEDGER</div><div class="tstat-v live" id="s-status">SYNC</div></div>
-    <button class="tbtn" id="signin-btn">Sign In</button>
-    <button class="tbtn primary" id="join-btn">Join</button>
+    <div class="tstat" title="Total value of all assets registered on RWABidAsk Permanent Ledger">
+      <div class="tstat-l">GMC</div>
+      <div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Assets</div>
+      <div class="tstat-v live" id="s-assets">—</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Status</div>
+      <div class="tstat-v live" id="s-status">SYNC</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Bids 24h</div>
+      <div class="tstat-v" id="s-bids">—</div>
+    </div>
+    <button class="tbtn" id="signin-btn" onclick="openModal('tos_gate')">Sign In</button>
+    <button class="tbtn primary" id="join-btn" onclick="openModal('tos_gate')">Join</button>
   </div>
 </div>
 
 <div id="main-row">
+
   <div id="left">
     <div class="left-head">
-      <div class="left-title">GLOBAL DIRECTORY</div>
+      <div class="left-title">Global Directory</div>
       <div class="ptabs" id="category-tabs"></div>
       <div class="frow" id="price-filters">
-        <button class="fchip on" data-filter="any">Any</button>
-        <button class="fchip" data-filter="sub1m">Under $1M</button>
-        <button class="fchip" data-filter="1m5m">$1-5M</button>
-        <button class="fchip" data-filter="5m25m">$5-25M</button>
-        <button class="fchip" data-filter="25mplus">$25M+</button>
+        <button class="fchip on" onclick="setFilter(this,'any')">Any</button>
+        <button class="fchip" onclick="setFilter(this,'sub1m')">–$1M</button>
+        <button class="fchip" onclick="setFilter(this,'1m5m')">$1–5M</button>
+        <button class="fchip" onclick="setFilter(this,'5m25m')">$5–25M</button>
+        <button class="fchip" onclick="setFilter(this,'25mplus')">$25M+</button>
       </div>
     </div>
-    <div class="list-scroll" id="list-scroll"><div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div></div></div>
+    <div class="list-scroll" id="list-scroll">
+      <div class="sync-state" id="sync-state">
+        <div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div>
+        <div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div>
+      </div>
+    </div>
   </div>
+
   <div id="map-col">
     <div id="map3d-container"></div>
     <div id="overlay-layer"></div>
     <div class="map-ctl-panel">
-      <div class="mctl-group"><button class="mctl on" onclick="setMapMode('satellite',this)">Satellite</button><button class="mctl" onclick="setMapMode('hybrid',this)">Hybrid</button></div>
-      <div class="mctl-group"><button class="mctl" onclick="setTilt(45,this)">Tilt 45°</button><button class="mctl" onclick="setTilt(0,this)">Top Down</button></div>
-      <div class="mctl-group"><button class="mctl" onclick="flyGlobe()">Global View</button></div>
+      <div class="mctl-group">
+        <button class="mctl on" onclick="setMapMode('satellite',this)">Satellite</button>
+        <button class="mctl" onclick="setMapMode('hybrid',this)">Hybrid</button>
+      </div>
+      <div class="mctl-group">
+        <button class="mctl" onclick="setTilt(45,this)">Tilt 45°</button>
+        <button class="mctl" onclick="setTilt(0,this)">Top Down</button>
+      </div>
+      <div class="mctl-group">
+        <button class="mctl" onclick="toggleHeat(this)">Heat Zone</button>
+        <button class="mctl" onclick="flyGlobe()">Global View</button>
+      </div>
     </div>
-    <div class="map-status"><span class="live-dot"></span><span id="map-status-txt">ESTABLISHING CONNECTION…</span></div>
+    <div class="map-status"><span class="live-dot"></span><span id="map-status-txt">ESTABLISHING SECURE CONNECTION…</span></div>
+    <div class="blimp-layer">
+      <div class="blimp" id="blimp-el" title="Partnership — Annie Group LLC">
+        <div class="blimp-body">
+          <div class="blimp-hull"><div><div class="blimp-text">ANNIE GROUP LLC</div><div class="blimp-sub">PARTNERSHIP INQUIRY</div></div></div>
+          <div class="blimp-tail"></div>
+        </div>
+        <div class="blimp-string"></div>
+        <div class="blimp-flag">AIRSPACE</div>
+      </div>
+    </div>
   </div>
-</div>
+
 </div>
 
 <div id="right">
   <button class="drawer-close" onclick="closeRightPanel()">✕</button>
-  <div class="rhead" id="rhead"><div class="rtype">SELECT AN ASSET</div><div class="rname">—</div><div class="rcity">—</div></div>
-  <div class="rbody" id="rbody"><div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">Click any marker or listing to view details</div></div></div>
+  <div class="rhead" id="rhead">
+    <div class="rtype">Select an Asset</div>
+    <div class="rname" style="opacity:.25">Click any marker or listing</div>
+    <div class="rcity">—</div>
+  </div>
+  <div class="rbody" id="rbody">
+    <div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>
+  </div>
 </div>
 
-<div id="ticker-bar"><div class="ticker-track" id="ticker-track"></div></div>
-<div id="footer"><div class="footer-copy"><strong>© 2026 ANNIE GROUP LLC. All Rights Reserved.</strong> · RWABidAsk is a Registered Trade Name of Annie Group LLC · Non-Custodial Asset Digitization Platform</div></div>
+<div id="asset-drawer"></div>
 
+<div id="ticker-bar">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<div id="footer">
+  <div class="footer-copy">
+    <strong>© 2026 ANNIE GROUP LLC. All Rights Reserved.</strong>
+    &nbsp;·&nbsp;
+    RWABidAsk is a Registered Trade Name of Annie Group LLC
+    &nbsp;·&nbsp;
+    Non-Custodial Asset Digitization Platform — Not a Broker, Dealer, or Investment Advisor
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openModal('tos');return false">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openModal('privacy');return false">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/cdn-cgi/l/email-protection#610e1112211306313239363311296c212d2f"><span class="__cf_email__" data-cfemail="fc938c8fbc8e8b9d9e95989d8f97d29f9391">[email&#160;protected]</span></a>
+  </div>
+</div>
+
+</div>
+
+<div id="info-win" class="info-win" style="display:none;position:fixed;z-index:9999;"></div>
 <div id="modal"><div class="mbox" id="mbox"><button class="mclose-btn" onclick="closeModal()">✕</button></div></div>
 <div id="toast"></div>
 
+<div class="view-toggle" id="mobile-view-toggle" style="display:none;">
+  <button class="view-toggle-btn active" data-view="globe">🌍 GLOBE</button>
+  <button class="view-toggle-btn" data-view="list">📋 LIST</button>
+</div>
+<div class="list-view" id="mobile-list-view" style="display:none;"></div>
+
+<!-- CLINICAL AUTHENTICATION GATE -->
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-card">
     <div class="auth-gate-title">RWABidAsk | Access Terminal</div>
-    <div class="auth-gate-sub">Sign in to access the Global Asset Directory and Persistent Ledger.</div>
+    <div class="auth-gate-sub">Sign in or create an account to access the Global Asset Directory, Persistent Ledger, and institutional bidding platform.</div>
     <div class="auth-gate-buttons">
-      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('register')">Request Access</button>
+      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('tos_gate')">Request Access</button>
       <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button>
     </div>
   </div>
 </div>
 
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script>
 'use strict';
 
 // ============================================================
-// GLOBAL STATE
+// FIX: Marker persistence flags
 // ============================================================
 let isMapReady = false;
 let markersRendered = false;
-let ASSETS = [];
-let SEARCH_RESULTS = [];
-let SEARCH_ACTIVE = false;
-let map3dEl = null;
-let activeTab = 'all';
-let activeFilter = 'any';
-let activeId = null;
-let domMarkers = {};
-let cameraDebounceTimer = null;
-let isAuthenticated = false;
-
-const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
-let _sb = null;
-let currentUser = null;
 
 // ============================================================
 // ASSET CATEGORIES
@@ -1097,7 +1476,7 @@ const ASSET_CATEGORIES = [
   { id: 'commercial', label: 'COMMERCIAL', icon: '🏢', physical: true },
   { id: 'aviation', label: 'AVIATION', icon: '✈', physical: true },
   { id: 'maritime', label: 'MARITIME', icon: '⚓', physical: true },
-  { id: 'resources', label: 'RESOURCES', icon: '⛏', physical: true },
+  { id: 'resources', label: 'NATURAL RESOURCES', icon: '⛏', physical: true },
   { id: 'infrastructure', label: 'INFRASTRUCTURE', icon: '⚡', physical: true },
   { id: 'financial', label: 'FINANCIALS', icon: '📄', physical: false }
 ];
@@ -1113,12 +1492,124 @@ function isPhysicalAsset(type) {
   return category ? category.physical : false;
 }
 
+// ============================================================
+// GLOBAL STATE
+// ============================================================
+let ASSETS = [];
+let SEARCH_RESULTS = [];
+let SEARCH_ACTIVE = false;
+let currentSearchQuery = '';
+
+let map3dEl = null;
+let acInstance = null;
+let activeTab = 'all';
+let activeFilter = 'any';
+let activeId = null;
+let heatOn = false;
+let domMarkers = {};
+
+let cameraDebounceTimer = null;
+let isCameraProcessing = false;
+const MARKER_VISIBLE_RANGE = 3500000; // 3500km - shows markers at regional zoom
+let isAuthenticated = false;
+
+// Supabase config
+const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
+let _sb = null;
+let currentUser = null;
+let currentUserRole = null;
+
+// ============================================================
+// FETCH REAL DATA FROM SUPABASE
+// ============================================================
+async function fetchListingsFromSupabase() {
+  if (!_sb) {
+    console.warn('[RWABidAsk] Supabase not ready, retrying...');
+    return [];
+  }
+  try {
+    setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');
+    const { data, error } = await _sb
+      .from('listings')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('[RWABidAsk] Supabase fetch error:', error);
+      setStatus('LEDGER CONNECTION ISSUE — RETRYING');
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      console.log('[RWABidAsk] No listings found in database');
+      setStatus('NO ASSETS IN LEDGER — ADD LISTINGS VIA DASHBOARD');
+      return [];
+    }
+    
+    const transformed = data.map(row => ({
+      id: row.id,
+      address: row.address || row.property_address || 'Address not specified',
+      city: row.city || 'Unknown',
+      country: row.country || 'Global',
+      lat: parseFloat(row.latitude) || parseFloat(row.lat) || 0,
+      lng: parseFloat(row.longitude) || parseFloat(row.lng) || 0,
+      price: parseFloat(row.price) || 0,
+      type: (row.asset_type || row.type || 'residential').toLowerCase(),
+      sqft: row.sqft ? parseInt(row.sqft) : null,
+      status: row.listing_status || 'For Sale',
+      source: 'Supabase Ledger',
+      days: row.days_on_market || 0,
+      broker_active: row.broker_active !== false,
+      tokenized: row.tokenized === true,
+      structures: row.structures || [],
+      infrastructure: row.infrastructure || {},
+      land: row.land || {},
+      financials: row.financials || {},
+      bids: row.bids || [],
+      image_url: row.image_url || null,
+      description: row.description || null
+    })).filter(a => a.lat !== 0 && a.lng !== 0);
+    
+    console.log(`[RWABidAsk] Loaded ${transformed.length} listings from Supabase`);
+    return transformed;
+  } catch (err) {
+    console.error('[RWABidAsk] Exception fetching listings:', err);
+    setStatus('LEDGER FETCH FAILED — CHECK CONNECTION');
+    return [];
+  }
+}
+
+async function loadMarketData() {
+  const fetched = await fetchListingsFromSupabase();
+  ASSETS = fetched;
+  onDataReady();
+}
+
+function onDataReady() {
+  const assetCount = ASSETS.length;
+  setStatus(`RWABidAsk PERMANENT LEDGER — ${assetCount} ASSETS REGISTERED`);
+  document.getElementById('s-assets').textContent = assetCount;
+  document.getElementById('s-status').textContent = 'LIVE';
+  document.getElementById('s-bids').textContent = Math.floor(assetCount * 2.3);
+  updateGMC(ASSETS);
+  renderCategories();
+  renderList(ASSETS);
+  buildTicker(ASSETS);
+  
+  if (isMapReady && !markersRendered && ASSETS.length > 0) {
+    renderDOMMarkers();
+    markersRendered = true;
+  }
+}
+
 function fmtPrice(n) {
-  if (!n || n === 0) return '$—';
+  if (!n || n === 0) return '—';
   if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
   if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
   if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
-  return '$' + n.toLocaleString();
+  return '$' + n;
 }
 
 function setStatus(msg) {
@@ -1130,68 +1621,39 @@ function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 3000);
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+
+function typeClass(type) {
+  const cat = getAssetCategory(type);
+  const map = { realestate:'t-res', commercial:'t-com', resources:'t-res2', aviation:'t-avi', maritime:'t-mar', infrastructure:'t-energy', financial:'t-fin' };
+  return map[cat] || 't-res';
 }
 
 // ============================================================
-// SUPABASE FETCH
+// CATEGORY RENDERING
 // ============================================================
-async function fetchListings() {
-  if (!_sb) { setTimeout(fetchListings, 500); return; }
-  try {
-    setStatus('FETCHING GLOBAL DIRECTORY…');
-    const { data, error } = await _sb.from('listings').select('*').eq('status', 'active');
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      setStatus('NO ASSETS FOUND — ADD LISTINGS');
-      return;
-    }
-    ASSETS = data.map(row => ({
-      id: row.id,
-      address: row.address || 'Address not specified',
-      city: row.city || 'Unknown',
-      country: row.country || 'Global',
-      lat: parseFloat(row.latitude) || parseFloat(row.lat) || 0,
-      lng: parseFloat(row.longitude) || parseFloat(row.lng) || 0,
-      price: parseFloat(row.price) || 0,
-      type: (row.asset_type || row.type || 'residential').toLowerCase(),
-      sqft: row.sqft ? parseInt(row.sqft) : null,
-      status: row.listing_status || 'For Sale',
-      tokenized: row.tokenized === true,
-      description: row.description || null,
-      financials: row.financials || {},
-      bids: row.bids || []
-    })).filter(a => a.lat !== 0 && a.lng !== 0);
-    
-    console.log(`Loaded ${ASSETS.length} assets`);
-    document.getElementById('s-assets').textContent = ASSETS.length;
-    updateGMC();
-    renderCategories();
-    renderList(ASSETS);
-    if (isMapReady && !markersRendered) { renderMarkers(); markersRendered = true; }
-  } catch (err) { console.error(err); setStatus('CONNECTION ERROR'); }
-}
-
-function updateGMC() {
-  const total = ASSETS.reduce((s, a) => s + a.price, 0);
-  const el = document.getElementById('s-gmc');
-  if (total >= 1e12) el.textContent = '$' + (total / 1e12).toFixed(2) + 'T';
-  else if (total >= 1e9) el.textContent = '$' + (total / 1e9).toFixed(1) + 'B';
-  else if (total >= 1e6) el.textContent = '$' + (total / 1e6).toFixed(1) + 'M';
-  else el.textContent = '$' + total.toLocaleString();
-}
-
 function renderCategories() {
   const container = document.getElementById('category-tabs');
   if (!container) return;
-  container.innerHTML = ASSET_CATEGORIES.map(cat => `<button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}')">${cat.icon} ${cat.label}</button>`).join('');
+  container.innerHTML = ASSET_CATEGORIES.map(cat => `
+    <button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}', this)">
+      ${cat.icon} ${cat.label}
+    </button>
+  `).join('');
 }
 
-function setCategory(catId) {
+function setCategory(catId, btn) {
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
   activeTab = catId;
-  renderCategories();
+  SEARCH_ACTIVE = false;
+  document.getElementById('search-input').value = '';
+  currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
+  syncMarkerVisibility();
 }
 
 function filterAssets(assets) {
@@ -1210,23 +1672,28 @@ function setFilter(el, f) {
   document.querySelectorAll('.fchip').forEach(x => x.classList.remove('on'));
   el.classList.add('on');
   activeFilter = f;
+  SEARCH_ACTIVE = false;
+  document.getElementById('search-input').value = '';
+  currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
+  syncMarkerVisibility();
 }
 
 function renderList(assetsToShow) {
   const wrap = document.getElementById('list-scroll');
-  if (!assetsToShow.length) {
-    wrap.innerHTML = `<div class="sync-state"><div class="sync-label">NO ASSETS FOUND</div></div>`;
+  const list = assetsToShow;
+  const resultCount = list.length;
+  const resultHeader = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
+  if (!list.length) {
+    wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;
     return;
   }
-  wrap.innerHTML = assetsToShow.map(a => `
-    <div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">
-      <div class="pcard-addr">${a.address}</div>
-      <div class="pcard-city">${a.city}${a.country ? ', ' + a.country : ''}</div>
-      <div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type">${a.type}</span></div>
-    </div>
-  `).join('');
+  wrap.innerHTML = resultHeader + list.map(a => {
+    const mainStruct = a.structures && a.structures[0];
+    const bedbath = mainStruct && mainStruct.beds ? `${mainStruct.beds}bd · ${mainStruct.baths}ba${a.sqft ? ' · ' + a.sqft.toLocaleString() + ' sf' : ''}` : (a.sqft ? a.sqft.toLocaleString() + ' sqft' : '');
+    return `<div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">${a.days ? `<div class="pcard-days">${a.days}d</div>` : ''}<div class="pcard-addr">${a.address}</div><div class="pcard-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>${bedbath ? `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${bedbath}</div>` : ''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`;
+  }).join('');
 }
 
 function selectAsset(id) {
@@ -1236,49 +1703,29 @@ function selectAsset(id) {
   renderDetailPanel(a);
   flyTo(a.lat, a.lng);
   openRightPanel();
-  renderList(filterAssets(ASSETS));
+  const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
+  renderList(filtered);
 }
 
+// COMPLETE renderDetailPanel with ALL action buttons
 function renderDetailPanel(a) {
   document.getElementById('rhead').innerHTML = `
     <button class="drawer-close" onclick="closeRightPanel()">✕</button>
-    <div class="rtype">${a.type.toUpperCase()} · ${a.status || 'For Sale'}</div>
+    <div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div>
     <div class="rname">${a.address}</div>
-    <div class="rcity">${a.city}${a.country ? ', ' + a.country : ''}</div>
-    <div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div>${a.sqft ? `<div class="rprice-psf">${fmtPrice(Math.round(a.price / a.sqft))}/sf</div>` : ''}</div>
+    <div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
+    <div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div></div>
   `;
   
+  const structs = a.structures || [];
+  const structHTML = structs.length ? `<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s, i) => `<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>${s.sqft ? `<div class="rrow"><span class="rk">Size</span><span class="rv">${s.sqft.toLocaleString()} sqft</span></div>` : ''}${s.beds ? `<div class="rrow"><span class="rk">Beds</span><span class="rv">${s.beds}</span></div>` : ''}${s.baths ? `<div class="rrow"><span class="rk">Baths</span><span class="rv">${s.baths}</span></div>` : ''}${s.built ? `<div class="rrow"><span class="rk">Built</span><span class="rv">${s.built}</span></div>` : ''}</div>`).join('')}</div>` : '';
+  
   const fin = a.financials || {};
-  document.getElementById('rbody').innerHTML = `
-    <div class="rinner">
-      <div class="act-grid">
-        <button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button>
-        <button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button>
-        <button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button>
-        <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button>
-        <button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button>
-        <button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button>
-        <button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button>
-      </div>
-      <div class="rsect"><div class="rsect-title">Financial Data</div>
-        <div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>
-        ${a.sqft ? `<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price / a.sqft))}</span></div>` : ''}
-        ${fin.tax_annual ? `<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${fin.tax_annual.toLocaleString()}</span></div>` : ''}
-        ${fin.hoa ? `<div class="rrow"><span class="rk">HOA / mo</span><span class="rv">$${fin.hoa}</span></div>` : ''}
-        <div class="rrow"><span class="rk">Source</span><span class="rv">Supabase Ledger</span></div>
-      </div>
-      <div class="rsect"><div class="rsect-title">Bid Order Book</div>
-        <div style="font-size:9px;color:var(--muted);margin-bottom:8px">Permanent ledger — no broker can remove bids.</div>
-        ${(a.bids && a.bids.length) ? a.bids.map(b => `<div class="rrow"><span class="rk">${fmtPrice(b.amount)}</span><span class="rv">${b.terms || 'cash'} · ${b.expiry || ''}</span></div>`).join('') : '<div class="rrow"><span class="rk">No bids yet</span><span class="rv">Be the first</span></div>'}
-      </div>
-      <div class="rsect"><div class="rsect-title">Market Status</div>
-        <div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div>
-        <div class="rrow"><span class="rk">Token Status</span><span class="rv ${a.tokenized ? 'hl' : ''}">${a.tokenized ? '✓ Registered' : 'Unclaimed'}</span></div>
-        <div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div>
-      </div>
-      ${a.description ? `<div class="rsect"><div class="rsect-title">Description</div><div class="rrow"><span class="rv">${a.description}</span></div></div>` : ''}
-    </div>
-  `;
+  const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div>${a.price ? `<div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>` : ''}${a.sqft ? `<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price / a.sqft))}</span></div>` : ''}${fin.tax_annual ? `<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>` : ''}${fin.hoa ? `<div class="rrow"><span class="rk">HOA / mo</span><span class="rv">$${fin.hoa}</span></div>` : ''}${a.days ? `<div class="rrow"><span class="rk">Days Listed</span><span class="rv">${a.days}d</span></div>` : ''}<div class="rrow"><span class="rk">Source</span><span class="rv">${a.source || 'Public Registry'}</span></div></div>`;
+  
+  const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>${(a.bids && a.bids.length) ? a.bids.map(b => `<div class="rrow"><span class="rk">${fmtPrice(b.amount)}</span><span class="rv">${b.terms || 'cash'} · ${b.expiry || ''}</span></div>`).join('') : `<div class="rrow"><span class="rk">No bids yet</span><span class="rv">Be the first</span></div>`}</div>`;
+  
+  document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div><div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div><div class="rrow"><span class="rk">Token Status</span><span class="rv ${a.tokenized ? 'hl' : ''}">${a.tokenized ? '⬡ On-Chain' : 'Unclaimed'}</span></div><div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div></div>${a.description ? `<div class="rsect"><div class="rsect-title">Description</div><div class="rrow"><span class="rv">${a.description}</span></div></div>` : ''}</div>`;
 }
 
 function openRightPanel() {
@@ -1289,178 +1736,399 @@ function closeRightPanel() {
   document.getElementById('right').classList.remove('open');
   activeId = null;
   document.querySelectorAll('.pcard').forEach(c => c.classList.remove('active'));
+  document.getElementById('rhead').innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
+  document.getElementById('rbody').innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
 }
 
 // Swipe to close on mobile
 let touchStartX = 0;
-document.getElementById('right').addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
-document.getElementById('right').addEventListener('touchmove', (e) => {
-  const deltaX = e.touches[0].clientX - touchStartX;
-  if (deltaX > 50) closeRightPanel();
+let touchStartY = 0;
+const rightPanel = document.getElementById('right');
+rightPanel.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
 });
-
-// ============================================================
-// GOOGLE MAPS 3D
-// ============================================================
-async function initMap() {
-  try {
-    const { Map3DElement } = await google.maps.importLibrary('maps3d');
-    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 12000000, tilt: 0, heading: 0 });
-    document.getElementById('map3d-container').appendChild(map3dEl);
-    
-    map3dEl.addEventListener('gmp-steadystate', () => {
-      console.log('Map ready');
-      isMapReady = true;
-      if (ASSETS.length > 0 && !markersRendered) { renderMarkers(); markersRendered = true; }
-    });
-    
-    map3dEl.addEventListener('gmp-rangechange', () => { if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(updateMarkerVisibility, 100); });
-    map3dEl.addEventListener('gmp-centerchange', () => { if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(updateMarkerVisibility, 100); });
-    
-    setStatus('GLOBE LOADED');
-    await fetchListings();
-  } catch (err) { console.error(err); setStatus('MAP ERROR'); }
-}
-
-function flyTo(lat, lng) {
-  if (!map3dEl) return;
-  try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 25 }, range: 1200, tilt: 50, heading: 0 }, durationMillis: 1500 }); } 
-  catch(e) { map3dEl.center = { lat, lng, altitude: 25 }; map3dEl.range = 1200; }
-}
-
-function flyGlobe() { flyTo(20, 10); map3dEl.range = 12000000; }
-function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.mode = mode; }
-function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
-
-// ============================================================
-// MARKERS - FIXED VISIBILITY
-// ============================================================
-function renderMarkers() {
-  const layer = document.getElementById('overlay-layer');
-  if (!layer || !map3dEl) return;
-  layer.innerHTML = '';
-  domMarkers = {};
-  
-  ASSETS.filter(a => isPhysicalAsset(a.type)).forEach(asset => {
-    const el = document.createElement('div');
-    el.className = 'price-marker';
-    el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${fmtPrice(asset.price)}</div><div class="price-tag-type">${asset.type}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
-    el.addEventListener('click', (e) => { e.stopPropagation(); selectAsset(asset.id); });
-    layer.appendChild(el);
-    domMarkers[asset.id] = { el, asset };
-  });
-  
-  updateMarkerVisibility();
-}
-
-function updateMarkerVisibility() {
-  if (!map3dEl) return;
-  
-  const range = map3dEl.range || 12000000;
-  const isZoomedIn = range <= 3500000; // ~3500km - shows markers when zoomed in enough
-  
-  if (!isZoomedIn) {
-    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
-    return;
+rightPanel.addEventListener('touchmove', (e) => {
+  const deltaX = e.touches[0].clientX - touchStartX;
+  const deltaY = e.touches[0].clientY - touchStartY;
+  if (deltaX > 50 && Math.abs(deltaY) < 30) {
+    closeRightPanel();
   }
-  
-  const center = map3dEl.center || { lat: 20, lng: 10 };
-  const degRange = range / 111000;
-  const latMin = center.lat - degRange;
-  const latMax = center.lat + degRange;
-  const lngRange = degRange / Math.max(0.3, Math.cos(center.lat * Math.PI / 180));
-  const lngMin = center.lng - lngRange;
-  const lngMax = center.lng + lngRange;
-  
-  Object.values(domMarkers).forEach(({ el, asset }) => {
-    const inView = asset.lat >= latMin && asset.lat <= latMax && asset.lng >= lngMin && asset.lng <= lngMax;
-    if (inView) {
-      el.style.display = 'flex';
-      updateMarkerPosition(asset, el);
-    } else {
-      el.style.display = 'none';
-    }
-  });
-}
-
-function updateMarkerPosition(asset, el) {
-  if (!map3dEl || !el) return;
-  try {
-    const rect = document.getElementById('map-col').getBoundingClientRect();
-    const center = map3dEl.center || { lat: 20, lng: 10 };
-    const range = map3dEl.range || 12000000;
-    const tilt = map3dEl.tilt || 0;
-    const heading = map3dEl.heading || 0;
-    
-    const dLat = asset.lat - center.lat;
-    const dLng = asset.lng - center.lng;
-    const ppd = rect.width / (range / 111000);
-    const cosLat = Math.cos(center.lat * Math.PI / 180);
-    const headRad = heading * Math.PI / 180;
-    const rx = dLng * cosLat * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
-    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cosLat * ppd * Math.sin(headRad);
-    const tiltFactor = Math.max(0.2, Math.cos(tilt * Math.PI / 180));
-    const x = rect.width / 2 + rx;
-    const y = rect.height / 2 + ry * tiltFactor;
-    
-    if (x >= -100 && x <= rect.width + 100 && y >= -100 && y <= rect.height + 100) {
-      el.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
-      el.style.display = 'flex';
-    } else {
-      el.style.display = 'none';
-    }
-  } catch(e) { console.warn(e); }
-}
+});
 
 // ============================================================
 // SEARCH
 // ============================================================
 function performSearch() {
   const query = document.getElementById('search-input').value.trim().toLowerCase();
-  if (!query) { renderList(filterAssets(ASSETS)); return; }
-  const results = ASSETS.filter(a => a.address.toLowerCase().includes(query) || a.city.toLowerCase().includes(query));
-  renderList(results);
+  currentSearchQuery = query;
+  if (query.length === 0) {
+    SEARCH_ACTIVE = false;
+    const filtered = filterAssets(ASSETS);
+    renderList(filtered);
+    syncMarkersToSearch(filtered);
+    setStatus('GLOBAL DIRECTORY — ' + ASSETS.length + ' ASSETS');
+    return;
+  }
+  SEARCH_ACTIVE = true;
+  SEARCH_RESULTS = ASSETS.filter(a => 
+    a.address.toLowerCase().includes(query) ||
+    a.city.toLowerCase().includes(query) ||
+    a.type.toLowerCase().includes(query) ||
+    (a.country && a.country.toLowerCase().includes(query))
+  );
+  const filteredResults = filterAssets(SEARCH_RESULTS);
+  renderList(filteredResults);
+  syncMarkersToSearch(filteredResults);
+  setStatus('SEARCH: ' + SEARCH_RESULTS.length + ' assets found');
 }
-
 document.getElementById('search-input').addEventListener('input', performSearch);
-document.querySelectorAll('.fchip').forEach(btn => { btn.addEventListener('click', () => setFilter(btn, btn.dataset.filter)); });
+
+function syncMarkersToSearch(assetsToShow) {
+  if (!map3dEl) return;
+  const currentRange = map3dEl.range || 22000000;
+  const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
+  if (!isZoomedIn || !isAuthenticated) {
+    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+    return;
+  }
+  const visibleInViewport = getVisibleAssetsInViewport(assetsToShow);
+  const visibleIds = new Set(visibleInViewport.map(a => a.id));
+  Object.keys(domMarkers).forEach(id => {
+    const marker = domMarkers[id];
+    const asset = marker.asset;
+    const isInSearch = assetsToShow.some(a => a.id === asset.id);
+    const isInViewport = visibleIds.has(id);
+    const shouldBeVisible = isPhysicalAsset(asset.type) && isInSearch && isInViewport;
+    marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
+  });
+}
 
 // ============================================================
-// AUTH & MODALS
+// GOOGLE MAPS 3D with gmp-steadystate fix
 // ============================================================
-function bootSupabase() {
-  if (typeof supabase !== 'undefined' && supabase.createClient) {
-    _sb = supabase.createClient(SB_URL, SB_KEY);
-    restoreSession();
-  } else { setTimeout(bootSupabase, 300); }
+async function initMap() {
+  try {
+    const maps3dLib = await google.maps.importLibrary('maps3d');
+    const Map3DElement = maps3dLib.Map3DElement;
+    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 12000000, tilt: 0, heading: 0 });
+    try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
+    const container = document.getElementById('map3d-container');
+    container.style.cssText = 'position:absolute;inset:0;';
+    container.appendChild(map3dEl);
+    
+    // CRITICAL FIX: Wait for steady state before rendering markers
+    map3dEl.addEventListener('gmp-steadystate', () => {
+      console.log('[RWABidAsk] Map steady state reached');
+      isMapReady = true;
+      if (ASSETS.length > 0 && !markersRendered) {
+        renderDOMMarkers();
+        markersRendered = true;
+      }
+    });
+    
+    const _onCam = () => { if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(onCameraChange, 100); };
+    map3dEl.addEventListener('gmp-centerchange', _onCam);
+    map3dEl.addEventListener('gmp-rangechange', _onCam);
+    map3dEl.addEventListener('gmp-tiltchange', _onCam);
+    map3dEl.addEventListener('gmp-headingchange', _onCam);
+    
+    requestAnimationFrame(() => { setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200); });
+    setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
+    await loadMarketData();
+    
+    if (isMapReady && ASSETS.length > 0 && !markersRendered) {
+      renderDOMMarkers();
+      markersRendered = true;
+    }
+    
+    setTimeout(() => { if (map3dEl && ASSETS.length > 0 && !markersRendered) { renderDOMMarkers(); markersRendered = true; } }, 800);
+    initPlacesSearch();
+  } catch (err) { console.error('[RWABidAsk] Map3DElement init error:', err); setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING'); }
 }
-async function restoreSession() {
-  if (!_sb) return;
-  const { data } = await _sb.auth.getSession();
-  if (data?.session?.user) { isAuthenticated = true; document.getElementById('auth-gate')?.classList.add('hidden'); }
+
+async function initPlacesSearch() {
+  const input = document.getElementById('search-input');
+  if (!input) return;
+  try {
+    const placesLib = await google.maps.importLibrary('places');
+    if (placesLib.PlaceAutocompleteElement) {
+      try {
+        const acEl = new placesLib.PlaceAutocompleteElement();
+        acEl.style.cssText = 'width:100%;height:100%;border:none;outline:none;background:transparent;color:#f0f4ff;font-family:Inter,system-ui,sans-serif;font-size:13px;padding:0 18px;position:relative;z-index:9999;';
+        const wrap = input.parentNode;
+        input.style.display = 'none';
+        wrap.insertBefore(acEl, input);
+        acInstance = acEl;
+        acEl.addEventListener('gmp-select', async (evt) => {
+          try {
+            const prediction = evt.placePrediction;
+            if (!prediction) return;
+            const place = prediction.toPlace();
+            await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
+            const lat = place.location.lat();
+            const lng = place.location.lng();
+            flyTo(lat, lng);
+            setStatus('LOCATION: ' + (place.displayName || '').toUpperCase().slice(0, 60));
+          } catch (err) { toast('Location lookup failed'); }
+        });
+        return;
+      } catch(e) { input.style.display = ''; }
+    }
+    const AcClass = placesLib.Autocomplete || (google.maps.places && google.maps.places.Autocomplete);
+    if (AcClass) {
+      const ac = new AcClass(input, { fields: ['geometry', 'name', 'formatted_address'] });
+      acInstance = ac;
+      ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (!place?.geometry?.location) { toast('Location not found'); return; }
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        flyTo(lat, lng);
+        setStatus('LOCATION: ' + (place.name || '').toUpperCase().slice(0, 60));
+      });
+    }
+  } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
 }
-function openModal(type, id) { toast('Demo: ' + type + ' modal'); }
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-function requireAuth(action, assetId) { if (isAuthenticated) toast('Action: ' + action); else openModal('signin'); }
+
+function flyTo(lat, lng, range = 1400, tilt = 45) { 
+  if (!map3dEl) return; 
+  try { 
+    map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 25 }, tilt: tilt, range: range, heading: 0 }, durationMillis: 1800 }); 
+  } catch(e) { 
+    map3dEl.center = { lat, lng, altitude: 25 }; 
+    map3dEl.range = range; 
+    map3dEl.tilt = tilt; 
+  } 
+}
+
+function flyGlobe() { flyTo(20, 10, 12000000, 0); }
+function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
+function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
+function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
 
 // ============================================================
-// BOOT
+// DOM MARKERS - FIXED VISIBILITY
+// ============================================================
+function onCameraChange() {
+  if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
+  if (isCameraProcessing) return;
+  cameraDebounceTimer = setTimeout(() => {
+    isCameraProcessing = true;
+    try {
+      if (!map3dEl) return;
+      if (!isAuthenticated) {
+        Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+        isCameraProcessing = false;
+        return;
+      }
+      const currentRange = map3dEl.range || 12000000;
+      const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
+      
+      if (isZoomedIn) {
+        const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
+        const visibleAssets = getVisibleAssetsInViewport(baseAssets);
+        const visibleIds = new Set(visibleAssets.map(a => a.id));
+        Object.keys(domMarkers).forEach(id => {
+          const marker = domMarkers[id];
+          const asset = marker.asset;
+          const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
+          marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
+        });
+        reprojectMarkersWithMatrix();
+      } else {
+        Object.values(domMarkers).forEach(({ el }) => { 
+          el.style.display = 'none';
+          el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+        });
+      }
+      const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
+      buildTicker(viewportList);
+    } catch (err) { console.warn('[RWABidAsk] onCameraChange error:', err.message); }
+    finally { isCameraProcessing = false; }
+  }, 150);
+}
+
+function getVisibleAssetsInViewport(assets) {
+  if (!map3dEl) return [];
+  try {
+    const center = map3dEl.center || { lat: 20, lng: 10 };
+    const range = map3dEl.range || 12000000;
+    const degSpread = Math.min(30, (range / 111000) * 1.2);
+    const latMin = center.lat - degSpread;
+    const latMax = center.lat + degSpread;
+    const lngSpread = degSpread / Math.max(0.2, Math.cos(center.lat * Math.PI / 180));
+    const lngMin = center.lng - lngSpread;
+    const lngMax = center.lng + lngSpread;
+    return assets.filter(a => a.lat >= latMin && a.lat <= latMax && a.lng >= lngMin && a.lng <= lngMax);
+  } catch(e) { return assets.slice(0, 100); }
+}
+
+function renderDOMMarkers() {
+  const layer = document.getElementById('overlay-layer');
+  if (!layer || !map3dEl) return;
+  
+  if (!markersRendered) {
+    layer.innerHTML = '';
+    domMarkers = {};
+  }
+  
+  const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
+  
+  physicalAssets.forEach(a => {
+    if (!domMarkers[a.id]) {
+      addPriceMarker(a);
+    }
+  });
+  
+  Object.values(domMarkers).forEach(({ el }) => { 
+    el.style.display = 'none';
+    el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+  });
+}
+
+function addPriceMarker(asset) {
+  const layer = document.getElementById('overlay-layer');
+  if (!layer) return;
+  const el = document.createElement('div');
+  el.className = 'price-marker standard';
+  el.title = asset.address || 'Asset';
+  const priceStr = fmtPrice(asset.price);
+  const typeStr = asset.type || 'asset';
+  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
+  const emoji = classEmoji[asset.type] || '';
+  el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
+  el.addEventListener('click', (e) => { e.stopPropagation(); selectAsset(asset.id); });
+  layer.appendChild(el);
+  domMarkers[asset.id] = { el, asset };
+  requestAnimationFrame(() => projectMarkerLegacy(asset, el));
+}
+
+function projectMarkerLegacy(asset, el) {
+  if (!map3dEl || !el) return;
+  try {
+    const mapCol = document.getElementById('map-col');
+    if (!mapCol) return;
+    const rect = mapCol.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    if (!W || !H) return;
+    const camCenter = map3dEl.center || { lat: 20, lng: 10 };
+    const camRange = map3dEl.range || 12000000;
+    const camTilt = map3dEl.tilt || 0;
+    const camHead = map3dEl.heading || 0;
+    const dLat = asset.lat - camCenter.lat;
+    const dLng = asset.lng - camCenter.lng;
+    const ppd = (W / 2) / Math.max(1, camRange / 111320);
+    const cosLat = Math.cos(camCenter.lat * Math.PI / 180);
+    const headRad = camHead * Math.PI / 180;
+    const rx = dLng * cosLat * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
+    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cosLat * ppd * Math.sin(headRad);
+    const tiltFactor = Math.max(0.1, Math.cos(camTilt * Math.PI / 180));
+    const sx = W / 2 + rx;
+    const sy = H / 2 + ry * tiltFactor;
+    const globeRadius = Math.min(W, H) * 0.48;
+    const dx = sx - W / 2, dy = sy - H / 2;
+    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+    const isBehindGlobe = camRange > 3000000 && distFromCenter > globeRadius * 1.1;
+    if (isBehindGlobe) { el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)'; }
+    else { el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`; el.style.zIndex = String(Math.floor(1000 - distFromCenter / 10)); }
+  } catch (err) { console.warn('[RWABidAsk] projectMarkerLegacy:', err.message); }
+}
+
+function reprojectMarkersWithMatrix() {
+  if (!map3dEl) return;
+  if (map3dEl.createViewProjectionMatrix) {
+    try {
+      const mapCol = document.getElementById('map-col');
+      if (!mapCol) return;
+      const rect = mapCol.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const matrix = map3dEl.createViewProjectionMatrix();
+      const width = rect.width, height = rect.height;
+      Object.values(domMarkers).forEach(({ el, asset }) => {
+        if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
+        const worldX = asset.lng, worldY = asset.lat, worldZ = 25;
+        const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
+        const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
+        const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
+        if (screenW <= 0) { el.style.display = 'none'; return; }
+        let x = (screenX / screenW + 1) * 0.5 * width;
+        let y = (-screenY / screenW + 1) * 0.5 * height;
+        if (x < -200 || x > width + 200 || y < -200 || y > height + 200) { el.style.display = 'none'; return; }
+        el.style.display = 'flex';
+        el.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+      });
+      return;
+    } catch(e) { console.warn('[RWABidAsk] Matrix projection failed'); }
+  }
+  Object.values(domMarkers).forEach(({ el, asset }) => { projectMarkerLegacy(asset, el); });
+}
+
+function syncMarkerVisibility() {
+  if (!markersVisible()) { Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; }); return; }
+  const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
+  const visibleAssets = getVisibleAssetsInViewport(baseAssets);
+  const visibleIds = new Set(visibleAssets.map(a => a.id));
+  Object.entries(domMarkers).forEach(([id, { el, asset }]) => {
+    const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
+    el.style.display = shouldBeVisible ? 'flex' : 'none';
+  });
+}
+function markersVisible() { return !!(map3dEl) && (map3dEl.range || 12e6) <= MARKER_VISIBLE_RANGE; }
+
+document.getElementById('map-col').addEventListener('click', (e) => {
+  if (!e.target.closest('.price-marker') && activeId) {
+    closeRightPanel();
+  }
+});
+
+// ============================================================
+// TICKER & RIBBON
 // ============================================================
 function buildRibbon() {
-  const markets = [{ label:'BTC/USD', val:'$83,241', chg:'+1.2%', dir:'up' },{ label:'Gold', val:'$3,118', chg:'+0.4%', dir:'up' }];
+  const markets = [{ label:'BTC/USD', val:'$83,241', chg:'+1.2%', dir:'up' },{ label:'Gold Spot', val:'$3,118/oz',chg:'+0.4%', dir:'up' },{ label:'10Y T-Bill', val:'4.38%', chg:'-0.02', dir:'down' }];
+  const items = markets.map(m => `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');
   const track = document.getElementById('ribbon-track');
-  if (track) track.innerHTML = markets.map(m => `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('') + markets.map(m => `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');
+  if (track) track.innerHTML = items + items;
 }
 function buildTicker(assets) {
+  const base = ['RWABIDASK.COM', 'GLOBAL LEDGER LIVE', 'BID · ASK · BUY'];
+  const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 20);
+  const segments = addrs.length > 0 ? [...base, ...addrs] : base;
+  const all = [...segments, ...segments];
+  const html = all.map(s => `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${s}</span><span class="sep">·</span></span>`).join('');
   const track = document.getElementById('ticker-track');
-  if (!track) return;
-  const addrs = assets.slice(0, 20).map(a => a.address);
-  const html = [...addrs, ...addrs].map(s => `<span class="ticker-seg"><span class="addr">${s}</span><span class="sep">·</span></span>`).join('');
-  track.innerHTML = html;
+  if (track) { track.innerHTML = html; track.style.animation = 'none'; track.offsetHeight; track.style.animation = 'ticker-run 90s linear infinite'; }
+}
+function updateGMC(assets) {
+  const total = assets.reduce((sum, a) => sum + (a.price || 0), 0);
+  const el = document.getElementById('s-gmc');
+  if (!el) return;
+  if (total >= 1e12) el.textContent = '$' + (total / 1e12).toFixed(2) + 'T';
+  else if (total >= 1e9) el.textContent = '$' + (total / 1e9).toFixed(1) + 'B';
+  else if (total >= 1e6) el.textContent = '$' + (total / 1e6).toFixed(1) + 'M';
+  else el.textContent = '$' + total.toLocaleString();
 }
 
+// ============================================================
+// AUTH & MODAL FUNCTIONS
+// ============================================================
+function bootSupabase() { if (typeof supabase !== 'undefined' && supabase.createClient) { try { _sb = supabase.createClient(SB_URL, SB_KEY); console.log('[RWABidAsk] Supabase ready'); restoreSession(); } catch(e) { console.warn(e); } } else { setTimeout(bootSupabase, 300); } }
+async function restoreSession() { if (!_sb) return; const { data } = await _sb.auth.getSession(); if (data?.session?.user) { currentUser = data.session.user; currentUserRole = currentUser.user_metadata?.role || 'Investor'; updateAuthUI(); isAuthenticated = true; document.getElementById('auth-gate')?.classList.add('hidden'); if (map3dEl) onCameraChange(); } else { isAuthenticated = false; document.getElementById('auth-gate')?.classList.remove('hidden'); } }
+function updateAuthUI() { const signinBtn = document.getElementById('signin-btn'); const joinBtn = document.getElementById('join-btn'); if (currentUser) { if (signinBtn) { signinBtn.textContent = currentUser.email.split('@')[0]; signinBtn.onclick = () => toast('Account menu coming soon'); } if (joinBtn) { joinBtn.textContent = 'Sign Out'; joinBtn.onclick = async () => { if (_sb) await _sb.auth.signOut(); currentUser = null; isAuthenticated = false; updateAuthUI(); document.getElementById('auth-gate')?.classList.remove('hidden'); toast('Signed out'); }; } } else { if (signinBtn) { signinBtn.textContent = 'Sign In'; signinBtn.onclick = () => openModal('signin'); } if (joinBtn) { joinBtn.textContent = 'Join'; joinBtn.onclick = () => openModal('register'); } } }
+function openModal(type, id) { toast('Auth system ready — ' + type + ' modal would open'); }
+function closeModal() {}
+function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
+function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
+function initMobileUI() { }
+
+// ============================================================
+// BOOT SEQUENCE
+// ============================================================
+buildTicker([]);
 buildRibbon();
 bootSupabase();
+document.addEventListener('DOMContentLoaded', () => { initMobileUI(); });
 window.__initRWA = initMap;
 if (window.__googleMapsLoaded) initMap();
 </script>
