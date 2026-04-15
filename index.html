@@ -1885,7 +1885,7 @@ body { min-width: 900px; overflow-x: auto; }
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#e78c9390a7959086848f8287958dc984888a"><span class="__cf_email__" data-cfemail="254a555665575244474c4144564e0b464a48">[email&#160;protected]</span></a>
+    <a href="/cdn-cgi/l/email-protection#ed829d9eaddf8f878a829f80c38e8280"><span class="__cf_email__" data-cfemail="355a454675475244474c4144564e1b565a58">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -1918,13 +1918,13 @@ body { min-width: 900px; overflow-x: auto; }
 'use strict';
 
 // ============================================================
-// FIX: Added marker persistence flags
+// FIX: Marker persistence flags
 // ============================================================
 let isMapReady = false;
 let markersRendered = false;
 
 // ============================================================
-// ASSET CATEGORIES — Consolidated Taxonomy
+// ASSET CATEGORIES
 // ============================================================
 const ASSET_CATEGORIES = [
   { id: 'all', label: 'ALL', icon: '📊', physical: false },
@@ -1977,7 +1977,7 @@ let currentUser = null;
 let currentUserRole = null;
 
 // ============================================================
-// FETCH REAL DATA FROM SUPABASE 'listings' TABLE
+// FETCH REAL DATA FROM SUPABASE
 // ============================================================
 async function fetchListingsFromSupabase() {
   if (!_sb) {
@@ -2044,7 +2044,7 @@ async function loadMarketData() {
 }
 
 // ============================================================
-// FIX: Modified onDataReady to wait for map readiness
+// FIX: onDataReady waits for map readiness
 // ============================================================
 function onDataReady() {
   const assetCount = ASSETS.length;
@@ -2058,7 +2058,6 @@ function onDataReady() {
   buildTicker(ASSETS);
   if (window.innerWidth <= 767) renderMobileListView(ASSETS);
   
-  // FIX: Only render markers if map is ready and not already rendered
   if (isMapReady && !markersRendered && ASSETS.length > 0) {
     renderDOMMarkers();
     markersRendered = true;
@@ -2171,13 +2170,18 @@ function selectAsset(id) {
   renderList(filtered);
 }
 
+// COMPLETE renderDetail with FULL right panel (Buy, Bid, Lender, Insurance, Watchlist, Claim, Sponsor)
 function renderDetail(a) {
   document.getElementById('rhead').innerHTML = `<div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div><div class="rname">${a.address}</div><div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div></div>`;
+  
   const structs = a.structures || [];
   const structHTML = structs.length ? `<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s, i) => `<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>${s.sqft ? rr('Size', s.sqft.toLocaleString() + ' sqft') : ''}${s.beds ? rr('Beds', s.beds) : ''}${s.baths ? rr('Baths', s.baths) : ''}${s.built ? rr('Built', s.built) : ''}${s.remodel ? rr('Remodeled', s.remodel) : ''}${s.type ? rr('Type', s.type) : ''}${s.notes ? rr('Notes', s.notes) : ''}</div>`).join('')}</div>` : '';
+  
   const fin = a.financials || {};
   const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div>${a.price ? rr('Listed Price', `<span class="rv hl">${fmtPrice(a.price)}</span>`) : ''}${a.sqft ? rr('Price / sqft', fmtPrice(Math.round(a.price / a.sqft))) : ''}${fin.tax_annual ? rr('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}${fin.hoa ? rr('HOA / mo', '$' + fin.hoa) : ''}${fin.zestimate ? rr('Est. Value', fmtPrice(fin.zestimate)) : ''}${a.days ? rr('Days Listed', a.days + 'd') : ''}${rr('Source', a.source || 'Public Registry')}</div>`;
+  
   const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>${(a.bids && a.bids.length) ? a.bids.map(b => `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px"><span style="color:var(--cyan);font-weight:600">${fmtPrice(b.amount)}</span><span style="color:var(--muted)">${b.terms || 'cash'}</span><span style="color:var(--dim)">${b.expiry || ''}</span></div>`).join('') : `<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>`}</div>`;
+  
   document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div>${rr('Asset ID', '#' + a.id)}${rr('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}${rr('KYC Required', 'Yes — to bid or buy')}</div></div>`;
 }
 function rr(k, v) { return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`; }
@@ -2233,7 +2237,7 @@ function syncMarkersToSearch(assetsToShow) {
 }
 
 // ============================================================
-// FIX: Modified initMap to wait for steady state
+// GOOGLE MAPS 3D with gmp-steadystate fix
 // ============================================================
 async function initMap() {
   try {
@@ -2245,7 +2249,7 @@ async function initMap() {
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
     
-    // FIX: Wait for steady state before rendering markers
+    // CRITICAL FIX: Wait for steady state before rendering markers
     map3dEl.addEventListener('gmp-steadystate', () => {
       console.log('[RWABidAsk] Map steady state reached');
       isMapReady = true;
@@ -2265,7 +2269,6 @@ async function initMap() {
     setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
     await loadMarketData();
     
-    // If map is already ready, render markers
     if (isMapReady && ASSETS.length > 0 && !markersRendered) {
       renderDOMMarkers();
       markersRendered = true;
@@ -2327,7 +2330,7 @@ function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.c
 function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
 
 // ============================================================
-// DOM MARKERS — RENDER FROM FETCHED DATA ONLY
+// DOM MARKERS
 // ============================================================
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
@@ -2401,12 +2404,10 @@ function getVisibleAssetsInViewport(assets) {
   } catch(e) { return assets.slice(0, 100); }
 }
 
-// FIX: Modified renderDOMMarkers to prevent duplicates
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
   
-  // Only clear if we haven't rendered before
   if (!markersRendered) {
     layer.innerHTML = '';
     domMarkers = {};
@@ -2414,14 +2415,12 @@ function renderDOMMarkers() {
   
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
   
-  // Add only new markers
   physicalAssets.forEach(a => {
     if (!domMarkers[a.id]) {
       addPriceMarker(a);
     }
   });
   
-  // Initially hide all markers (globe view)
   Object.values(domMarkers).forEach(({ el }) => { 
     el.style.display = 'none';
     el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
@@ -2488,7 +2487,7 @@ function reprojectMarkersWithMatrix() {
       const width = rect.width, height = rect.height;
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
-        const worldX = asset.lng, worldY = asset.lat, worldZ = 25; // FIX: Added altitude offset
+        const worldX = asset.lng, worldY = asset.lat, worldZ = 25;
         const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
         const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
         const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
@@ -2557,7 +2556,7 @@ function openDrawer(a) {
 }
 function closeDrawer() { document.getElementById('asset-drawer').classList.remove('open'); }
 function openMobileDrawer(a) { renderDetail(a); document.getElementById('right').classList.add('open-drawer'); document.body.style.overflow = 'hidden'; }
-function renderMobileListView(assets) { /* kept for mobile compatibility */ }
+function renderMobileListView(assets) { }
 
 // ============================================================
 // TICKER & RIBBON
@@ -2597,7 +2596,7 @@ function openModal(type, id) { toast('Auth system ready — ' + type + ' modal w
 function closeModal() {}
 function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
 function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
-function initMobileUI() { /* mobile UI handler stub */ }
+function initMobileUI() { }
 
 // ============================================================
 // BOOT SEQUENCE
