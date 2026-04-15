@@ -31,6 +31,14 @@
 </style>
 
 <style>
+
+  /* CLEANER: Hides Google "Dismiss" and "Development" popups */
+.dismissButton, [class*="dismissButton"],
+div[style*="z-index: 1000000"], div[style*="z-index:1000000"],
+.gm-style-pbc, .gm-err-container { 
+    display: none !important; 
+}
+  
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
