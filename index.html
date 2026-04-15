@@ -2593,6 +2593,46 @@ bootSupabase();
 document.addEventListener('DOMContentLoaded', () => { initMobileUI(); });
 window.__initRWA = initMap;
 if (window.__googleMapsLoaded) initMap();
+
+  // ============================================================
+// ASSET MARKER ENGINE (The "Pulse" Logic)
+// ============================================================
+
+async function render3DMarkers() {
+  const { Marker3DElement } = await google.maps.importLibrary("maps3d");
+  
+  // 1. Wipe clean so we don't get "ghost" markers
+  document.querySelectorAll('gmp-marker-3d').forEach(el => el.remove());
+
+  // 2. Loop through your assets (Supabase data)
+  assets.forEach(asset => {
+    // Determine the label based on the currency rules you set
+    const labelText = `${asset.currency_code === 'GBP' ? '£' : '$'}${(asset.price_local / 1000000).toFixed(1)}M`;
+    
+    const marker = new Marker3DElement({
+      position: { lat: asset.lat, lng: asset.lng, altitude: 25 },
+      label: labelText,
+      extruded: true,
+      altitudeMode: "RELATIVE_TO_GROUND"
+    });
+
+    // 3. Attach it to the 3D container
+    const mapElement = document.querySelector('gmp-map-3d');
+    if (mapElement) {
+      mapElement.append(marker);
+    }
+  });
+}
+
+// THE HAND-HOLD: This "Pulse" waits for the 3D globe to be stable
+const mapElement = document.querySelector('gmp-map-3d');
+if (mapElement) {
+  mapElement.addEventListener('gmp-steadystate', () => {
+    console.log("3D Map Solid. Rendering Markers...");
+    render3DMarkers();
+  });
+}
+  
 </script>
 </body>
 </html>
