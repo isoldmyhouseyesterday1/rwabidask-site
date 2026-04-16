@@ -541,19 +541,11 @@ html, body {
   /* ── PRICE TAG MARKERS ── */
 .price-marker {
   position: absolute;
-  /* 1. Set to none so markers don't appear until you zoom in */
-  display: none; 
-  /* 2. Anchors the marker 'feet' to the map instead of the center */
-  transform: translate(-50%, -100%);
-  will-change: transform, left, top;
-  
-  pointer-events: all;
-  cursor: pointer;
-  flex-direction: column;
-  align-items: center;
-  filter: drop-shadow(0 4px 16px rgba(0,0,0,.7));
-  transition: filter .2s, transform .15s;
+  display: flex; /* Ensure it is flex, not none */
+  visibility: hidden; /* We hide it via visibility so projectMarker can "wake" it up */
+  pointer-events: auto; 
   z-index: 10;
+  will-change: transform;
 }
 
 .price-marker:hover { 
@@ -1388,13 +1380,16 @@ html, body {
   .map-ctl-panel   { z-index: 1000; }
   
   /* FIXED: Set to 999 to ensure markers are above the map but below the topbar */
-  #overlay-layer   { 
-    position: absolute; 
-    top: 0; left: 0; 
-    width: 100%; height: 100%; 
-    z-index: 999; 
-    pointer-events: none; 
-  }
+#overlay-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999; 
+  pointer-events: none;
+  overflow: hidden; /* Keeps markers from bleeding off the map edge */
+}
   
   #map3d-container { z-index: 0; }
   #shell { isolation: isolate; }
@@ -3176,25 +3171,21 @@ function toggleHeat(btn) {
 ═══════════════════════════════════════════════════════════ */
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
-  if (!layer) return;
+  if (!layer || !map3dEl) return;
+
   layer.innerHTML = '';
   domMarkers = {};
 
-  const range = map3dEl?.range || 22000000;
-
-  // 1. SPACE VIEW: If higher than 300km, stay clinical and empty.
-  if (range > 300000) return;
-
-  // 2. REGIONAL VIEW (50km to 300km): Show ONLY Premium/Anchors.
-  if (range <= 300000 && range > 50000) {
+  const range = map3dEl.range || 22000000;
+  
+  // THE MONOPOLY GATE: 
+  // Let's set this to 25,000,000 JUST ONCE to see if they appear.
+  // If they appear, we know the math works, and then we can 
+  // tighten it back to 300,000 for your regional view.
+  if (range <= 25000000) { 
     const premiums = ASSETS.filter(a => a.anchor);
-    // Note: No viewport filter here yet so they pop in reliably
+    console.log("Rendering " + premiums.length + " markers...");
     premiums.forEach(a => _addPriceMarker(a));
-  }
-
-  // 3. LOCAL VIEW (≤ 50km): Show EVERYTHING.
-  if (range <= 50000) {
-    ASSETS.forEach(a => _addPriceMarker(a));
   }
 }
   
@@ -3348,7 +3339,7 @@ function projectMarker(asset, el) {
     const lat = parseFloat(asset.lat);
     const lng = parseFloat(asset.lng);
     
-    const point = map3dEl.project({ lat, lng, altitude: 0 });
+    const point = map3dEl.project({ lat, lng, altitude: 20 }); // Float it slightly
 
     // 2. The "Monopoly House" Logic
     if (point && !point.behind) {
@@ -5079,10 +5070,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // Google Maps "Handshake" — This starts the 3D Engine
 window.__initRWA = initMap;
 
-// Trigger first render for visibility
+// Trigger first render for visibility (The "Jumpstart")
 setTimeout(() => { 
-  if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); 
-}, 500);
+  console.log("[RWABidAsk] BOOT SEQUENCE: Forcing Marker Render...");
+  if(typeof renderDOMMarkers === 'function') {
+    renderDOMMarkers(); 
+  }
+}, 1000); // 1000ms ensures the 3D map is fully stable first
 
 // Fallback for immediate initialization if Maps is already ready
 if (window.__googleMapsLoaded) {
