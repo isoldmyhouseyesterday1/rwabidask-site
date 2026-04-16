@@ -2465,7 +2465,7 @@ const SEED_ASSETS = [
     mls_id:'APOLLO-SC-2026-0012', source_url:'https://www.apollo.com',
     ext:{ instrument_type:'Senior Secured Term Loan B', issuer:'Midwest Logistics REIT LLC',
       coupon:'SOFR + 425bps (floating)', yield_current:'9.82%', ytm:'9.65%',
-      maturity:'2029-06-30', rating:'B+ (S&P) · B1 (Moody's)',
+      maturity: '2029-06-30', rating: "B+ (S&P) · B1 (Moody's)",
       collateral_desc:'First lien on 18 Class A logistics properties — 12.4M sqft',
       ltv:'58% LTV on appraised collateral', originator:'Apollo Global Management' },
     financials:{}, structures:[], infrastructure:{}, land:{},
@@ -3152,17 +3152,29 @@ function renderDOMMarkers() {
     const nonAnchors = ASSETS.filter(a => !a.anchor);
     viewportVisible(nonAnchors).forEach(a => _addPriceMarker(a));
   }
-  // Camera event listeners
-  if (map3dEl) {
-    map3dEl.addEventListener('gmp-centerchange',  onCameraChange);
-    map3dEl.addEventListener('gmp-rangechange',   onCameraChange);
-    map3dEl.addEventListener('gmp-tiltchange',    onCameraChange);
-    map3dEl.addEventListener('gmp-headingchange', onCameraChange);
-  }
+  
+  // 1. Create a timer variable at the top of this block
+let cameraTimer;
+
+// 2. Wrap the event listeners in a Debounce function
+if (map3dEl) {
+  const stabilizedCameraChange = () => {
+    // Clear the previous timer so we don't fire 100 times
+    clearTimeout(cameraTimer);
+    
+    // Only run the logic after 100ms of "silence" (no moving)
+    cameraTimer = setTimeout(() => {
+      onCameraChange();
+    }, 100); 
+  };
+
+  map3dEl.addEventListener('gmp-centerchange',  stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-rangechange',   stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-tiltchange',    stabilizedCameraChange);
+  map3dEl.addEventListener('gmp-headingchange', stabilizedCameraChange);
 }
 
-let _cameraChangeTimer = null;
-const MARKER_RANGE_THRESHOLD = 500000; // 500km — hide non-anchor tags above this altitude
+const MARKER_RANGE_THRESHOLD = 50000; // 50km — hide non-anchor tags above this altitude
 
 function markersVisible() {
   if (!map3dEl) return false;
@@ -4440,10 +4452,10 @@ document.getElementById('modal').addEventListener('click', e => {
    CREATE POLICY "Service role only" ON leads USING (false);
    ─────────────────────────────────────────────────────────
 */
-   Project: iyejqvdjbvokrswlsoda.supabase.co
-═══════════════════════════════════════════════════════════ */
+   Project: 'iyejqvdjbvokrswlsoda.supabase.co';
+//------------ */
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MjYyNzIsImV4cCI6MjA1OTMwMjI3Mn0.Fy73JUGZFpxBiSoBbSFnVpFpLaQ0K1GMFAm-SxCWVY4';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
 
 let _sb = null;
 let currentUser = null;
@@ -4990,6 +5002,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // __initRWA is set here; __mapReady calls it when Maps API is fully loaded
 window.__initRWA = initMap;
 
+} // Closes viewportVisible (or whichever function was last)
+
+  // Manually trigger the first render so the map isn't empty on start
+setTimeout(() => { if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); }, 500);
+  
 // Fallback: if Maps somehow loaded before this script ran
 if (window.__googleMapsLoaded) initMap();
 
