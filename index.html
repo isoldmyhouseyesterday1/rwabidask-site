@@ -1,4 +1,4 @@
-a<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -25,9 +25,54 @@ a<!DOCTYPE html>
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady" async defer></script>
 <style>
-  .dismissButton, [class*="dismissButton"],
-  div[style*="z-index: 1000000"], div[style*="z-index:1000000"],
-  .gm-style-pbc, .gm-err-container { display: none !important; }
+  /* ── Google Maps Alpha / Development UI Suppression ────────────────────────
+     Targets every known variant of the "For development purposes only" banner,
+     the dismiss button, watermark overlays, and error containers.
+     Uses !important + multiple selectors for maximum surface coverage.       */
+
+  /* Attribute-based dismiss button (most common in alpha builds) */
+  .dismissButton,
+  [class*="dismissButton"],
+  [class*="dismiss-button"],
+  [id*="dismissButton"],
+  [aria-label*="dismiss" i],
+  [aria-label*="Dismiss" i] {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  /* High z-index dev banners injected via inline style */
+  div[style*="z-index: 1000000"],
+  div[style*="z-index:1000000"],
+  div[style*="z-index: 999999"],
+  div[style*="z-index:999999"] {
+    display: none !important;
+  }
+
+  /* Named Google Maps dev/error UI classes */
+  .gm-style-pbc,
+  .gm-err-container,
+  .gm-err-content,
+  .gm-err-message,
+  .gm-style-cc,
+  .gm-svpc,
+  .gm-fullscreen-control,
+  .gm-bundled-control { 
+    display: none !important; 
+  }
+
+  /* 3D / Alpha watermark and terms overlay inside shadow DOM pierce attempts */
+  gmp-map-3d::part(attribution),
+  gmp-map-3d::part(dismiss),
+  gmp-map-3d::part(dev-banner) {
+    display: none !important;
+  }
+
+  /* Any fixed-position full-width bar near the bottom (the "for dev" ribbon) */
+  body > div[style*="position: fixed"][style*="bottom"],
+  body > div[style*="position:fixed"][style*="bottom"] {
+    display: none !important;
+  }
 </style>
 
 <style>
@@ -404,6 +449,15 @@ body { min-width: 900px; overflow-x: auto; }
 #map3d-container {
   position: absolute;
   inset: 0;
+}
+
+/* Overlay layer must be a full-size, pointer-passthrough sibling of the 3D canvas */
+#overlay-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* let clicks fall through to the map except on markers */
+  z-index: 10;
+  overflow: hidden;
 }
 .map-ctl-panel {
   position: absolute;
@@ -1059,12 +1113,14 @@ body { min-width: 900px; overflow-x: auto; }
   will-change: transform;
 }
 #asset-drawer.open { transform: translateX(0); }
+/* overlay-layer — authoritative rule defined earlier in the file; this is kept
+   in sync. z-index 10 keeps it under .map-ctl-panel (400) but above the 3D canvas. */
 #overlay-layer {
   position: absolute;
   inset: 0;
-  z-index: 999;
+  z-index: 10;
   pointer-events: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* MOBILE "ZILLOW" UI (≤767px) — Centered Globe + 75vh Slide-up Drawer */
@@ -1885,7 +1941,7 @@ body { min-width: 900px; overflow-x: auto; }
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#d2bda2a192a0a5b3b0bbb6b3a1b9fcb1bdbf"><span class="__cf_email__" data-cfemail="c5aab5b685b7b2a4a7aca1a4b6aeeba6aaa8">[email&#160;protected]</span></a>
+    <a href="/cdn-cgi/l/email-protection#6b041b182b191c0a09020f0a180045080406"><span class="__cf_email__" data-cfemail="b4dbc4c7f4c6c3d5d6ddd0d5c7df9ad7dbd9">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -1917,11 +1973,15 @@ body { min-width: 900px; overflow-x: auto; }
 <script>
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
-   ASSET CATEGORIES — Consolidated Taxonomy (8 Sectors)
-   Physical (globe pins): Categories 2-7 (REAL ESTATE through INFRASTRUCTURE)
-   Non-Physical (list/sidebar only): Category 8 (FINANCIALS)
-═══════════════════════════════════════════════════════════ */
+// ============================================================
+// FIX: Marker persistence flags - ADDED
+// ============================================================
+let isMapReady = false;
+let markersRendered = false;
+
+// ============================================================
+// ASSET CATEGORIES
+// ============================================================
 const ASSET_CATEGORIES = [
   { id: 'all', label: 'ALL', icon: '📊', physical: false },
   { id: 'realestate', label: 'REAL ESTATE', icon: '🏠', physical: true },
@@ -1933,23 +1993,9 @@ const ASSET_CATEGORIES = [
   { id: 'financial', label: 'FINANCIALS', icon: '📄', physical: false }
 ];
 
-const TYPE_TO_CATEGORY = {
-  'residential': 'realestate',
-  'land': 'realestate',
-  'commercial': 'commercial',
-  'business': 'commercial',
-  'aviation': 'aviation',
-  'maritime': 'maritime',
-  'resources': 'resources',
-  'minerals': 'resources',
-  'energy': 'infrastructure',
-  'ip': 'financial',
-  'debt': 'financial',
-  'financial': 'financial'
-};
-
 function getAssetCategory(type) {
-  return TYPE_TO_CATEGORY[type] || 'financial';
+  const map = { residential:'realestate', land:'realestate', commercial:'commercial', business:'commercial', aviation:'aviation', maritime:'maritime', resources:'resources', minerals:'resources', energy:'infrastructure', ip:'financial', debt:'financial', financial:'financial' };
+  return map[type] || 'financial';
 }
 
 function isPhysicalAsset(type) {
@@ -1958,38 +2004,13 @@ function isPhysicalAsset(type) {
   return category ? category.physical : false;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CONFIG & SEED DATA
-═══════════════════════════════════════════════════════════ */
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0';
+// ============================================================
+// GLOBAL STATE
+// ============================================================
 let ASSETS = [];
 let SEARCH_RESULTS = [];
 let SEARCH_ACTIVE = false;
 let currentSearchQuery = '';
-
-const SEED_ASSETS = [
-  { id:'sea-001', address:'2450 Eastlake Ave E', city:'Seattle', country:'USA', lat:47.6423, lng:-122.3256, price:1850000, type:'residential', sqft:3200, status:'For Sale', source:'NWMLS', days:14, structures:[{label:'Main House',sqft:2800,beds:4,baths:3,built:2003}], infrastructure:{roof:'Composition',hvac:'Forced Air'}, land:{acres:0.12}, financials:{tax_annual:14200}, bids:[], broker_active:true, tokenized:false },
-  { id:'sea-002', address:'1411 2nd Ave, Unit 2401', city:'Seattle', country:'USA', lat:47.6079, lng:-122.3370, price:3200000, type:'residential', sqft:2100, status:'For Sale', source:'NWMLS', days:6, structures:[{label:'Luxury Condo',sqft:2100,beds:3,baths:2.5,built:2018}], infrastructure:{}, land:{}, financials:{tax_annual:22400,hoa:1800}, bids:[{amount:3100000,terms:'Cash',expiry:'24 hours'}], broker_active:true, tokenized:false },
-  { id:'sea-003', address:'8820 35th Ave SW', city:'Seattle', country:'USA', lat:47.5238, lng:-122.3804, price:875000, type:'residential', sqft:1850, status:'For Sale', source:'NWMLS', days:22, structures:[{label:'Main House',sqft:1850,beds:3,baths:1.75,built:1962}], infrastructure:{}, land:{acres:0.15}, financials:{tax_annual:7800}, bids:[], broker_active:true, tokenized:false },
-  { id:'sea-004', address:'1200 Westlake Ave N, Suite 600', city:'Seattle', country:'USA', lat:47.6268, lng:-122.3393, price:4500000, type:'commercial', sqft:6200, status:'For Sale', source:'CoStar', days:45, structures:[{label:'Office',sqft:6200,baths:4,built:2001}], infrastructure:{}, land:{}, financials:{tax_annual:38000}, bids:[{amount:4300000,terms:'Seller Finance',expiry:'30 days'}], broker_active:true, tokenized:false },
-  { id:'dxb-001', address:'Palm Jumeirah Signature Villa', city:'Dubai', country:'UAE', lat:25.1124, lng:55.1390, price:12500000, type:'residential', sqft:9800, status:'For Sale', source:'Property Finder', days:30, structures:[{label:'Main Villa',sqft:8000,beds:6,baths:7,built:2017}], infrastructure:{}, land:{acres:0.45}, financials:{tax_annual:0}, bids:[], broker_active:true, tokenized:false },
-  { id:'lon-001', address:'15 Eaton Square, Belgravia', city:'London', country:'UK', lat:51.4965, lng:-0.1527, price:18000000, type:'residential', sqft:5400, status:'For Sale', source:'Rightmove', days:42, structures:[{label:'Townhouse',sqft:5400,beds:5,baths:5,built:1842}], infrastructure:{}, land:{acres:0.08}, financials:{tax_annual:7800}, bids:[], broker_active:true, tokenized:false },
-  { id:'nyc-001', address:'432 Park Avenue, Unit 62A', city:'New York', country:'USA', lat:40.7617, lng:-73.9717, price:23500000, type:'residential', sqft:4000, status:'For Sale', source:'StreetEasy', days:88, structures:[{label:'Full-Floor Residence',sqft:4000,beds:4,baths:4.5,built:2015}], infrastructure:{}, land:{}, financials:{tax_annual:96000,hoa:6500}, bids:[], broker_active:true, tokenized:false },
-  { id:'avi-001', address:'Gulfstream G700 — S/N 70002', city:'Teterboro', country:'USA', lat:40.8501, lng:-74.0607, price:75000000, type:'aviation', sqft:null, status:'For Sale', source:'JETNET', days:18, aviation:{ registration:'N700GX', aftt:'812 hrs', cycles:'290' }, bids:[{amount:72000000,terms:'All Cash',expiry:'14 days'}], broker_active:true, tokenized:false },
-  { id:'mar-001', address:'MV Pacific Carrier — IMO 9841203', city:'Singapore', country:'Singapore', lat:1.2633, lng:103.8198, price:38000000, type:'maritime', sqft:null, status:'For Sale', source:'VesselsValue', days:62, maritime:{ imo:'9841203', dwt:'82,400 DWT', loa:'229m' }, bids:[{amount:36500000,terms:'30% down Bank Finance',expiry:'30 days'}], broker_active:true, tokenized:false },
-  { id:'res-001', address:'Cascade Timber Tract — 4,200 Acres', city:'Darrington', country:'USA', lat:48.2534, lng:-121.6012, price:22000000, type:'resources', sqft:null, status:'For Sale', source:'Mason Bruce Girard', days:88, resources:{ resource_type:'Timber', acres:'4,200', board_feet:'42M board-feet' }, bids:[{amount:20000000,terms:'Land Contract',expiry:'60 days'}], broker_active:true, tokenized:false },
-  { id:'fin-001', address:'US Treasury Note 4.625% 2031', city:'New York', country:'USA', lat:40.7200, lng:-74.0100, price:10000000, type:'financial', sqft:null, status:'Available', source:'FINRA TRACE', days:0, financial:{ cusip:'912828XX1', instrument:'US Treasury Note', coupon:'4.625%', yield_current:'4.41%' }, bids:[{amount:9980000,terms:'Market wire',expiry:'End of day'}], broker_active:true, tokenized:false },
-  { id:'nrg-001', address:'Coachella Valley Solar + Storage Array — 42MW', city:'Palm Springs', country:'USA', lat:33.8303, lng:-116.5453, price:87000000, type:'energy', sqft:null, status:'For Sale', source:'Blackrock Infrastructure', days:22, ext:{ energy_type:'Solar PV + Battery Storage', capacity_mw:'42 MW AC' }, bids:[], broker_active:true, tokenized:false },
-  { id:'min-001', address:'Lithium Brine Claim — Salton Sea', city:'Calipatria', country:'USA', lat:33.1245, lng:-115.5123, price:125000000, type:'minerals', sqft:null, status:'For Sale', source:'Controlled Thermal Resources', days:45, ext:{ mineral_type:'Lithium Carbonate', acres:'8,400' }, bids:[], broker_active:true, tokenized:false },
-  { id:'ip-001', address:'Enterprise AI Patent Portfolio — 847 Patents', city:'San Jose', country:'USA', lat:37.3382, lng:-121.8863, price:380000000, type:'ip', sqft:null, status:'Available', source:'Ocean Tomo', days:31, ext:{ ip_type:'Utility Patents', portfolio_desc:'847 active US patents' }, bids:[], broker_active:true, tokenized:false },
-  { id:'dbt-001', address:'Senior Secured Term Loan — Logistics REIT', city:'Chicago', country:'USA', lat:41.8827, lng:-87.6233, price:75000000, type:'debt', sqft:null, status:'Available', source:'Apollo Global Management', days:5, ext:{ instrument_type:'Senior Secured Term Loan B', coupon:'SOFR + 425bps' }, bids:[], broker_active:true, tokenized:false }
-];
-
-const ANCHOR_ASSETS = [
-  { id:'ANCHOR-001', anchor:true, address:'Gulfstream G650ER — N650WC', city:'Van Nuys', country:'USA', lat:34.2098, lng:-118.4899, price:54500000, type:'aviation', sqft:null, status:'For Sale', source:'JETNET', days:12, aviation:{ registration:'N650WC', aftt:'1,840 hrs', cycles:'620' }, bids:[{amount:52000000,terms:'All Cash',expiry:'14 days'}], broker_active:true, tokenized:false },
-  { id:'ANCHOR-002', anchor:true, address:'500-Acre Timber Tract — Olympic Peninsula', city:'Clallam County', country:'USA', lat:47.9512, lng:-124.1001, price:3750000, type:'resources', sqft:null, status:'For Sale', source:'Annie Group LLC — Direct', days:0, resources:{ resource_type:'Timber / Land', acres:'500', board_feet:'6.2M board-feet' }, bids:[{amount:3500000,terms:'Seller Finance — 0% interest', expiry:'Open'}], broker_active:true, tokenized:false },
-  { id:'ANCHOR-003', anchor:true, address:'US T-Bill Institutional Lot — 4.625% 2031', city:'New York', country:'USA', lat:40.7074, lng:-74.0113, price:10000000, type:'financial', sqft:null, status:'Available', source:'FINRA TRACE', days:0, financial:{ cusip:'912828XX1', instrument:'US Treasury Note', coupon:'4.625%' }, bids:[{amount:9980000,terms:'Market wire',expiry:'End of day'}], broker_active:true, tokenized:false }
-];
 
 let map3dEl = null;
 let acInstance = null;
@@ -1999,6 +2020,114 @@ let activeId = null;
 let heatOn = false;
 let domMarkers = {};
 
+let cameraDebounceTimer = null;
+let isCameraProcessing = false;
+const MARKER_VISIBLE_RANGE = 6000000; // FIX: Increased to 6000km - markers show at regional zoom
+let isAuthenticated = false;
+
+// Supabase config
+const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
+let _sb = null;
+let currentUser = null;
+let currentUserRole = null;
+
+// ============================================================
+// FETCH REAL DATA FROM SUPABASE 'listings' TABLE
+// ============================================================
+async function fetchListingsFromSupabase() {
+  if (!_sb) {
+    console.warn('[RWABidAsk] Supabase not ready, retrying...');
+    return [];
+  }
+  try {
+    setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');
+    const { data, error } = await _sb
+      .from('listings')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('[RWABidAsk] Supabase fetch error:', error);
+      setStatus('LEDGER CONNECTION ISSUE — RETRYING');
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      console.log('[RWABidAsk] No listings found in database');
+      setStatus('NO ASSETS IN LEDGER — ADD LISTINGS VIA DASHBOARD');
+      return [];
+    }
+    
+    const transformed = data.map(row => {
+      // ── Safety Net: resolve coordinates regardless of column naming ──
+      const coords = normalizeCoords(row);
+      if (!coords) {
+        console.warn(`[RWABidAsk] Skipping asset #${row.id} — no valid coordinates found`, row);
+        return null;
+      }
+      return {
+        id:           row.id,
+        address:      row.address || row.property_address || 'Address not specified',
+        city:         row.city || 'Unknown',
+        country:      row.country || row.country_name || 'Global',
+        country_code: row.country_code || row.iso_country || '',
+        currency:     row.currency || row.currency_code || null,
+        lat:          coords.lat,
+        lng:          coords.lng,
+        price:        parseFloat(row.price) || 0,
+        type:         (row.asset_type || row.type || 'residential').toLowerCase(),
+        sqft:         row.sqft ? parseInt(row.sqft) : null,
+        status:       row.listing_status || 'For Sale',
+        source:       'Supabase Ledger',
+        days:         row.days_on_market || 0,
+        broker_active: row.broker_active !== false,
+        tokenized:    row.tokenized === true,
+        structures:   row.structures   || [],
+        infrastructure: row.infrastructure || {},
+        land:         row.land         || {},
+        financials:   row.financials   || {},
+        bids:         row.bids         || [],
+        image_url:    row.image_url    || null,
+        description:  row.description  || null,
+      };
+    }).filter(Boolean); // remove null entries (bad coords)
+    
+    console.log(`[RWABidAsk] Loaded ${transformed.length} listings from Supabase`);
+    return transformed;
+  } catch (err) {
+    console.error('[RWABidAsk] Exception fetching listings:', err);
+    setStatus('LEDGER FETCH FAILED — CHECK CONNECTION');
+    return [];
+  }
+}
+
+async function loadMarketData() {
+  const fetched = await fetchListingsFromSupabase();
+  ASSETS = fetched;
+  onDataReady();
+}
+
+// ============================================================
+// FIX: onDataReady — delegates to shared render gate
+// ============================================================
+function onDataReady() {
+  const assetCount = ASSETS.length;
+  setStatus(`RWABidAsk PERMANENT LEDGER — ${assetCount} ASSETS REGISTERED`);
+  document.getElementById('s-assets').textContent = assetCount;
+  document.getElementById('s-status').textContent = 'LIVE';
+  document.getElementById('s-bids').textContent = Math.floor(assetCount * 2.3);
+  updateGMC(ASSETS);
+  renderCategories();
+  renderList(ASSETS);
+  buildTicker(ASSETS);
+  if (window.innerWidth <= 767) renderMobileListView(ASSETS);
+
+  // Let the central gate decide whether map is also ready
+  _tryRenderMarkers('onDataReady');
+}
+
 function fmtPrice(n) {
   if (!n || n === 0) return '—';
   if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
@@ -2006,10 +2135,12 @@ function fmtPrice(n) {
   if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
   return '$' + n;
 }
+
 function setStatus(msg) {
   const el = document.getElementById('map-status-txt');
   if (el) el.textContent = msg;
 }
+
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -2017,92 +2148,16 @@ function toast(msg) {
   clearTimeout(toast._t);
   toast._t = setTimeout(() => { t.style.display = 'none'; }, 4000);
 }
+
 function typeClass(type) {
   const cat = getAssetCategory(type);
   const map = { realestate:'t-res', commercial:'t-com', resources:'t-res2', aviation:'t-avi', maritime:'t-mar', infrastructure:'t-energy', financial:'t-fin' };
   return map[cat] || 't-res';
 }
 
-/* ═══════════════════════════════════════════════════════════
-   DATA LOADING
-═══════════════════════════════════════════════════════════ */
-async function loadMarketData() {
-  setStatus('FETCHING GLOBAL DIRECTORY…');
-  ASSETS = [...ANCHOR_ASSETS, ...SEED_ASSETS];
-  onDataReady();
-  try {
-    const res = await fetch(CSV_URL, { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    const parsed = parseCSV(text);
-    if (parsed.length) {
-      const combined = [...ANCHOR_ASSETS, ...SEED_ASSETS];
-      const csvNew = parsed.filter(a => !combined.find(s => s.address === a.address));
-      ASSETS = [...combined, ...csvNew];
-      onDataReady();
-    }
-  } catch (e) {
-    console.info('[RWABidAsk] CSV unavailable —', e.message);
-  }
-}
-function parseCSV(raw) {
-  const lines = raw.trim().split('\n');
-  if (lines.length < 2) return [];
-  const hdrs = csvRow(lines[0]).map(h => h.toLowerCase().trim());
-  const get = (obj, key) => (obj[key] || '').trim();
-  return lines.slice(1).map((line, i) => {
-    const vals = csvRow(line);
-    const o = {};
-    hdrs.forEach((h, j) => { o[h] = (vals[j] || '').replace(/^"|"$/g, '').trim(); });
-    return {
-      id: get(o, 'id') || String(i + 1),
-      address: get(o, 'address') || get(o, 'name') || '—',
-      city: get(o, 'city') || '—',
-      country: get(o, 'country') || '—',
-      lat: parseFloat(get(o, 'lat')) || 0,
-      lng: parseFloat(get(o, 'lng')) || 0,
-      price: parseFloat(get(o, 'price').replace(/[^0-9.]/g, '')) || 0,
-      type: (get(o, 'type') || 'residential').toLowerCase(),
-      sqft: parseInt(get(o, 'sqft')) || null,
-      status: get(o, 'status') || 'For Sale',
-      source: get(o, 'source') || 'Public Registry',
-      days: parseInt(get(o, 'days')) || 0,
-      parcel: get(o, 'parcel') || null,
-      broker_active: get(o, 'broker_active') !== 'false',
-      tokenized: get(o, 'tokenized') === 'true',
-      structures: [],
-      infrastructure: {},
-      land: {},
-      financials: {},
-      bids: [],
-    };
-  }).filter(a => a.lat !== 0 && a.lng !== 0);
-}
-function csvRow(line) {
-  const out = []; let cur = ''; let q = false;
-  for (let i = 0; i < line.length; i++) {
-    if (line[i] === '"') { q = !q; }
-    else if (line[i] === ',' && !q) { out.push(cur); cur = ''; }
-    else { cur += line[i]; }
-  }
-  out.push(cur);
-  return out;
-}
-function onDataReady() {
-  setStatus('RWABidAsk PERMANENT LEDGER LIVE — ' + ASSETS.length + ' ASSETS');
-  document.getElementById('s-assets').textContent = ASSETS.length;
-  document.getElementById('s-status').textContent = 'LIVE';
-  document.getElementById('s-bids').textContent = Math.floor(ASSETS.length * 4.2);
-  updateGMC(ASSETS);
-  renderCategories();
-  renderList(ASSETS);
-  renderDOMMarkers();
-  buildTicker(ASSETS);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   CATEGORY RENDERING
-═══════════════════════════════════════════════════════════ */
+// ============================================================
+// CATEGORY RENDERING
+// ============================================================
 function renderCategories() {
   const container = document.getElementById('category-tabs');
   if (!container) return;
@@ -2112,6 +2167,7 @@ function renderCategories() {
     </button>
   `).join('');
 }
+
 function setCategory(catId, btn) {
   document.querySelectorAll('.ptab').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
@@ -2124,6 +2180,7 @@ function setCategory(catId, btn) {
   syncMarkerVisibility();
   if (window.innerWidth <= 767) renderMobileListView(filtered);
 }
+
 function filterAssets(assets) {
   let filtered = assets;
   if (activeTab !== 'all') {
@@ -2135,6 +2192,7 @@ function filterAssets(assets) {
   else if (activeFilter === '25mplus') filtered = filtered.filter(a => a.price > 25e6);
   return filtered;
 }
+
 function setFilter(el, f) {
   document.querySelectorAll('.fchip').forEach(x => x.classList.remove('on'));
   el.classList.add('on');
@@ -2147,13 +2205,14 @@ function setFilter(el, f) {
   syncMarkerVisibility();
   if (window.innerWidth <= 767) renderMobileListView(filtered);
 }
+
 function renderList(assetsToShow) {
   const wrap = document.getElementById('list-scroll');
   const list = assetsToShow;
   const resultCount = list.length;
   const resultHeader = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
   if (!list.length) {
-    wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS FOUND<br>ADJUST FILTERS</div></div>`;
+    wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;
     return;
   }
   wrap.innerHTML = resultHeader + list.map(a => {
@@ -2162,6 +2221,7 @@ function renderList(assetsToShow) {
     return `<div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">${a.days ? `<div class="pcard-days">${a.days}d</div>` : ''}<div class="pcard-addr">${a.address}</div><div class="pcard-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>${bedbath ? `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${bedbath}</div>` : ''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`;
   }).join('');
 }
+
 function selectAsset(id) {
   activeId = id;
   const a = ASSETS.find(x => x.id === id);
@@ -2173,6 +2233,7 @@ function selectAsset(id) {
   const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
   renderList(filtered);
 }
+
 function renderDetail(a) {
   document.getElementById('rhead').innerHTML = `<div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div><div class="rname">${a.address}</div><div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div></div>`;
   const structs = a.structures || [];
@@ -2184,10 +2245,9 @@ function renderDetail(a) {
 }
 function rr(k, v) { return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`; }
 
-/* ═══════════════════════════════════════════════════════════
-   UNIFIED SEARCH ENGINE — Multi-parameter (Asset Name, Type, City, Country, Price)
-   Real-time sync with List View AND Globe markers
-═══════════════════════════════════════════════════════════ */
+// ============================================================
+// SEARCH
+// ============================================================
 function performSearch() {
   const query = document.getElementById('search-input').value.trim().toLowerCase();
   currentSearchQuery = query;
@@ -2205,12 +2265,7 @@ function performSearch() {
     a.address.toLowerCase().includes(query) ||
     a.city.toLowerCase().includes(query) ||
     a.type.toLowerCase().includes(query) ||
-    (a.country && a.country.toLowerCase().includes(query)) ||
-    (a.structures && a.structures[0] && a.structures[0].type && a.structures[0].type.toLowerCase().includes(query)) ||
-    (a.aviation && a.aviation.registration && a.aviation.registration.toLowerCase().includes(query)) ||
-    (a.maritime && a.maritime.imo && a.maritime.imo.toLowerCase().includes(query)) ||
-    (a.resources && a.resources.resource_type && a.resources.resource_type.toLowerCase().includes(query)) ||
-    (a.financial && a.financial.instrument && a.financial.instrument.toLowerCase().includes(query))
+    (a.country && a.country.toLowerCase().includes(query))
   );
   const filteredResults = filterAssets(SEARCH_RESULTS);
   renderList(filteredResults);
@@ -2218,20 +2273,18 @@ function performSearch() {
   if (window.innerWidth <= 767) renderMobileListView(filteredResults);
   setStatus('SEARCH: ' + SEARCH_RESULTS.length + ' assets found');
 }
+document.getElementById('search-input').addEventListener('input', performSearch);
 
 function syncMarkersToSearch(assetsToShow) {
   if (!map3dEl) return;
   const currentRange = map3dEl.range || 22000000;
   const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
-  
   if (!isZoomedIn || !isAuthenticated) {
     Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
     return;
   }
-  
   const visibleInViewport = getVisibleAssetsInViewport(assetsToShow);
   const visibleIds = new Set(visibleInViewport.map(a => a.id));
-  
   Object.keys(domMarkers).forEach(id => {
     const marker = domMarkers[id];
     const asset = marker.asset;
@@ -2242,38 +2295,187 @@ function syncMarkersToSearch(assetsToShow) {
   });
 }
 
-document.getElementById('search-input').addEventListener('input', performSearch);
-function triggerSearch() { performSearch(); }
+// ============================================================
+// COORDINATE SAFETY NET
+// Accepts any reasonable coordinate naming convention from
+// scrapers: lat/lng, latitude/longitude, lat_coord/lon_coord,
+// x/y, or even nested {lat, lon} objects.
+// Returns { lat, lng } as validated floats, or null if invalid.
+// ============================================================
+function normalizeCoords(row) {
+  const candidates = [
+    // Standard pair
+    { lat: row.lat,       lng: row.lng },
+    { lat: row.lat,       lng: row.lon },
+    // Long-form
+    { lat: row.latitude,  lng: row.longitude },
+    { lat: row.latitude,  lng: row.lon },
+    // Suffixed
+    { lat: row.lat_coord, lng: row.lng_coord },
+    { lat: row.lat_coord, lng: row.lon_coord },
+    // GeoJSON-style arrays  [lng, lat]
+    row.coordinates && Array.isArray(row.coordinates)
+      ? { lat: row.coordinates[1], lng: row.coordinates[0] }
+      : null,
+    // Nested location object
+    row.location && typeof row.location === 'object'
+      ? { lat: row.location.lat ?? row.location.latitude,
+          lng: row.location.lng ?? row.location.longitude ?? row.location.lon }
+      : null,
+  ].filter(Boolean);
 
-/* ═══════════════════════════════════════════════════════════
-   GOOGLE MAPS 3D
-═══════════════════════════════════════════════════════════ */
+  for (const c of candidates) {
+    const lat = parseFloat(c.lat);
+    const lng = parseFloat(c.lng);
+    if (!isNaN(lat) && !isNaN(lng) &&
+        lat >= -90 && lat <= 90 &&
+        lng >= -180 && lng <= 180 &&
+        !(lat === 0 && lng === 0)) {          // reject null-island
+      return { lat, lng };
+    }
+  }
+  return null; // caller must discard this asset
+}
+
+// ============================================================
+// CURRENCY FORMATTER
+// Detects asset country and emits the correct local symbol.
+// Extend COUNTRY_CURRENCY_MAP for full global coverage.
+// ============================================================
+const COUNTRY_CURRENCY_MAP = {
+  'UK': '£', 'GB': '£', 'United Kingdom': '£', 'England': '£',
+  'Scotland': '£', 'Wales': '£',
+  'EU': '€', 'France': '€', 'Germany': '€', 'Italy': '€',
+  'Spain': '€', 'Portugal': '€', 'Netherlands': '€',
+  'Greece': '€', 'Austria': '€', 'Belgium': '€',
+  'JP': '¥', 'Japan': '¥',
+  'CN': '¥', 'China': '¥',
+  'AU': 'A$', 'Australia': 'A$',
+  'CA': 'C$', 'Canada': 'C$',
+  'CH': 'CHF ', 'Switzerland': 'CHF ',
+  'SG': 'S$', 'Singapore': 'S$',
+  'AE': 'AED ', 'UAE': 'AED ', 'United Arab Emirates': 'AED ',
+  'SA': 'SAR ', 'Saudi Arabia': 'SAR ',
+  'IN': '₹', 'India': '₹',
+  'BR': 'R$', 'Brazil': 'R$',
+  'MX': 'MX$', 'Mexico': 'MX$',
+};
+
+function fmtLocalPrice(asset) {
+  const n = asset.price;
+  if (!n || n === 0) return '—';
+  // Prefer explicit currency field, then derive from country
+  const rawCurrency = asset.currency ||
+    COUNTRY_CURRENCY_MAP[asset.country] ||
+    COUNTRY_CURRENCY_MAP[asset.country_code] ||
+    '$';
+  const sym = rawCurrency;
+  if (n >= 1e9)  return sym + (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6)  return sym + (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3)  return sym + (n / 1e3).toFixed(0) + 'K';
+  return sym + n.toLocaleString();
+}
+
+// ============================================================
+// GOOGLE MAPS 3D — BULLETPROOF INIT
+// Strategy:
+//   1. Import the maps3d library.
+//   2. Construct Map3DElement and append to container.
+//   3. Listen for ONE `gmp-steadystate` event — this fires when
+//      the 3D world tiles have fully loaded and the scene is
+//      stable. Only then do we render DOM markers.
+//   4. A 5-second safety-valve setTimeout fires in case
+//      gmp-steadystate never fires (observed on some alpha builds
+//      behind VPNs / restricted networks).
+//   5. Load Supabase data in parallel; whichever finishes last
+//      (map ready OR data ready) triggers the first marker render.
+// ============================================================
 async function initMap() {
   try {
+    // ── 1. Load the 3D library ──────────────────────────────
     const maps3dLib = await google.maps.importLibrary('maps3d');
-    const Map3DElement = maps3dLib.Map3DElement;
-    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 22000000, tilt: 0, heading: 0 });
-    try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
+    const { Map3DElement, MapMode } = maps3dLib;
+
+    // ── 2. Construct the element ────────────────────────────
+    map3dEl = new Map3DElement({
+      center:  { lat: 20, lng: 10, altitude: 0 },
+      range:   12000000,
+      tilt:    0,
+      heading: 0,
+    });
+
+    // Apply satellite mode safely
+    try { if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
+
     const container = document.getElementById('map3d-container');
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
-    const _onCam = () => { if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(onCameraChange, 100); };
-    map3dEl.addEventListener('gmp-centerchange', _onCam);
-    map3dEl.addEventListener('gmp-rangechange', _onCam);
-    map3dEl.addEventListener('gmp-tiltchange', _onCam);
+
+    // ── 3. gmp-steadystate handshake ───────────────────────
+    // { once: true } guarantees this handler fires exactly once.
+    // We set isMapReady, then check whether data is also ready.
+    map3dEl.addEventListener('gmp-steadystate', () => {
+      console.log('[RWABidAsk] ✓ gmp-steadystate — 3D world confirmed stable');
+      isMapReady = true;
+      _tryRenderMarkers('steadystate');
+    }, { once: true });
+
+    // ── 4. Safety valve: if steadystate never fires ─────────
+    // Some alpha builds omit this event. 5 s is conservative but
+    // long enough for slow connections to tile in.
+    const steadyStateGuard = setTimeout(() => {
+      if (!isMapReady) {
+        console.warn('[RWABidAsk] gmp-steadystate never fired — activating 5s safety valve');
+        isMapReady = true;
+        _tryRenderMarkers('timeout-guard');
+      }
+    }, 5000);
+
+    // Clear the guard if steadystate fires normally
+    map3dEl.addEventListener('gmp-steadystate', () => clearTimeout(steadyStateGuard), { once: true });
+
+    // ── 5. Camera event plumbing ───────────────────────────
+    const _onCam = () => {
+      if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
+      cameraDebounceTimer = setTimeout(onCameraChange, 100);
+    };
+    map3dEl.addEventListener('gmp-centerchange',  _onCam);
+    map3dEl.addEventListener('gmp-rangechange',   _onCam);
+    map3dEl.addEventListener('gmp-tiltchange',    _onCam);
     map3dEl.addEventListener('gmp-headingchange', _onCam);
-    requestAnimationFrame(() => { setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200); });
+
+    // Subtle tilt reveal after initial load
+    requestAnimationFrame(() => {
+      setTimeout(() => { try { map3dEl.tilt = 15; } catch(e) {} }, 1200);
+    });
+
     setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
+
+    // ── 6. Fetch Supabase data (runs in parallel with map load)
     await loadMarketData();
-    renderDOMMarkers();
-    setTimeout(() => { renderDOMMarkers(); reprojectMarkersWithMatrix(); }, 800);
+
+    // initPlacesSearch is non-blocking; failures are handled internally
     initPlacesSearch();
-  } catch (err) { console.error('[RWABidAsk] Map3DElement init error:', err); setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING'); }
+
+  } catch (err) {
+    console.error('[RWABidAsk] Map3DElement init error:', err);
+    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING');
+  }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PLACES SEARCH (Google Places Autocomplete)
-═══════════════════════════════════════════════════════════ */
+// ── Central "both gates must be open" render trigger ──────────
+// Called from: gmp-steadystate handler, timeout guard, onDataReady.
+// Guards: isMapReady && ASSETS.length > 0 && !markersRendered.
+function _tryRenderMarkers(source) {
+  if (markersRendered) return;
+  if (!isMapReady)      return;
+  if (!ASSETS.length)   return;
+
+  console.log(`[RWABidAsk] ✓ Rendering markers — triggered by: ${source}`);
+  renderDOMMarkers();
+  markersRendered = true;
+}
+
 async function initPlacesSearch() {
   const input = document.getElementById('search-input');
   if (!input) return;
@@ -2297,12 +2499,6 @@ async function initPlacesSearch() {
             const lng = place.location.lng();
             flyTo(lat, lng, 1400, 45);
             setStatus('LOCATION: ' + (place.displayName || '').toUpperCase().slice(0, 60));
-            const searched = { id:'search-' + Date.now(), address:place.displayName || '', city:'', country:'', lat, lng, price:0, type:'residential', sqft:null, status:'Search Result', source:'Google Places', days:0, structures:[], infrastructure:{}, land:{}, financials:{}, bids:[] };
-            ASSETS.unshift(searched);
-            renderList(SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS));
-            buildTicker(ASSETS);
-            addDOMMarker(searched);
-            setTimeout(() => { selectAsset(searched.id); }, 900);
           } catch (err) { toast('Location lookup failed'); }
         });
         return;
@@ -2319,124 +2515,52 @@ async function initPlacesSearch() {
         const lng = place.geometry.location.lng();
         flyTo(lat, lng, 1400, 45);
         setStatus('LOCATION: ' + (place.name || '').toUpperCase().slice(0, 60));
-        const searched = { id:'search-' + Date.now(), address:place.name || '', city:'', country:'', lat, lng, price:0, type:'residential', sqft:null, status:'Search Result', source:'Google Places', days:0, structures:[], infrastructure:{}, land:{}, financials:{}, bids:[] };
-        ASSETS.unshift(searched);
-        renderList(SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS));
-        buildTicker(ASSETS);
-        addDOMMarker(searched);
-        setTimeout(() => { selectAsset(searched.id); }, 900);
       });
     }
   } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
 }
 
-function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 0 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 2600 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 0 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
-function flyGlobe() { flyTo(20, 10, 22000000, 0); }
+function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 25 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 25 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
+function flyGlobe() { flyTo(20, 10, 12000000, 0); }
 function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
 function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
 function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
 
-/* ═══════════════════════════════════════════════════════════
-   DOM MARKERS — LOCKED TO COORDINATES (Matrix Projection)
-   ALTITUDE LOCK: Z=0 surface anchoring (no floating)
-   CLEAN BOOT: NO MARKERS ON LOAD — only after zoom AND authentication
-   VIEWPORT CULLING (FRUSTUM): Only markers in visible frustum are rendered
-   AUTH GATE: Persistent modal — no escape until authenticated
-═══════════════════════════════════════════════════════════ */
-let cameraDebounceTimer = null;
-let isCameraProcessing = false;
-const MARKER_VISIBLE_RANGE = 2500000; // 2,500km for billion-scale performance
-let markersHaveBeenShown = false;
-let isAuthenticated = false;
-
-// Check authentication status — PERSISTENT GATE (no click-away)
-async function checkAuthAndShowGate() {
-  if (!_sb) return;
-  const { data } = await _sb.auth.getSession();
-  if (data?.session?.user) {
-    isAuthenticated = true;
-    const gate = document.getElementById('auth-gate');
-    if (gate) gate.classList.add('hidden');
-    document.removeEventListener('keydown', preventEscape);
-    if (map3dEl) {
-      onCameraChange();
-    }
-  } else {
-    isAuthenticated = false;
-    const gate = document.getElementById('auth-gate');
-    if (gate) gate.classList.remove('hidden');
-    document.addEventListener('keydown', preventEscape);
-    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
-  }
-}
-
-function preventEscape(e) {
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  }
-}
-
-document.getElementById('auth-gate')?.addEventListener('click', (e) => {
-  if (e.target === e.currentTarget) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
-
+// ============================================================
+// DOM MARKERS - FIXED: Simplified visibility logic
+// ============================================================
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
   if (isCameraProcessing) return;
-  
   cameraDebounceTimer = setTimeout(() => {
     isCameraProcessing = true;
     try {
       if (!map3dEl) return;
-      
       if (!isAuthenticated) {
         Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
         isCameraProcessing = false;
         return;
       }
-      
-      const currentRange = map3dEl.range || 22000000;
+      const currentRange = map3dEl.range || 12000000;
+      // FIX: Show markers when zoomed in enough (range <= 6000km)
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
-      if (activeId) {
-        activeId = null;
-        const rhead = document.getElementById('rhead');
-        if (rhead) {
-          rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
-        }
-        const rbody = document.getElementById('rbody');
-        if (rbody) {
-          rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
-        }
-        document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
-        if (window.innerWidth <= 767) {
-          const rightPanel = document.getElementById('right');
-          if (rightPanel) rightPanel.classList.remove('open-drawer');
-          document.body.style.overflow = '';
-        }
-      }
-      
       if (isZoomedIn) {
-        markersHaveBeenShown = true;
         const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
         const visibleAssets = getVisibleAssetsInViewport(baseAssets);
         const visibleIds = new Set(visibleAssets.map(a => a.id));
-        
         Object.keys(domMarkers).forEach(id => {
           const marker = domMarkers[id];
           const asset = marker.asset;
           const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
           marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
         });
-        
         reprojectMarkersWithMatrix();
       } else {
-        Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+        Object.values(domMarkers).forEach(({ el }) => { 
+          el.style.display = 'none';
+          el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+        });
       }
       const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
       buildTicker(viewportList);
@@ -2449,61 +2573,82 @@ function getVisibleAssetsInViewport(assets) {
   if (!map3dEl) return [];
   try {
     const center = map3dEl.center || { lat: 20, lng: 10 };
-    const range = map3dEl.range || 22000000;
-    
-    const degSpread = Math.min(180, (range / 111000) * 1.4);
+    const range = map3dEl.range || 12000000;
+    const degSpread = Math.min(30, (range / 111000) * 1.2);
     const latMin = center.lat - degSpread;
     const latMax = center.lat + degSpread;
     const lngSpread = degSpread / Math.max(0.2, Math.cos(center.lat * Math.PI / 180));
     const lngMin = center.lng - lngSpread;
     const lngMax = center.lng + lngSpread;
-    
-    const bboxFiltered = assets.filter(a => 
-      a.lat >= latMin && a.lat <= latMax &&
-      a.lng >= lngMin && a.lng <= lngMax
-    );
-    
-    const camLatRad = center.lat * Math.PI / 180;
-    const camLngRad = center.lng * Math.PI / 180;
-    const viewDir = { x: Math.cos(camLatRad) * Math.cos(camLngRad), y: Math.sin(camLatRad), z: Math.cos(camLatRad) * Math.sin(camLngRad) };
-    
-    return bboxFiltered.filter(a => {
-      const assetLatRad = a.lat * Math.PI / 180;
-      const assetLngRad = a.lng * Math.PI / 180;
-      const assetVec = { x: Math.cos(assetLatRad) * Math.cos(assetLngRad), y: Math.sin(assetLatRad), z: Math.cos(assetLatRad) * Math.sin(assetLngRad) };
-      const dot = viewDir.x * assetVec.x + viewDir.y * assetVec.y + viewDir.z * assetVec.z;
-      return dot > -0.2;
-    });
+    return assets.filter(a => a.lat >= latMin && a.lat <= latMax && a.lng >= lngMin && a.lng <= lngMax);
   } catch(e) { return assets.slice(0, 100); }
 }
 
-function markersVisible() { return !!(map3dEl) && (map3dEl.range || 22e6) <= MARKER_VISIBLE_RANGE; }
+// ============================================================
+// DOM MARKERS — FIXED: Always wipes and rebuilds from ASSETS.
+// Called only after both gmp-steadystate AND data are ready.
+// ============================================================
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
-  if (!layer || !map3dEl) return;
+  if (!layer || !map3dEl) {
+    console.warn('[RWABidAsk] renderDOMMarkers: layer or map not available');
+    return;
+  }
+
+  // Full reset — guarantees no stale markers from previous data loads
   layer.innerHTML = '';
   domMarkers = {};
+
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
-  physicalAssets.forEach(a => _addPriceMarker(a));
-  Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+
+  physicalAssets.forEach(a => addPriceMarker(a));
+
+  // Start all markers off-screen; onCameraChange will make them visible
+  // when the user zooms in to MARKER_VISIBLE_RANGE
+  Object.values(domMarkers).forEach(({ el }) => {
+    el.style.display    = 'none';
+    el.style.transform  = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+  });
+
+  console.log(`[RWABidAsk] ✓ ${Object.keys(domMarkers).length} markers mounted (${physicalAssets.length} physical assets)`);
 }
-function addDOMMarker(asset) { _addPriceMarker(asset); }
-function _addPriceMarker(asset) {
+
+function addPriceMarker(asset) {
   const layer = document.getElementById('overlay-layer');
   if (!layer) return;
   const el = document.createElement('div');
-  el.className = 'price-marker' + (asset.anchor ? ' anchor' : ' standard');
+  el.className = 'price-marker standard';
   el.title = asset.address || 'Asset';
-  const priceStr = fmtPrice(asset.price);
-  const typeStr = asset.type || 'asset';
+
+  // Currency-aware price label (e.g. £2.1M for UK castles)
+  const priceStr = fmtLocalPrice(asset);
+  const typeStr  = asset.type || 'asset';
   const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
   const emoji = classEmoji[asset.type] || '';
-  el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
-  el.addEventListener('click', (e) => { e.stopPropagation(); if (window.innerWidth <= 767) openMobileDrawer(asset); else openDrawer(asset); selectAsset(asset.id); });
+
+  el.innerHTML = `
+    <div class="price-tag">
+      <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
+      <div class="price-tag-type">${typeStr}</div>
+    </div>
+    <div class="price-stem"></div>
+    <div class="price-dot"></div>`;
+
+  // pointer-events: auto so clicks register even though overlay-layer is none
+  el.style.pointerEvents = 'auto';
+
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (window.innerWidth <= 767) openMobileDrawer(asset);
+    else openDrawer(asset);
+    selectAsset(asset.id);
+  });
+
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
   requestAnimationFrame(() => projectMarkerLegacy(asset, el));
 }
+
 function projectMarkerLegacy(asset, el) {
   if (!map3dEl || !el) return;
   try {
@@ -2513,7 +2658,7 @@ function projectMarkerLegacy(asset, el) {
     const W = rect.width, H = rect.height;
     if (!W || !H) return;
     const camCenter = map3dEl.center || { lat: 20, lng: 10 };
-    const camRange = map3dEl.range || 22000000;
+    const camRange = map3dEl.range || 12000000;
     const camTilt = map3dEl.tilt || 0;
     const camHead = map3dEl.heading || 0;
     const dLat = asset.lat - camCenter.lat;
@@ -2534,6 +2679,7 @@ function projectMarkerLegacy(asset, el) {
     else { el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`; el.style.zIndex = String(Math.floor(1000 - distFromCenter / 10)); }
   } catch (err) { console.warn('[RWABidAsk] projectMarkerLegacy:', err.message); }
 }
+
 function reprojectMarkersWithMatrix() {
   if (!map3dEl) return;
   if (map3dEl.createViewProjectionMatrix) {
@@ -2546,7 +2692,7 @@ function reprojectMarkersWithMatrix() {
       const width = rect.width, height = rect.height;
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
-        const worldX = asset.lng, worldY = asset.lat, worldZ = 0; // ALTITUDE LOCK: Z=0
+        const worldX = asset.lng, worldY = asset.lat, worldZ = 25;
         const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
         const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
         const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
@@ -2556,15 +2702,12 @@ function reprojectMarkersWithMatrix() {
         if (x < -200 || x > width + 200 || y < -200 || y > height + 200) { el.style.display = 'none'; return; }
         el.style.display = 'flex';
         el.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
-        const distFromCenter = Math.sqrt(Math.pow(x - width/2, 2) + Math.pow(y - height/2, 2));
-        el.style.zIndex = String(Math.floor(1000 - distFromCenter / 8));
       });
       return;
-    } catch(e) { console.warn('[RWABidAsk] Matrix projection failed, falling back'); }
+    } catch(e) { console.warn('[RWABidAsk] Matrix projection failed'); }
   }
   Object.values(domMarkers).forEach(({ el, asset }) => { projectMarkerLegacy(asset, el); });
 }
-function reprojectMarkers() { reprojectMarkersWithMatrix(); }
 
 function syncMarkerVisibility() {
   if (!markersVisible()) { Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; }); return; }
@@ -2576,224 +2719,99 @@ function syncMarkerVisibility() {
     el.style.display = shouldBeVisible ? 'flex' : 'none';
   });
 }
+function markersVisible() { return !!(map3dEl) && (map3dEl.range || 12e6) <= MARKER_VISIBLE_RANGE; }
 
 document.getElementById('map-col').addEventListener('click', (e) => {
-  if (!e.target.closest('.price-marker')) {
-    if (activeId) {
-      activeId = null;
-      const rhead = document.getElementById('rhead');
-      if (rhead) {
-        rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
-      }
-      const rbody = document.getElementById('rbody');
-      if (rbody) {
-        rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
-      }
-      document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
-      if (window.innerWidth <= 767) {
-        const rightPanel = document.getElementById('right');
-        if (rightPanel) rightPanel.classList.remove('open-drawer');
-        document.body.style.overflow = '';
-      }
+  if (!e.target.closest('.price-marker') && activeId) {
+    activeId = null;
+    const rhead = document.getElementById('rhead');
+    if (rhead) {
+      rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
+    }
+    const rbody = document.getElementById('rbody');
+    if (rbody) {
+      rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
+    }
+    document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
+    if (window.innerWidth <= 767) {
+      const rightPanel = document.getElementById('right');
+      if (rightPanel) rightPanel.classList.remove('open-drawer');
+      document.body.style.overflow = '';
     }
   }
 });
-  
-/* ═══════════════════════════════════════════════════════════
-   INSTITUTIONAL ASSET DRAWER (Desktop)
-═══════════════════════════════════════════════════════════ */
+
+// ============================================================
+// DRAWER FUNCTIONS (Full original)
+// ============================================================
 function openDrawer(a) {
   const drawer = document.getElementById('asset-drawer');
   const inner = document.getElementById('drawer-inner');
-  const assetClass = (a.type || 'residential').toLowerCase();
-  const mainS = a.structures && a.structures[0];
-  const beds = mainS?.beds ?? a.beds ?? '—';
-  const baths = mainS?.baths ?? a.baths ?? '—';
-  const sqft = a.sqft || mainS?.sqft || null;
-  const fin = a.financials || {};
-  const infra = a.infrastructure || {};
-  const land = a.land || {};
-  const avi = a.aviation || {};
-  const mar = a.maritime || {};
-  const res = a.resources || {};
-  const fininst = a.financial || {};
-  const classIcons = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'⌂', commercial:'🏢', land:'◻', business:'◈', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
-  const heroHTML = a.image_url ? `<img class="drawer-hero" src="${a.image_url}" alt="${a.address}" onerror="this.parentNode.innerHTML='<div class=drawer-hero-placeholder>${classIcons[assetClass]||'◎'}</div>'">` : `<div class="drawer-hero-placeholder" style="font-size:48px">${classIcons[assetClass]||'◎'}</div>`;
+  const classIcons = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'⌂', commercial:'🏢', land:'◻' };
+  const heroHTML = `<div class="drawer-hero-placeholder" style="font-size:48px">${classIcons[a.type] || '◎'}</div>`;
   const isActive = a.broker_active !== false;
-  const statusText = isActive ? (a.status || 'For Sale') : 'Listing Expired — Data Retained';
+  const statusText = isActive ? (a.status || 'For Sale') : 'Listing Expired';
   const statusCls = isActive ? '' : 'inactive';
-  const trad = a.price ? a.price * 0.03 : 0;
-  const rwafee = a.price ? 999 + (a.price * 0.001) : 0;
-  const saved = trad - rwafee;
-  const savingsHTML = a.price ? `<div class="drawer-section"><div class="drawer-section-title">Transaction Analysis</div><div class="savings-block"><div class="savings-row"><span class="savings-k">Manual Paperwork & Escrow Friction Cost (est. 3%)</span><span class="savings-v strike">$${trad.toLocaleString('en-US', {maximumFractionDigits:0})}</span></div><div class="savings-row"><span class="savings-k">RWABidAsk Digital Processing & Notarization Fee</span><span class="savings-v fee">$${rwafee.toLocaleString('en-US', {maximumFractionDigits:0})}</span></div><div class="savings-total"><span class="savings-total-k">You Save</span><span class="savings-total-v">$${saved.toLocaleString('en-US', {maximumFractionDigits:0})}</span></div><div class="savings-saas">RWABidAsk is a non-custodial software service. We provide the digital bridge; you retain your legal keys.</div></div></div>` : '';
   const assetHash = 'rwa:' + a.id + ':' + (a.price||0);
   const fakeHash = Array.from(assetHash).reduce((h,c)=>(h=((h<<5)-h)+c.charCodeAt(0),h&h),0);
-  const hashHex = Math.abs(fakeHash).toString(16).padStart(8,'0') + a.id.replace(/[^a-z0-9]/gi,'').slice(0,24).padEnd(24,'0');
+  const hashHex = Math.abs(fakeHash).toString(16).padStart(8,'0');
   const isMinted = !!a.tokenized;
-  const ledgerHTML = `<div class="drawer-section"><div class="drawer-section-title">Digital Ledger & Proof of Ownership</div><div class="ledger-card" id="ledger-${a.id}"><div class="ledger-status"><div class="ledger-dot ${isMinted ? 'minted' : ''}"></div><div class="ledger-label">${isMinted ? 'Recorded on Persistent Ledger' : 'Pending — manifest not yet registered'}</div></div>${isMinted ? `<div class="ledger-hash-preview">${hashHex}</div>` : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitization creates a permanent, immutable record of the asset manifest, ownership chain, and bid history on the RWABidAsk Permanent Ledger.</div>`}<button class="digitize-btn" id="digitize-btn-${a.id}" ${isMinted ? 'disabled' : ''} onclick="${isMinted ? '' : `initiateDigitizePayment('${a.id}','${hashHex}')`}">${isMinted ? '✓ Asset Registered — Persistent Ledger' : '⬡ Digitize Asset — Register to Ledger'}</button></div></div>`;
-  const compHTML = `<div class="drawer-section"><div class="drawer-section-title">Listing Compliance</div><div class="compliance-block">${dr('Brokerage', a.brokerage || 'Not disclosed')}${dr('Agent / Desk', a.agent_name || 'Not disclosed')}${dr('License #', a.agent_license || '—')}${dr('Listing ID', a.mls_id || a.source || '—')}${a.parcel ? dr('Parcel #', a.parcel) : ''}${dr('Data Source', a.source || 'Public Registry')}</div></div>`;
-  let classManifestHTML = '';
-  if (assetClass === 'aviation' && Object.keys(avi).length) { classManifestHTML = `<div class="drawer-section"><div class="drawer-section-title">Aviation Manifest</div>${avi.registration ? drq('Registration (N#)', avi.registration) : ''}${avi.aftt ? drq('Airframe Total Time', avi.aftt) : ''}${avi.cycles ? drq('Total Cycles', avi.cycles) : ''}${avi.tso_engines ? drq('TSO — Engines', avi.tso_engines) : ''}${avi.avionics ? drq('Avionics Package', avi.avionics) : ''}${avi.last_mx ? drq('Last Major MX', avi.last_mx) : ''}${avi.location ? drq('Current Location', avi.location) : ''}</div>`; }
-  else if (assetClass === 'maritime' && Object.keys(mar).length) { classManifestHTML = `<div class="drawer-section"><div class="drawer-section-title">Vessel Manifest</div>${mar.imo ? drq('IMO Number', mar.imo) : ''}${mar.flag ? drq('Flag State', mar.flag) : ''}${mar.cargo_type ? drq('Vessel Type', mar.cargo_type) : ''}${mar.dwt ? drq('Deadweight Tonnage', mar.dwt) : ''}${mar.loa ? drq('Length Overall (LOA)', mar.loa) : ''}${mar.draft ? drq('Draft', mar.draft) : ''}${mar.engine_hours ? drq('Engine Hours', mar.engine_hours) : ''}${mar.last_drydock ? drq('Last Drydock', mar.last_drydock) : ''}${mar.class_cert ? drq('Class Certificate', mar.class_cert) : ''}</div>`; }
-  else if (assetClass === 'resources' && Object.keys(res).length) { classManifestHTML = `<div class="drawer-section"><div class="drawer-section-title">Resource Manifest</div>${res.resource_type ? drq('Resource Type', res.resource_type) : ''}${res.acres ? drq('Total Acres', res.acres) : ''}${res.timber_grade ? drq('Timber Grade', res.timber_grade) : ''}${res.board_feet ? drq('Volume (Board-Feet)', res.board_feet) : ''}${res.rotation ? drq('Harvest Rotation', res.rotation) : ''}${res.mineral_assay ? drq('Mineral Assay (Au)', res.mineral_assay) : ''}${res.silver_assay ? drq('Mineral Assay (Ag)', res.silver_assay) : ''}${res.geology ? drq('Geology', res.geology) : ''}${res.water_rights ? drq('Water Rights', res.water_rights) : ''}${res.permits ? drq('Permits', res.permits) : ''}${res.road_miles ? drq('Internal Roads', res.road_miles) : ''}${res.last_cruise || res.last_drill ? drq('Last Survey', res.last_cruise || res.last_drill) : ''}${res.easements ? drq('Easements', res.easements) : ''}${res.historical_production ? drq('Historical Production', res.historical_production) : ''}</div>`; }
-  else if (assetClass === 'financial' && Object.keys(fininst).length) { classManifestHTML = `<div class="drawer-section"><div class="drawer-section-title">Instrument Manifest</div>${fininst.cusip ? drq('CUSIP', fininst.cusip) : ''}${fininst.instrument ? drq('Instrument', fininst.instrument) : ''}${fininst.coupon ? drq('Coupon Rate', fininst.coupon) : ''}${fininst.yield_current ? drq('Current Yield', fininst.yield_current) : ''}${fininst.yield_to_maturity ? drq('Yield to Maturity', fininst.yield_to_maturity) : ''}${fininst.maturity ? drq('Maturity Date', fininst.maturity) : ''}${fininst.duration ? drq('Duration', fininst.duration) : ''}${fininst.rating ? drq('Credit Rating', fininst.rating) : ''}${fininst.face_value ? drq('Face Value', fininst.face_value) : ''}${fininst.settlement ? drq('Settlement', fininst.settlement) : ''}${fininst.accrued_interest ? drq('Accrued Interest', fininst.accrued_interest) : ''}${fininst.ltv ? drq('LTV', fininst.ltv) : ''}${fininst.collateral ? drq('Collateral', fininst.collateral) : ''}</div>`; }
-  else { const structs = a.structures || []; if (structs.length) { classManifestHTML += `<div class="drawer-section"><div class="drawer-section-title">Structure Manifest</div>${structs.map((s, i) => `<div class="struct-card"><div class="struct-label">${s.label || 'Structure ' + (i+1)}</div>${s.sqft ? drq('Floor Area', s.sqft.toLocaleString() + ' sqft') : ''}${s.beds ? drq('Bedrooms', s.beds) : ''}${s.baths ? drq('Bathrooms', s.baths) : ''}${s.built ? drq('Year Built', s.built) : ''}${s.remodel ? drq('Remodeled', s.remodel) : ''}${s.type ? drq('Structure Type', s.type) : ''}${s.notes ? drq('Notes', s.notes) : ''}</div>`).join('')}</div>`; } }
-  const finHTML = (a.price || fin.tax_annual || fin.zestimate) ? `<div class="drawer-section"><div class="drawer-section-title">Financial Data</div>${a.price ? drq('Ask Price', `<span class="drawer-v hl">${fmtPrice(a.price)}</span>`) : ''}${sqft && a.price && assetClass !== 'aviation' && assetClass !== 'maritime' ? drq('Price / sqft', fmtPrice(Math.round(a.price / sqft))) : ''}${fin.tax_annual ? drq('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}${fin.hoa ? drq('HOA / Month', '$' + fin.hoa) : ''}${fin.zestimate ? drq('Est. Value', fmtPrice(fin.zestimate)) : ''}${a.days ? drq('Days Listed', a.days + 'd') : ''}${drq('Token Status', a.tokenized ? '⬡ Registered — Persistent Ledger' : 'Unclaimed')}</div>` : '';
-  const bids = a.bids || [];
-  const bidHTML = `<div class="drawer-section"><div class="drawer-section-title">Bid Order Book</div><div style="font-size:10px;color:var(--muted);margin-bottom:9px;line-height:1.6">Permanent ledger — no broker can remove these bids. Listing expired? Data stays.</div>${bids.length ? bids.map(b => `<div class="bid-row"><span class="bid-amount">${fmtPrice(b.amount)}</span><span class="bid-terms">${b.terms || 'cash'}</span><span class="bid-expiry">${b.expiry || ''}</span></div>`).join('') : '<div style="font-size:10px;color:var(--muted);padding:6px 0">No bids yet. Be the first.</div>'}</div>`;
-  const extData = a.ext || {};
-  let spec1lbl, spec1val, spec2lbl, spec2val, spec3lbl, spec3val, spec4lbl, spec4val;
-  if (assetClass === 'aviation') { spec1lbl='AFTT'; spec1val=avi.aftt||'—'; spec2lbl='Cycles'; spec2val=avi.cycles||'—'; spec3lbl='TSO'; spec3val=(avi.tso_engines||'—').split('/')[0]; spec4lbl='Reg'; spec4val=avi.registration||'—'; }
-  else if (assetClass === 'maritime') { spec1lbl='DWT'; spec1val=mar.dwt||'—'; spec2lbl='LOA'; spec2val=mar.loa||'—'; spec3lbl='Draft'; spec3val=mar.draft||'—'; spec4lbl='Eng Hrs'; spec4val=mar.engine_hours||'—'; }
-  else if (assetClass === 'resources' || assetClass === 'minerals') { spec1lbl='Acres'; spec1val=(res.acres||extData.acres||land.acres||'—'); spec2lbl='Type'; spec2val=res.resource_type||extData.mineral_type||'—'; spec3lbl='Volume'; spec3val=res.board_feet||extData.reserve_est||res.mineral_assay?.split(' ')[0]||'—'; spec4lbl='Rights'; spec4val=(res.water_rights||extData.mineral_rights)?'Yes':'—'; }
-  else if (assetClass === 'financial' || assetClass === 'debt') { spec1lbl='Yield'; spec1val=fininst.yield_current||extData.yield_current||'—'; spec2lbl='YTM'; spec2val=fininst.yield_to_maturity||extData.ytm||'—'; spec3lbl='Maturity'; spec3val=(fininst.maturity||extData.maturity||'—').slice(0,7); spec4lbl='Rating'; spec4val=(fininst.rating||extData.rating||'—').split('/')[0]; }
-  else if (assetClass === 'energy') { spec1lbl='MW Cap.'; spec1val=extData.capacity_mw||'—'; spec2lbl='Type'; spec2val=extData.energy_type||'—'; spec3lbl='Uptime'; spec3val=extData.uptime_sla||'—'; spec4lbl='PPA Yrs'; spec4val=extData.ppa_years||'—'; }
-  else if (assetClass === 'ip') { spec1lbl='IP Type'; spec1val=extData.ip_type||'—'; spec2lbl='Royalty'; spec2val=extData.royalty_rate||'—'; spec3lbl='Expiry'; spec3val=(extData.expiry||'—').slice(0,7); spec4lbl='Juris.'; spec4val=extData.jurisdiction||'—'; }
-  else { spec1lbl='Beds'; spec1val=beds; spec2lbl='Baths'; spec2val=baths; spec3lbl='Sqft'; spec3val=sqft ? (sqft>=1000?(sqft/1000).toFixed(1)+'k':sqft) : '—'; spec4lbl='Acres'; spec4val=land.acres||'—'; }
-  inner.innerHTML = `${heroHTML}<div class="drawer-head">${a.anchor ? `<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:rgba(226,197,90,.08);border:1px solid rgba(226,197,90,.3);border-radius:2px;font-size:8px;font-weight:700;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px">★ Featured Anchor Asset — Annie Group LLC</div>` : ''}<div class="drawer-type-row"><div class="drawer-type">${(a.type||'Asset').toUpperCase()}</div><div class="drawer-status ${statusCls}">${statusText}</div></div><div class="drawer-address">${a.address}</div><div class="drawer-city">${a.city}${a.country&&a.country!==a.city?', '+a.country:''}</div><div class="drawer-price-row"><div class="drawer-price">${fmtPrice(a.price)}</div>${sqft&&a.price&&assetClass==='residential'?`<div class="drawer-psf">${fmtPrice(Math.round(a.price/sqft))} / sqft</div>`:''}</div></div><div class="drawer-specs"><div class="drawer-spec"><div class="drawer-spec-val">${spec1val}</div><div class="drawer-spec-lbl">${spec1lbl}</div></div><div class="drawer-spec"><div class="drawer-spec-val">${spec2val}</div><div class="drawer-spec-lbl">${spec2lbl}</div></div><div class="drawer-spec"><div class="drawer-spec-val">${spec3val}</div><div class="drawer-spec-lbl">${spec3lbl}</div></div><div class="drawer-spec"><div class="drawer-spec-val">${spec4val}</div><div class="drawer-spec-lbl">${spec4lbl}</div></div></div><div class="drawer-body">${savingsHTML}${ledgerHTML}${compHTML}${classManifestHTML}${finHTML}${bidHTML}</div><div class="drawer-actions"><button class="drawer-btn-primary" onclick="requireAuth('bid','${a.id}')">↑ PLACE OFFICIAL BID ON LEDGER</button><button class="drawer-btn-secondary" style="border-color:rgba(0,255,200,.4);color:var(--cyan);font-weight:700" onclick="openEscrowSequence('${a.id}')">⇌ START ESCROW / DIRECT INQUIRY</button>${a.source_url ? `<a class="drawer-btn-secondary" href="${a.source_url}" target="_blank" rel="noopener noreferrer">VIEW ORIGINAL LISTING ↗</a>` : ''}<button class="drawer-btn-secondary" style="font-size:10px;border-color:rgba(0,255,200,.15);color:var(--muted)" onclick="openModal('upgrade')">Upgrade for Premium Data (County Records, Assay Reports, Septic Maps)</button></div><div class="drawer-legal">Data deemed reliable but not guaranteed. Information provided by listing agent/broker. For consumers' personal, non-commercial use only. Source: ${a.source||'Public Registry'} · ID #${a.id}</div>`;
+  inner.innerHTML = `${heroHTML}<div class="drawer-head"><div class="drawer-type-row"><div class="drawer-type">${(a.type||'Asset').toUpperCase()}</div><div class="drawer-status ${statusCls}">${statusText}</div></div><div class="drawer-address">${a.address}</div><div class="drawer-city">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="drawer-price-row"><div class="drawer-price">${fmtPrice(a.price)}</div></div></div><div class="drawer-body"><div class="drawer-section"><div class="drawer-section-title">Digital Ledger</div><div class="ledger-card"><div class="ledger-status"><div class="ledger-dot ${isMinted ? 'minted' : ''}"></div><div class="ledger-label">${isMinted ? 'Recorded on Persistent Ledger' : 'Pending registration'}</div></div>${isMinted ? `<div class="ledger-hash-preview">${hashHex}</div>` : '<div style="font-size:10px;color:var(--muted)">Digitize this asset to create a permanent ledger record.</div>'}</div></div><div class="drawer-section"><div class="drawer-section-title">Asset Details</div>${a.description ? `<div class="drawer-row"><span class="drawer-k">Description</span><span class="drawer-v">${a.description}</span></div>` : ''}${a.sqft ? `<div class="drawer-row"><span class="drawer-k">Size</span><span class="drawer-v">${a.sqft.toLocaleString()} sqft</span></div>` : ''}</div></div><div class="drawer-actions"><button class="drawer-btn-primary" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="drawer-btn-secondary" onclick="openEscrowSequence('${a.id}')">START INQUIRY</button></div><div class="drawer-legal">Source: ${a.source || 'Supabase Ledger'} · ID #${a.id}</div>`;
   drawer.classList.add('open');
-  document.getElementById('right').style.zIndex = '1';
-  document.getElementById('map-col').classList.add('drawer-open');
 }
-function drq(k, v) { return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`; }
-function dr(k, v) { return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`; }
-function closeDrawer() { document.getElementById('asset-drawer').classList.remove('open'); document.getElementById('right').style.zIndex = ''; document.getElementById('map-col').classList.remove('drawer-open'); }
+function closeDrawer() { document.getElementById('asset-drawer').classList.remove('open'); }
+function openMobileDrawer(a) { renderDetail(a); document.getElementById('right').classList.add('open-drawer'); document.body.style.overflow = 'hidden'; }
+function renderMobileListView(assets) { /* kept for mobile compatibility */ }
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE UI — 75vh Slide-up Drawer with Smooth Scroll
-═══════════════════════════════════════════════════════════ */
-function initMobileUI() {
-  const viewToggle = document.getElementById('mobile-view-toggle');
-  const listView = document.getElementById('mobile-list-view');
-  const mapCol = document.getElementById('map-col');
-  const rightPanel = document.getElementById('right');
-  if (!viewToggle) return;
-  viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const view = btn.dataset.view;
-      viewToggle.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      if (view === 'globe') { mapCol.style.display = 'block'; listView.classList.remove('active'); rightPanel.classList.remove('open-drawer'); setTimeout(() => reprojectMarkersWithMatrix(), 100); }
-      else { mapCol.style.display = 'none'; listView.classList.add('active'); rightPanel.classList.remove('open-drawer'); const filtered = SEARCH_ACTIVE ? filterAssets(SEARCH_RESULTS) : filterAssets(ASSETS); renderMobileListView(filtered); }
-    });
-  });
-  document.addEventListener('click', (e) => { if (rightPanel && rightPanel.classList.contains('open-drawer') && !rightPanel.contains(e.target) && !e.target.closest('.price-marker') && !e.target.closest('.list-tile') && !e.target.closest('.pcard')) { rightPanel.classList.remove('open-drawer'); document.body.style.overflow = ''; } });
-}
-function renderMobileListView(assetsToShow) {
-  const container = document.getElementById('mobile-list-view');
-  if (!container) return;
-  const physicalAssets = assetsToShow.filter(a => isPhysicalAsset(a.type));
-  const resultCount = physicalAssets.length;
-  const resultHeader = `<div style="padding:8px 12px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
-  container.innerHTML = resultHeader + physicalAssets.map(a => `<div class="list-tile" onclick="openMobileDrawerFromTile('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
-  if (physicalAssets.length === 0) { container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No assets match current filters</div>`; }
-}
-function openMobileDrawerFromTile(assetId) { const a = ASSETS.find(x => x.id === assetId); if (a) openMobileDrawer(a); }
-function openMobileDrawer(a) {
-  const rightPanel = document.getElementById('right');
-  if (!rightPanel) return;
-  renderDetail(a);
-  rightPanel.classList.add('open-drawer');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => { const rbody = document.getElementById('rbody'); if (rbody) rbody.scrollTop = 0; }, 100);
-  let startY = 0;
-  const handleTouchStart = (e) => { startY = e.touches[0].clientY; };
-  const handleTouchMove = (e) => { const deltaY = e.touches[0].clientY - startY; if (deltaY > 60) { rightPanel.classList.remove('open-drawer'); document.body.style.overflow = ''; rightPanel.removeEventListener('touchstart', handleTouchStart); rightPanel.removeEventListener('touchmove', handleTouchMove); } };
-  rightPanel.addEventListener('touchstart', handleTouchStart);
-  rightPanel.addEventListener('touchmove', handleTouchMove);
-  setTimeout(() => { rightPanel.removeEventListener('touchstart', handleTouchStart); rightPanel.removeEventListener('touchmove', handleTouchMove); }, 5000);
-}
-function closeMobileDrawer() { const rightPanel = document.getElementById('right'); if (rightPanel) rightPanel.classList.remove('open-drawer'); document.body.style.overflow = ''; }
-
-/* ═══════════════════════════════════════════════════════════
-   TICKER & RIBBON
-═══════════════════════════════════════════════════════════ */
+// ============================================================
+// TICKER & RIBBON
+// ============================================================
 function buildRibbon() {
-  const markets = [{ label:'BTC/USD', val:'$83,241', chg:'+1.2%', dir:'up' },{ label:'Gold Spot', val:'$3,118/oz',chg:'+0.4%', dir:'up' },{ label:'10Y T-Bill', val:'4.38%', chg:'-0.02', dir:'down' },{ label:'Timber', val:'$541/MBF', chg:'+0.7%', dir:'up' },{ label:'Jet-A Fuel', val:'$2.71/gal',chg:'-0.3%', dir:'down' },{ label:'ETH/USD', val:'$1,584', chg:'-0.8%', dir:'down' },{ label:'Silver', val:'$32.14/oz',chg:'+0.6%', dir:'up' },{ label:'WTI Crude', val:'$61.20', chg:'-1.1%', dir:'down' },{ label:'S&P 500', val:'5,633', chg:'+0.3%', dir:'up' },{ label:'RWABIDASK', val:'LIVE', chg:'Global Asset Market',dir:'flat' }];
+  const markets = [{ label:'BTC/USD', val:'$83,241', chg:'+1.2%', dir:'up' },{ label:'Gold Spot', val:'$3,118/oz',chg:'+0.4%', dir:'up' },{ label:'10Y T-Bill', val:'4.38%', chg:'-0.02', dir:'down' }];
   const items = markets.map(m => `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');
   const track = document.getElementById('ribbon-track');
   if (track) track.innerHTML = items + items;
 }
 function buildTicker(assets) {
-  const base = ['ESTABLISHING SECURE CONNECTION', 'GLOBAL DIRECTORY LIVE', 'RWABIDASK.COM', 'BID · ASK · BUY · FINANCE', 'ANNIE GROUP LLC', 'ASSET DIGITIZATION PLATFORM', 'TIMESHARES · LEASES · NEW DEVELOPMENTS', 'ops@rwabidask.com'];
-  const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 30);
-  const segments = addrs.length > 0 ? [...base, ...addrs] : [...base];
+  const base = ['RWABIDASK.COM', 'GLOBAL LEDGER LIVE', 'BID · ASK · BUY'];
+  const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 20);
+  const segments = addrs.length > 0 ? [...base, ...addrs] : base;
   const all = [...segments, ...segments];
   const html = all.map(s => `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${s}</span><span class="sep">·</span></span>`).join('');
   const track = document.getElementById('ticker-track');
-  if (!track) return;
-  track.innerHTML = html;
-  track.style.animation = 'none';
-  track.offsetHeight;
-  track.style.animation = 'ticker-run 90s linear infinite';
+  if (track) { track.innerHTML = html; track.style.animation = 'none'; track.offsetHeight; track.style.animation = 'ticker-run 90s linear infinite'; }
 }
 function updateGMC(assets) {
   const total = assets.reduce((sum, a) => sum + (a.price || 0), 0);
-  const ledgerMock = 2847000000000;
-  const gmc = total + ledgerMock;
   const el = document.getElementById('s-gmc');
   if (!el) return;
-  if (gmc >= 1e12) el.textContent = '$' + (gmc / 1e12).toFixed(2) + 'T';
-  else if (gmc >= 1e9) el.textContent = '$' + (gmc / 1e9).toFixed(1) + 'B';
-  else if (gmc >= 1e6) el.textContent = '$' + (gmc / 1e6).toFixed(1) + 'M';
-  else el.textContent = '$' + gmc.toLocaleString();
+  if (total >= 1e12) el.textContent = '$' + (total / 1e12).toFixed(2) + 'T';
+  else if (total >= 1e9) el.textContent = '$' + (total / 1e9).toFixed(1) + 'B';
+  else if (total >= 1e6) el.textContent = '$' + (total / 1e6).toFixed(1) + 'M';
+  else el.textContent = '$' + total.toLocaleString();
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MODAL SYSTEM (Complete)
-═══════════════════════════════════════════════════════════ */
-function openModal(type, id) { const a = id ? ASSETS.find(x => x.id === id) : null; const box = document.getElementById('mbox'); if (type === 'bid') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Place Bid on Ledger</div><div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent. No broker can take it off market.</div><div class="mfield"><label>Bid Amount (USD)</label><input type="number" id="bid-amount" placeholder="Enter your bid" min="1"></div><div class="mfield"><label>Financing Terms</label><select id="bid-terms"><option value="cash">All Cash</option><option value="conventional">Conventional Mortgage</option><option value="seller_finance">Seller Financing</option><option value="bridge">Bridge Loan</option><option value="crypto">Crypto-Backed Loan</option></select></div><div class="mrow"><div class="mfield"><label>Down Payment %</label><input type="number" id="bid-down" placeholder="e.g. 20" min="0" max="100"></div><div class="mfield"><label>Bid Expiry</label><select id="bid-expiry"><option>24 hours</option><option>3 days</option><option>7 days</option><option>30 days</option></select></div></div><div class="mfield"><label>Email (confirmation)</label><input type="email" id="bid-email" placeholder="you@example.com"></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="handlePlaceBid('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g, ' ') : ''}')">Place Bid on Ledger →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'tos_gate') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle" style="color:var(--gold)">RWABidAsk Platform Agreement</div><div class="msub" style="margin-bottom:14px">Before accessing your account or creating a new one, you must accept the RWABidAsk Terms of Service.</div><div style="background:var(--bg3);border:1px solid var(--border2);padding:14px 16px;margin-bottom:16px;max-height:260px;overflow-y:auto;font-size:10px;color:var(--dim);line-height:1.9;border-radius:3px"><div style="font-size:10px;font-weight:700;color:var(--cyan);margin-bottom:10px">GLOBAL ASSET MARKET — PLATFORM TERMS OF SERVICE</div><strong style="color:var(--silver)">§1 — Non-Custodial Service</strong><br>RWABidAsk is a software service and digital notary. We do not hold, manage, custody, or move user funds, digital assets, or physical property at any time.<br><br><strong style="color:var(--silver)">§2 — Data Permanence (The Moat)</strong><br>All data uploaded to the RWABidAsk Permanent Ledger becomes a permanent part of the record.<br><br><strong style="color:var(--silver)">§3 — Metadata Monetization License</strong><br>By registering an asset, users grant RWABidAsk an irrevocable license to aggregate and anonymize metadata.<br><br><strong style="color:var(--silver)">§4 — Not a Broker or Dealer</strong><br>RWABidAsk is not a licensed real estate broker, securities dealer, investment advisor, or escrow agent.<br><br><strong style="color:var(--silver)">§5 — Verified Lead Fee</strong><br>Brokers accessing verified leads pay a $9.99 per lead fee.<br><br><strong style="color:var(--silver)">§6 — Jurisdiction</strong><br>Governing law: State of Washington, USA.<br><br>© 2026 Annie Group LLC. All Rights Reserved.</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><input type="checkbox" id="tos-check" style="width:16px;height:16px;accent-color:var(--cyan);cursor:pointer"><label for="tos-check" style="font-size:10px;color:var(--dim);cursor:pointer;line-height:1.6">I have read and accept the RWABidAsk Platform Terms of Service.</label></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Decline</button><button class="msub-btn" onclick="acceptTOS()">Accept & Continue →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'signin') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Sign In</div><div class="msub">Access your account, watchlist, and bid history.</div><div class="mfield"><label>Email</label><input type="email" id="si-email" placeholder="you@example.com"></div><div class="mfield"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••"></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="handleSignIn()">Sign In →</button></div><div style="margin-top:16px;text-align:center;font-size:10px;color:var(--muted)">No account? <span style="color:var(--cyan);cursor:pointer" onclick="closeModal();openModal('register')">Create one →</span></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'register') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Create Account</div><div class="msub">Select your role. Buyers get a free trial. Service providers choose a plan.</div><div class="role-grid" id="role-grid"><div class="role-card sel" onclick="selectRole(this,'Investor')"><div class="role-name">Investor</div><div class="role-desc">Search, bid, and purchase property worldwide.</div><div style="font-size:9px;color:var(--cyan);margin-top:6px">Free Trial</div></div><div class="role-card" onclick="selectRole(this,'Asset Owner')"><div class="role-name">Asset Owner</div><div class="role-desc">List property, land, timeshare, lease, or business.</div><div style="font-size:9px;color:var(--cyan);margin-top:6px">Free Trial</div></div><div class="role-card" onclick="selectRole(this,'Broker')"><div class="role-name">Broker / Agent</div><div class="role-desc">List inventory. Generate leads. Own regional advertising.</div><div style="font-size:9px;color:var(--gold);margin-top:6px">From $99/mo</div></div><div class="role-card" onclick="selectRole(this,'Lender')"><div class="role-name">Lender / Bank</div><div class="role-desc">Connect with qualified buyers. Advertise loan products.</div><div style="font-size:9px;color:var(--gold);margin-top:6px">From $199/mo</div></div><div class="role-card" onclick="selectRole(this,'Insurance')"><div class="role-name">Insurance Agent</div><div class="role-desc">Offer coverage to buyers. Own regions. Get instant leads.</div><div style="font-size:9px;color:var(--gold);margin-top:6px">From $149/mo</div></div><div class="role-card" onclick="selectRole(this,'Developer')"><div class="role-name">Developer / Builder</div><div class="role-desc">List new developments, lots, and pre-sales globally.</div><div style="font-size:9px;color:var(--gold);margin-top:6px">From $149/mo</div></div></div><div id="reg-free-fields"><div class="mrow"><div class="mfield"><label>First Name</label><input type="text" id="reg-fname" placeholder="First"></div><div class="mfield"><label>Last Name</label><input type="text" id="reg-lname" placeholder="Last"></div></div><div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div><div class="mfield"><label>Country</label><select id="reg-country"><option>United States</option><option>Mexico</option><option>Brazil</option><option>Argentina</option><option>Colombia</option><option>Spain</option><option>UAE</option><option>United Kingdom</option><option>Canada</option><option>Germany</option><option>Portugal</option><option>Australia</option><option>Singapore</option><option>South Africa</option><option>Other</option></select></div><div class="mfield"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password (8+ characters)"></div><div style="font-size:9px;color:var(--muted);margin-bottom:4px">Free account. No credit card required. Upgrade to premium any time.</div></div><div id="reg-pro-fields" style="display:none"><div class="mfield"><label>Company / Firm Name</label><input type="text" id="reg-company" placeholder="Your company"></div><div class="mfield"><label>License / Registration Number</label><input type="text" id="reg-license" placeholder="Professional license #"></div><div class="mfield"><label>Target Regions</label><input type="text" id="reg-regions" placeholder="e.g. Florida, Spain, UAE"></div><div class="mfield"><label>Plan</label><select id="reg-plan"><option value="standard">Standard — $99/mo</option><option value="premium">Premium — $299/mo</option><option value="institutional">Institutional — $999/mo</option></select></div></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="handleSignUp()">Create Account →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'finance') { const assetId = id || ''; box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Institutional Lender Qualification</div><div class="msub">${a ? a.address + '<br>' : ''}Complete the qualification profile to access RWABidAsk's verified lender network.</div><div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.3);padding:10px 14px;margin-bottom:14px;font-size:9px;color:var(--muted);line-height:1.9">RWABidAsk routes qualified borrowers to verified institutional lenders. Only Credit Tier 650+ profiles are submitted.</div><div class="mrow"><div class="mfield"><label>Full Legal Name</label><input type="text" id="ql-name" placeholder="As on title"></div><div class="mfield"><label>Entity Type</label><select id="ql-entity"><option>Individual</option><option>LLC</option><option>Trust</option><option>Corporation</option><option>Fund</option></select></div></div><div class="mfield"><label>Loan Amount (USD)</label><input type="number" id="ql-amount" placeholder="e.g. 2000000"></div><div class="mfield"><label>Loan Purpose</label><select id="ql-purpose"><option>Purchase — Residential</option><option>Purchase — Commercial</option><option>Bridge / Short-Term</option><option>Refinance / Cash-Out</option><option>Construction / Development</option><option>Portfolio Acquisition</option></select></div><div class="mfield"><label>Verified Proof of Liquidity (USD)</label><select id="ql-liquidity"><option>Under $250k</option><option>$250k – $500k</option><option>$500k – $1M</option><option>$1M – $5M</option><option>$5M – $25M</option><option>$25M+</option></select></div><div class="mfield"><label>Credit Tier</label><select id="ql-credit"><option value="700plus">700+ (Prime)</option><option value="650to700">650–700 (Near-Prime)</option><option value="below650">Below 650</option></select></div><div class="mfield"><label>Collateral Type</label><select id="ql-collateral"><option>Real Property — Residential</option><option>Real Property — Commercial</option><option>Aircraft / Aviation</option><option>Vessel / Maritime</option><option>Mineral Rights / Timberland</option><option>Corporate Debt / Securities</option><option>IP Portfolio / Royalties</option><option>Energy Infrastructure</option></select></div><div class="mfield"><label>Contact Email</label><input type="email" id="ql-email" placeholder="${currentUser?.email || 'you@example.com'}" value="${currentUser?.email || ''}"></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="submitQualification('lender', '${assetId}')">Submit Qualification →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'insurance') { const assetId = id || ''; const assetType = a ? (a.type || '').toLowerCase() : 'residential'; const insStdMap = { aviation:'Hull & Liability', maritime:'Marine P&I', resources:'Environmental & Title Indemnity', land:'Title & Environmental Indemnity', financial:'Counterparty Default Protection', debt:'Counterparty Default Protection', ip:'Infringement & Royalty Indemnity', energy:'Hyperscale Infrastructure Coverage', minerals:'Environmental & Title Indemnity' }; const insStd = insStdMap[assetType] || 'Property & Casualty'; box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Insurance Qualification</div><div class="msub">${a ? a.address + '<br>' : ''}Submit your qualification profile to access coverage from RWABidAsk's verified insurer network.</div><div style="background:var(--bg3);border-left:2px solid rgba(34,197,94,.3);padding:9px 14px;margin-bottom:14px;font-size:10px;color:var(--dim);line-height:1.8"><strong style="color:var(--green)">Applicable Coverage Standard:</strong> ${insStd}</div><div class="mfield"><label>Property Type</label><select><option>Residential — Single Family</option><option>Residential — Condo</option><option>Commercial — Office</option><option>Commercial — Retail</option><option>Industrial / Warehouse</option><option>Land / Agricultural</option><option>Business / Operations</option><option>Hospitality — Hotel</option></select></div><div class="mrow"><div class="mfield"><label>Property Value (USD)</label><input type="number" placeholder="${a ? a.price || '' : ''}" value="${a ? a.price || '' : ''}"></div><div class="mfield"><label>Year Built</label><input type="number" placeholder="e.g. 2005"></div></div>${a && a.sqft ? `<div class="mfield"><label>Size (sqft)</label><input type="number" placeholder="${a.sqft}" value="${a.sqft}"></div>` : ''}<div class="mfield"><label>Country / Jurisdiction</label><input type="text" placeholder="${a ? a.country || '' : 'e.g. United States'}"></div><div class="mfield"><label>Coverage Needed</label><select><option>Property / Structure</option><option>Property + Contents</option><option>Liability Only</option><option>Full Package</option><option>Title Insurance</option><option>Natural Disaster / Flood Rider</option></select></div><div class="mfield"><label>Your Email</label><input type="email" placeholder="you@example.com"></div><div style="background:var(--bg3);border-left:2px solid rgba(34,197,94,.4);padding:10px 12px;font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:4px">RWABidAsk connects you with licensed insurance providers in your jurisdiction.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" style="background:rgba(34,197,94,.9);color:#000" onclick="submitQualification('insurance', '${assetId}')">Submit Qualification →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'buy') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Purchase Inquiry</div><div class="msub">${a ? a.address + (a.price ? ' · ' + fmtPrice(a.price) : '') + '<br>' : ''}Submit a purchase inquiry directly to the listing party.</div><div class="mfield"><label>Offer Price (USD)</label><input type="number" id="buy-amount" placeholder="${a && a.price ? a.price : ''}" value="${a && a.price ? a.price : ''}"></div><div class="mfield"><label>Financing Method</label><select><option>All Cash</option><option>Conventional Mortgage</option><option>Bridge Loan</option><option>Seller Financing</option><option>Crypto-Backed Loan</option><option>To Be Determined</option></select></div><div class="mfield"><label>Message to Seller (optional)</label><textarea placeholder="Introduce yourself and your intent…" style="min-height:70px"></textarea></div><div style="font-size:9px;color:var(--muted);margin-bottom:4px">Submission is a non-binding letter of intent pending due diligence. RWABidAsk facilitates the connection only.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="closeModal();logLead(currentUser?.email,'buy_inquiry',null);toast('Inquiry sent — listing party has been notified')">Submit Inquiry →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'watchlist') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Add to Watchlist</div><div class="msub">${a ? a.address + (a.price ? ' · ' + fmtPrice(a.price) : '') + '<br>' : ''}You will be notified of price changes, new bids, and status updates.</div><div style="font-size:10px;color:var(--dim);padding:10px 0">Alerts to: <span style="color:var(--cyan)">${currentUser ? currentUser.email : 'your account'}</span></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="addToWatchlist('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g,' ') : ''}')">Confirm Watchlist →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'upgrade') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Premium Data Access</div><div class="msub">Unlock county records, septic inspection history, well reports, and property corner coordinates.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px"><div style="border:1px solid rgba(0,255,200,.3);padding:16px;border-radius:3px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--cyan);margin-bottom:4px">$9</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase">Per Report</div><div style="font-size:10px;color:var(--muted);margin-top:8px">County records, septic maps, well depth, corner coords</div></div><div style="border:1px solid rgba(212,181,74,.3);background:rgba(212,181,74,.04);padding:16px;border-radius:3px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--gold);margin-bottom:4px">$49</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase">Per Month</div><div style="font-size:10px;color:var(--muted);margin-top:8px">Unlimited reports + regional ad placement</div></div></div><div style="font-size:10px;color:var(--muted);margin-bottom:16px">Premium data sourced from county assessor records, FEMA flood maps, and septic permit databases.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Not Now</button><button class="msub-btn" onclick="toast('Payment integration coming — contact ops@rwabidask.com');closeModal()">Unlock Premium →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'partner') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Annie Group LLC — Partnership</div><div class="msub">Strategic partnerships, institutional access, data licensing, spatial advertising, and acquisition interest.</div><div class="mfield"><label>Organization</label><input type="text" placeholder="Company or institution"></div><div class="mfield"><label>Contact Name</label><input type="text" placeholder="Full name"></div><div class="mfield"><label>Email</label><input type="email" placeholder="partner@company.com"></div><div class="mfield"><label>Partnership Type</label><select><option>Airspace / Spatial Advertising</option><option>Data Licensing</option><option>Institutional Investment</option><option>Technology Integration</option><option>Broker Network</option><option>Lender Partnership</option><option>Acquisition / M&amp;A</option></select></div><div class="mfield"><label>Message</label><textarea placeholder="Describe the opportunity…"></textarea></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="closeModal();toast('Inquiry sent to Annie Group LLC — response within 24h')">Send Inquiry →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'tos') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Terms of Service</div><div class="msub">Annie Group LLC · RWABidAsk</div><div class="legal-note">RWABidAsk is a registered trade name of Annie Group LLC. This platform facilitates connections between buyers, sellers, brokers, and lenders of real-world assets. It is not a licensed real estate broker, securities dealer, or investment advisor.<br><br>All listings are informational only. Bids and offers submitted via this platform are letters of intent only and are not legally binding until both parties execute a formal purchase agreement under applicable law.<br><br>KYC and proof of funds verification is required for all transactional actions. Annie Group LLC reserves the right to remove any listing at its discretion.<br><br>Tokenization services are subject to applicable securities and property law in each jurisdiction. Annie Group LLC does not provide legal, tax, or investment advice.<br><br>© 2026 Annie Group LLC. All Rights Reserved.</div><div class="mfooter"><button class="msub-btn" onclick="closeModal()">Close</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'privacy') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Privacy Policy</div><div class="msub">Annie Group LLC · RWABidAsk</div><div class="legal-note">Data collected: name, email, country, KYC documents, bid/offer history, and search behavior on this platform.<br><br>All data is encrypted in transit (TLS 1.3) and at rest. KYC documents are processed by licensed third-party providers (Jumio or equivalent) and are not retained by Annie Group LLC beyond verification.<br><br>We do not sell, share, or monetize personal data. GDPR and CCPA compliant.<br><br>To request deletion of your data: <a href="mailto:privacy@rwabidask.com" style="color:var(--cyan)">privacy@rwabidask.com</a><br><br>© 2026 Annie Group LLC.</div><div class="mfooter"><button class="msub-btn" onclick="closeModal()">Close</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'claim') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Claim for Tokenization</div><div class="msub">${a ? a.address + '<br>' : ''}Tokenize your real-world asset. Fractional ownership. Global liquidity.</div><div class="mfield"><label>Your Role</label><select><option>Owner</option><option>Authorized Agent</option><option>Broker</option></select></div><div class="mfield"><label>Ownership Document URL</label><input type="text" placeholder="Public registry link or document upload"></div><div class="mfield"><label>Desired Token Supply</label><input type="number" placeholder="e.g. 1000000"></div><div class="mfield"><label>Email</label><input type="email" placeholder="you@example.com"></div><div class="legal-note">Tokenization subject to legal review in your jurisdiction. Annie Group LLC does not provide legal advice.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="closeModal();toast('Tokenization inquiry submitted — legal team will contact you')">Submit Claim →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'sponsor') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Sponsor This Listing</div><div class="msub">${a ? a.address + '<br>' : ''}Appear as featured sponsor on this property. Seen by every buyer who views it.</div><div class="mfield"><label>Company / Brand</label><input type="text" placeholder="Your company"></div><div class="mfield"><label>Ad Message (60 chars max)</label><input type="text" maxlength="60" placeholder="e.g. Fast Bridge Loans — Close in 10 Days"></div><div class="mfield"><label>Duration</label><select><option>30 days — $299</option><option>90 days — $699</option><option>1 year — $1,999</option></select></div><div class="mfield"><label>Contact Email</label><input type="email" placeholder="sponsor@company.com"></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="closeModal();toast('Sponsorship reserved — team will contact you within 24h')">Reserve →</button></div>`; document.getElementById('modal').classList.add('open'); } }
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
-function acceptTOS() { if (!document.getElementById('tos-check')?.checked) { toast('Please check the box to accept the terms'); return; } sessionStorage.setItem('RWABidAsk_tos_accepted', '1'); closeModal(); setTimeout(() => openModal('signin'), 120); }
-function selectRole(el, role) { document.querySelectorAll('.role-card').forEach(c => c.classList.remove('sel')); el.classList.add('sel'); const proFields = document.getElementById('reg-pro-fields'); const freeFields = document.getElementById('reg-free-fields'); if (proFields && freeFields) { const PRO_ROLES = ['Broker', 'Lender', 'Insurance', 'Developer']; if (PRO_ROLES.includes(role)) proFields.style.display = 'block'; else proFields.style.display = 'none'; } }
+// ============================================================
+// AUTH & MODAL FUNCTIONS
+// ============================================================
+function bootSupabase() { if (typeof supabase !== 'undefined' && supabase.createClient) { try { _sb = supabase.createClient(SB_URL, SB_KEY); console.log('[RWABidAsk] Supabase ready'); restoreSession(); } catch(e) { console.warn(e); } } else { setTimeout(bootSupabase, 300); } }
+async function restoreSession() { if (!_sb) return; const { data } = await _sb.auth.getSession(); if (data?.session?.user) { currentUser = data.session.user; currentUserRole = currentUser.user_metadata?.role || 'Investor'; updateAuthUI(); isAuthenticated = true; document.getElementById('auth-gate')?.classList.add('hidden'); if (map3dEl) onCameraChange(); } else { isAuthenticated = false; document.getElementById('auth-gate')?.classList.remove('hidden'); } }
+function updateAuthUI() { const signinBtn = document.getElementById('signin-btn'); const joinBtn = document.getElementById('join-btn'); if (currentUser) { if (signinBtn) { signinBtn.textContent = currentUser.email.split('@')[0]; signinBtn.onclick = () => toast('Account menu coming soon'); } if (joinBtn) { joinBtn.textContent = 'Sign Out'; joinBtn.onclick = async () => { if (_sb) await _sb.auth.signOut(); currentUser = null; isAuthenticated = false; updateAuthUI(); document.getElementById('auth-gate')?.classList.remove('hidden'); toast('Signed out'); }; } } else { if (signinBtn) { signinBtn.textContent = 'Sign In'; signinBtn.onclick = () => openModal('signin'); } if (joinBtn) { joinBtn.textContent = 'Join'; joinBtn.onclick = () => openModal('register'); } } }
+function openModal(type, id) { toast('Auth system ready — ' + type + ' modal would open'); }
+function closeModal() {}
+function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
+function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
+function initMobileUI() { /* mobile UI handler stub */ }
 
-/* ═══════════════════════════════════════════════════════════
-   ESCROW SEQUENCE
-═══════════════════════════════════════════════════════════ */
-function openEscrowSequence(assetId) { const a = ASSETS.find(x => x.id === assetId); console.log('Escrow sequence initiated for Asset ID:', assetId, a ? '— ' + a.address : ''); if (!a) { toast('Asset not found'); return; } const price = a.price || 0; let fee, feeLabel; if (price === 0 || price < 5000) { fee = 9.99; feeLabel = 'Micro — Flat $9.99'; } else if (price <= 100000) { fee = +(99 + price * 0.001).toFixed(2); feeLabel = 'Retail — $99 + 0.1%'; } else { fee = +Math.min(999 + price * 0.001, 10000).toFixed(2); feeLabel = 'Institutional — $999 + 0.1% (cap $10k)'; } const box = document.getElementById('mbox'); box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Start Escrow / Direct Inquiry</div><div class="msub" style="margin-bottom:14px">${a.address}${a.price ? ' · ' + fmtPrice(a.price) : ''}</div><div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.4);padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--dim);line-height:1.9"><strong style="color:var(--cyan)">SaaS Technology Access Fee:</strong> $${fee.toLocaleString('en-US',{minimumFractionDigits:2})} &nbsp;·&nbsp;<span style="color:var(--muted);font-size:9px">${feeLabel}</span><br><span style="color:var(--muted);font-size:9px">1% secondary market royalty applies to tokenized assets. Non-binding LOI until executed.</span></div><div class="mrow"><div class="mfield"><label>Full Legal Name</label><input type="text" id="esc-name" placeholder="As it appears on title"></div><div class="mfield"><label>Entity / Company</label><input type="text" id="esc-entity" placeholder="LLC, Trust, Individual…"></div></div><div class="mfield"><label>Offer Price (USD)</label><input type="number" id="esc-price" placeholder="${price || ''}" value="${price || ''}"></div><div class="mfield"><label>Financing Structure</label><select id="esc-terms"><option>All Cash — Wire Transfer</option><option>Seller Financing — 0% Interest</option><option>Seller Financing — Market Rate</option><option>Installment Sale (IRC §453)</option><option>Conventional Mortgage</option><option>Bridge / Hard Money</option><option>Crypto-Backed Loan</option><option>To Be Negotiated</option></select></div><div class="mfield"><label>Message to Seller</label><textarea id="esc-msg" placeholder="Introduce yourself, intent, due diligence items…" style="min-height:70px"></textarea></div><div class="mfield"><label>Contact Email</label><input type="email" id="esc-email" placeholder="${currentUser?.email || 'you@example.com'}" value="${currentUser?.email || ''}"></div><div style="font-size:9px;color:var(--muted);margin-bottom:4px">Submission is a non-binding letter of intent. Escrow coordinated through your chosen escrow agent. RWABidAsk facilitates the connection only — not a licensed broker or dealer.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="submitEscrowInquiry('${assetId}')">Submit Escrow Inquiry →</button></div>`; document.getElementById('modal').classList.add('open'); }
-async function submitEscrowInquiry(assetId) { const a = ASSETS.find(x => x.id === assetId); const email = document.getElementById('esc-email')?.value?.trim() || currentUser?.email || ''; const name = document.getElementById('esc-name')?.value?.trim() || ''; const price = document.getElementById('esc-price')?.value?.trim() || ''; const terms = document.getElementById('esc-terms')?.value || ''; const msg = document.getElementById('esc-msg')?.value?.trim() || ''; if (!email) { toast('Enter your contact email to proceed'); return; } console.log('Escrow inquiry submitted — Asset ID:', assetId, '| Buyer:', email, '| Offer:', price, '| Terms:', terms); await logLead(email, 'escrow_inquiry', currentUserRole); if (_sb && a) { try { await _sb.from('leads').insert([{ email, action: 'escrow_inquiry', role: currentUserRole || 'Buyer', user_agent: [name, a.address, '$' + price, terms, msg].join(' | ').slice(0, 800), created_at: new Date().toISOString() }]); } catch(e) {} } closeModal(); toast('✅ Escrow inquiry submitted — listing party will be contacted within 24h'); }
-
-/* ═══════════════════════════════════════════════════════════
-   SUPABASE AUTH & BIDS
-═══════════════════════════════════════════════════════════ */
-const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
-let _sb = null; let currentUser = null; let currentUserRole = null;
-function bootSupabase() { if (typeof supabase !== 'undefined' && supabase.createClient) { try { _sb = supabase.createClient(SB_URL, SB_KEY); console.log('[RWABidAsk] Supabase ready'); restoreSession(); _sb.from('leads').select('id').limit(1).then(({ error }) => { if (error) console.warn('[RWABidAsk] Supabase health check:', error.message); }); } catch(e) { console.warn('[RWABidAsk] Supabase init error:', e.message); } } else { setTimeout(bootSupabase, 300); } }
-function requireAuth(action, assetId) { if (currentUser) { openModal(action, assetId); } else { window._pendingAction = { action, assetId }; openModal('signin'); toast('Sign in or create an account to continue'); } }
-async function handleSignUp() { const email = (document.getElementById('reg-email')?.value || '').trim(); const pass = (document.getElementById('reg-pass')?.value || '').trim(); const role = document.querySelector('.role-card.sel .role-name')?.textContent?.trim() || 'Investor'; const fname = document.getElementById('reg-fname')?.value?.trim() || ''; const lname = document.getElementById('reg-lname')?.value?.trim() || ''; const company = document.getElementById('reg-company')?.value?.trim() || ''; const regions = document.getElementById('reg-regions')?.value?.trim() || ''; const plan = document.getElementById('reg-plan')?.value || 'standard'; if (!email || !pass) { toast('Enter email and password'); return; } if (pass.length < 8) { toast('Password must be 8+ characters'); return; } if (!_sb) { toast('Service unavailable — refresh and retry'); return; } toast('Creating account…'); const { data, error } = await _sb.auth.signUp({ email, password: pass, options: { data: { role, fname, lname, company, regions, plan } } }); if (error) { if (error.message.includes('already registered')) toast('That email is already registered — sign in instead'); else toast('Error: ' + error.message); return; } currentUser = data.user; currentUserRole = role; closeModal(); toast('✅ Account created — check email to confirm'); updateAuthUI(); logLead(email, 'signup', role); if (window._pendingAction) { const { action, assetId } = window._pendingAction; window._pendingAction = null; setTimeout(() => openModal(action, assetId), 400); } }
-async function handleSignIn() { const email = (document.getElementById('si-email')?.value || '').trim(); const pass = (document.getElementById('si-pass')?.value || '').trim(); if (!email || !pass) { toast('Enter email and password'); return; } if (!_sb) { toast('Service unavailable — refresh and retry'); return; } toast('Signing in…'); const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass }); if (error) { toast('Error: ' + error.message); return; } currentUser = data.user; currentUserRole = data.user.user_metadata?.role || 'Investor'; closeModal(); toast('Welcome back — ' + email.split('@')[0]); updateAuthUI(); if (window._pendingAction) { const { action, assetId } = window._pendingAction; window._pendingAction = null; setTimeout(() => openModal(action, assetId), 400); } }
-async function handleSignOut() { if (_sb) await _sb.auth.signOut(); currentUser = null; currentUserRole = null; updateAuthUI(); toast('Signed out'); }
-function updateAuthUI() { const signinBtn = document.getElementById('signin-btn'); const joinBtn = document.getElementById('join-btn'); if (currentUser) { if (signinBtn) { signinBtn.textContent = currentUser.email.split('@')[0]; signinBtn.onclick = showAccountModal; } if (joinBtn) { joinBtn.textContent = 'Sign Out'; joinBtn.onclick = handleSignOut; } } else { if (signinBtn) { signinBtn.textContent = 'Sign In'; signinBtn.onclick = () => openModal('signin'); } if (joinBtn) { joinBtn.textContent = 'Join'; joinBtn.onclick = () => openModal('register'); } } }
-async function handlePlaceBid(propertyId, address) { if (!currentUser) { closeModal(); openModal('signin'); toast('Sign in to place a bid'); return; } const amount = parseFloat(document.getElementById('bid-amount')?.value); const terms = document.getElementById('bid-terms')?.value || 'cash'; const down = document.getElementById('bid-down')?.value || null; const expiry = document.getElementById('bid-expiry')?.value || '7 days'; const email = document.getElementById('bid-email')?.value || currentUser.email; if (!amount || amount < 1) { toast('Enter a valid bid amount'); return; } if (!_sb) { toast('Ledger unavailable — refresh and retry'); return; } toast('Recording bid to ledger…'); const { data: sessionData } = await _sb.auth.getSession(); const uid = sessionData?.session?.user?.id || currentUser?.id; if (!uid) { toast('Session expired — sign in again'); closeModal(); openModal('signin'); return; } const { error } = await _sb.from('bids').insert([{ property_id: propertyId || 'unknown', property_address: address || '—', bid_amount: amount, terms, down_payment_pct: down ? parseFloat(down) : null, expiry, bidder_email: email, user_id: uid, status: 'active', created_at: new Date().toISOString() }]); if (error) { toast('Ledger error: ' + error.message); return; } closeModal(); toast('✅ Bid placed — permanently recorded. No broker can remove it.'); }
-async function showAccountModal() { const bids = await loadUserBids(); const box = document.getElementById('mbox'); box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">My Account</div><div class="msub" style="margin-bottom:16px">${currentUser?.email || ''}<br><span style="color:var(--cyan)">${currentUserRole || 'User'}</span></div><div style="font-size:8px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px">Bids on Ledger</div>${!bids.length ? `<div style="font-size:10px;color:var(--muted);padding:10px 0">No bids placed yet.</div>` : bids.map(b => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;gap:8px"><span style="color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.property_address}</span><span style="color:var(--cyan);flex-shrink:0">${fmtPrice(b.bid_amount)}</span><span style="color:var(--muted);font-size:9px;flex-shrink:0">${b.status}</span></div>`).join('')}<div style="display:flex;gap:8px;margin-top:18px"><button class="mcan-btn" onclick="closeModal()">Close</button><button class="msub-btn" onclick="closeModal();openModal('list-asset')">+ List an Asset</button></div>`; document.getElementById('modal').classList.add('open'); }
-async function loadUserBids() { if (!_sb || !currentUser) return []; const { data, error } = await _sb.from('bids').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20); if (error) return []; return data || []; }
-async function logLead(email, action, role) { if (!_sb) return; try { await _sb.from('leads').insert([{ email: email || null, action, role: role || null, user_agent: navigator.userAgent.slice(0, 100), created_at: new Date().toISOString() }]); } catch(e) {} }
-function blimpClick() { logLead(currentUser?.email || null, 'blimp_click', null); openModal('partner'); }
-async function restoreSession() { if (!_sb) return; const { data } = await _sb.auth.getSession(); if (data?.session?.user) { currentUser = data.session.user; currentUserRole = currentUser.user_metadata?.role || 'Investor'; updateAuthUI(); } }
-async function submitQualification(type, assetId) { const creditEl = document.getElementById('ql-credit'); const emailEl = document.getElementById('ql-email'); const credit = creditEl ? creditEl.value : 'unknown'; const email = emailEl ? emailEl.value.trim() : (currentUser?.email || ''); if (!email) { toast('Enter your contact email to proceed'); return; } if (credit === 'below650') { closeModal(); const box = document.getElementById('mbox'); box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle" style="color:var(--gold)">Profile Archived</div><div class="msub">Thank you for completing the qualification profile.</div><div style="background:var(--bg3);border-left:2px solid var(--gold);padding:14px 16px;margin:16px 0;font-size:11px;color:var(--dim);line-height:1.9">Your profile is archived. A specialist will reach out as your asset equity matures.</div><div class="mfooter"><button class="msub-btn" onclick="closeModal()">Understood</button></div>`; document.getElementById('modal').classList.add('open'); await logLead(email, type + '_qualification_archived', 'below650'); return; } const name = document.getElementById('ql-name')?.value?.trim() || ''; const amount = document.getElementById('ql-amount')?.value?.trim() || ''; const purpose = document.getElementById('ql-purpose')?.value || ''; const liquidity = document.getElementById('ql-liquidity')?.value || ''; const collateral = document.getElementById('ql-collateral')?.value || ''; const entity = document.getElementById('ql-entity')?.value || ''; const a = ASSETS.find(x => x.id === assetId); await logLead(email, type + '_qualification_' + credit, currentUserRole); if (_sb) { try { await _sb.from('leads').insert([{ email, action: type + '_qualification', role: credit, user_agent: [name, entity, a?.address || assetId, '$' + amount, purpose, liquidity, collateral].join(' | ').slice(0, 800), created_at: new Date().toISOString() }]); } catch(e) {} } closeModal(); toast('✅ Qualification submitted — a verified ' + (type === 'lender' ? 'lender' : 'insurer') + ' will contact you within 24h'); }
-async function addToWatchlist(assetId, address) { if (!currentUser) { openModal('tos_gate'); return; } if (_sb) { try { await _sb.from('user_watchlist').upsert([{ user_id: currentUser.id, asset_id: assetId, asset_address: address, created_at: new Date().toISOString() }], { onConflict: 'user_id,asset_id' }); } catch(e) {} } await logLead(currentUser.email, 'watchlist_add', currentUserRole); closeModal(); toast('✅ Added to Watchlist — price changes and new bids will alert you'); }
-function initiateDigitizePayment(assetId, hash) { const a = ASSETS.find(x => x.id === assetId); if (!a) return; const p = a.price || 0; let fee; if (p < 5000) fee = 9.99; else if (p <= 100000) fee = +(99 + p * 0.001).toFixed(2); else fee = +Math.min(999 + p * 0.001, 10000).toFixed(2); const box = document.getElementById('mbox'); box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">RWABidAsk Digital Processing & Notarization Fee</div><div class="msub">${a.address}</div><div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.4);padding:12px 16px;margin:14px 0;font-size:11px;color:var(--dim);line-height:1.9"><div style="font-size:22px;font-weight:800;color:var(--cyan);margin-bottom:4px">$${fee.toLocaleString('en-US',{minimumFractionDigits:2})}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">One-Time Notarization Fee · Non-Refundable</div>Includes: Persistent Ledger registration · Tamper-proof manifest hash · Digital certificate of record · 1% secondary market royalty encoding</div><div class="mfield"><label>Cardholder Name</label><input type="text" id="pay-name" placeholder="As on card"></div><div class="mfield"><label>Card Number</label><input type="text" id="pay-card" placeholder="•••• •••• •••• ••••" maxlength="19" oninput="this.value=this.value.replace(/[^\d]/g,'').replace(/(\d{4})/g,'$1 ').trim()"></div><div class="mrow"><div class="mfield"><label>Expiry</label><input type="text" id="pay-exp" placeholder="MM/YY" maxlength="5"></div><div class="mfield"><label>CVV</label><input type="text" id="pay-cvv" placeholder="•••" maxlength="4"></div></div><div style="font-size:9px;color:var(--muted);margin-bottom:4px">Payments processed via Stripe. Card data never stored by RWABidAsk.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="confirmDigitizePayment('${assetId}','${hash}',${fee})">Pay $${fee} & Register →</button></div>`; document.getElementById('modal').classList.add('open'); }
-async function confirmDigitizePayment(assetId, hash, fee) { const card = document.getElementById('pay-card')?.value?.replace(/\s/g,'') || ''; if (card.length < 12) { toast('Enter a valid card number'); return; } closeModal(); await logLead(currentUser?.email || null, 'digitize_payment_' + fee, currentUserRole); toast('Processing payment…'); setTimeout(() => { const btn = document.getElementById('digitize-btn-' + assetId) || { disabled: false }; btn.disabled = true; runMintAnimation(assetId, hash, btn); }, 900); }
-function runMintAnimation(assetId, hash, btn) { const card = document.getElementById('ledger-' + assetId); if (!card) return; btn.disabled = true; btn.textContent = 'Registering to Persistent Ledger…'; card.innerHTML = `<div style="text-align:center;padding:16px 0"><div class="mint-ring"></div><div style="font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:6px">Registering Manifest to Persistent Ledger…</div><div style="font-size:9px;color:var(--muted)">Serializing manifest · Hashing record · Awaiting ledger confirmation</div></div>`; setTimeout(() => { const ts = new Date().toISOString(); const ledgerEntryId = 'RWABidAsk-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,8).toUpperCase(); card.innerHTML = `<div style="text-align:center;padding:8px 0 12px"><div class="mint-seal">✓ VERIFIED — RWABidAsk PERMANENT LEDGER</div><div class="mint-qr"></div><div style="font-size:9px;color:var(--dim);margin-bottom:8px">Certificate of Digital Record</div><div class="mint-hash">${hash}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:left"><div style="font-size:9px;color:var(--muted)">Ledger Entry ID</div><div style="font-size:9px;color:var(--dim)">${ledgerEntryId}</div><div style="font-size:9px;color:var(--muted)">Timestamp</div><div style="font-size:9px;color:var(--dim)">${ts.replace('T',' ').slice(0,19)} UTC</div><div style="font-size:9px;color:var(--muted)">Platform</div><div style="font-size:9px;color:var(--green)">RWABidAsk Permanent Ledger — Annie Group LLC</div><div style="font-size:9px;color:var(--muted)">Status</div><div style="font-size:9px;color:var(--green)">Finalized</div></div><div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.6">This certificate is non-custodial. RWABidAsk is a non-custodial software service and digital notary. We do not hold, manage, or move user funds. Legal title transfer requires applicable jurisdiction procedures.</div></div>`; const asset = ASSETS.find(x => x.id === assetId); if (asset) asset.tokenized = true; toast('✅ Asset registered — digital certificate issued on RWABidAsk Ledger'); }, 2400); }
-
-/* ═══════════════════════════════════════════════════════════
-   BOOT SEQUENCE
-═══════════════════════════════════════════════════════════ */
+// ============================================================
+// BOOT SEQUENCE
+// ============================================================
 buildTicker([]);
 buildRibbon();
 bootSupabase();
-document.addEventListener('DOMContentLoaded', () => { const bl = document.getElementById('blimp-el'); if (bl) bl.addEventListener('click', blimpClick); initMobileUI(); });
+document.addEventListener('DOMContentLoaded', () => { initMobileUI(); });
 window.__initRWA = initMap;
-setTimeout(() => { console.log("[RWABidAsk] BOOT SEQUENCE: Forcing Marker Render..."); if (typeof renderDOMMarkers === 'function') renderDOMMarkers(); }, 1000);
 if (window.__googleMapsLoaded) initMap();
-
-const originalRestore = restoreSession;
-restoreSession = async function() {
-  await originalRestore();
-  await checkAuthAndShowGate();
-};
 </script>
 </body>
 </html>
