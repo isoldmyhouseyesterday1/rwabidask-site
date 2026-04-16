@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>RWABidAsk — Global Asset Market | Institutional Digitization Platform</title>
-<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, energy infrastructure, IP, minerals, and aviation on the Persistent Ledger.">
+<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy,  infrastructure, IP, minerals, aviation and maritime transport on the Persistent Ledger.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1849,14 +1849,13 @@ function isPhysicalAsset(type) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CONFIG & SEED DATA (Compressed for length)
+   CONFIG & SEED DATA
 ═══════════════════════════════════════════════════════════ */
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0';
 let ASSETS = [];
 let SEARCH_RESULTS = [];
 let SEARCH_ACTIVE = false;
 
-// Seed assets (condensed for brevity — full seed data in Part 2)
 const SEED_ASSETS = [
   { id:'sea-001', address:'2450 Eastlake Ave E', city:'Seattle', country:'USA', lat:47.6423, lng:-122.3256, price:1850000, type:'residential', sqft:3200, status:'For Sale', source:'NWMLS', days:14, structures:[{label:'Main House',sqft:2800,beds:4,baths:3,built:2003}], infrastructure:{roof:'Composition',hvac:'Forced Air'}, land:{acres:0.12}, financials:{tax_annual:14200}, bids:[], broker_active:true, tokenized:false },
   { id:'sea-002', address:'1411 2nd Ave, Unit 2401', city:'Seattle', country:'USA', lat:47.6079, lng:-122.3370, price:3200000, type:'residential', sqft:2100, status:'For Sale', source:'NWMLS', days:6, structures:[{label:'Luxury Condo',sqft:2100,beds:3,baths:2.5,built:2018}], infrastructure:{}, land:{}, financials:{tax_annual:22400,hoa:1800}, bids:[{amount:3100000,terms:'Cash',expiry:'24 hours'}], broker_active:true, tokenized:false },
@@ -2069,15 +2068,6 @@ function renderDetail(a) {
   document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div>${rr('Asset ID', '#' + a.id)}${rr('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}${rr('KYC Required', 'Yes — to bid or buy')}</div></div>`;
 }
 function rr(k, v) { return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`; }
-function syncMarkerVisibility() {
-  if (!markersVisible()) { Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; }); return; }
-  const visibleAssets = getVisibleAssetsInViewport(ASSETS);
-  const visibleIds = new Set(visibleAssets.map(a => a.id));
-  Object.entries(domMarkers).forEach(([id, { el, asset }]) => {
-    const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
-    el.style.display = shouldBeVisible ? 'flex' : 'none';
-  });
-}
 
 /* ═══════════════════════════════════════════════════════════
    SEARCH ENGINE — Real-time filtering by Address, City, Type
@@ -2201,6 +2191,7 @@ function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn);
 
 /* ═══════════════════════════════════════════════════════════
    DOM MARKERS — LOCKED TO COORDINATES (Matrix Projection)
+   REGIONAL VIEWPORT CLIPPING: Only markers in visible viewport + range < 3,000,000
 ═══════════════════════════════════════════════════════════ */
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
@@ -2216,6 +2207,7 @@ function onCameraChange() {
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       if (isZoomedIn) {
+        // Get assets visible in current 3D viewport (frustum culling)
         const visibleAssets = getVisibleAssetsInViewport(ASSETS);
         const visibleIds = new Set(visibleAssets.map(a => a.id));
         Object.keys(domMarkers).forEach(id => {
@@ -2226,6 +2218,7 @@ function onCameraChange() {
         });
         reprojectMarkersWithMatrix();
       } else {
+        // Hide all markers when zoomed out beyond 3,000km
         Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
       }
       const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
@@ -2234,20 +2227,46 @@ function onCameraChange() {
     finally { isCameraProcessing = false; }
   }, 150);
 }
+
 function getVisibleAssetsInViewport(assets) {
-  if (!map3dEl) return assets;
+  if (!map3dEl) return [];
   try {
     const center = map3dEl.center || { lat: 20, lng: 10 };
     const range = map3dEl.range || 22000000;
-    const degSpread = Math.min(180, (range / 111000) * 1.6);
+    const heading = map3dEl.heading || 0;
+    const tilt = map3dEl.tilt || 0;
+    
+    // Convert range to degrees (rough approximation for bounding box)
+    const degSpread = Math.min(180, (range / 111000) * 1.4);
     const latMin = center.lat - degSpread;
     const latMax = center.lat + degSpread;
-    const lngSpread = degSpread / Math.max(0.1, Math.cos(center.lat * Math.PI / 180));
+    const lngSpread = degSpread / Math.max(0.2, Math.cos(center.lat * Math.PI / 180));
     const lngMin = center.lng - lngSpread;
     const lngMax = center.lng + lngSpread;
-    return assets.filter(a => a.lat >= latMin && a.lat <= latMax && a.lng >= lngMin && a.lng <= lngMax);
-  } catch(e) { return assets; }
+    
+    // First filter by bounding box
+    const bboxFiltered = assets.filter(a => 
+      a.lat >= latMin && a.lat <= latMax &&
+      a.lng >= lngMin && a.lng <= lngMax
+    );
+    
+    // Additional frustum culling: filter out markers behind the globe
+    // For markers on the back face, their screen projection would be behind the camera
+    // We use a simple dot product test with the camera's view direction
+    const camLatRad = center.lat * Math.PI / 180;
+    const camLngRad = center.lng * Math.PI / 180;
+    const viewDir = { x: Math.cos(camLatRad) * Math.cos(camLngRad), y: Math.sin(camLatRad), z: Math.cos(camLatRad) * Math.sin(camLngRad) };
+    
+    return bboxFiltered.filter(a => {
+      const assetLatRad = a.lat * Math.PI / 180;
+      const assetLngRad = a.lng * Math.PI / 180;
+      const assetVec = { x: Math.cos(assetLatRad) * Math.cos(assetLngRad), y: Math.sin(assetLatRad), z: Math.cos(assetLatRad) * Math.sin(assetLngRad) };
+      const dot = viewDir.x * assetVec.x + viewDir.y * assetVec.y + viewDir.z * assetVec.z;
+      return dot > -0.2; // Only show front-facing hemisphere + small back-face buffer
+    });
+  } catch(e) { return assets.slice(0, 100); }
 }
+
 function markersVisible() { return !!(map3dEl) && (map3dEl.range || 22e6) <= MARKER_VISIBLE_RANGE; }
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
@@ -2335,6 +2354,17 @@ function reprojectMarkersWithMatrix() {
   Object.values(domMarkers).forEach(({ el, asset }) => { projectMarkerLegacy(asset, el); });
 }
 function reprojectMarkers() { reprojectMarkersWithMatrix(); }
+
+function syncMarkerVisibility() {
+  if (!markersVisible()) { Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; }); return; }
+  const visibleAssets = getVisibleAssetsInViewport(ASSETS);
+  const visibleIds = new Set(visibleAssets.map(a => a.id));
+  Object.entries(domMarkers).forEach(([id, { el, asset }]) => {
+    const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
+    el.style.display = shouldBeVisible ? 'flex' : 'none';
+  });
+}
+
 /* ═══════════════════════════════════════════════════════════
    INSTITUTIONAL ASSET DRAWER (Desktop)
 ═══════════════════════════════════════════════════════════ */
