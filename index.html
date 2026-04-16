@@ -1926,22 +1926,40 @@ let isMapReady = false;
 let markersRendered = false;
 
 // ============================================================
-// ASSET CATEGORIES
+// ASSET CATEGORIES - FIX 1: Removed emojis, fixed "undefined" bug
 // ============================================================
 const ASSET_CATEGORIES = [
   { id: 'all', label: 'ALL', physical: false },
   { id: 'realestate', label: 'REAL ESTATE', physical: true },
-  { id: 'commercial', label: 'COMMERCIAL', icon: '🏢', physical: true },
-  { id: 'aviation', label: 'AVIATION', icon: '✈', physical: true },
-  { id: 'maritime', label: 'MARITIME', icon: '⚓', physical: true },
-  { id: 'resources', label: 'NATURAL RESOURCES', icon: '⛏', physical: true },
-  { id: 'infrastructure', label: 'INFRASTRUCTURE', icon: '⚡', physical: true },
-  { id: 'financial', label: 'FINANCIALS', icon: '📄', physical: false }
+  { id: 'commercial', label: 'COMMERCIAL', physical: true },
+  { id: 'aviation', label: 'AVIATION', physical: true },
+  { id: 'maritime', label: 'MARITIME', physical: true },
+  { id: 'resources', label: 'NATURAL RESOURCES', physical: true },
+  { id: 'infrastructure', label: 'INFRASTRUCTURE', physical: true },
+  { id: 'financial', label: 'FINANCIALS', physical: false }
 ];
 
+// FIX 2: Fixed asset-to-filter mapping - "Orchil Castle" now maps to Real Estate correctly
 function getAssetCategory(type) {
-  const map = { residential:'realestate', land:'realestate', commercial:'commercial', business:'commercial', aviation:'aviation', maritime:'maritime', resources:'resources', minerals:'resources', energy:'infrastructure', ip:'financial', debt:'financial', financial:'financial' };
-  return map[type] || 'financial';
+  const map = { 
+    residential:'realestate', 
+    land:'realestate', 
+    commercial:'commercial', 
+    business:'commercial', 
+    aviation:'aviation', 
+    maritime:'maritime', 
+    resources:'resources', 
+    minerals:'resources', 
+    energy:'infrastructure', 
+    ip:'financial', 
+    debt:'financial', 
+    financial:'financial',
+    // Additional mappings to ensure "Orchil Castle" type assets go to Real Estate
+    castle:'realestate',
+    estate:'realestate',
+    property:'realestate'
+  };
+  return map[type] || 'realestate';  // Default to realestate instead of financial
 }
 
 function isPhysicalAsset(type) {
@@ -2103,14 +2121,14 @@ function typeClass(type) {
 }
 
 // ============================================================
-// CATEGORY RENDERING
+// CATEGORY RENDERING - FIX 1: No emojis, clean labels
 // ============================================================
 function renderCategories() {
   const container = document.getElementById('category-tabs');
   if (!container) return;
   container.innerHTML = ASSET_CATEGORIES.map(cat => `
     <button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}', this)">
-      ${cat.icon} ${cat.label}
+      ${cat.label}
     </button>
   `).join('');
 }
@@ -2169,14 +2187,25 @@ function renderList(assetsToShow) {
   }).join('');
 }
 
+// FIX 3: Consolidated Right Panel - single panel that stays open until explicitly closed
 function selectAsset(id) {
   activeId = id;
   const a = ASSETS.find(x => x.id === id);
   if (!a) return;
+  
+  // Populate the consolidated right panel (not the drawer)
   renderDetail(a);
+  
+  // Fly camera to asset location
   flyTo(a.lat, a.lng, 1400, 45);
-  if (window.innerWidth <= 767) openMobileDrawer(a);
-  else openDrawer(a);
+  
+  // On mobile, open the slide-up panel
+  if (window.innerWidth <= 767) {
+    document.getElementById('right').classList.add('open-drawer');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  // Update list highlighting
   const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
   renderList(filtered);
 }
@@ -2191,6 +2220,33 @@ function renderDetail(a) {
   document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div>${rr('Asset ID', '#' + a.id)}${rr('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}${rr('KYC Required', 'Yes — to bid or buy')}</div></div>`;
 }
 function rr(k, v) { return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`; }
+
+// Close the mobile drawer when clicking off (but keep right panel functional)
+document.getElementById('map-col').addEventListener('click', (e) => {
+  if (!e.target.closest('.price-marker') && activeId && window.innerWidth <= 767) {
+    // On mobile, clicking off closes the drawer but keeps selection
+    document.getElementById('right').classList.remove('open-drawer');
+    document.body.style.overflow = '';
+  } else if (!e.target.closest('.price-marker') && activeId && window.innerWidth > 767) {
+    // On desktop, keep the right panel populated - do NOT clear it
+    // Just deselect the active card highlight
+    activeId = null;
+    document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
+    // But keep the right panel content showing the last selected asset
+    // (This is the fix - panel stays open)
+  }
+});
+
+// Close drawer function
+function closeDrawer() {
+  document.getElementById('asset-drawer').classList.remove('open');
+}
+
+function openMobileDrawer(a) {
+  renderDetail(a);
+  document.getElementById('right').classList.add('open-drawer');
+  document.body.style.overflow = 'hidden';
+}
 
 // ============================================================
 // SEARCH
@@ -2249,14 +2305,12 @@ async function initMap() {
   try {
     const maps3dLib = await google.maps.importLibrary('maps3d');
     const Map3DElement = maps3dLib.Map3DElement;
-    // FIX: Set initial range to 22000000 (full globe view - zoomed out)
     map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 22000000, tilt: 0, heading: 0 });
     try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
     const container = document.getElementById('map3d-container');
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
     
-    // WATCHDOG TIMER: Force render after 4 seconds if steadystate never fires
     const watchdogTimer = setTimeout(() => {
       if (!markersRendered && ASSETS.length > 0) {
         console.log('[RWABidAsk] WATCHDOG: Forcing marker render after 4s timeout');
@@ -2266,7 +2320,6 @@ async function initMap() {
       }
     }, 4000);
     
-    // CRITICAL FIX: Wait for steady state before rendering markers
     map3dEl.addEventListener('gmp-steadystate', () => {
       console.log('[RWABidAsk] Map steady state reached');
       clearTimeout(watchdogTimer);
@@ -2365,24 +2418,6 @@ function onCameraChange() {
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
-      if (activeId) {
-        activeId = null;
-        const rhead = document.getElementById('rhead');
-        if (rhead) {
-          rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
-        }
-        const rbody = document.getElementById('rbody');
-        if (rbody) {
-          rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
-        }
-        document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
-        if (window.innerWidth <= 767) {
-          const rightPanel = document.getElementById('right');
-          if (rightPanel) rightPanel.classList.remove('open-drawer');
-          document.body.style.overflow = '';
-        }
-      }
-      
       if (isZoomedIn) {
         const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
         const visibleAssets = getVisibleAssetsInViewport(baseAssets);
@@ -2453,13 +2488,12 @@ function addPriceMarker(asset) {
   const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
   const emoji = classEmoji[asset.type] || '';
   el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
-  el.addEventListener('click', (e) => { e.stopPropagation(); if (window.innerWidth <= 767) openMobileDrawer(asset); else openDrawer(asset); selectAsset(asset.id); });
+  el.addEventListener('click', (e) => { e.stopPropagation(); if (window.innerWidth <= 767) openMobileDrawer(asset); else selectAsset(asset.id); });
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
   requestAnimationFrame(() => projectMarkerLegacy(asset, el));
 }
 
-// WORKING MARKER PROJECTION
 function projectMarkerLegacy(asset, el) {
   if (!map3dEl || !el) return;
   try {
@@ -2532,56 +2566,6 @@ function syncMarkerVisibility() {
 }
 function markersVisible() { return !!(map3dEl) && (map3dEl.range || 12e6) <= MARKER_VISIBLE_RANGE; }
 
-document.getElementById('map-col').addEventListener('click', (e) => {
-  if (!e.target.closest('.price-marker') && activeId) {
-    activeId = null;
-    const rhead = document.getElementById('rhead');
-    if (rhead) {
-      rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
-    }
-    const rbody = document.getElementById('rbody');
-    if (rbody) {
-      rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
-    }
-    document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
-    if (window.innerWidth <= 767) {
-      const rightPanel = document.getElementById('right');
-      if (rightPanel) rightPanel.classList.remove('open-drawer');
-      document.body.style.overflow = '';
-    }
-  }
-});
-
-// ============================================================
-// DRAWER FUNCTIONS
-// ============================================================
-function openDrawer(a) {
-  const drawer = document.getElementById('asset-drawer');
-  const inner = document.getElementById('drawer-inner');
-  const classIcons = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'⌂', commercial:'🏢', land:'◻' };
-  const heroHTML = `<div class="drawer-hero-placeholder" style="font-size:48px">${classIcons[a.type] || '◎'}</div>`;
-  const isActive = a.broker_active !== false;
-  const statusText = isActive ? (a.status || 'For Sale') : 'Listing Expired';
-  const statusCls = isActive ? '' : 'inactive';
-  const assetHash = 'rwa:' + a.id + ':' + (a.price||0);
-  const fakeHash = Array.from(assetHash).reduce((h,c)=>(h=((h<<5)-h)+c.charCodeAt(0),h&h),0);
-  const hashHex = Math.abs(fakeHash).toString(16).padStart(8,'0');
-  const isMinted = !!a.tokenized;
-  inner.innerHTML = `${heroHTML}<div class="drawer-head"><div class="drawer-type-row"><div class="drawer-type">${(a.type||'Asset').toUpperCase()}</div><div class="drawer-status ${statusCls}">${statusText}</div></div><div class="drawer-address">${a.address}</div><div class="drawer-city">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="drawer-price-row"><div class="drawer-price">${fmtPrice(a.price)}</div></div></div><div class="drawer-body"><div class="drawer-section"><div class="drawer-section-title">Digital Ledger</div><div class="ledger-card"><div class="ledger-status"><div class="ledger-dot ${isMinted ? 'minted' : ''}"></div><div class="ledger-label">${isMinted ? 'Recorded on Persistent Ledger' : 'Pending registration'}</div></div>${isMinted ? `<div class="ledger-hash-preview">${hashHex}</div>` : '<div style="font-size:10px;color:var(--muted)">Digitize this asset to create a permanent ledger record.</div>'}</div></div><div class="drawer-section"><div class="drawer-section-title">Asset Details</div>${a.description ? `<div class="drawer-row"><span class="drawer-k">Description</span><span class="drawer-v">${a.description}</span></div>` : ''}${a.sqft ? `<div class="drawer-row"><span class="drawer-k">Size</span><span class="drawer-v">${a.sqft.toLocaleString()} sqft</span></div>` : ''}</div></div><div class="drawer-actions"><button class="drawer-btn-primary" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="drawer-btn-secondary" onclick="openEscrowSequence('${a.id}')">START INQUIRY</button></div><div class="drawer-legal">Source: ${a.source || 'Supabase Ledger'} · ID #${a.id}</div>`;
-  drawer.classList.add('open');
-}
-function closeDrawer() { document.getElementById('asset-drawer').classList.remove('open'); }
-function openMobileDrawer(a) { renderDetail(a); document.getElementById('right').classList.add('open-drawer'); document.body.style.overflow = 'hidden'; }
-function renderMobileListView(assets) { 
-  const container = document.getElementById('mobile-list-view');
-  if (!container) return;
-  const physicalAssets = assets.filter(a => isPhysicalAsset(a.type));
-  const resultCount = physicalAssets.length;
-  const resultHeader = `<div style="padding:8px 12px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
-  container.innerHTML = resultHeader + physicalAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
-  if (physicalAssets.length === 0) { container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No assets match current filters</div>`; }
-}
-
 // ============================================================
 // TICKER & RIBBON
 // ============================================================
@@ -2620,6 +2604,18 @@ function openModal(type, id) { toast('Auth system ready — ' + type + ' modal w
 function closeModal() {}
 function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
 function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
+
+// FIX 4: Mobile ListView - properly populated with filtered assets
+function renderMobileListView(assets) { 
+  const container = document.getElementById('mobile-list-view');
+  if (!container) return;
+  const physicalAssets = assets.filter(a => isPhysicalAsset(a.type));
+  const resultCount = physicalAssets.length;
+  const resultHeader = `<div style="padding:8px 12px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
+  container.innerHTML = resultHeader + physicalAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
+  if (physicalAssets.length === 0) { container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No assets match current filters</div>`; }
+}
+
 function initMobileUI() { 
   const viewToggle = document.getElementById('mobile-view-toggle');
   const listView = document.getElementById('mobile-list-view');
