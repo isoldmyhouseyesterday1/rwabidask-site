@@ -3146,15 +3146,18 @@ function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   layer.innerHTML = '';
   domMarkers = {};
+  
   // Anchor assets always visible — render first regardless of zoom level
   ANCHOR_ASSETS.forEach(a => _addPriceMarker(a));
+  
   // Non-anchor markers only when zoomed in enough
   if (markersVisible()) {
     const nonAnchors = ASSETS.filter(a => !a.anchor);
     viewportVisible(nonAnchors).forEach(a => _addPriceMarker(a));
   }
-  
-  // 1. Create a timer variable at the top of this block
+} // <--- THIS IS THE BRACKET THAT WAS MISSING
+
+// 1. Create a timer variable at the top of this block
 let cameraTimer;
 
 // 2. Wrap the event listeners in a Debounce function
@@ -4989,38 +4992,30 @@ async function confirmDigitizePayment(assetId, hash, fee) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   BOOT
+   RWABidAsk — BOOT SEQUENCE
 ═══════════════════════════════════════════════════════════ */
 buildTicker([]);
 buildRibbon();
 bootSupabase();
 
-// Wire blimp
+// Wire blimp controls
 document.addEventListener('DOMContentLoaded', () => {
   const bl = document.getElementById('blimp-el');
   if (bl) bl.addEventListener('click', blimpClick);
 });
 
-/* ═══════════════════════════════════════════════════════════
-   BOOT
-═══════════════════════════════════════════════════════════ */
-buildTicker([]);
-buildRibbon();
-bootSupabase();
-
-// Wire blimp
-document.addEventListener('DOMContentLoaded', () => {
-  const bl = document.getElementById('blimp-el');
-  if (bl) bl.addEventListener('click', blimpClick);
-});
-
-// Google Maps boot
+// Google Maps "Handshake" — This starts the 3D Engine
 window.__initRWA = initMap;
 
-// Manually trigger the first render
+// Manually trigger the first render so the map isn't empty on start
 setTimeout(() => { 
   if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); 
 }, 500);
+
+// Fallback for immediate initialization
+if (window.__googleMapsLoaded) {
+  initMap();
+}
 
 </script>
 </body>
