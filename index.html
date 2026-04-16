@@ -2,761 +2,4061 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RWABidAsk — Global Property Exchange</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>RWABidAsk — Global Real-World Asset Market</title>
+<meta name="description" content="The world's first open-market global bid-ask platform for real estate, businesses, and land. No brokers. Direct bid, ask, and buy.">
+
+<!-- ── FONTS ── -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ── SUPABASE ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ── GOOGLE MAPS (alpha — Map3DElement requires this version) ── -->
+<script>
+  window.__mapReady = function() { window.__googleMapsLoaded = true; window.__initRWA && window.__initRWA(); };
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady" async defer></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Suppress Google Maps alpha/beta development banner */
+  .dismissButton, [class*="dismissButton"],
+  div[style*="z-index: 1000000"], div[style*="z-index:1000000"],
+  .gm-style-pbc, .gm-err-container { display: none !important; }
+</style>
+
+<style>
+/* ══════════════════════════════════════════════
+   AUTOCOMPLETE SKIN
+══════════════════════════════════════════════ */
+.pac-container {
+  z-index: 99999 !important;
+  background: #232d4e;
+  border: 1px solid rgba(0,255,200,.25);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.pac-item {
+  color: #a8b0c8;
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: .3px;
+  transition: background .12s;
+}
+.pac-item:hover, .pac-item-selected {
+  background: rgba(0,255,200,.06);
+  color: #e5e7eb;
+}
+.pac-item-query { color: #e5e7eb; font-size: 12px; }
+.pac-matched { color: #00ffc8; }
+.pac-icon { display: none; }
+
+/* ══════════════════════════════════════════════
+   RESET & ROOT
+══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0c0e12;
-  --surface: #13161c;
-  --surface2: #1a1e26;
-  --border: rgba(255,255,255,0.06);
-  --border-strong: rgba(255,255,255,0.12);
-  --text: #e2e6ed;
-  --text-muted: #6b7280;
-  --text-dim: #9ca3af;
-  --accent: #10b981;
-  --accent-dim: rgba(16,185,129,0.12);
-  --blue: #3b82f6;
-  --blue-dim: rgba(59,130,246,0.12);
-  --amber: #f59e0b;
-  --amber-dim: rgba(245,158,11,0.12);
-  --red: #ef4444;
-  --red-dim: rgba(239,68,68,0.12);
-  --orange: #f97316;
-  --orange-dim: rgba(249,115,22,0.12);
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', sans-serif;
+  --bg:       #1c2540;
+  --bg1:      #232d4e;
+  --bg2:      #2a3560;
+  --bg3:      #303d6e;
+  --bg4:      #38477c;
+  --border:   rgba(255,255,255,.14);
+  --border2:  rgba(255,255,255,.24);
+  --border3:  rgba(255,255,255,.38);
+  --text:     #f0f4ff;
+  --muted:    #8fa0c8;
+  --dim:      #c8d4f0;
+  --cyan:     #00ffc8;
+  --cyan-dim: rgba(0,255,200,.14);
+  --cyan-glow:rgba(0,255,200,.4);
+  --silver:   #dde4f5;
+  --gold:     #e2c55a;
+  --red:      #ff6b6b;
+  --blue:     #6ba8ff;
+  --green:    #3ee688;
+  --font: 'Inter', system-ui, sans-serif;
+  /* keep these for any legacy references */
+  --mono: 'Inter', system-ui, sans-serif;
+  --sans: 'Inter', system-ui, sans-serif;
 }
 
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); }
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
-/* Layout */
-#app { display: grid; grid-template-columns: 300px 1fr 320px; grid-template-rows: 48px 1fr; height: 100vh; }
+/* ══════════════════════════════════════════════
+   SHELL LAYOUT
+══════════════════════════════════════════════ */
+#shell {
+  display: grid;
+  grid-template-rows: 24px 54px 1fr 30px 26px;
+  height: 100vh;
+  min-height: 0;
+}
+#main-row {
+  display: grid;
+  grid-template-columns: 288px 1fr 320px;
+  min-height: 0;
+  overflow: hidden;
+}
 
-/* Topbar */
+/* ══════════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════════ */
 #topbar {
-  grid-column: 1/-1;
-  background: var(--surface);
+  background: var(--bg1);
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  padding: 0;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 600;
 }
+
+/* Logo */
 .logo {
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 20px; height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  height: 100%;
   border-right: 1px solid var(--border);
-  font-family: var(--mono); font-size: 13px; font-weight: 500;
-  color: var(--accent); letter-spacing: -0.3px; white-space: nowrap;
-}
-.logo-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
-.search-wrap {
-  flex: 1; display: flex; align-items: center; gap: 8px;
-  padding: 0 16px; height: 100%;
-  border-right: 1px solid var(--border);
-}
-.search-wrap svg { flex-shrink: 0; color: var(--text-muted); }
-#search-input {
-  flex: 1; background: none; border: none; outline: none;
-  color: var(--text); font-family: var(--sans); font-size: 13px;
-}
-#search-input::placeholder { color: var(--text-muted); }
-.topbar-stats { display: flex; height: 100%; }
-.ts {
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 0 16px; border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  text-decoration: none;
   cursor: default;
 }
-.ts-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-.ts-val { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--text); }
-.ts-val.green { color: var(--accent); }
-.topbar-actions { display: flex; align-items: center; gap: 8px; padding: 0 14px; margin-left: auto; }
-.btn-primary {
-  background: var(--accent); color: #000; border: none; cursor: pointer;
-  font-family: var(--sans); font-size: 12px; font-weight: 600;
-  padding: 7px 14px; border-radius: 4px; transition: opacity .15s;
+.logo-mark {
+  width: 8px; height: 8px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--cyan), 0 0 22px rgba(0,255,200,.4);
+  animation: pulse-logo 3s ease-in-out infinite;
 }
-.btn-primary:hover { opacity: .85; }
-.btn-ghost {
-  background: none; color: var(--text-dim); border: 1px solid var(--border-strong);
-  cursor: pointer; font-family: var(--sans); font-size: 12px;
-  padding: 6px 12px; border-radius: 4px; transition: all .15s;
+@keyframes pulse-logo {
+  0%, 100% { box-shadow: 0 0 10px var(--cyan), 0 0 22px rgba(0,255,200,.4); }
+  50%       { box-shadow: 0 0 16px var(--cyan), 0 0 36px rgba(0,255,200,.6); }
 }
-.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,.25); }
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .3px;
+}
+.logo-tag {
+  font-size: 8px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  font-weight: 500;
+}
 
-/* Left panel */
+/* Search */
+.search-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  position: relative;
+  border-right: 1px solid var(--border);
+  min-width: 0;
+}
+#search-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 13px;
+  padding: 0 18px;
+}
+#search-input::placeholder { color: var(--muted); }
+.search-icon {
+  position: absolute;
+  right: 0;
+  top: 0; bottom: 0;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-left: 1px solid var(--border);
+  color: var(--dim);
+  transition: all .15s;
+  background: none;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+}
+.search-icon svg { display: block; }
+.search-icon:hover { color: var(--cyan); background: var(--cyan-dim); }
+
+/* Topbar right */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.tstat {
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid var(--border);
+  cursor: default;
+}
+.tstat-l {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--dim);
+  margin-bottom: 2px;
+}
+.tstat-v {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--silver);
+}
+.tstat-v.live { color: var(--cyan); }
+.tbtn {
+  height: 100%;
+  padding: 0 16px;
+  background: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  color: var(--silver);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.tbtn:hover { color: var(--text); background: rgba(255,255,255,.05); }
+.tbtn.primary {
+  background: var(--cyan);
+  color: #000;
+  font-weight: 700;
+  border-left-color: var(--cyan);
+}
+.tbtn.primary:hover { background: #00e6b4; }
+
+/* ══════════════════════════════════════════════
+   LEFT PANEL
+══════════════════════════════════════════════ */
 #left {
-  background: var(--surface); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg1);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 }
-.panel-head {
-  padding: 12px 14px 0;
+.left-head {
+  padding: 14px 16px 0;
+  flex-shrink: 0;
+}
+.left-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--silver);
+  margin-bottom: 12px;
+}
+.ptabs {
+  display: flex;
   border-bottom: 1px solid var(--border);
 }
-.panel-tabs { display: flex; gap: 0; margin-bottom: -1px; }
-.tab {
-  padding: 8px 10px; font-size: 11px; font-weight: 500; cursor: pointer;
-  color: var(--text-muted); border-bottom: 2px solid transparent;
-  transition: all .15s; white-space: nowrap;
+.ptab {
+  flex: 1;
+  padding: 8px 4px;
+  text-align: center;
+  font-family: var(--font);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
 }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.tab:hover:not(.active) { color: var(--text-dim); }
-.filter-bar {
-  display: flex; gap: 6px; padding: 10px 14px;
+.ptab.on { color: var(--cyan); border-bottom-color: var(--cyan); font-weight: 700; }
+.ptab:hover:not(.on) { color: var(--silver); }
+
+.frow {
+  display: flex;
+  gap: 5px;
+  padding: 9px 14px;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
   overflow-x: auto;
 }
-.filter-bar::-webkit-scrollbar { display: none; }
-.chip {
-  padding: 3px 10px; font-size: 11px; font-weight: 500; cursor: pointer;
-  border: 1px solid var(--border-strong); border-radius: 20px; color: var(--text-muted);
-  background: none; font-family: var(--sans); white-space: nowrap; transition: all .15s;
+.frow::-webkit-scrollbar { display: none; }
+.fchip {
+  padding: 3px 9px;
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--dim);
+  border: 1px solid var(--border2);
+  background: none;
+  cursor: pointer;
+  border-radius: 2px;
+  white-space: nowrap;
+  transition: all .15s;
+  letter-spacing: .3px;
 }
-.chip.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-.chip:hover:not(.active) { color: var(--text-dim); border-color: rgba(255,255,255,.2); }
-
-.listings { flex: 1; overflow-y: auto; }
-.listings::-webkit-scrollbar { width: 3px; }
-.listings::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
-
-.card {
-  padding: 13px 14px; border-bottom: 1px solid var(--border);
-  cursor: pointer; transition: background .1s; position: relative;
+.fchip.on {
+  border-color: rgba(0,255,200,.45);
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  font-weight: 600;
 }
-.card:hover { background: rgba(255,255,255,.02); }
-.card.active { background: rgba(16,185,129,.04); border-left: 2px solid var(--accent); padding-left: 12px; }
-.card-badge {
-  display: inline-block; font-size: 9px; font-weight: 600; letter-spacing: .8px;
-  text-transform: uppercase; padding: 2px 7px; border-radius: 3px; margin-bottom: 6px;
-}
-.badge-residential { background: var(--blue-dim); color: var(--blue); }
-.badge-commercial { background: var(--amber-dim); color: var(--amber); }
-.badge-land { background: var(--accent-dim); color: var(--accent); }
-.badge-business { background: var(--orange-dim); color: var(--orange); }
-.card-row { display: flex; justify-content: space-between; align-items: flex-start; }
-.card-name { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.35; }
-.card-price { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); white-space: nowrap; margin-left: 8px; }
-.card-loc { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-.card-spread { display: flex; gap: 10px; margin-top: 7px; align-items: center; }
-.spread-item { font-family: var(--mono); font-size: 10px; }
-.spread-bid { color: var(--red); }
-.spread-ask { color: var(--accent); }
-.spread-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-right: 3px; }
-.card-source { font-size: 9px; color: var(--text-muted); margin-top: 5px; font-family: var(--mono); }
+.fchip:hover:not(.on) { border-color: var(--border3); color: var(--silver); }
 
-/* Map */
-#map-wrap { position: relative; }
-#map { width: 100%; height: 100%; }
-
-.map-controls {
-  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 4px; z-index: 10;
+/* List */
+.list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
-.mc-btn {
-  background: rgba(13,16,22,.92); border: 1px solid var(--border-strong);
-  color: var(--text-muted); font-family: var(--sans); font-size: 11px; font-weight: 500;
-  padding: 7px 13px; cursor: pointer; border-radius: 4px;
-  backdrop-filter: blur(8px); transition: all .15s;
-}
-.mc-btn.active, .mc-btn:hover { color: var(--accent); border-color: var(--accent); }
+.list-scroll::-webkit-scrollbar { width: 2px; }
+.list-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 1px; }
 
-.map-legend {
-  position: absolute; top: 14px; left: 14px; z-index: 10;
-  background: rgba(13,16,22,.88); border: 1px solid var(--border-strong);
-  padding: 10px 12px; border-radius: 6px; backdrop-filter: blur(8px);
+/* Empty / Sync state */
+.sync-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 18px;
+  padding: 24px;
 }
-.legend-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
-.legend-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; font-size: 10px; color: var(--text-dim); }
-.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-.heatmap-legend {
-  position: absolute; top: 14px; right: 14px; z-index: 10;
-  background: rgba(13,16,22,.88); border: 1px solid var(--border-strong);
-  padding: 10px 12px; border-radius: 6px; backdrop-filter: blur(8px);
-  display: none;
+.sync-rings {
+  position: relative;
+  width: 44px;
+  height: 44px;
 }
-.hm-gradient { height: 6px; border-radius: 3px; background: linear-gradient(to right,#3b82f6,#10b981,#f59e0b,#ef4444); margin: 7px 0; width: 140px; }
-.hm-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-muted); font-family: var(--mono); }
+.sync-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--cyan);
+  animation: sync-expand 2.4s ease-out infinite;
+}
+.sync-ring:nth-child(2) { animation-delay: .8s; }
+.sync-ring:nth-child(3) { animation-delay: 1.6s; }
+@keyframes sync-expand {
+  0%   { transform: scale(.2); opacity: .8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.sync-dot {
+  position: absolute;
+  inset: 50%;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%,-50%);
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--cyan);
+}
+.sync-label {
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-align: center;
+  line-height: 2.2;
+  text-transform: uppercase;
+}
 
-/* Right panel */
+/* Property card */
+.pcard {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .1s;
+  position: relative;
+}
+.pcard:hover { background: rgba(255,255,255,.02); }
+.pcard.active {
+  background: rgba(0,255,200,.04);
+  border-left: 1px solid rgba(0,255,200,.4);
+}
+.pcard-addr {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 3px;
+  padding-right: 40px;
+}
+.pcard-city {
+  font-size: 11px;
+  color: var(--dim);
+  margin-bottom: 5px;
+}
+.pcard-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pcard-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cyan);
+}
+.pcard-type {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+.t-res  { background: rgba(59,125,248,.12); color: #6ba3fb; }
+.t-com  { background: rgba(201,168,76,.12);  color: var(--gold); }
+.t-land { background: rgba(0,255,200,.1);    color: var(--cyan); }
+.t-biz  { background: rgba(139,92,246,.12);  color: #a78bfa; }
+.pcard-days {
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--muted);
+  position: absolute;
+  top: 12px;
+  right: 14px;
+}
+
+/* ══════════════════════════════════════════════
+   MAP COLUMN
+══════════════════════════════════════════════ */
+#map-col {
+  position: relative;
+  background: #111928;
+  overflow: hidden;
+}
+
+/* The 3D map fills entire column */
+#map3d-container {
+  position: absolute;
+  inset: 0;
+}
+
+/* Map controls overlay */
+.map-ctl-panel {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mctl-group {
+  background: rgba(26,34,60,.94);
+  border: 1px solid var(--border2);
+  backdrop-filter: blur(12px);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mctl {
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.mctl:hover, .mctl.on { color: var(--cyan); background: var(--cyan-dim); }
+
+/* Status strip */
+.map-status {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26,34,60,.92);
+  border: 1px solid var(--border2);
+  padding: 7px 18px;
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--silver);
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  z-index: 400;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.live-dot {
+  display: inline-block;
+  width: 5px; height: 5px;
+  background: var(--cyan);
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  box-shadow: 0 0 6px var(--cyan);
+  animation: live-blink 2.4s ease-in-out infinite;
+}
+@keyframes live-blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .25; }
+}
+
+/* ── PRICE TAG MARKERS ── */
+.price-marker {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  pointer-events: all;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,.7));
+  transition: filter .2s, transform .15s;
+  z-index: 10;
+}
+.price-marker:hover { filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); transform: translate(-50%,-100%) scale(1.06); }
+.price-tag {
+  background: rgba(14,22,46,.97);
+  border: 1px solid rgba(0,255,200,.55);
+  border-radius: 5px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  line-height: 1;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0,0,0,.5);
+}
+.price-tag-val {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--cyan);
+  letter-spacing: .1px;
+}
+.price-tag-type {
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-top: 1px;
+}
+.price-stem {
+  width: 1px;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0));
+}
+.price-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5);
+  margin-top: -1px;
+}
+/* Heat mode overrides */
+.price-marker.heat-warm .price-tag { border-color: rgba(255,180,0,.6); }
+.price-marker.heat-warm .price-tag-val { color: #ffb400; }
+.price-marker.heat-warm .price-stem { background: linear-gradient(to bottom, rgba(255,180,0,.6), transparent); }
+.price-marker.heat-warm .price-dot  { background: #ffb400; box-shadow: 0 0 6px #ffb400; }
+.price-marker.heat-hot  .price-tag { border-color: rgba(255,80,80,.6); }
+.price-marker.heat-hot  .price-tag-val { color: #ff5a5a; }
+.price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,80,80,.6), transparent); }
+.price-marker.heat-hot  .price-dot  { background: #ff5a5a; box-shadow: 0 0 6px #ff5a5a; }
+
+/* Info window */
+.info-win {
+  position: absolute;
+  background: var(--bg2);
+  border: 1px solid rgba(0,255,200,.35);
+  padding: 0;
+  z-index: 500;
+  min-width: 240px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.8), 0 0 0 1px rgba(0,255,200,.1);
+  animation: info-appear .18s ease;
+  transform: translateX(-50%) translateY(calc(-100% - 18px));
+}
+@keyframes info-appear {
+  from { opacity: 0; transform: translateX(-50%) translateY(calc(-100% - 24px)); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(calc(-100% - 18px)); }
+}
+.info-win::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px; height: 10px;
+  background: var(--bg2);
+  border-right: 1px solid rgba(0,255,200,.3);
+  border-bottom: 1px solid rgba(0,255,200,.3);
+  transform: translateX(-50%) rotate(45deg);
+}
+.info-head {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.info-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cyan);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.info-addr {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+.info-city {
+  font-size: 10px;
+  color: var(--muted);
+}
+.info-body {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+}
+.info-k { color: var(--dim); font-size: 11px; }
+.info-v { color: var(--silver); font-size: 11px; font-weight: 500; }
+.info-actions {
+  padding: 10px 14px 12px;
+  display: flex;
+  gap: 6px;
+}
+.info-bid {
+  flex: 1;
+  padding: 9px 10px;
+  background: var(--cyan);
+  color: #000;
+  border: none;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  transition: background .15s;
+}
+.info-bid:hover { background: #00e6b4; }
+.info-more {
+  padding: 9px 10px;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  font-family: var(--font);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.info-more:hover { border-color: var(--border3); color: var(--text); }
+.info-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color .15s;
+  z-index: 10;
+}
+.info-close:hover { color: var(--text); }
+.info-sponsor {
+  padding: 7px 14px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sponsor-link {
+  color: var(--gold);
+  cursor: pointer;
+  transition: color .15s;
+  background: none;
+  border: none;
+  font-family: var(--font);
+  font-size: 9px;
+  padding: 0;
+}
+.sponsor-link:hover { color: #e2c17a; }
+
+/* Blimp */
+.blimp-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 600;
+  overflow: hidden;
+}
+.blimp {
+  position: absolute;
+  bottom: 22%;
+  pointer-events: all;
+  animation: blimp-drift 55s linear infinite;
+  cursor: pointer;
+}
+@keyframes blimp-drift {
+  0%   { left: -260px; }
+  100% { left: 110%; }
+}
+.blimp-body {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  filter: drop-shadow(0 4px 16px rgba(201,168,76,.4));
+}
+.blimp-hull {
+  background: linear-gradient(135deg, #c9a84c 0%, #e8c96a 45%, #b8943e 100%);
+  border-radius: 50px;
+  padding: 8px 24px 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  clip-path: ellipse(100% 70% at 45% 50%);
+}
+.blimp-tail {
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 13px solid #c9a84c;
+  margin-left: -1px;
+}
+.blimp-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1000;
+  white-space: nowrap;
+  letter-spacing: .2px;
+}
+.blimp-sub { font-size: 8px; color: rgba(0,0,0,.55); letter-spacing: .5px; }
+.blimp-string {
+  width: 1px;
+  height: 26px;
+  background: linear-gradient(to bottom, rgba(201,168,76,.6), transparent);
+  margin: 0 auto;
+}
+.blimp-flag {
+  font-family: var(--font);
+  font-size: 8px;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 1.5px;
+  opacity: .7;
+}
+
+/* ══════════════════════════════════════════════
+   RIGHT PANEL
+══════════════════════════════════════════════ */
 #right {
-  background: var(--surface); border-left: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg1);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 }
-.detail-top {
-  padding: 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+.rhead {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
-.detail-empty {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  color: var(--text-muted); text-align: center; gap: 10px;
+.rtype {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--cyan);
+  opacity: .7;
+  margin-bottom: 6px;
 }
-.detail-empty-icon { font-size: 32px; opacity: .2; }
-.detail-empty p { font-size: 12px; line-height: 1.7; }
-.d-type-badge { display: inline-block; font-size: 9px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; margin-bottom: 8px; }
-.d-name { font-size: 17px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
-.d-loc { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
-.d-price-row { display: flex; justify-content: space-between; align-items: flex-end; }
-.d-price { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--accent); }
-.d-psf { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
-
-.detail-scroll { flex: 1; overflow-y: auto; }
-.detail-scroll::-webkit-scrollbar { width: 3px; }
-.detail-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); }
-.detail-inner { padding: 14px 16px; }
-
-.ba-box {
-  background: var(--surface2); border: 1px solid var(--border-strong);
-  border-radius: 6px; padding: 14px; margin-bottom: 14px;
+.rname {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 4px;
 }
-.ba-cols { display: flex; }
-.ba-col { flex: 1; text-align: center; }
-.ba-col-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 5px; }
-.ba-col-val { font-family: var(--mono); font-size: 17px; font-weight: 500; }
-.bid-color { color: var(--red); }
-.ask-color { color: var(--accent); }
-.ba-divider { width: 1px; background: var(--border); margin: 0 8px; }
-.spread-info { text-align: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
-
-.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 16px; }
-.action-btn {
-  padding: 9px 8px; font-family: var(--sans); font-size: 12px; font-weight: 600;
-  cursor: pointer; border-radius: 4px; border: none; transition: opacity .15s;
+.rcity {
+  font-size: 12px;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+.rprice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.rprice {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: -.5px;
+}
+.rprice-psf {
+  font-family: var(--font);
+  font-size: 10px;
+  color: var(--muted);
+}
+.rbody {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.rbody::-webkit-scrollbar { width: 2px; }
+.rbody::-webkit-scrollbar-thumb { background: var(--border2); }
+.r-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  padding: 24px;
   text-align: center;
 }
-.action-btn:hover { opacity: .85; }
-.a-buy { background: var(--accent); color: #000; }
-.a-bid { background: none; border: 1px solid var(--accent); color: var(--accent); }
-.a-contact { background: none; border: 1px solid var(--border-strong); color: var(--text-dim); }
-.a-save { background: none; border: 1px solid var(--border-strong); color: var(--text-dim); }
-
-.section { margin-bottom: 16px; }
-.section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
-.data-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
-.data-key { color: var(--text-muted); }
-.data-val { color: var(--text); font-weight: 500; font-family: var(--mono); font-size: 11px; }
-.data-val.source { color: var(--text-muted); font-size: 10px; font-family: var(--sans); }
-
-.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.bar-label { font-size: 10px; color: var(--text-muted); width: 80px; flex-shrink: 0; }
-.bar-track { flex: 1; height: 3px; background: var(--border-strong); border-radius: 2px; }
-.bar-fill { height: 100%; border-radius: 2px; }
-.bar-stat { font-family: var(--mono); font-size: 10px; width: 45px; text-align: right; flex-shrink: 0; }
-
-.ai-brief {
-  background: var(--surface2); border-left: 2px solid var(--accent);
-  padding: 11px 13px; border-radius: 0 4px 4px 0;
-  font-size: 11px; color: var(--text-dim); line-height: 1.75;
+.r-empty-glyph {
+  font-size: 36px;
+  opacity: .06;
+  line-height: 1;
 }
-.ai-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 6px; font-weight: 600; }
-
-/* Source verified badge */
-.verified { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-muted); margin-bottom: 12px; }
-.verified-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; }
-
-/* Tooltip */
-#tt {
-  position: fixed; pointer-events: none; z-index: 100;
-  background: rgba(13,16,22,.96); border: 1px solid var(--border-strong);
-  border-radius: 6px; padding: 10px 12px; display: none;
-  backdrop-filter: blur(8px); min-width: 180px;
+.r-empty-text {
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 2.4;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
-#tt.show { display: block; }
-.tt-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-.tt-price { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-bottom: 2px; }
-.tt-loc { font-size: 10px; color: var(--text-muted); }
+.rinner { padding: 14px 16px; }
+.rsect { margin-bottom: 18px; }
+.rsect-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--cyan);
+  margin-bottom: 9px;
+  border-bottom: 1px solid rgba(0,255,200,.2);
+  padding-bottom: 5px;
+  opacity: .9;
+}
+.rrow {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  gap: 12px;
+}
+.rk { color: var(--dim); flex-shrink: 0; font-size: 11px; }
+.rv {
+  color: var(--silver);
+  font-size: 11px;
+  text-align: right;
+  word-break: break-word;
+}
+.rv.hl { color: var(--cyan); font-weight: 600; }
 
-/* Modal */
+/* Action buttons */
+.act-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.abtn {
+  padding: 10px 8px;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  transition: all .15s;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+.abtn:hover { opacity: .85; transform: translateY(-1px); }
+.a-buy  { background: var(--cyan); color: #000; }
+.a-bid  { background: none; border: 1px solid rgba(0,255,200,.3) !important; color: var(--cyan); }
+.a-lend { background: none; border: 1px solid rgba(59,125,248,.3) !important; color: #6ba3fb; }
+.a-save { background: none; border: 1px solid var(--border) !important; color: var(--muted); }
+.a-claim {
+  grid-column: 1 / -1;
+  background: none;
+  border: 1px solid rgba(34,197,94,.25) !important;
+  color: var(--green);
+}
+.a-sponsor {
+  grid-column: 1 / -1;
+  background: none;
+  border: 1px solid rgba(201,168,76,.25) !important;
+  color: var(--gold);
+  font-size: 9px;
+}
+
+/* ══════════════════════════════════════════════
+   TICKER
+══════════════════════════════════════════════ */
+/* ── Market Ribbon (top) ── */
+#market-ribbon {
+  background: #0d1526;
+  border-bottom: 1px solid rgba(0,255,200,.1);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  z-index: 800;
+  flex-shrink: 0;
+}
+.ribbon-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ribbon-run 60s linear infinite;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .3px;
+  gap: 0;
+}
+.ribbon-track:hover { animation-play-state: paused; }
+.ribbon-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  border-right: 1px solid rgba(255,255,255,.06);
+  cursor: default;
+}
+.ribbon-label {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+}
+.ribbon-val {
+  color: var(--silver);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ribbon-chg.up   { color: var(--green); }
+.ribbon-chg.down { color: var(--red);   }
+.ribbon-chg.flat { color: var(--muted); }
+@keyframes ribbon-run {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Address Ticker (bottom) ── */
+#ticker-bar {
+  background: var(--bg1);
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker-run 90s linear infinite;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 1px;
+}
+.ticker-seg { padding: 0 24px; }
+.ticker-seg .addr { color: var(--silver); }
+.ticker-seg .sep  { color: var(--border2); margin: 0 8px; }
+@keyframes ticker-run {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ══════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════ */
+#footer {
+  background: #161e38;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+}
+.footer-copy {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .6px;
+  text-align: center;
+  line-height: 1;
+}
+.footer-copy strong { color: var(--dim); font-weight: 500; }
+.footer-copy a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .15s;
+}
+.footer-copy a:hover { color: var(--dim); }
+
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
 #modal {
-  display: none; position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
-  align-items: center; justify-content: center;
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
 }
 #modal.open { display: flex; }
-.modal-box {
-  background: var(--surface); border: 1px solid var(--border-strong);
-  border-radius: 8px; width: 440px; max-width: 95vw; padding: 28px;
+.mbox {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  width: 460px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
 }
-.modal-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-.modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
-.field { margin-bottom: 13px; }
-.field label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
-.field input, .field select {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border-strong);
-  border-radius: 4px; color: var(--text); font-family: var(--sans); font-size: 13px;
-  padding: 8px 11px; outline: none; transition: border-color .15s;
+.mbox::-webkit-scrollbar { width: 2px; }
+.mbox::-webkit-scrollbar-thumb { background: var(--border2); }
+.mtitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -.4px;
 }
-.field input:focus, .field select:focus { border-color: var(--accent); }
-.field input::placeholder { color: var(--text-muted); }
-.field select option { background: var(--surface); }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.modal-footer { display: flex; gap: 8px; margin-top: 20px; }
-.modal-submit { flex: 1; padding: 10px; background: var(--accent); color: #000; border: none; cursor: pointer; font-family: var(--sans); font-size: 13px; font-weight: 600; border-radius: 4px; transition: opacity .15s; }
-.modal-submit:hover { opacity: .85; }
-.modal-cancel { padding: 10px 16px; background: none; border: 1px solid var(--border-strong); color: var(--text-muted); cursor: pointer; font-family: var(--sans); font-size: 13px; border-radius: 4px; transition: all .15s; }
-.modal-cancel:hover { color: var(--text); }
+.msub {
+  font-size: 12px;
+  color: var(--dim);
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+.mfield { margin-bottom: 14px; }
+.mfield label {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--dim);
+  margin-bottom: 5px;
+}
+.mfield input,
+.mfield select,
+.mfield textarea {
+  width: 100%;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 10px 12px;
+  outline: none;
+  border-radius: 3px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.mfield input:focus,
+.mfield select:focus,
+.mfield textarea:focus { border-color: rgba(0,255,200,.5); box-shadow: 0 0 0 2px rgba(0,255,200,.08); }
+.mfield input::placeholder,
+.mfield textarea::placeholder { color: var(--muted); }
+.mfield select option { background: var(--bg2); }
+.mfield textarea { resize: vertical; min-height: 80px; }
+.mrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mfooter { display: flex; gap: 8px; margin-top: 24px; }
+.msub-btn {
+  flex: 1;
+  padding: 11px;
+  background: var(--cyan);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  border-radius: 2px;
+  transition: background .15s;
+}
+.msub-btn:hover { background: #00e6b4; }
+.mcan-btn {
+  padding: 11px 18px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 11px;
+  border-radius: 2px;
+  transition: all .15s;
+}
+.mcan-btn:hover { color: var(--text); border-color: var(--border2); }
+.role-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.role-card {
+  border: 1px solid var(--border);
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+}
+.role-card:hover, .role-card.sel {
+  border-color: rgba(0,255,200,.35);
+  background: var(--cyan-dim);
+}
+.role-icon { font-size: 22px; margin-bottom: 6px; }
+.role-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.role-desc { font-size: 10px; color: var(--dim); margin-top: 4px; line-height: 1.6; }
+.mclose-btn {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color .15s;
+}
+.mclose-btn:hover { color: var(--text); }
+.legal-note {
+  font-family: var(--font);
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.9;
+  margin-top: 4px;
+}
 
-/* Notification */
-#notif {
-  position: fixed; top: 58px; right: 16px; z-index: 300;
-  background: var(--surface2); border: 1px solid var(--accent);
-  border-radius: 6px; padding: 11px 16px; font-size: 12px; color: var(--accent);
-  display: none; animation: fadeSlide .25s ease;
+/* ══════════════════════════════════════════════
+   NOTIFICATION TOAST
+══════════════════════════════════════════════ */
+#toast {
+  position: fixed;
+  top: 64px;
+  right: 18px;
+  z-index: 99999;
+  background: var(--bg2);
+  border: 1px solid rgba(0,255,200,.3);
+  padding: 12px 18px;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--cyan);
+  display: none;
+  border-radius: 2px;
+  max-width: 340px;
+  letter-spacing: .3px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.6);
+  animation: toast-in .2s ease;
 }
-@keyframes fadeSlide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-/* Ticker */
-#ticker {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 26px;
-  background: var(--surface); border-top: 1px solid var(--border);
-  overflow: hidden; z-index: 50; display: flex; align-items: center;
+/* ══════════════════════════════════════════════
+   ASSET DRAWER (Institutional Side Drawer)
+══════════════════════════════════════════════ */
+/* Desktop: side drawer */
+#asset-drawer {
+  position: fixed;
+  top: 78px;
+  right: 0;
+  bottom: 30px;
+  width: min(480px, 38vw);
+  background: var(--bg1);
+  border-left: 1px solid rgba(0,255,200,.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 700;
+  transform: translateX(105%);
+  transition: transform .32s cubic-bezier(.4,0,.2,1);
+  box-shadow: -20px 0 60px rgba(0,0,0,.6);
+  will-change: transform;
 }
-.ticker-inner {
-  display: flex; gap: 32px; white-space: nowrap;
-  animation: scroll-l 80s linear infinite; font-family: var(--mono); font-size: 10px;
+#asset-drawer.open { transform: translateX(0); }
+
+/* Mobile: bottom sheet */
+@media (max-width: 767px) {
+
+  /* ── Topbar: strip non-essentials ── */
+  .tstat    { display: none; }
+  .logo-tag { display: none; }
+  #search-input { font-size: 12px; }
+  .tbtn     { padding: 0 10px; font-size: 10px; }
+
+  /* ── Full-screen map layout ── */
+  #main-row {
+    grid-template-columns: 1fr;   /* one column — map only */
+    grid-template-rows: 1fr;
+    position: relative;
+  }
+  #left, #right { display: none; } /* panels hidden; drawer takes over */
+
+  /* ── Map column: occupies full area by default,
+        shrinks to top 40% when drawer is open ── */
+  #map-col {
+    position: absolute;
+    inset: 0;
+    transition: bottom .32s cubic-bezier(.4,0,.2,1);
+  }
+  /* JS adds .drawer-open class to #map-col when drawer opens */
+  #map-col.drawer-open {
+    bottom: 60%; /* map shows top 40% of remaining height */
+  }
+
+  /* ── Bottom sheet drawer ── */
+  #asset-drawer {
+    position: fixed;
+    top: auto;       /* ignore top */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 60vh;    /* exactly 60% of viewport — map gets the other 40% */
+    max-height: 60vh;
+    border-left: none;
+    border-top: 2px solid rgba(0,255,200,.3);
+    border-radius: 18px 18px 0 0;
+    transform: translateY(105%);  /* starts fully below screen */
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 -12px 50px rgba(0,0,0,.75);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    will-change: transform;
+  }
+  #asset-drawer.open {
+    transform: translateY(0); /* slides up into view */
+  }
+
+  /* ── Pull handle ── */
+  #asset-drawer::before {
+    content: '';
+    display: block;
+    width: 44px;
+    height: 4px;
+    background: rgba(255,255,255,.18);
+    border-radius: 2px;
+    margin: 12px auto 6px;
+  }
+
+  /* ── Touch-friendly buttons ── */
+  .drawer-btn-primary,
+  .drawer-btn-secondary {
+    min-height: 52px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+  .drawer-close {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Tighten drawer padding on small screens ── */
+  .drawer-head    { padding: 10px 14px 10px; }
+  .drawer-section { padding: 10px 14px; }
+  .drawer-actions { padding: 10px 14px 20px; } /* extra bottom for home bar */
+  .drawer-legal   { padding: 8px 14px 24px; }  /* safe-area buffer */
+
+  /* ── Price tags: slightly larger tap target on mobile ── */
+  .price-tag {
+    padding: 6px 12px;
+  }
+  .price-tag-val { font-size: 13px; }
+  .price-marker  { z-index: 20; } /* above map controls on mobile */
 }
-.ti { color: var(--text-muted); }
-.ti .p { margin-left: 5px; }
-.ti .p.up { color: var(--accent); }
-.ti .p.dn { color: var(--red); }
-@keyframes scroll-l { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+.drawer-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 10;
+  line-height: 1;
+  transition: color .15s;
+  padding: 4px;
+}
+.drawer-close:hover { color: var(--text); }
+
+.drawer-hero {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  background: var(--bg3);
+}
+.drawer-hero-placeholder {
+  width: 100%;
+  height: 160px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--border2);
+  font-size: 36px;
+  letter-spacing: 4px;
+}
+
+.drawer-head {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.drawer-type-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.drawer-type {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--cyan);
+  opacity: .8;
+}
+.drawer-status {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: rgba(46,212,122,.12);
+  color: var(--green);
+  border: 1px solid rgba(46,212,122,.25);
+}
+.drawer-status.inactive {
+  background: rgba(255,90,90,.08);
+  color: var(--red);
+  border-color: rgba(255,90,90,.2);
+}
+.drawer-address {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 2px;
+}
+.drawer-city {
+  font-size: 11px;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+.drawer-price-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.drawer-price {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: -.5px;
+  line-height: 1;
+}
+.drawer-psf {
+  font-size: 11px;
+  color: var(--muted);
+  padding-bottom: 3px;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  max-height: calc(90vh - 280px);
+  -webkit-overflow-scrolling: touch;
+}
+.drawer-body::-webkit-scrollbar { width: 3px; }
+.drawer-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.drawer-specs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.drawer-spec {
+  padding: 12px 14px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.drawer-spec:last-child { border-right: none; }
+.drawer-spec-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.drawer-spec-lbl {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.drawer-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.drawer-section-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--cyan);
+  margin-bottom: 10px;
+  opacity: .85;
+}
+.drawer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 12px;
+}
+.drawer-row:last-child { border-bottom: none; }
+.drawer-k { font-size: 11px; color: var(--dim); flex-shrink: 0; }
+.drawer-v { font-size: 11px; font-weight: 500; color: var(--silver); text-align: right; word-break: break-word; }
+.drawer-v.hl { color: var(--cyan); font-weight: 700; }
+
+/* Compliance block */
+.compliance-block {
+  background: rgba(0,255,200,.04);
+  border: 1px solid rgba(0,255,200,.12);
+  border-radius: 3px;
+  padding: 10px 12px;
+  margin-bottom: 0;
+}
+.compliance-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 10px;
+  gap: 8px;
+}
+.compliance-k { color: var(--muted); font-size: 10px; }
+.compliance-v { color: var(--silver); font-weight: 600; font-size: 10px; text-align: right; }
+
+/* Structure cards */
+.struct-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 9px 11px;
+  margin-bottom: 7px;
+}
+.struct-card:last-child { margin-bottom: 0; }
+.struct-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+/* Action buttons */
+.drawer-actions {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+.drawer-btn-primary {
+  width: 100%;
+  min-height: 48px;
+  padding: 13px;
+  background: linear-gradient(135deg, #00c49a 0%, #00ffc8 100%);
+  color: #041a12;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: opacity .15s, transform .1s;
+}
+.drawer-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.drawer-btn-secondary {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .15s;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+}
+.drawer-btn-secondary:hover { border-color: var(--border3); color: var(--text); }
+
+/* Legal footer */
+.drawer-legal {
+  padding: 10px 16px 12px;
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.7;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Bid book inside drawer */
+.bid-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 8px;
+  font-size: 10px;
+}
+.bid-row:last-child { border-bottom: none; }
+.bid-amount { color: var(--cyan); font-weight: 700; font-size: 12px; }
+.bid-terms  { color: var(--dim); }
+.bid-expiry { color: var(--muted); font-size: 9px; text-align: right; }
+
+
+/* ── New asset class badges ── */
+.t-avi  { background: rgba(91,150,255,.12); color: var(--blue); }
+.t-mar  { background: rgba(34,150,200,.12); color: #22c8e8; }
+.t-res2 { background: rgba(201,168,76,.12); color: var(--gold); }
+.t-fin  { background: rgba(46,212,122,.12); color: var(--green); }
+
+/* ── Mint / Digitize animation ── */
+@keyframes mint-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes mint-pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .6; transform: scale(1.08); }
+}
+.mint-ring {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,255,200,.2);
+  border-top-color: var(--cyan);
+  animation: mint-spin .9s linear infinite;
+  margin: 0 auto 12px;
+}
+.mint-hash {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1.8;
+  font-family: 'Courier New', monospace;
+  background: rgba(0,0,0,.3);
+  padding: 8px 10px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+.mint-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border: 1px solid rgba(46,212,122,.4);
+  border-radius: 20px;
+  background: rgba(46,212,122,.06);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: .5px;
+  margin-bottom: 12px;
+}
+.mint-qr {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 8px;
+  color: #000;
+  position: relative;
+  overflow: hidden;
+}
+/* Fake QR pattern */
+.mint-qr::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background-image:
+    repeating-linear-gradient(0deg, #000 0, #000 2px, transparent 2px, transparent 5px),
+    repeating-linear-gradient(90deg, #000 0, #000 2px, transparent 2px, transparent 5px);
+  opacity: .7;
+}
+
+/* ── Savings Engine ── */
+.savings-block {
+  background: linear-gradient(135deg, rgba(0,12,4,.9) 0%, rgba(0,20,10,.9) 100%);
+  border: 1px solid rgba(46,212,122,.25);
+  border-radius: 4px;
+  padding: 12px 14px;
+  margin: 0;
+}
+.savings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 8px;
+}
+.savings-row:last-child { border-bottom: none; }
+.savings-k { color: var(--dim); font-size: 11px; }
+.savings-v { font-size: 11px; font-weight: 600; color: var(--silver); }
+.savings-v.strike { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+.savings-v.fee    { color: var(--cyan); }
+.savings-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+}
+.savings-total-k { color: var(--dim); }
+.savings-total-v { color: var(--green); font-size: 16px; letter-spacing: -.3px; }
+.savings-saas {
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-style: italic;
+}
+
+/* ── Digital Ledger card ── */
+.ledger-card {
+  background: rgba(0,255,200,.03);
+  border: 1px solid rgba(0,255,200,.15);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+.ledger-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ledger-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 0 2px rgba(148,160,190,.2);
+  flex-shrink: 0;
+}
+.ledger-dot.minted {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green), 0 0 0 2px rgba(46,212,122,.25);
+}
+.ledger-label { font-size: 11px; color: var(--dim); }
+.ledger-hash-preview {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+.digitize-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  background: none;
+  border: 1px solid rgba(0,255,200,.3);
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .15s;
+}
+.digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
+.digitize-btn:disabled { opacity: .4; cursor: default; }
+
 </style>
 </head>
 <body>
-<div id="app">
 
-<!-- TOPBAR -->
+<div id="shell">
+
+<!-- ══ MARKET RIBBON ══ -->
+<div id="market-ribbon">
+  <div class="ribbon-track" id="ribbon-track"><!-- built by JS --></div>
+</div>
+
+<!-- ══ TOPBAR ══ -->
 <div id="topbar">
   <div class="logo">
-    <div class="logo-dot"></div>
-    RWABidAsk
+    <div class="logo-mark"></div>
+    <div>
+      <div class="logo-text">RWABidAsk</div>
+      <div class="logo-tag">GLOBAL ASSET MARKET</div>
+    </div>
   </div>
+
   <div class="search-wrap">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input id="search-input" type="text" placeholder="Search city, country, address, business type…">
+    <input
+      id="search-input"
+      type="text"
+      placeholder="Global Asset Navigation — search any address, city, or region…"
+      autocomplete="off"
+    >
+    <button class="search-icon" onclick="triggerSearch()" title="Global Asset Navigation" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
   </div>
-  <div class="topbar-stats">
-    <div class="ts"><div class="ts-label">Listed</div><div class="ts-val green" id="s-count">—</div></div>
-    <div class="ts"><div class="ts-label">Countries</div><div class="ts-val">47</div></div>
-    <div class="ts"><div class="ts-label">Market Cap</div><div class="ts-val green" id="s-cap">—</div></div>
-    <div class="ts"><div class="ts-label">Bids 24h</div><div class="ts-val green">2,841</div></div>
-  </div>
-  <div class="topbar-actions">
-    <button class="btn-ghost" onclick="openModal('kyc')">Verify / KYC</button>
-    <button class="btn-primary" onclick="openModal('list')">+ List Asset</button>
+
+  <div class="topbar-right">
+    <div class="tstat">
+      <div class="tstat-l">Assets</div>
+      <div class="tstat-v live" id="s-assets">—</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Status</div>
+      <div class="tstat-v live" id="s-status">SYNC</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Bids 24h</div>
+      <div class="tstat-v" id="s-bids">—</div>
+    </div>
+    <button class="tbtn" id="signin-btn" onclick="openModal('signin')">Sign In</button>
+    <button class="tbtn primary" id="join-btn" onclick="openModal('register')">Join</button>
   </div>
 </div>
 
-<!-- LEFT PANEL -->
-<div id="left">
-  <div class="panel-head">
-    <div class="panel-tabs">
-      <div class="tab active" onclick="setTab(this,'all')">All</div>
-      <div class="tab" onclick="setTab(this,'residential')">Residential</div>
-      <div class="tab" onclick="setTab(this,'commercial')">Commercial</div>
-      <div class="tab" onclick="setTab(this,'business')">Business</div>
-      <div class="tab" onclick="setTab(this,'land')">Land</div>
+<!-- ══ MAIN ══ -->
+<div id="main-row">
+
+  <!-- LEFT PANEL -->
+  <div id="left">
+    <div class="left-head">
+      <div class="left-title">Global Directory</div>
+      <div class="ptabs">
+        <button class="ptab on"  onclick="setTab(this,'all')">All</button>
+        <button class="ptab" onclick="setTab(this,'residential')">RE</button>
+        <button class="ptab" onclick="setTab(this,'commercial')">Com</button>
+        <button class="ptab" onclick="setTab(this,'aviation')">✈</button>
+        <button class="ptab" onclick="setTab(this,'maritime')">⚓</button>
+        <button class="ptab" onclick="setTab(this,'resources')">⛏</button>
+        <button class="ptab" onclick="setTab(this,'financial')">$</button>
+        <button class="ptab" onclick="setTab(this,'business')">Biz</button>
+        <button class="ptab" onclick="setTab(this,'land')">Land</button>
+      </div>
+    </div>
+    <div class="frow">
+      <button class="fchip on" onclick="setFilter(this,'any')">Any</button>
+      <button class="fchip" onclick="setFilter(this,'sub1m')">–$1M</button>
+      <button class="fchip" onclick="setFilter(this,'1m5m')">$1–5M</button>
+      <button class="fchip" onclick="setFilter(this,'5m25m')">$5–25M</button>
+      <button class="fchip" onclick="setFilter(this,'25mplus')">$25M+</button>
+    </div>
+    <div class="list-scroll" id="list-scroll">
+      <!-- Populated by JS -->
+      <div class="sync-state" id="sync-state">
+        <div class="sync-rings">
+          <div class="sync-ring"></div>
+          <div class="sync-ring"></div>
+          <div class="sync-ring"></div>
+          <div class="sync-dot"></div>
+        </div>
+        <div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div>
+      </div>
     </div>
   </div>
-  <div class="filter-bar">
-    <button class="chip active" onclick="setFilter(this,'any')">Any price</button>
-    <button class="chip" onclick="setFilter(this,'sub1m')">Under $1M</button>
-    <button class="chip" onclick="setFilter(this,'1m10m')">$1M – $10M</button>
-    <button class="chip" onclick="setFilter(this,'10mplus')">$10M+</button>
-  </div>
-  <div class="listings" id="listing-list"></div>
-</div>
 
-<!-- MAP -->
-<div id="map-wrap">
-  <div id="map"></div>
-  <div class="map-legend" id="legend-type">
-    <div class="legend-title">Asset type</div>
-    <div class="legend-row"><div class="legend-dot" style="background:#3b82f6"></div>Residential</div>
-    <div class="legend-row"><div class="legend-dot" style="background:#f59e0b"></div>Commercial</div>
-    <div class="legend-row"><div class="legend-dot" style="background:#10b981"></div>Land</div>
-    <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div>Business</div>
-  </div>
-  <div class="heatmap-legend" id="legend-heat">
-    <div class="legend-title">Price / sqft</div>
-    <div class="hm-gradient"></div>
-    <div class="hm-labels"><span>$50</span><span>$500</span><span>$5k+</span></div>
-  </div>
-  <div class="map-controls">
-    <button class="mc-btn active" id="btn-satellite" onclick="setStyle('satellite')">Satellite</button>
-    <button class="mc-btn" id="btn-street" onclick="setStyle('street')">Street</button>
-    <button class="mc-btn" id="btn-dark" onclick="setStyle('dark')">Dark</button>
-    <button class="mc-btn" id="btn-heat" onclick="toggleHeat()">Heat Map</button>
-  </div>
-</div>
+  <!-- MAP -->
+  <div id="map-col">
 
-<!-- RIGHT PANEL -->
-<div id="right">
-  <div class="detail-top" id="detail-top">
-    <div style="color:var(--text-muted);font-size:11px;">Select a listing to view details</div>
+    <!-- Google Maps 3D — properly initialized via JS below -->
+    <div id="map3d-container"></div>
+
+    <!-- Marker & Info Window layer -->
+    <div id="overlay-layer" style="position:absolute;inset:0;pointer-events:none;z-index:300;"></div>
+
+    <!-- Map controls -->
+    <div class="map-ctl-panel">
+      <div class="mctl-group">
+        <button class="mctl on" onclick="setMapMode('satellite',this)">Satellite</button>
+        <button class="mctl" onclick="setMapMode('hybrid',this)">Hybrid</button>
+      </div>
+      <div class="mctl-group">
+        <button class="mctl" onclick="setTilt(45,this)">Tilt 45°</button>
+        <button class="mctl" onclick="setTilt(0,this)">Top Down</button>
+      </div>
+      <div class="mctl-group">
+        <button class="mctl" onclick="toggleHeat(this)">Heat Zone</button>
+        <button class="mctl" onclick="flyGlobe()" title="Navigate to global view">Global View</button>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="map-status">
+      <span class="live-dot"></span>
+      <span id="map-status-txt">ESTABLISHING SECURE CONNECTION…</span>
+    </div>
+
+    <!-- Blimp -->
+    <div class="blimp-layer">
+      <div class="blimp" id="blimp-el" title="Partnership — Annie Group LLC">
+        <div class="blimp-body">
+          <div class="blimp-hull">
+            <div>
+              <div class="blimp-text">ANNIE GROUP LLC</div>
+              <div class="blimp-sub">PARTNERSHIP INQUIRY</div>
+            </div>
+          </div>
+          <div class="blimp-tail"></div>
+        </div>
+        <div class="blimp-string"></div>
+        <div class="blimp-flag">AIRSPACE</div>
+      </div>
+    </div>
+
   </div>
-  <div id="detail-body" class="detail-scroll">
-    <div class="detail-empty">
-      <div class="detail-empty-icon">◎</div>
-      <p>Click any marker on the map<br>or a listing on the left</p>
+
+  <!-- RIGHT PANEL -->
+  <div id="right">
+    <div class="rhead" id="rhead">
+      <div class="rtype">Select an Asset</div>
+      <div class="rname" style="opacity:.25">Click any marker or listing</div>
+      <div class="rcity">—</div>
+    </div>
+    <div class="rbody" id="rbody">
+      <div class="r-empty">
+        <div class="r-empty-glyph">◎</div>
+        <div class="r-empty-text">
+          SEARCH · BID · BUY · FINANCE<br>
+          RESIDENTIAL · COMMERCIAL · LAND<br>
+          TIMESHARES · LEASES · BUSINESSES
+        </div>
+      </div>
     </div>
   </div>
+
+</div><!-- #main-row -->
+
+<!-- ══ INSTITUTIONAL ASSET DRAWER ══ -->
+<div id="asset-drawer">
+  <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  <div id="drawer-inner"><!-- populated by JS --></div>
 </div>
 
+<!-- ══ TICKER ══ -->
+<div id="ticker-bar">
+  <div class="ticker-track" id="ticker-track">
+    <!-- built by JS -->
+  </div>
 </div>
 
-<!-- TOOLTIP -->
-<div id="tt">
-  <div class="tt-name" id="tt-name"></div>
-  <div class="tt-price" id="tt-price"></div>
-  <div class="tt-loc" id="tt-loc"></div>
+<!-- ══ FOOTER ══ -->
+<div id="footer">
+  <div class="footer-copy">
+    <strong>© 2026 ANNIE GROUP LLC. All Rights Reserved.</strong>
+    &nbsp;·&nbsp;
+    RWABidAsk is a Registered Trade Name of Annie Group LLC
+    &nbsp;·&nbsp;
+    Platform facilitation only — not a licensed broker or dealer
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openModal('tos');return false">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openModal('privacy');return false">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/cdn-cgi/l/email-protection#9cf3ecefdceeebfdfef5f8fdeff7b2fff3f1"><span class="__cf_email__" data-cfemail="1976696a596b6e787b707d786a72377a7674">[email&#160;protected]</span></a>
+  </div>
 </div>
 
-<!-- MODAL -->
+</div><!-- #shell -->
+
+<!-- ══ INFO WINDOW (portal, absolutely positioned) ══ -->
+<div id="info-win" class="info-win" style="display:none;position:fixed;z-index:9999;">
+  <!-- built by JS -->
+</div>
+
+<!-- ══ MODAL ══ -->
 <div id="modal">
-  <div class="modal-box" id="modal-inner"></div>
+  <div class="mbox" id="mbox">
+    <button class="mclose-btn" onclick="closeModal()">✕</button>
+  </div>
 </div>
 
-<!-- NOTIF -->
-<div id="notif" id="notif-box"></div>
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
 
-<!-- TICKER -->
-<div id="ticker"><div class="ticker-inner" id="ticker-inner"></div></div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+'use strict';
 
-<script>
-// ── DATA (structured identically to what a scraper returns) ──
-const DATA = [
-  { id:1,  name:"Beachfront Villa",           type:"residential", city:"Marbella",      country:"Spain",       lat:36.510, lng:-4.882, ask:4200000,  bid:3800000,  sqft:5200,    beds:6,  baths:7,  yr:2019, cap:null, rev:null,    src:"Registro Propiedad ES", days:34  },
-  { id:2,  name:"Tech Office Campus",         type:"commercial",  city:"Lisbon",        country:"Portugal",    lat:38.717, lng:-9.142, ask:12500000, bid:11000000, sqft:28000,   beds:null,baths:null,yr:2015, cap:6.2,  rev:null,    src:"Registo Comercial PT",  days:88  },
-  { id:3,  name:"Agricultural Land 480ac",    type:"land",        city:"Mendoza",       country:"Argentina",   lat:-32.89, lng:-68.83, ask:890000,   bid:750000,   sqft:20908800,beds:null,baths:null,yr:null,  cap:null, rev:380000,  src:"INCRA AR Registry",     days:121 },
-  { id:4,  name:"Craft Brewery + Taproom",    type:"business",    city:"Portland",      country:"USA",         lat:45.521, lng:-122.68,ask:3100000,  bid:2800000,  sqft:8400,    beds:null,baths:null,yr:2016, cap:null, rev:2400000, src:"OR SOS Business Reg.",  days:19  },
-  { id:5,  name:"Historic Apartment Block",   type:"residential", city:"Budapest",      country:"Hungary",     lat:47.498, lng:19.039, ask:1850000,  bid:1650000,  sqft:12000,   beds:18, baths:18, yr:1902, cap:7.8,  rev:null,    src:"Földhivatal HU",        days:65  },
-  { id:6,  name:"Boutique Hotel — 32 Rooms",  type:"commercial",  city:"Cartagena",     country:"Colombia",    lat:10.391, lng:-75.512,ask:5600000,  bid:5000000,  sqft:18000,   beds:32, baths:36, yr:2008, cap:8.4,  rev:920000,  src:"Colombia Prop. Reg.",   days:44  },
-  { id:7,  name:"E-Commerce Brand (FBA)",     type:"business",    city:"Remote",        country:"USA",         lat:37.09,  lng:-95.71, ask:780000,   bid:700000,   sqft:null,    beds:null,baths:null,yr:2021, cap:null, rev:1100000, src:"BizBuySell Aggregated", days:7   },
-  { id:8,  name:"Riverfront Warehouse Block", type:"commercial",  city:"Warsaw",        country:"Poland",      lat:52.230, lng:21.012, ask:7800000,  bid:7000000,  sqft:45000,   beds:null,baths:null,yr:1987, cap:5.9,  rev:null,    src:"KRS PL Registry",       days:56  },
-  { id:9,  name:"Luxury Penthouse",           type:"residential", city:"Dubai",         country:"UAE",         lat:25.197, lng:55.274, ask:9200000,  bid:8500000,  sqft:7800,    beds:5,  baths:6,  yr:2022, cap:null, rev:null,    src:"DLD Registry UAE",      days:22  },
-  { id:10, name:"Coffee Farm — 200ha",        type:"land",        city:"Minas Gerais",  country:"Brazil",      lat:-18.51, lng:-44.17, ask:1200000,  bid:1050000,  sqft:2152800, beds:null,baths:null,yr:null,  cap:null, rev:380000,  src:"INCRA BR Registry",     days:99  },
-  { id:11, name:"Medieval Castle Estate",     type:"residential", city:"Loire Valley",  country:"France",      lat:47.412, lng:0.695,  ask:18500000, bid:16000000, sqft:42000,   beds:22, baths:18, yr:1387, cap:null, rev:null,    src:"Notaires de France",    days:180 },
-  { id:12, name:"Auto Repair Chain (12 loc)", type:"business",    city:"Toronto",       country:"Canada",      lat:43.651, lng:-79.383,ask:4400000,  bid:4000000,  sqft:null,    beds:null,baths:null,yr:2009, cap:null, rev:5200000, src:"ON Corp. Registry",     days:31  },
-  { id:13, name:"Seaside Resort Land 8ac",    type:"land",        city:"Phuket",        country:"Thailand",    lat:7.878,  lng:98.392, ask:2900000,  bid:2500000,  sqft:348480,  beds:null,baths:null,yr:null,  cap:null, rev:null,    src:"Land Dept. TH",         days:74  },
-  { id:14, name:"Mixed-Use High-Rise",        type:"commercial",  city:"Lagos",         country:"Nigeria",     lat:6.524,  lng:3.379,  ask:6200000,  bid:5500000,  sqft:62000,   beds:null,baths:null,yr:2018, cap:9.1,  rev:null,    src:"Lagos State Registry",  days:48  },
-  { id:15, name:"SaaS Company (ARR $2M)",     type:"business",    city:"Dublin",        country:"Ireland",     lat:53.332, lng:-6.249, ask:8000000,  bid:7200000,  sqft:null,    beds:null,baths:null,yr:2020, cap:null, rev:2000000, src:"CRO IE Registry",       days:14  },
-  { id:16, name:"Ski Chalet Complex 6 Units", type:"residential", city:"Verbier",       country:"Switzerland", lat:46.096, lng:7.228,  ask:6800000,  bid:6200000,  sqft:9600,    beds:14, baths:12, yr:2011, cap:4.2,  rev:420000,  src:"Register Foncier CH",   days:28  },
-  { id:17, name:"Logistics Warehouse 3ac",    type:"commercial",  city:"Rotterdam",     country:"Netherlands", lat:51.924, lng:4.462,  ask:9400000,  bid:8800000,  sqft:86000,   beds:null,baths:null,yr:2016, cap:6.8,  rev:null,    src:"Kadaster NL",           days:52  },
-  { id:18, name:"Renewable Energy Farm",      type:"land",        city:"Seville",       country:"Spain",       lat:37.389, lng:-5.984, ask:3300000,  bid:2900000,  sqft:4356000, beds:null,baths:null,yr:null,  cap:null, rev:280000,  src:"Catastro ES",           days:67  },
-  { id:19, name:"Restaurant Group (8 loc)",   type:"business",    city:"Singapore",     country:"Singapore",   lat:1.352,  lng:103.819,ask:6100000,  bid:5500000,  sqft:null,    beds:null,baths:null,yr:2014, cap:null, rev:7200000, src:"ACRA SG Registry",      days:9   },
-  { id:20, name:"Colonial Mansion",           type:"residential", city:"Havana",        country:"Cuba",        lat:23.136, lng:-82.359,ask:980000,   bid:820000,   sqft:8200,    beds:9,  baths:8,  yr:1924, cap:null, rev:null,    src:"Registro Prop. CU",     days:210 },
+/* ═══════════════════════════════════════════════════════════
+   CONFIG — swap CSV_URL for your Google Sheet CSV export link
+   Columns expected: id, address, city, country, lat, lng,
+                     price, type, sqft, status, source, days
+═══════════════════════════════════════════════════════════ */
+const CSV_URL =
+  'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0';
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let ASSETS    = [];
+
+/* ═══════════════════════════════════════════════════════════
+   SEED DATA — Seattle + Top World Markets
+   Loads immediately; CSV feed appends on top when connected
+═══════════════════════════════════════════════════════════ */
+const SEED_ASSETS = [
+  // ── SEATTLE ──────────────────────────────────────────
+  {
+    id:'sea-001', brokerage:'RE/MAX Eastlake', agent_name:'Sarah Chen', agent_license:'WA-23918', mls_id:'NWMLS-2024001', source_url:'https://www.nwmls.com',, address:'2450 Eastlake Ave E', city:'Seattle', country:'USA',
+    lat:47.6423, lng:-122.3256, price:1850000, type:'residential', sqft:3200,
+    status:'For Sale', source:'NWMLS', days:14, parcel:'3340200225',
+    structures:[
+      {label:'Main House',sqft:2800,beds:4,baths:3,built:2003,remodel:2021,type:'Single Family'},
+      {label:'ADU / Studio',sqft:400,beds:1,baths:1,built:2019,notes:'Legal ADU, separate entrance'}
+    ],
+    infrastructure:{roof:'Composition — 4 yrs',hvac:'Forced Air + AC — 2020',water:'City of Seattle',sewer:'Seattle Public Utilities',electric:'Seattle City Light',foundation:'Poured concrete'},
+    land:{acres:0.12,topo:'Level',fencing:'Partial',parking:'2-car garage + street',vegetation:'2 Maple, 1 Cherry, garden beds',features:'Deck, patio, fully fenced yard'},
+    financials:{tax_annual:14200,zestimate:1790000},
+    bids:[{amount:1800000,terms:'Conventional — 20% down',expiry:'7 days'},{amount:1750000,terms:'All Cash',expiry:'3 days'}],
+    broker_active:true, tokenized:false
+  },
+  {
+    id:'sea-002', brokerage:'Compass Seattle', agent_name:'James Park', agent_license:'WA-18847', mls_id:'NWMLS-2024002', source_url:'https://www.nwmls.com',, address:'1411 2nd Ave, Unit 2401', city:'Seattle', country:'USA',
+    lat:47.6079, lng:-122.3370, price:3200000, type:'residential', sqft:2100,
+    status:'For Sale', source:'NWMLS', days:6, parcel:'0660001880',
+    structures:[{label:'Luxury Condo — 24th Floor',sqft:2100,beds:3,baths:2.5,built:2018,type:'Condominium',notes:'Corner unit, unobstructed Sound + mountain views'}],
+    infrastructure:{roof:'Building-managed',hvac:'Heat pump, in-unit',water:'Building',sewer:'Building',electric:'Puget Sound Energy'},
+    land:{acres:null,parking:'2 deeded spaces, EV charging',features:'Concierge, gym, rooftop terrace, pet-friendly'},
+    financials:{tax_annual:22400,hoa:1800,zestimate:3100000},
+    bids:[{amount:3100000,terms:'Cash',expiry:'24 hours'}],
+    broker_active:true, tokenized:false
+  },
+  {
+    id:'sea-003', brokerage:'Windermere RE', agent_name:'Maria Lopez', agent_license:'WA-31204', mls_id:'NWMLS-2024003', source_url:'https://www.nwmls.com',, address:'8820 35th Ave SW', city:'Seattle', country:'USA',
+    lat:47.5238, lng:-122.3804, price:875000, type:'residential', sqft:1850,
+    status:'For Sale', source:'NWMLS', days:22, parcel:'2095600130',
+    structures:[{label:'Main House',sqft:1850,beds:3,baths:1.75,built:1962,remodel:2018,type:'Single Family',notes:'Detached garage, basement'}],
+    infrastructure:{roof:'Metal — 8 yrs',hvac:'Forced Air — 2018',water:'City of Seattle',sewer:'City of Seattle',electric:'Seattle City Light',foundation:'Concrete block'},
+    land:{acres:0.15,topo:'Sloped',fencing:'Full wood fence',parking:'Detached 1-car + driveway',vegetation:'Fruit trees: apple, plum',features:'Large backyard, alley access'},
+    financials:{tax_annual:7800,zestimate:855000},
+    bids:[], broker_active:true, tokenized:false
+  },
+  {
+    id:'sea-004', brokerage:'CBRE Seattle', agent_name:'Tom Nguyen', agent_license:'WA-22091', mls_id:'CoStar-2024004', source_url:'https://www.costar.com',, address:'1200 Westlake Ave N, Suite 600', city:'Seattle', country:'USA',
+    lat:47.6268, lng:-122.3393, price:4500000, type:'commercial', sqft:6200,
+    status:'For Sale', source:'CoStar', days:45, parcel:'0660002411',
+    structures:[{label:'Office — 6th Floor',sqft:6200,beds:null,baths:4,built:2001,remodel:2022,type:'Class A Office',notes:'Lake Union views, open floor plan, server room'}],
+    infrastructure:{roof:'Building-managed',hvac:'HVAC central — 2022',water:'Building',sewer:'Building',electric:'Puget Sound Energy'},
+    land:{acres:null,parking:'12 deeded spaces in garage',features:'24/7 access, freight elevator, fiber'},
+    financials:{tax_annual:38000,zestimate:null},
+    bids:[{amount:4300000,terms:'Seller Finance — 10% down, 5yr balloon',expiry:'30 days'}],
+    broker_active:true, tokenized:false
+  },
+  {
+    id:'sea-005', brokerage:'Kidder Mathews', agent_name:'Diana Ross', agent_license:'WA-19934', mls_id:'NWMLS-2024005', source_url:'https://www.nwmls.com',, address:'4721 University Way NE', city:'Seattle', country:'USA',
+    lat:47.6636, lng:-122.3139, price:1250000, type:'commercial', sqft:3400,
+    status:'For Sale', source:'NWMLS', days:60, parcel:'3827200305',
+    structures:[{label:'Mixed-Use Retail + Apt',sqft:3400,beds:2,baths:2,built:1948,remodel:2010,type:'Mixed-Use',notes:'Street-level retail (1,800 sqft) + 2BR upstairs'}],
+    infrastructure:{roof:'Flat — 12 yrs, needs inspection',hvac:'Radiator heat + window AC',water:'Seattle Public',sewer:'Seattle Public',electric:'Seattle City Light',foundation:'Brick'},
+    land:{acres:0.07,topo:'Level',parking:'None — street',features:'High foot traffic, U District location'},
+    financials:{tax_annual:11200,zestimate:null},
+    bids:[], broker_active:true, tokenized:false
+  },
+  {
+    id:'sea-006', brokerage:'John L. Scott', agent_name:'Kevin Wu', agent_license:'WA-28871', mls_id:'NWMLS-2024006', source_url:'https://www.nwmls.com',, address:'14505 Aurora Ave N', city:'Shoreline', country:'USA',
+    lat:47.7268, lng:-122.3440, price:680000, type:'residential', sqft:1420,
+    status:'For Sale', source:'NWMLS', days:38, parcel:'8650000135',
+    structures:[{label:'Ranch House',sqft:1420,beds:3,baths:1.5,built:1955,remodel:2015,type:'Single Family'}],
+    infrastructure:{roof:'Composition — 9 yrs',hvac:'Forced Air — 2015',water:'City of Shoreline',sewer:'City of Shoreline',electric:'Puget Sound Energy',foundation:'Poured concrete'},
+    land:{acres:0.22,topo:'Level',fencing:'Full chain link',parking:'1-car garage + long driveway, RV capable',vegetation:'Mature cedar, apple tree',features:'Large lot, alley access, shop potential'},
+    financials:{tax_annual:5900,zestimate:665000},
+    bids:[{amount:670000,terms:'Conventional',expiry:'7 days'}],
+    broker_active:true, tokenized:false
+  },
+  {
+    id:'sea-007', brokerage:'Berkshire Hathaway HomeServices', agent_name:'Amanda Cole', agent_license:'WA-34512', mls_id:'NWMLS-2024007', source_url:'https://www.nwmls.com',, address:'910 NE 65th St', city:'Seattle', country:'USA',
+    lat:47.6756, lng:-122.3242, price:1100000, type:'residential', sqft:2050,
+    status:'Contingent', source:'NWMLS', days:9, parcel:'3918200270',
+    structures:[{label:'Craftsman',sqft:2050,beds:4,baths:2,built:1928,remodel:2019,type:'Single Family',notes:'Original hardwood floors, claw tub, updated kitchen'}],
+    infrastructure:{roof:'Composition — 5 yrs',hvac:'Forced Air — 2019',water:'City of Seattle',sewer:'City of Seattle',electric:'Seattle City Light',foundation:'Concrete perimeter'},
+    land:{acres:0.09,topo:'Level',fencing:'Wood privacy',parking:'1-car detached garage',vegetation:'Cherry blossom, garden',features:'Front porch, alley garage, Roosevelt neighborhood'},
+    financials:{tax_annual:8900,zestimate:1085000},
+    bids:[{amount:1100000,terms:'Conventional',expiry:'Under contract'},{amount:1050000,terms:'Cash — backup',expiry:'30 days'}],
+    broker_active:true, tokenized:false
+  },
+  {
+    id:'sea-008', brokerage:'Pacific Real Estate Group', agent_name:'David Kim', agent_license:'WA-17663', mls_id:'KCA-2024008', source_url:'https://kingcounty.gov',, address:'Vacant Land — S Beacon Hill', city:'Seattle', country:'USA',
+    lat:47.5635, lng:-122.3058, price:480000, type:'land', sqft:null,
+    status:'For Sale', source:'King County Assessor', days:120, parcel:'7442600510',
+    structures:[],
+    infrastructure:{water:'Available at street',sewer:'Available at street',electric:'Available at street'},
+    land:{acres:0.18,topo:'Sloped — south-facing views',fencing:'None',parking:'None',vegetation:'Mixed scrub',features:'Views of Rainier + downtown, zoning LR2 — 4 units allowed'},
+    financials:{tax_annual:2100,zestimate:null},
+    bids:[], broker_active:true, tokenized:false
+  },
+  // ── DUBAI ────────────────────────────────────────────
+  {
+    id:'dxb-001', brokerage:'Engel & Völkers Dubai', agent_name:'Omar Al Rashid', agent_license:'RERA-28841', mls_id:'PF-DXB-001', source_url:'https://www.propertyfinder.ae',, address:'Palm Jumeirah Signature Villa', city:'Dubai', country:'UAE',
+    lat:25.1124, lng:55.1390, price:12500000, type:'residential', sqft:9800,
+    status:'For Sale', source:'Property Finder', days:30,
+    structures:[{label:'Main Villa',sqft:8000,beds:6,baths:7,built:2017,type:'Villa',notes:'Beachfront, private pool, 3-car garage'},{label:'Guest House',sqft:1800,beds:2,baths:2,built:2017}],
+    infrastructure:{roof:'Flat concrete — maintained',hvac:'Central AC — 2023',water:'DEWA',sewer:'DEWA',electric:'DEWA'},
+    land:{acres:0.45,topo:'Level — beachfront',fencing:'Gated',parking:'3-car garage + 2 surface',vegetation:'Palms, manicured garden',features:'Private beach, pool, sea views'},
+    financials:{tax_annual:0,zestimate:null},
+    bids:[], broker_active:true, tokenized:false
+  },
+  {
+    id:'dxb-002', brokerage:'Bayut Prime', agent_name:'Leila Mansouri', agent_license:'RERA-31920', mls_id:'BAYUT-DXB-002', source_url:'https://www.bayut.com',, address:'Downtown Dubai — Burj Khalifa District', city:'Dubai', country:'UAE',
+    lat:25.1972, lng:55.2796, price:3800000, type:'residential', sqft:2600,
+    status:'For Sale', source:'Bayut', days:18,
+    structures:[{label:'Luxury Apartment',sqft:2600,beds:3,baths:3.5,built:2021,type:'High-Rise Condo',notes:'Burj Khalifa + fountain views, fully furnished'}],
+    infrastructure:{roof:'Building',hvac:'Building central AC',water:'DEWA',sewer:'DEWA',electric:'DEWA'},
+    land:{acres:null,parking:'2 spaces',features:'Concierge, pool, gym, spa — 5-star building services'},
+    financials:{tax_annual:0,hoa:2400,zestimate:null},
+    bids:[{amount:3700000,terms:'Cash',expiry:'14 days'}],
+    broker_active:true, tokenized:false
+  },
+  // ── LONDON ───────────────────────────────────────────
+  {
+    id:'lon-001', brokerage:'Savills Belgravia', agent_name:'Charles Worthington', agent_license:'RICS-44821', mls_id:'RM-LON-001', source_url:'https://www.rightmove.co.uk',, address:'15 Eaton Square, Belgravia', city:'London', country:'UK',
+    lat:51.4965, lng:-0.1527, price:18000000, type:'residential', sqft:5400,
+    status:'For Sale', source:'Rightmove', days:42,
+    structures:[{label:'Stucco Townhouse',sqft:5400,beds:5,baths:5,built:1842,remodel:2018,type:'Georgian Townhouse',notes:'Freehold, original cornicing, south garden'}],
+    infrastructure:{roof:'Lead flat + slate — 2018',hvac:'Underfloor heating + AC',water:'Thames Water',sewer:'Thames Water',electric:'UK Grid'},
+    land:{acres:0.08,topo:'Level',fencing:'Iron railing',parking:'Residents permit + private',vegetation:'Communal garden access',features:'Gated square, Grade II listed'},
+    financials:{tax_annual:7800,zestimate:null},
+    bids:[], broker_active:true, tokenized:false
+  },
+  // ── NEW YORK ──────────────────────────────────────────
+  {
+    id:'nyc-001', brokerage:'Douglas Elliman', agent_name:'Victoria Stone', agent_license:'NY-48821AB', mls_id:'SE-NYC-001', source_url:'https://streeteasy.com',, address:'432 Park Avenue, Unit 62A', city:'New York', country:'USA',
+    lat:40.7617, lng:-73.9717, price:23500000, type:'residential', sqft:4000,
+    status:'For Sale', source:'StreetEasy', days:88,
+    structures:[{label:'Full-Floor Residence',sqft:4000,beds:4,baths:4.5,built:2015,type:'Luxury Condo',notes:'10-ft windows, 360-degree views, full building amenities'}],
+    infrastructure:{roof:'Building',hvac:'In-unit fan coil',water:'Building',sewer:'NYC DEP',electric:'Con Edison'},
+    land:{acres:null,parking:'Available — valet $500/mo',features:'Concierge, pool, restaurant, library, squash court'},
+    financials:{tax_annual:96000,hoa:6500,zestimate:null},
+    bids:[], broker_active:true, tokenized:false
+  },
+  // ── MIAMI ─────────────────────────────────────────────
+  {
+    id:'mia-001', brokerage:'ONE Sotheby\'s International', agent_name:'Roberto Garcia', agent_license:'FL-BK3441209', mls_id:'MLS-MIA-001', source_url:'https://www.realtor.com',, address:'3000 Collins Ave, Unit 1401', city:'Miami Beach', country:'USA',
+    lat:25.7864, lng:-80.1300, price:5900000, type:'residential', sqft:3100,
+    status:'For Sale', source:'Realtor.com', days:25,
+    structures:[{label:'Oceanfront Condo',sqft:3100,beds:4,baths:4,built:2020,type:'Luxury Condo',notes:'Direct ocean views, private pool access, turnkey furnished'}],
+    infrastructure:{roof:'Building',hvac:'Central AC — in-unit',water:'City of Miami',sewer:'City of Miami',electric:'FPL'},
+    land:{acres:null,parking:'2 valet spaces',features:'Beach club, spa, infinity pool, restaurant'},
+    financials:{tax_annual:48000,hoa:3200,zestimate:null},
+    bids:[{amount:5750000,terms:'All Cash',expiry:'7 days'}],
+    broker_active:true, tokenized:false
+  },
+  // ── SINGAPORE ────────────────────────────────────────
+  {
+    id:'sgp-001', brokerage:'PropNex Realty', agent_name:'Wei Ling Tan', agent_license:'CEA-R012341G', mls_id:'PG-SGP-001', source_url:'https://www.propertyguru.com.sg',, address:'1 Ardmore Park', city:'Singapore', country:'Singapore',
+    lat:1.3048, lng:103.8267, price:8200000, type:'residential', sqft:2900,
+    status:'For Sale', source:'PropertyGuru', days:55,
+    structures:[{label:'Luxury Condo',sqft:2900,beds:4,baths:4,built:2001,remodel:2022,type:'Condominium',notes:'Prime District 10, freehold, full facilities'}],
+    infrastructure:{roof:'Building',hvac:'Central AC',water:'PUB',sewer:'PUB',electric:'SP Group'},
+    land:{acres:null,parking:'2 spaces',features:'Pool, gym, tennis, 24hr security'},
+    financials:{tax_annual:18000,hoa:1600,zestimate:null},
+    bids:[], broker_active:true, tokenized:false
+  },
+  // ── SYDNEY ───────────────────────────────────────────
+  {
+    id:'syd-001', brokerage:'McGrath Real Estate', agent_name:'Claire Watson', agent_license:'REIQ-00442', mls_id:'DOM-SYD-001', source_url:'https://www.domain.com.au',, address:'45 Hopetoun Ave, Vaucluse', city:'Sydney', country:'Australia',
+    lat:-33.8548, lng:151.2760, price:9800000, type:'residential', sqft:5200,
+    status:'For Sale', source:'Domain.com.au', days:33,
+    structures:[{label:'Federation House',sqft:5200,beds:5,baths:4,built:1908,remodel:2020,type:'Single Family',notes:'Harbor views, original sandstone, pool + boathouse'}],
+    infrastructure:{roof:'Terracotta tile — 2020',hvac:'Ducted AC — 2020',water:'Sydney Water',sewer:'Sydney Water',electric:'Ausgrid'},
+    land:{acres:0.52,topo:'Sloped to harbor',fencing:'Stone perimeter',parking:'3-car garage',vegetation:'Established gardens, figs, jacaranda',features:'Direct harbor access, deep-water jetty'},
+    financials:{tax_annual:32000,zestimate:null},
+    bids:[], broker_active:true, tokenized:false
+  },
+  // ── SEQUIM WA (from your docs) ───────────────────────
+  {
+    id:'seq-001', brokerage:'RE/MAX Evergreen', agent_name:'Shawn Washburn', agent_license:'WA-44219', mls_id:'NWMLS-2434863', source_url:'https://www.nwmls.com',, address:'273702 Hwy 101', city:'Sequim', country:'USA',
+    lat:48.0521, lng:-123.0847, price:1200000, type:'residential', sqft:5150,
+    status:'For Sale', source:'NWMLS #2434863', days:206, parcel:'0230323202000000',
+    structures:[
+      {label:'Main Rambler',sqft:1874,beds:3,baths:2,built:1972,type:'Single Family',notes:'Custom woodwork, hardwood floors, vaulted ceilings'},
+      {label:'Guest Cottage',sqft:938,beds:1,baths:1,built:1972,notes:'Ideal for visitors or home office'},
+      {label:'ADU — Loft',sqft:700,beds:1,baths:1,built:1972,notes:'Vaulted ceilings, income potential'},
+      {label:'Shop / Garage',sqft:3249,beds:null,baths:null,type:'Workshop',notes:'3,249 sqft, concrete floor, 220V power'}
+    ],
+    infrastructure:{roof:'Composition + Metal — 4 yrs',hvac:'Heat Pump + Ductless — 2020',water:'Individual Well — 120ft, pump 2021',sewer:'Septic — installed 1972, inspected 2024',electric:'Clallam PUD',foundation:'Poured Concrete + Slab'},
+    land:{acres:5,topo:'Sloped',fencing:'Fully fenced + gated',parking:'7 spaces: attached + detached garage, RV',vegetation:'Small orchard: apple, pear. 2 gazebos.',features:'Territorial views, outbuildings, patio, shop'},
+    financials:{tax_annual:5498,zestimate:1144900},
+    bids:[{amount:1150000,terms:'Seller Finance — 10% down, 30yr @ 5%',expiry:'30 days'}],
+    broker_active:true, tokenized:false
+  },
+  // ── AVIATION ──────────────────────────────────────────────
+  {
+    id:'avi-001', address:'Gulfstream G700 — S/N 70002', city:'Teterboro', country:'USA',
+    lat:40.8501, lng:-74.0607, price:75000000, type:'aviation', sqft:null,
+    status:'For Sale', source:'JETNET', days:18,
+    brokerage:'Air Purchase International', agent_name:'Robert Harlan', agent_license:'FAA-DLR-00441', mls_id:'JETNET-G700-002', source_url:'https://www.jetnet.com',
+    aviation:{ registration:'N700GX', aftt:'812 hrs', cycles:'290', tso_engines:'812/812 hrs', avionics:'Honeywell Primus Epic 2', last_mx:'2025-11', location:'KTEB — Teterboro NJ' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:72000000,terms:'All Cash',expiry:'14 days'}],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  {
+    id:'avi-002', address:'Bombardier Global 7500 — S/N 70241', city:'Geneva', country:'Switzerland',
+    lat:46.2381, lng:6.1087, price:62000000, type:'aviation', sqft:null,
+    status:'For Sale', source:'AMSTAT', days:44,
+    brokerage:'European Business Jets', agent_name:'Marc Dubois', agent_license:'EASA-DLR-08821', mls_id:'AMSTAT-G7500-241', source_url:'https://www.amstat.com',
+    aviation:{ registration:'HB-JGX', aftt:'1,240 hrs', cycles:'410', tso_engines:'1,240/980 hrs', avionics:'Rockwell Collins Pro Line Fusion', last_mx:'2026-01', location:'LSGG — Geneva Intl' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  // ── MARITIME ──────────────────────────────────────────────
+  {
+    id:'mar-001', address:'MV Pacific Carrier — IMO 9841203', city:'Singapore', country:'Singapore',
+    lat:1.2633, lng:103.8198, price:38000000, type:'maritime', sqft:null,
+    status:'For Sale', source:'VesselsValue', days:62,
+    brokerage:'Pacific Maritime Brokers', agent_name:'James Tan', agent_license:'MPA-BKR-2291', mls_id:'VV-IMO-9841203', source_url:'https://www.vesselsvalue.com',
+    maritime:{ imo:'9841203', flag:'Marshall Islands', dwt:'82,400 DWT', draft:'14.2m laden', loa:'229m', engine_hours:'18,450 hrs', last_drydock:'2024-03', class_cert:'DNV GL', cargo_type:'Bulk Carrier' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:36500000,terms:'30% down Bank Finance',expiry:'30 days'}],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  {
+    id:'mar-002', address:'SY Hemisphere — 73m Superyacht', city:'Palma de Mallorca', country:'Spain',
+    lat:39.5508, lng:2.6291, price:95000000, type:'maritime', sqft:null,
+    status:'For Sale', source:'Burgess Yachts', days:120,
+    brokerage:'Burgess Yachts', agent_name:'Sophie Laurent', agent_license:'MCA-YBK-4419', mls_id:'BURGESS-HEM-73', source_url:'https://www.burgesssyachts.com',
+    maritime:{ flag:'Cayman Islands', dwt:'Pleasure Vessel', draft:'4.1m', loa:'73m', engine_hours:'3,200 hrs MTU 16V', last_drydock:'2024-08', class_cert:"Lloyd's Register", cargo_type:'Superyacht' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  // ── NATURAL RESOURCES ─────────────────────────────────────
+  {
+    id:'res-001', address:'Cascade Timber Tract — 4,200 Acres', city:'Darrington', country:'USA',
+    lat:48.2534, lng:-121.6012, price:22000000, type:'resources', sqft:null,
+    status:'For Sale', source:'Mason Bruce Girard', days:88,
+    brokerage:'Pacific Rim Timberlands', agent_name:'Craig Weston', agent_license:'WA-TIMBER-3312', mls_id:'MBG-2024-CASCADE', source_url:'https://www.prtimber.com',
+    resources:{ resource_type:'Timber', acres:'4,200', timber_grade:'Douglas Fir — Grade #1 & #2', board_feet:'42M board-feet (est)', rotation:'35-40yr harvest', water_rights:'Class A — 2.4 cfs Stillaguamish tributary', road_miles:'18mi internal haul road', last_cruise:'2024-06', easements:'Conservation — upper 800 acres' },
+    financials:{}, structures:[], infrastructure:{}, land:{ acres:4200, topo:'Mixed slope 800-3,200ft' }, bids:[{amount:20000000,terms:'Land Contract 25% down',expiry:'60 days'}],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  {
+    id:'res-002', address:'Goldstrike Mineral Claim Block — Carlin Trend', city:'Elko', country:'USA',
+    lat:40.8324, lng:-116.1143, price:48000000, type:'resources', sqft:null,
+    status:'For Sale', source:'Mining Intelligence', days:210,
+    brokerage:'Western States Mineral Brokers', agent_name:'Dean Alvarez', agent_license:'NV-MIN-BKR-0882', mls_id:'MI-2024-CARLIN', source_url:'https://www.miningintelligence.com',
+    resources:{ resource_type:'Gold / Silver Mineral Rights', acres:'1,840', mineral_assay:'Au 2.4 g/t avg — 890k oz inferred', silver_assay:'Ag 18 g/t — 6.8M oz inferred', geology:'Carlin-type disseminated deposit', permits:'NV Exploration Permit NV-2019-4421', last_drill:'2023-11', historical_production:'None — greenfield' },
+    financials:{}, structures:[], infrastructure:{}, land:{ acres:1840, topo:'Basin and Range semi-arid' }, bids:[],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  // ── FINANCIAL INSTRUMENTS ────────────────────────────────
+  {
+    id:'fin-001', address:'US Treasury Note 4.625% 2031', city:'New York', country:'USA',
+    lat:40.7200, lng:-74.0100, price:10000000, type:'financial', sqft:null,
+    status:'Available', source:'FINRA TRACE', days:0,
+    brokerage:'Morgan Stanley Fixed Income', agent_name:'Fixed Income Desk', agent_license:'FINRA-BD-149777', mls_id:'CUSIP-912828XX1', source_url:'https://www.treasurydirect.gov',
+    financial:{ cusip:'912828XX1', instrument:'US Treasury Note', coupon:'4.625%', maturity:'2031-02-15', yield_current:'4.41%', yield_to_maturity:'4.38%', duration:'5.2 yrs', rating:'AAA / Aaa', face_value:'$10,000,000', settlement:'T+1', accrued_interest:'$24,166' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[{amount:9980000,terms:'Market wire T+1',expiry:'End of day'}],
+    broker_active:true, tokenized:false, image_url:null
+  },
+  {
+    id:'fin-002', address:'Miami CMBS Pool — Class A Tranche', city:'Miami', country:'USA',
+    lat:25.7800, lng:-80.2500, price:50000000, type:'financial', sqft:null,
+    status:'Available', source:'Bloomberg', days:3,
+    brokerage:'JP Morgan Structured Finance', agent_name:'Structured Products Desk', agent_license:'FINRA-BD-000079', mls_id:'CUSIP-59523PAA4', source_url:'https://www.bloomberg.com',
+    financial:{ cusip:'59523PAA4', instrument:'CMBS Class A', coupon:'5.12%', maturity:'2034-06-15', yield_current:'5.08%', yield_to_maturity:'5.05%', duration:'7.8 yrs', rating:'AAA (S&P)', face_value:'$50,000,000', ltv:'52%', collateral:'28 Miami-Dade commercial properties' },
+    financials:{}, structures:[], infrastructure:{}, land:{}, bids:[],
+    broker_active:true, tokenized:false, image_url:null
+  },
 ];
+let map3dEl   = null;
+let acInstance = null;
+let activeTab    = 'all';
+let activeFilter = 'any';
+let activeId     = null;
+let heatOn       = false;
+let domMarkers   = {};  // id → {el, asset}
 
-const TYPE_COLOR = { residential:'#3b82f6', commercial:'#f59e0b', land:'#10b981', business:'#f97316' };
-const TYPE_BADGE = { residential:'badge-residential', commercial:'badge-commercial', land:'badge-land', business:'badge-business' };
-
-let activeTab = 'all', activeFilter = 'any', activeId = null, heatOn = false, query = '';
-
-function fmt(n) {
-  if (!n && n!==0) return '—';
-  if (n>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
-  if (n>=1e6) return '$'+(n/1e6).toFixed(2)+'M';
-  if (n>=1e3) return '$'+(n/1e3).toFixed(0)+'K';
-  return '$'+n;
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════ */
+function fmtPrice(n) {
+  if (!n || n === 0) return '—';
+  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
+  return '$' + n;
+}
+function setStatus(msg) {
+  const el = document.getElementById('map-status-txt');
+  if (el) el.textContent = msg;
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+function typeClass(type) {
+  return { residential: 't-res', commercial: 't-com', business: 't-biz', land: 't-land', aviation: 't-avi', maritime: 't-mar', resources: 't-res2', financial: 't-fin' }[type] || 't-res';
 }
 
+/* ═══════════════════════════════════════════════════════════
+   CSV FEED
+═══════════════════════════════════════════════════════════ */
+async function loadMarketData() {
+  setStatus('FETCHING GLOBAL DIRECTORY…');
+  try {
+    const res = await fetch(CSV_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const parsed = parseCSV(text);
+    if (!parsed.length) throw new Error('Empty CSV');
+    // Merge seed data with CSV (seed data stays, CSV appends)
+    ASSETS = [...SEED_ASSETS, ...parsed.filter(a => !SEED_ASSETS.find(s => s.address === a.address))];
+    onDataReady();
+  } catch (e) {
+    console.info('[RWABidAsk] CSV unavailable —', e.message, '— loading seed data.');
+    ASSETS = SEED_ASSETS;
+    onDataReady();
+  }
+}
+
+function parseCSV(raw) {
+  const lines = raw.trim().split('\n');
+  if (lines.length < 2) return [];
+  const hdrs = csvRow(lines[0]).map(h => h.toLowerCase().trim());
+  const get = (obj, key) => (obj[key] || '').trim();
+  return lines.slice(1).map((line, i) => {
+    const vals = csvRow(line);
+    const o = {};
+    hdrs.forEach((h, j) => { o[h] = (vals[j] || '').replace(/^"|"$/g, '').trim(); });
+    const tryJSON = (key) => { try { return JSON.parse(get(o,key)); } catch(e) { return null; } };
+    return {
+      id:             get(o, 'id') || String(i + 1),
+      address:        get(o, 'address') || get(o, 'name') || '—',
+      city:           get(o, 'city') || '—',
+      country:        get(o, 'country') || '—',
+      lat:            parseFloat(get(o, 'lat')) || 0,
+      lng:            parseFloat(get(o, 'lng')) || 0,
+      price:          parseFloat(get(o, 'price').replace(/[^0-9.]/g, '')) || 0,
+      type:           (get(o, 'type') || 'residential').toLowerCase(),
+      sqft:           parseInt(get(o, 'sqft')) || null,
+      status:         get(o, 'status') || 'For Sale',
+      source:         get(o, 'source') || 'Public Registry',
+      days:           parseInt(get(o, 'days')) || 0,
+      parcel:         get(o, 'parcel') || null,
+      broker_active:  get(o, 'broker_active') !== 'false',
+      tokenized:      get(o, 'tokenized') === 'true',
+      structures:     tryJSON('structures') || [],
+      infrastructure: tryJSON('infrastructure') || {},
+      land:           tryJSON('land') || {},
+      financials:     tryJSON('financials') || {},
+      bids:           [],
+    };
+  }).filter(a => a.lat !== 0 && a.lng !== 0);
+}
+
+function csvRow(line) {
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { q = !q; }
+    else if (line[i] === ',' && !q) { out.push(cur); cur = ''; }
+    else { cur += line[i]; }
+  }
+  out.push(cur);
+  return out;
+}
+
+function onDataReady() {
+  setStatus('GLOBAL DIRECTORY LIVE — ' + ASSETS.length + ' ASSETS');
+  document.getElementById('s-assets').textContent = ASSETS.length;
+  document.getElementById('s-status').textContent = 'LIVE';
+  document.getElementById('s-bids').textContent = Math.floor(ASSETS.length * 4.2);
+  renderList();
+  renderDOMMarkers();
+  buildTicker(ASSETS);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILTERED VIEW
+═══════════════════════════════════════════════════════════ */
 function filtered() {
-  return DATA.filter(l => {
-    if (activeTab !== 'all' && l.type !== activeTab) return false;
-    if (activeFilter === 'sub1m' && l.ask >= 1e6) return false;
-    if (activeFilter === '1m10m' && (l.ask < 1e6 || l.ask > 10e6)) return false;
-    if (activeFilter === '10mplus' && l.ask <= 10e6) return false;
-    if (query) {
-      const q = query.toLowerCase();
-      if (![l.name,l.city,l.country,l.type].some(s => s.toLowerCase().includes(q))) return false;
-    }
+  return ASSETS.filter(a => {
+    if (activeTab !== 'all' && a.type !== activeTab) return false;
+    if (activeFilter === 'sub1m'  && a.price >= 1e6) return false;
+    if (activeFilter === '1m5m'   && (a.price < 1e6  || a.price > 5e6))  return false;
+    if (activeFilter === '5m25m'  && (a.price < 5e6  || a.price > 25e6)) return false;
+    if (activeFilter === '25mplus'&& a.price <= 25e6) return false;
     return true;
   });
 }
 
+/* ═══════════════════════════════════════════════════════════
+   RENDER LEFT LIST
+═══════════════════════════════════════════════════════════ */
 function renderList() {
+  const wrap = document.getElementById('list-scroll');
   const list = filtered();
-  document.getElementById('s-count').textContent = list.length.toLocaleString();
-  const cap = list.reduce((s,l)=>s+l.ask,0);
-  document.getElementById('s-cap').textContent = fmt(cap);
 
-  document.getElementById('listing-list').innerHTML = list.map(l=>`
-    <div class="card ${activeId===l.id?'active':''}" onclick="select(${l.id})">
-      <span class="card-badge ${TYPE_BADGE[l.type]}">${l.type}</span>
-      <div class="card-row">
-        <div class="card-name">${l.name}</div>
-        <div class="card-price">${fmt(l.ask)}</div>
+  if (!list.length) {
+    wrap.innerHTML = `
+      <div class="sync-state">
+        <div class="sync-rings">
+          <div class="sync-ring"></div><div class="sync-ring"></div>
+          <div class="sync-ring"></div><div class="sync-dot"></div>
+        </div>
+        <div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div>
+      </div>`;
+    return;
+  }
+
+  wrap.innerHTML = list.map(a => {
+    const mainStruct = a.structures && a.structures[0];
+    const bedbath = mainStruct && mainStruct.beds
+      ? `${mainStruct.beds}bd · ${mainStruct.baths}ba${a.sqft ? ' · ' + a.sqft.toLocaleString() + ' sf' : ''}`
+      : (a.sqft ? a.sqft.toLocaleString() + ' sqft' : '');
+    return `
+    <div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">
+      ${a.days ? `<div class="pcard-days">${a.days}d</div>` : ''}
+      <div class="pcard-addr">${a.address}</div>
+      <div class="pcard-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
+      ${bedbath ? `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${bedbath}</div>` : ''}
+      <div class="pcard-bottom">
+        <div class="pcard-price">${fmtPrice(a.price)}</div>
+        <span class="pcard-type ${typeClass(a.type)}">${a.type}</span>
       </div>
-      <div class="card-loc">${l.city}, ${l.country}</div>
-      <div class="card-spread">
-        <span class="spread-label">Bid</span><span class="spread-item spread-bid">${fmt(l.bid)}</span>
-        <span style="color:var(--border-strong);margin:0 2px">|</span>
-        <span class="spread-label">Ask</span><span class="spread-item spread-ask">${fmt(l.ask)}</span>
-      </div>
-      <div class="card-source">${l.src} · ${l.days}d listed</div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
-function select(id) {
+/* ═══════════════════════════════════════════════════════════
+   SELECT & DETAIL
+═══════════════════════════════════════════════════════════ */
+function selectAsset(id) {
   activeId = id;
   renderList();
-  const l = DATA.find(x=>x.id===id);
-  renderDetail(l);
-  map.flyTo({ center:[l.lng,l.lat], zoom:10, duration:1200, essential:true });
+  const a = ASSETS.find(x => x.id === id);
+  if (!a) return;
+  renderDetail(a);   // keep right panel updated too
+  flyTo(a.lat, a.lng, 1400, 45);
+  openDrawer(a);
 }
 
-function renderDetail(l) {
-  const spread = l.ask - l.bid;
-  const spreadPct = ((spread/l.ask)*100).toFixed(1);
-
-  document.getElementById('detail-top').innerHTML = `
-    <span class="card-badge ${TYPE_BADGE[l.type]}" style="margin-bottom:8px;display:inline-block">${l.type}</span>
-    <div class="d-name">${l.name}</div>
-    <div class="d-loc">${l.city}, ${l.country}</div>
-    <div class="d-price-row">
-      <div class="d-price">${fmt(l.ask)}</div>
-      <div class="d-psf">${l.sqft ? fmt(Math.round(l.ask/l.sqft))+'/sqft' : ''}</div>
+function renderDetail(a) {
+  document.getElementById('rhead').innerHTML = `
+    <div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div>
+    <div class="rname">${a.address}</div>
+    <div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
+    <div class="rprice-row">
+      <div class="rprice">${fmtPrice(a.price)}</div>
+      <div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div>
     </div>
   `;
 
-  let rows = '';
-  if (l.sqft) rows += row('Size', l.sqft.toLocaleString() + ' sqft');
-  if (l.beds) rows += row('Beds / Baths', l.beds + ' / ' + l.baths);
-  if (l.yr)   rows += row('Year', l.yr);
-  if (l.cap)  rows += row('Cap Rate', l.cap + '%');
-  if (l.rev)  rows += row('Annual Revenue', fmt(l.rev));
-  rows += row('Days Listed', l.days + 'd');
-  rows += `<div class="data-row"><span class="data-key">Source</span><span class="data-val source">${l.src}</span></div>`;
+  // Build structure manifest blocks
+  const structs = a.structures || [];
+  const structHTML = structs.length ? `
+    <div class="rsect">
+      <div class="rsect-title">Structure Manifest</div>
+      ${structs.map((s, i) => `
+        <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px">
+          <div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px;letter-spacing:.3px">${s.label || ('Structure ' + (i+1))}</div>
+          ${s.sqft      ? rr('Size', s.sqft.toLocaleString() + ' sqft') : ''}
+          ${s.beds      ? rr('Beds', s.beds) : ''}
+          ${s.baths     ? rr('Baths', s.baths) : ''}
+          ${s.built     ? rr('Built', s.built) : ''}
+          ${s.remodel   ? rr('Remodeled', s.remodel) : ''}
+          ${s.type      ? rr('Type', s.type) : ''}
+          ${s.notes     ? rr('Notes', s.notes) : ''}
+        </div>`).join('')}
+    </div>` : '';
 
-  const pct = (v,max)=>Math.min(98,Math.round(v/max*100));
-  const mktPct = Math.floor(30+Math.random()*50);
-  const viewsN = Math.floor(80+Math.random()*1800);
+  // Build infrastructure manifest
+  const infra = a.infrastructure || {};
+  const infraHTML = Object.keys(infra).length ? `
+    <div class="rsect">
+      <div class="rsect-title">Infrastructure</div>
+      ${infra.roof    ? rr('Roof', infra.roof) : ''}
+      ${infra.hvac    ? rr('HVAC', infra.hvac) : ''}
+      ${infra.water   ? rr('Water', infra.water) : ''}
+      ${infra.sewer   ? rr('Sewer', infra.sewer) : ''}
+      ${infra.electric? rr('Electric', infra.electric) : ''}
+      ${infra.foundation ? rr('Foundation', infra.foundation) : ''}
+    </div>` : '';
 
-  document.getElementById('detail-body').innerHTML = `
-    <div class="detail-inner">
-      <div class="verified"><div class="verified-dot"></div>Verified public record</div>
+  // Build land manifest
+  const land = a.land || {};
+  const landHTML = Object.keys(land).length ? `
+    <div class="rsect">
+      <div class="rsect-title">Land & Lot</div>
+      ${land.acres    ? rr('Lot Size', land.acres + ' acres') : ''}
+      ${land.topo     ? rr('Topography', land.topo) : ''}
+      ${land.fencing  ? rr('Fencing', land.fencing) : ''}
+      ${land.parking  ? rr('Parking', land.parking) : ''}
+      ${land.vegetation ? rr('Vegetation', land.vegetation) : ''}
+      ${land.features ? rr('Features', land.features) : ''}
+    </div>` : '';
 
-      <div class="ba-box">
-        <div class="ba-cols">
-          <div class="ba-col">
-            <div class="ba-col-label">Best Bid</div>
-            <div class="ba-col-val bid-color">${fmt(l.bid)}</div>
-          </div>
-          <div class="ba-divider"></div>
-          <div class="ba-col">
-            <div class="ba-col-label">Ask Price</div>
-            <div class="ba-col-val ask-color">${fmt(l.ask)}</div>
-          </div>
-        </div>
-        <div class="spread-info">Spread ${fmt(spread)} · ${spreadPct}%</div>
+  // Build financial block
+  const fin = a.financials || {};
+  const finHTML = `
+    <div class="rsect">
+      <div class="rsect-title">Financial Data</div>
+      ${a.price       ? rr('Listed Price', `<span class="rv hl">${fmtPrice(a.price)}</span>`) : ''}
+      ${a.sqft        ? rr('Price / sqft', fmtPrice(Math.round(a.price / a.sqft))) : ''}
+      ${fin.tax_annual ? rr('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}
+      ${fin.hoa       ? rr('HOA / mo', '$' + fin.hoa) : ''}
+      ${fin.zestimate ? rr('Est. Value', fmtPrice(fin.zestimate)) : ''}
+      ${a.days        ? rr('Days Listed', a.days + 'd') : ''}
+      ${rr('Source', a.source || 'Public Registry')}
+      ${rr('Parcel #', a.parcel || '—')}
+    </div>`;
+
+  // Bid order book (show current bids from BIDS cache)
+  const bidsHTML = `
+    <div class="rsect">
+      <div class="rsect-title">Bid Order Book</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">
+        All bids are permanent. No broker can remove them. Highest offer always visible.
+      </div>
+      ${(a.bids && a.bids.length) ? a.bids.map(b => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px">
+          <span style="color:var(--cyan);font-weight:600">${fmtPrice(b.amount)}</span>
+          <span style="color:var(--muted)">${b.terms || 'cash'}</span>
+          <span style="color:var(--dim)">${b.expiry || ''}</span>
+        </div>`).join('')
+      : `<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>`}
+    </div>`;
+
+  document.getElementById('rbody').innerHTML = `
+    <div class="rinner">
+      <div class="act-grid">
+        <button class="abtn a-buy"  onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button>
+        <button class="abtn a-bid"  onclick="requireAuth('bid','${a.id}')">PLACE BID</button>
+        <button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button>
+        <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button>
+        <button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button>
+        <button class="abtn" style="background:none;border:1px solid rgba(139,92,246,.3)!important;color:#a78bfa" onclick="requireAuth('bid','${a.id}')">BID ON LEDGER</button>
+        <button class="abtn a-claim"   onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button>
+        <button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button>
       </div>
 
-      <div class="action-grid">
-        <button class="action-btn a-buy" onclick="notify('Buy order submitted — KYC required to complete')">Buy now</button>
-        <button class="action-btn a-bid" onclick="notify('Bid placed — seller notified')">Place bid</button>
-        <button class="action-btn a-contact" onclick="notify('Message sent to listing party')">Contact</button>
-        <button class="action-btn a-save" onclick="notify('Saved to watchlist')">Watchlist</button>
-      </div>
+      ${structHTML}
+      ${landHTML}
+      ${infraHTML}
+      ${finHTML}
+      ${bidsHTML}
 
-      <div class="section">
-        <div class="section-title">Property data</div>
-        ${rows}
-      </div>
-
-      <div class="section">
-        <div class="section-title">Market position</div>
-        ${barRow('Price/sqft', mktPct, '#3b82f6', mktPct+'th %ile')}
-        ${barRow('Days listed', pct(l.days,250), '#f59e0b', l.days+'d')}
-        ${barRow('Views (7d)', pct(viewsN,2000), '#f97316', viewsN.toLocaleString())}
-      </div>
-
-      <div class="section">
-        <div class="ai-label">AI Deal Brief</div>
-        <div class="ai-brief">${brief(l, spreadPct)}</div>
+      <div class="rsect">
+        <div class="rsect-title">Market Status</div>
+        ${rr('Asset ID', '#' + a.id)}
+        ${rr('Coordinates', a.lat.toFixed(5) + ', ' + a.lng.toFixed(5))}
+        ${rr('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}
+        ${rr('Listing Active', a.broker_active !== false ? 'Yes' : 'Expired — Data Retained')}
+        ${rr('KYC Required', 'Yes — to bid or buy')}
       </div>
     </div>
   `;
 }
 
-function row(k,v) {
-  return `<div class="data-row"><span class="data-key">${k}</span><span class="data-val">${v}</span></div>`;
-}
-function barRow(label, pct, color, stat) {
-  return `<div class="bar-row">
-    <div class="bar-label">${label}</div>
-    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
-    <div class="bar-stat" style="color:${color}">${stat}</div>
-  </div>`;
-}
-function brief(l, sp) {
-  if (l.type==='business') return `Revenue multiple: ${l.rev?(l.ask/l.rev).toFixed(1)+'×':'N/A'}. ${sp}% negotiation room signals motivated seller. Recommend 90-day LOI with seller financing inquiry and earnout clause.`;
-  if (l.type==='land') return `Raw land with ${sp}% bid-ask spread. Pure appreciation or development play. Verify zoning via local registry before offer.`;
-  if (l.cap) return `Cap rate ${l.cap}% is ${l.cap>7?'above':'below'} regional average. ${sp}% spread. Stabilized income asset — seller may accept ${fmt(Math.round(l.bid*1.05/1000)*1000)} on direct approach.`;
-  return `${sp}% spread from best bid. Seller likely flexible at ${fmt(Math.round((l.bid+l.ask)/2/1000)*1000)}. Direct negotiation recommended — skip the broker.`;
+function rr(k, v) {
+  return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`;
 }
 
-// ── TABS / FILTERS ──
+/* ═══════════════════════════════════════════════════════════
+   TABS / FILTERS
+═══════════════════════════════════════════════════════════ */
 function setTab(el, t) {
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active'); activeTab=t; renderList();
+  document.querySelectorAll('.ptab').forEach(x => x.classList.remove('on'));
+  el.classList.add('on');
+  activeTab = t;
+  renderList();
+  syncMarkerVisibility();
 }
 function setFilter(el, f) {
-  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active'); activeFilter=f; renderList();
+  document.querySelectorAll('.fchip').forEach(x => x.classList.remove('on'));
+  el.classList.add('on');
+  activeFilter = f;
+  renderList();
+  syncMarkerVisibility();
 }
-document.getElementById('search-input').addEventListener('input', e=>{query=e.target.value;renderList();});
-
-// ── MAP ──
-const MAP_STYLES = {
-  satellite: 'https://tiles.openfreemap.org/styles/positron',
-  street:    'https://tiles.openfreemap.org/styles/liberty',
-  dark:      'https://tiles.openfreemap.org/styles/dark',
-};
-
-const map = new maplibregl.Map({
-  container: 'map',
-  style: 'https://tiles.openfreemap.org/styles/positron',
-  center: [20, 25],
-  zoom: 2.2,
-  attributionControl: false,
-});
-map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
-
-const markers = {};
-
-map.on('load', () => {
-  DATA.forEach(l => {
-    const el = document.createElement('div');
-    const size = Math.max(10, Math.min(22, 10 + Math.log10(l.ask/100000)*3));
-    el.style.cssText = `
-      width:${size}px; height:${size}px; border-radius:50%;
-      background:${TYPE_COLOR[l.type]}; cursor:pointer;
-      border:2px solid rgba(255,255,255,.3);
-      box-shadow:0 0 0 2px ${TYPE_COLOR[l.type]}44;
-      transition:transform .15s;
-    `;
-    el.addEventListener('mouseenter', e => {
-      el.style.transform = 'scale(1.4)';
-      showTT(l, e.clientX, e.clientY);
-    });
-    el.addEventListener('mouseleave', () => {
-      el.style.transform = 'scale(1)';
-      document.getElementById('tt').classList.remove('show');
-    });
-    el.addEventListener('mousemove', e => moveTT(e.clientX, e.clientY));
-    el.addEventListener('click', () => select(l.id));
-
-    const m = new maplibregl.Marker({ element: el }).setLngLat([l.lng, l.lat]).addTo(map);
-    markers[l.id] = { marker: m, el, listing: l, defaultColor: TYPE_COLOR[l.type], size };
+function syncMarkerVisibility() {
+  if (!markersVisible()) {
+    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+    return;
+  }
+  const vis = new Set(viewportVisible(filtered()).map(a => a.id));
+  Object.entries(domMarkers).forEach(([id, { el }]) => {
+    el.style.display = vis.has(id) ? 'flex' : 'none';
   });
-});
-
-function showTT(l, x, y) {
-  const tt = document.getElementById('tt');
-  document.getElementById('tt-name').textContent = l.name;
-  document.getElementById('tt-price').textContent = fmt(l.ask) + ' ask · ' + fmt(l.bid) + ' bid';
-  document.getElementById('tt-loc').textContent = l.city + ', ' + l.country;
-  tt.classList.add('show');
-  moveTT(x,y);
-}
-function moveTT(x,y) {
-  const tt = document.getElementById('tt');
-  tt.style.left = (x+14)+'px'; tt.style.top = (y-12)+'px';
 }
 
-function setStyle(s) {
-  document.querySelectorAll('.mc-btn[id^=btn-]').forEach(b=>b.classList.remove('active'));
-  document.getElementById('btn-'+s).classList.add('active');
-  map.setStyle(MAP_STYLES[s] || MAP_STYLES.satellite);
+/* ═══════════════════════════════════════════════════════════
+   GOOGLE MAPS 3D  (Map3DElement — requires v=alpha)
+═══════════════════════════════════════════════════════════ */
+async function initMap() {
+  try {
+    // importLibrary is the correct alpha API approach
+    const maps3dLib = await google.maps.importLibrary('maps3d');
+    const Map3DElement = maps3dLib.Map3DElement;
+
+    map3dEl = new Map3DElement({
+      center: { lat: 20, lng: 10, altitude: 0 },
+      range: 22000000,
+      tilt: 0,
+      heading: 0,
+    });
+    // Set satellite mode after construction
+    try {
+      const { MapMode } = maps3dLib;
+      if (MapMode) map3dEl.mode = MapMode.SATELLITE;
+    } catch(e) { /* mode may not be needed */ }
+
+    const container = document.getElementById('map3d-container');
+    container.style.cssText = 'position:absolute;inset:0;';
+    container.appendChild(map3dEl);
+
+    // Wait one frame for element to attach, then gentle tilt
+    requestAnimationFrame(() => {
+      setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200);
+    });
+
+    setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
+
+    // Load CSV data
+    await loadMarketData();
+
+    // Init Places search (must come after map loads)
+    initSearch();
+
+  } catch (err) {
+    console.error('[RWABidAsk] Map3DElement init error:', err);
+    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING');
+  }
 }
 
-function toggleHeat() {
+/* ═══════════════════════════════════════════════════════════
+   SEARCH — Places Autocomplete
+═══════════════════════════════════════════════════════════ */
+async function initSearch() {
+  const input = document.getElementById('search-input');
+  if (!input) return;
+  try {
+    // Try new PlaceAutocompleteElement first (alpha)
+    let usedLegacy = false;
+    try {
+      const placesLib = await google.maps.importLibrary('places');
+      if (placesLib.Autocomplete) {
+        const ac = new placesLib.Autocomplete(input, {
+          fields: ['geometry', 'name', 'formatted_address'],
+        });
+        acInstance = ac;
+        ac.addListener('place_changed', onPlaceSelected.bind(null, ac));
+        usedLegacy = true;
+      }
+    } catch(e) { /* fall through */ }
+
+    // Fallback: classic google.maps.places.Autocomplete
+    if (!usedLegacy && google.maps.places && google.maps.places.Autocomplete) {
+      const ac = new google.maps.places.Autocomplete(input, {
+        fields: ['geometry', 'name', 'formatted_address'],
+      });
+      acInstance = ac;
+      ac.addListener('place_changed', onPlaceSelected.bind(null, ac));
+    }
+  } catch (e) {
+    console.warn('[RWABidAsk] Search init error:', e);
+  }
+}
+
+function onPlaceSelected(ac) {
+  const place = ac.getPlace();
+  if (!place || !place.geometry || !place.geometry.location) {
+    toast('Location not found — try a more specific address');
+    return;
+  }
+  const lat = place.geometry.location.lat();
+  const lng = place.geometry.location.lng();
+  flyTo(lat, lng, 1400, 45);
+  setStatus('LOCATION: ' + (place.name || place.formatted_address || '').toUpperCase());
+  logLead(null, 'search', null);
+
+  // Inject as unclaimed search result
+  const searched = {
+    id:      'search-' + Date.now(),
+    address: place.name || (place.formatted_address || '').split(',')[0],
+    city:    ((place.formatted_address || '').split(',')[1] || '').trim(),
+    country: ((place.formatted_address || '').split(',').pop() || '').trim(),
+    lat, lng,
+    price: 0, type: 'residential',
+    sqft: null, status: 'Unclaimed — Search Result',
+    source: 'Google Places', days: 0,
+  };
+  ASSETS.unshift(searched);
+  renderList();
+  buildTicker(ASSETS);
+  addDOMMarker(searched);
+  setTimeout(() => { selectAsset(searched.id); openDrawer(searched); }, 900);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CAMERA NAVIGATION
+═══════════════════════════════════════════════════════════ */
+function flyTo(lat, lng, range, tilt) {
+  if (!map3dEl) return;
+  try {
+    map3dEl.flyCameraTo({
+      endCamera: {
+        center: { lat, lng, altitude: 0 },
+        tilt: tilt ?? 45,
+        range: range ?? 1400,
+        heading: 0,
+      },
+      durationMillis: 2600,
+    });
+  } catch (e) {
+    // Fallback direct set
+    map3dEl.center  = { lat, lng, altitude: 0 };
+    map3dEl.range   = range ?? 1400;
+    map3dEl.tilt    = tilt ?? 45;
+  }
+}
+
+function flyGlobe() {
+  flyTo(20, 10, 22000000, 0);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAP CONTROLS
+═══════════════════════════════════════════════════════════ */
+function setMapMode(mode, btn) {
+  document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  if (map3dEl) {
+    try {
+      map3dEl.mode = mode === 'satellite'
+        ? google.maps.maps3d.MapMode.SATELLITE
+        : google.maps.maps3d.MapMode.HYBRID;
+    } catch(e) {
+      map3dEl.setAttribute('mode', mode);
+    }
+  }
+}
+
+function setTilt(deg, btn) {
+  document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  if (map3dEl) map3dEl.tilt = deg;
+}
+
+function toggleHeat(btn) {
   heatOn = !heatOn;
-  document.getElementById('btn-heat').classList.toggle('active', heatOn);
-  document.getElementById('legend-type').style.display = heatOn ? 'none' : 'block';
-  document.getElementById('legend-heat').style.display = heatOn ? 'block' : 'none';
-  Object.values(markers).forEach(({el, listing, defaultColor, size}) => {
-    if (heatOn) {
-      const psf = listing.sqft ? listing.ask/listing.sqft : 500;
-      const t = Math.min(1, Math.log(psf/50)/Math.log(100));
-      const h = Math.round((1-t)*240);
-      const c = `hsl(${h},90%,55%)`;
-      el.style.background = c; el.style.boxShadow = `0 0 0 2px ${c}44`;
-    } else {
-      el.style.background = defaultColor; el.style.boxShadow = `0 0 0 2px ${defaultColor}44`;
+  btn.classList.toggle('on', heatOn);
+  const prices = ASSETS.map(a => a.price).filter(Boolean);
+  const max = Math.max(...prices, 1);
+  const p33 = max * 0.33;
+  const p66 = max * 0.66;
+  Object.values(domMarkers).forEach(({ el, asset }) => {
+    el.classList.remove('heat-warm', 'heat-hot');
+    if (heatOn && asset.price) {
+      if (asset.price > p66)      el.classList.add('heat-hot');
+      else if (asset.price > p33) el.classList.add('heat-warm');
     }
   });
+  toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF');
 }
 
-// ── MODALS ──
-function openModal(type) {
-  document.getElementById('modal-inner').innerHTML = type==='list' ? listModal() : kycModal();
+/* ═══════════════════════════════════════════════════════════
+   DOM MARKERS (glowing cyan dots overlay)
+   These are positioned using the 3D map's projection.
+   Because Map3DElement doesn't yet expose a stable pixel
+   projection API in beta, we use a WebGL-free overlay approach:
+   we place markers via CSS absolute positioning recalculated
+   on camera change events.
+═══════════════════════════════════════════════════════════ */
+function renderDOMMarkers() {
+  const layer = document.getElementById('overlay-layer');
+  layer.innerHTML = '';
+  domMarkers = {};
+  // Only render if zoomed in enough
+  if (markersVisible()) {
+    const visible = viewportVisible(ASSETS);
+    visible.forEach(a => _addPriceMarker(a));
+  }
+  // On camera change: cull + reproject
+  if (map3dEl) {
+    map3dEl.addEventListener('gmp-centerchange',  onCameraChange);
+    map3dEl.addEventListener('gmp-rangechange',   onCameraChange);
+    map3dEl.addEventListener('gmp-tiltchange',    onCameraChange);
+    map3dEl.addEventListener('gmp-headingchange', onCameraChange);
+  }
+}
+
+let _cameraChangeTimer = null;
+const MARKER_RANGE_THRESHOLD = 500000; // 500km — hide tags above this altitude
+
+function markersVisible() {
+  if (!map3dEl) return false;
+  const range = map3dEl.range || 22000000;
+  return range <= MARKER_RANGE_THRESHOLD;
+}
+
+function onCameraChange() {
+  clearTimeout(_cameraChangeTimer);
+  _cameraChangeTimer = setTimeout(() => {
+    const show = markersVisible();
+    if (!show) {
+      // Hide all markers when zoomed out too far — clean globe view
+      Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+      return;
+    }
+    reprojectMarkers();
+    // Viewport cull: hide off-screen, add newly visible
+    const vis = new Set(viewportVisible(filtered()).map(a => a.id));
+    Object.entries(domMarkers).forEach(([id, { el }]) => {
+      if (!vis.has(id)) el.style.display = 'none';
+    });
+    vis.forEach(id => {
+      if (!domMarkers[id]) {
+        const a = ASSETS.find(x => x.id === id);
+        if (a) _addPriceMarker(a);
+      } else {
+        // Ensure existing marker is visible
+        const { el, asset } = domMarkers[id];
+        projectMarker(asset, el);
+      }
+    });
+  }, 80);
+}
+
+// Returns assets visible in the current map viewport (approximate)
+function viewportVisible(assets) {
+  if (!map3dEl) return assets;
+  try {
+    const center = map3dEl.center || { lat: 20, lng: 10 };
+    const range  = map3dEl.range  || 22000000;
+    // Convert range (meters from camera) to approximate degree spread
+    const degSpread = Math.min(180, (range / 111000) * 1.6);
+    const latMin = (center.lat || 0) - degSpread;
+    const latMax = (center.lat || 0) + degSpread;
+    const lngSpread = degSpread / Math.max(0.1, Math.cos((center.lat || 0) * Math.PI / 180));
+    const lngMin = (center.lng || 0) - lngSpread;
+    const lngMax = (center.lng || 0) + lngSpread;
+    return assets.filter(a =>
+      a.lat >= latMin && a.lat <= latMax &&
+      a.lng >= lngMin && a.lng <= lngMax
+    );
+  } catch(e) {
+    return assets;
+  }
+}
+
+let lastSearchMarkerId = null;
+function addDOMMarker(asset) {
+  if (lastSearchMarkerId && domMarkers[lastSearchMarkerId]) {
+    domMarkers[lastSearchMarkerId].el.remove();
+    delete domMarkers[lastSearchMarkerId];
+  }
+  lastSearchMarkerId = asset.id;
+  _addPriceMarker(asset);
+}
+
+function _addPriceMarker(asset) {
+  const el = document.createElement('div');
+  el.className = 'price-marker';
+  el.title = asset.address;
+  const priceStr = fmtPrice(asset.price) || '—';
+  const typeStr  = asset.type || 'asset';
+  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'', commercial:'', land:'', business:'◈' };
+  const emoji = classEmoji[asset.type] || '';
+  el.innerHTML = `
+    <div class="price-tag">
+      <div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div>
+      <div class="price-tag-type">${typeStr}</div>
+    </div>
+    <div class="price-stem"></div>
+    <div class="price-dot"></div>
+  `;
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openDrawer(asset);
+    selectAsset(asset.id);
+  });
+  document.getElementById('overlay-layer').appendChild(el);
+  domMarkers[asset.id] = { el, asset };
+  projectMarker(asset, el);
+}
+
+function projectMarker(asset, el) {
+  if (!map3dEl) return;
+  try {
+    const mapRect = document.getElementById('map-col').getBoundingClientRect();
+    const w = mapRect.width, h = mapRect.height;
+    const camCenter = map3dEl.center || { lat: 20, lng: 10 };
+    const camRange  = map3dEl.range  || 22000000;
+    const camTilt   = map3dEl.tilt   || 0;
+    const camHead   = map3dEl.heading || 0;
+    const dLat = asset.lat - (camCenter.lat || 0);
+    const dLng = asset.lng - (camCenter.lng || 0);
+    const ppd = Math.max(0.1, (w / 2) / (camRange / 111000));
+    const cos = Math.cos((camCenter.lat || 0) * Math.PI / 180);
+    const headRad = camHead * Math.PI / 180;
+    const rx = dLng * cos * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
+    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cos * ppd * Math.sin(headRad);
+    const tiltFactor = Math.cos(camTilt * Math.PI / 180);
+    const screenX = w / 2 + rx;
+    const screenY = h / 2 + ry * tiltFactor;
+    const pad = 60;
+    if (screenX < -pad || screenX > w + pad || screenY < -pad || screenY > h + pad) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = 'flex';
+      el.style.left = screenX + 'px';
+      el.style.top  = screenY + 'px';
+    }
+  } catch(e) { el.style.display = 'none'; }
+}
+
+function reprojectMarkers() {
+  Object.values(domMarkers).forEach(({ el, asset }) => projectMarker(asset, el));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INSTITUTIONAL ASSET DRAWER
+═══════════════════════════════════════════════════════════ */
+function openDrawer(a) {
+  const drawer = document.getElementById('asset-drawer');
+  const inner  = document.getElementById('drawer-inner');
+  const assetClass = (a.type || 'residential').toLowerCase();
+
+  const mainS = a.structures && a.structures[0];
+  const beds  = mainS?.beds  ?? a.beds  ?? '—';
+  const baths = mainS?.baths ?? a.baths ?? '—';
+  const sqft  = a.sqft || mainS?.sqft || null;
+  const fin   = a.financials    || {};
+  const infra = a.infrastructure || {};
+  const land  = a.land          || {};
+  const avi   = a.aviation      || {};
+  const mar   = a.maritime      || {};
+  const res   = a.resources     || {};
+  const fininst = a.financial   || {};
+
+  // ── Hero or class icon
+  const classIcons = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', residential:'⌂', commercial:'🏢', land:'◻', business:'◈' };
+  const heroHTML = a.image_url
+    ? `<img class="drawer-hero" src="${a.image_url}" alt="${a.address}" onerror="this.parentNode.innerHTML='<div class=drawer-hero-placeholder>${classIcons[assetClass]||'◎'}</div>'">`
+    : `<div class="drawer-hero-placeholder" style="font-size:48px">${classIcons[assetClass]||'◎'}</div>`;
+
+  const isActive   = a.broker_active !== false;
+  const statusText = isActive ? (a.status || 'For Sale') : 'Listing Expired — Data Retained';
+  const statusCls  = isActive ? '' : 'inactive';
+
+  // ── PILLAR 3: Savings Engine (first — prioritized on mobile)
+  const trad   = a.price ? a.price * 0.03 : 0;
+  const rwafee = a.price ? 999 + (a.price * 0.001) : 0;
+  const saved  = trad - rwafee;
+  const savingsHTML = a.price ? `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Transaction Analysis</div>
+      <div class="savings-block">
+        <div class="savings-row">
+          <span class="savings-k">Traditional Commission (3%)</span>
+          <span class="savings-v strike">$${trad.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
+        </div>
+        <div class="savings-row">
+          <span class="savings-k">RWABidAsk Tech Fee (flat $999 + 0.1%)</span>
+          <span class="savings-v fee">$${rwafee.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
+        </div>
+        <div class="savings-total">
+          <span class="savings-total-k">You Save</span>
+          <span class="savings-total-v">$${saved.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
+        </div>
+        <div class="savings-saas">
+          RWABidAsk is a non-custodial software service. We provide the digital bridge; you retain your legal keys.
+        </div>
+      </div>
+    </div>` : '';
+
+  // ── PILLAR 2: Digital Ledger & Proof of Ownership
+  const assetHash = 'rwa:' + a.id + ':' + (a.price||0);
+  const fakeHash  = Array.from(assetHash).reduce((h,c)=>(h=((h<<5)-h)+c.charCodeAt(0),h&h),0);
+  const hashHex   = Math.abs(fakeHash).toString(16).padStart(8,'0') + a.id.replace(/[^a-z0-9]/gi,'').slice(0,24).padEnd(24,'0');
+  const isMinted  = !!a.tokenized;
+
+  const ledgerHTML = `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Digital Ledger & Proof of Ownership</div>
+      <div class="ledger-card" id="ledger-${a.id}">
+        <div class="ledger-status">
+          <div class="ledger-dot ${isMinted ? 'minted' : ''}"></div>
+          <div class="ledger-label">${isMinted ? 'Anchored to Solana Blockchain' : 'Not yet digitized — manifest not anchored'}</div>
+        </div>
+        ${isMinted
+          ? `<div class="ledger-hash-preview">${hashHex}</div>`
+          : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitizing creates a tamper-proof Solana record of the asset manifest, ownership chain, and bid history.</div>`
+        }
+        <button class="digitize-btn" id="digitize-btn-${a.id}" ${isMinted ? 'disabled' : ''}
+          onclick="runMintAnimation('${a.id}','${hashHex}',this)">
+          ${isMinted ? '✓ Asset Digitized on Solana' : '⬡ Digitize Asset on Solana'}
+        </button>
+      </div>
+    </div>`;
+
+  // ── Compliance block
+  const compHTML = `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Listing Compliance</div>
+      <div class="compliance-block">
+        ${dr('Brokerage',       a.brokerage     || 'Not disclosed')}
+        ${dr('Agent / Desk',    a.agent_name    || 'Not disclosed')}
+        ${dr('License #',       a.agent_license || '—')}
+        ${dr('Listing ID',      a.mls_id || a.source || '—')}
+        ${a.parcel ? dr('Parcel #', a.parcel) : ''}
+        ${dr('Data Source',     a.source || 'Public Registry')}
+      </div>
+    </div>`;
+
+  // ── PILLAR 1: Class-specific manifest
+  let classManifestHTML = '';
+
+  if (assetClass === 'aviation' && Object.keys(avi).length) {
+    classManifestHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Aviation Manifest</div>
+        ${avi.registration ? drq('Registration (N#)', avi.registration) : ''}
+        ${avi.aftt         ? drq('Airframe Total Time', avi.aftt) : ''}
+        ${avi.cycles       ? drq('Total Cycles', avi.cycles) : ''}
+        ${avi.tso_engines  ? drq('TSO — Engines', avi.tso_engines) : ''}
+        ${avi.avionics     ? drq('Avionics Package', avi.avionics) : ''}
+        ${avi.last_mx      ? drq('Last Major MX', avi.last_mx) : ''}
+        ${avi.location     ? drq('Current Location', avi.location) : ''}
+      </div>`;
+  } else if (assetClass === 'maritime' && Object.keys(mar).length) {
+    classManifestHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Vessel Manifest</div>
+        ${mar.imo          ? drq('IMO Number', mar.imo) : ''}
+        ${mar.flag         ? drq('Flag State', mar.flag) : ''}
+        ${mar.cargo_type   ? drq('Vessel Type', mar.cargo_type) : ''}
+        ${mar.dwt          ? drq('Deadweight Tonnage', mar.dwt) : ''}
+        ${mar.loa          ? drq('Length Overall (LOA)', mar.loa) : ''}
+        ${mar.draft        ? drq('Draft', mar.draft) : ''}
+        ${mar.engine_hours ? drq('Engine Hours', mar.engine_hours) : ''}
+        ${mar.last_drydock ? drq('Last Drydock', mar.last_drydock) : ''}
+        ${mar.class_cert   ? drq('Class Certificate', mar.class_cert) : ''}
+      </div>`;
+  } else if (assetClass === 'resources' && Object.keys(res).length) {
+    classManifestHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Resource Manifest</div>
+        ${res.resource_type     ? drq('Resource Type', res.resource_type) : ''}
+        ${res.acres             ? drq('Total Acres', res.acres) : ''}
+        ${res.timber_grade      ? drq('Timber Grade', res.timber_grade) : ''}
+        ${res.board_feet        ? drq('Volume (Board-Feet)', res.board_feet) : ''}
+        ${res.rotation          ? drq('Harvest Rotation', res.rotation) : ''}
+        ${res.mineral_assay     ? drq('Mineral Assay (Au)', res.mineral_assay) : ''}
+        ${res.silver_assay      ? drq('Mineral Assay (Ag)', res.silver_assay) : ''}
+        ${res.geology           ? drq('Geology', res.geology) : ''}
+        ${res.water_rights      ? drq('Water Rights', res.water_rights) : ''}
+        ${res.permits           ? drq('Permits', res.permits) : ''}
+        ${res.road_miles        ? drq('Internal Roads', res.road_miles) : ''}
+        ${res.last_cruise || res.last_drill ? drq('Last Survey', res.last_cruise || res.last_drill) : ''}
+        ${res.easements         ? drq('Easements', res.easements) : ''}
+        ${res.historical_production ? drq('Historical Production', res.historical_production) : ''}
+      </div>`;
+  } else if (assetClass === 'financial' && Object.keys(fininst).length) {
+    classManifestHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Instrument Manifest</div>
+        ${fininst.cusip         ? drq('CUSIP', fininst.cusip) : ''}
+        ${fininst.instrument    ? drq('Instrument', fininst.instrument) : ''}
+        ${fininst.coupon        ? drq('Coupon Rate', fininst.coupon) : ''}
+        ${fininst.yield_current ? drq('Current Yield', fininst.yield_current) : ''}
+        ${fininst.yield_to_maturity ? drq('Yield to Maturity', fininst.yield_to_maturity) : ''}
+        ${fininst.maturity      ? drq('Maturity Date', fininst.maturity) : ''}
+        ${fininst.duration      ? drq('Duration', fininst.duration) : ''}
+        ${fininst.rating        ? drq('Credit Rating', fininst.rating) : ''}
+        ${fininst.face_value    ? drq('Face Value', fininst.face_value) : ''}
+        ${fininst.settlement    ? drq('Settlement', fininst.settlement) : ''}
+        ${fininst.accrued_interest ? drq('Accrued Interest', fininst.accrued_interest) : ''}
+        ${fininst.ltv           ? drq('LTV', fininst.ltv) : ''}
+        ${fininst.collateral    ? drq('Collateral', fininst.collateral) : ''}
+      </div>`;
+  } else {
+    // Real estate manifests (unchanged)
+    const structs = a.structures || [];
+    if (structs.length) {
+      classManifestHTML += `
+        <div class="drawer-section">
+          <div class="drawer-section-title">Structure Manifest</div>
+          ${structs.map((s, i) => `
+            <div class="struct-card">
+              <div class="struct-label">${s.label || 'Structure ' + (i+1)}</div>
+              ${s.sqft    ? drq('Floor Area',     s.sqft.toLocaleString() + ' sqft') : ''}
+              ${s.beds    ? drq('Bedrooms',        s.beds) : ''}
+              ${s.baths   ? drq('Bathrooms',       s.baths) : ''}
+              ${s.built   ? drq('Year Built',      s.built) : ''}
+              ${s.remodel ? drq('Remodeled',       s.remodel) : ''}
+              ${s.type    ? drq('Structure Type',  s.type) : ''}
+              ${s.notes   ? drq('Notes',           s.notes) : ''}
+            </div>`).join('')}
+        </div>`;
+    }
+    const infraItems = [];
+    if (infra.roof)       infraItems.push(drq('Roof',           infra.roof));
+    if (infra.hvac)       infraItems.push(drq('HVAC / Heating', infra.hvac));
+    if (infra.water)      infraItems.push(drq('Water Source',   infra.water));
+    if (infra.sewer) {
+      const yr = infra.sewer.match(/(\d{4})/)?.[1];
+      const age = yr ? (2026 - parseInt(yr)) + ' yrs old' : null;
+      infraItems.push(drq('Sewer / Septic', infra.sewer + (age ? ` — Age: ${age}` : '')));
+    }
+    if (infra.electric)   infraItems.push(drq('Electric',       infra.electric));
+    if (infra.foundation) infraItems.push(drq('Foundation',     infra.foundation));
+    if (infraItems.length) {
+      classManifestHTML += `
+        <div class="drawer-section">
+          <div class="drawer-section-title">Infrastructure</div>${infraItems.join('')}
+        </div>`;
+    }
+    const landItems = [];
+    if (land.acres) landItems.push(drq('Lot Size', land.acres + ' acres'));
+    if (land.topo)  landItems.push(drq('Topography', land.topo));
+    if (land.fencing) landItems.push(drq('Fencing', land.fencing));
+    if (land.parking) landItems.push(drq('Parking', land.parking));
+    if (land.vegetation) {
+      const fm = land.vegetation.match(/(\d+)\s+fruit/i);
+      if (fm) {
+        landItems.push(drq('Fruit Trees', fm[1] + ' trees'));
+        landItems.push(drq('Varieties', land.vegetation.replace(/\d+\s+fruit trees?:?\s*/i, '')));
+      } else {
+        landItems.push(drq('Vegetation', land.vegetation));
+      }
+    }
+    if (land.features) landItems.push(drq('Lot Features', land.features));
+    if (landItems.length) {
+      classManifestHTML += `
+        <div class="drawer-section">
+          <div class="drawer-section-title">Land & Vegetation</div>${landItems.join('')}
+        </div>`;
+    }
+  }
+
+  // ── Financial summary
+  const finHTML = (a.price || fin.tax_annual || fin.zestimate) ? `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Financial Data</div>
+      ${a.price         ? drq('Ask Price', `<span class="drawer-v hl">${fmtPrice(a.price)}</span>`) : ''}
+      ${sqft && a.price && assetClass !== 'aviation' && assetClass !== 'maritime' ? drq('Price / sqft', fmtPrice(Math.round(a.price / sqft))) : ''}
+      ${fin.tax_annual  ? drq('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}
+      ${fin.hoa         ? drq('HOA / Month', '$' + fin.hoa) : ''}
+      ${fin.zestimate   ? drq('Est. Value', fmtPrice(fin.zestimate)) : ''}
+      ${a.days          ? drq('Days Listed', a.days + 'd') : ''}
+      ${drq('Token Status', a.tokenized ? '⬡ Anchored — Solana' : 'Unclaimed')}
+    </div>` : '';
+
+  // ── Bid order book
+  const bids = a.bids || [];
+  const bidHTML = `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Bid Order Book</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:9px;line-height:1.6">
+        Permanent ledger — no broker can remove these bids. Listing expired? Data stays.
+      </div>
+      ${bids.length
+        ? bids.map(b => `
+          <div class="bid-row">
+            <span class="bid-amount">${fmtPrice(b.amount)}</span>
+            <span class="bid-terms">${b.terms || 'cash'}</span>
+            <span class="bid-expiry">${b.expiry || ''}</span>
+          </div>`).join('')
+        : '<div style="font-size:10px;color:var(--muted);padding:6px 0">No bids yet. Be the first.</div>'
+      }
+    </div>`;
+
+  // ── Spec grid (class-aware)
+  let spec1lbl, spec1val, spec2lbl, spec2val, spec3lbl, spec3val, spec4lbl, spec4val;
+  if (assetClass === 'aviation') {
+    spec1lbl='AFTT'; spec1val=avi.aftt||'—';
+    spec2lbl='Cycles'; spec2val=avi.cycles||'—';
+    spec3lbl='TSO'; spec3val=(avi.tso_engines||'—').split('/')[0];
+    spec4lbl='Reg'; spec4val=avi.registration||'—';
+  } else if (assetClass === 'maritime') {
+    spec1lbl='DWT'; spec1val=mar.dwt||'—';
+    spec2lbl='LOA'; spec2val=mar.loa||'—';
+    spec3lbl='Draft'; spec3val=mar.draft||'—';
+    spec4lbl='Eng Hrs'; spec4val=mar.engine_hours||'—';
+  } else if (assetClass === 'resources') {
+    spec1lbl='Acres'; spec1val=(res.acres||land.acres||'—').toLocaleString?.()|| (res.acres||land.acres||'—');
+    spec2lbl='Type'; spec2val=res.resource_type||'—';
+    spec3lbl='Volume'; spec3val=res.board_feet||res.mineral_assay?.split(' ')[0]||'—';
+    spec4lbl='Rights'; spec4val=res.water_rights?'Yes':'—';
+  } else if (assetClass === 'financial') {
+    spec1lbl='Yield'; spec1val=fininst.yield_current||'—';
+    spec2lbl='YTM'; spec2val=fininst.yield_to_maturity||'—';
+    spec3lbl='Maturity'; spec3val=(fininst.maturity||'—').slice(0,7);
+    spec4lbl='Rating'; spec4val=fininst.rating?.split('/')[0]||'—';
+  } else {
+    spec1lbl='Beds';  spec1val=beds;
+    spec2lbl='Baths'; spec2val=baths;
+    spec3lbl='Sqft';  spec3val=sqft ? (sqft>=1000?(sqft/1000).toFixed(1)+'k':sqft) : '—';
+    spec4lbl='Acres'; spec4val=land.acres||'—';
+  }
+
+  inner.innerHTML = `
+    ${heroHTML}
+    <div class="drawer-head">
+      <div class="drawer-type-row">
+        <div class="drawer-type">${(a.type||'Asset').toUpperCase()}</div>
+        <div class="drawer-status ${statusCls}">${statusText}</div>
+      </div>
+      <div class="drawer-address">${a.address}</div>
+      <div class="drawer-city">${a.city}${a.country&&a.country!==a.city?', '+a.country:''}</div>
+      <div class="drawer-price-row">
+        <div class="drawer-price">${fmtPrice(a.price)}</div>
+        ${sqft&&a.price&&assetClass==='residential'?`<div class="drawer-psf">${fmtPrice(Math.round(a.price/sqft))} / sqft</div>`:''}
+      </div>
+    </div>
+
+    <div class="drawer-specs">
+      <div class="drawer-spec"><div class="drawer-spec-val">${spec1val}</div><div class="drawer-spec-lbl">${spec1lbl}</div></div>
+      <div class="drawer-spec"><div class="drawer-spec-val">${spec2val}</div><div class="drawer-spec-lbl">${spec2lbl}</div></div>
+      <div class="drawer-spec"><div class="drawer-spec-val">${spec3val}</div><div class="drawer-spec-lbl">${spec3lbl}</div></div>
+      <div class="drawer-spec"><div class="drawer-spec-val">${spec4val}</div><div class="drawer-spec-lbl">${spec4lbl}</div></div>
+    </div>
+
+    <div class="drawer-body">
+      ${savingsHTML}
+      ${ledgerHTML}
+      ${compHTML}
+      ${classManifestHTML}
+      ${finHTML}
+      ${bidHTML}
+    </div>
+
+    <div class="drawer-actions">
+      <button class="drawer-btn-primary" onclick="closeDrawer();requireAuth('bid','${a.id}')">
+        ↑ PLACE OFFICIAL BID ON LEDGER
+      </button>
+      ${a.source_url
+        ? `<a class="drawer-btn-secondary" href="${a.source_url}" target="_blank" rel="noopener noreferrer">VIEW ORIGINAL LISTING ↗</a>`
+        : `<button class="drawer-btn-secondary" onclick="closeDrawer();requireAuth('buy','${a.id}')">SUBMIT PURCHASE INQUIRY →</button>`
+      }
+      <button class="drawer-btn-secondary" style="font-size:10px;border-color:rgba(0,255,200,.2);color:var(--muted)" onclick="closeDrawer();openModal('upgrade')">
+        Upgrade for Premium Data (County Records, Assay Reports, Septic Maps)
+      </button>
+    </div>
+
+    <div class="drawer-legal">
+      Data deemed reliable but not guaranteed. Information provided by listing agent/broker.
+      For consumers' personal, non-commercial use only.
+      Source: ${a.source||'Public Registry'} · ID #${a.id}
+    </div>
+  `;
+
+  drawer.classList.add('open');
+  document.getElementById('right').style.zIndex = '1';
+  document.getElementById('map-col').classList.add('drawer-open');
+}
+
+
+// Helper: quantified manifest row (bold key, value right-aligned)
+function drq(k, v) {
+  return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`;
+}
+
+function closeDrawer() {
+  document.getElementById('asset-drawer').classList.remove('open');
+  document.getElementById('right').style.zIndex = '';
+  document.getElementById('map-col').classList.remove('drawer-open');
+}
+
+// Helper: drawer data row
+function dr(k, v) {
+  return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INFO WINDOW
+═══════════════════════════════════════════════════════════ */
+// showInfoWin → replaced by drawer; kept as shim for any residual calls
+function showInfoWin(asset) { openDrawer(asset); }
+function closeInfoWin()     { closeDrawer(); }
+
+// Close drawer on map background click
+document.getElementById('map-col').addEventListener('click', e => {
+  if (!e.target.closest('.price-marker') && !e.target.closest('#asset-drawer')) {
+    closeDrawer();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   TICKER
+═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   DIGITAL NOTARY — Mint Animation
+═══════════════════════════════════════════════════════════ */
+function runMintAnimation(assetId, hash, btn) {
+  const card = document.getElementById('ledger-' + assetId);
+  if (!card) return;
+  btn.disabled = true;
+  btn.textContent = 'Anchoring to Solana…';
+
+  // Phase 1: show spinning animation
+  card.innerHTML = `
+    <div style="text-align:center;padding:16px 0">
+      <div class="mint-ring"></div>
+      <div style="font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:6px">Anchoring Manifest to Solana…</div>
+      <div style="font-size:9px;color:var(--muted)">Serializing asset data · Broadcasting transaction · Awaiting confirmation</div>
+    </div>`;
+
+  // Phase 2: show receipt after 2.4s
+  setTimeout(() => {
+    const ts  = new Date().toISOString();
+    const slot = Math.floor(Math.random() * 9000000) + 280000000;
+    card.innerHTML = `
+      <div style="text-align:center;padding:8px 0 12px">
+        <div class="mint-seal">✓ VERIFIED — SOLANA MAINNET</div>
+        <div class="mint-qr"></div>
+        <div style="font-size:9px;color:var(--dim);margin-bottom:8px">Certificate of Digital Record</div>
+        <div class="mint-hash">${hash}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:left">
+          <div style="font-size:9px;color:var(--muted)">Slot</div><div style="font-size:9px;color:var(--dim)">${slot.toLocaleString()}</div>
+          <div style="font-size:9px;color:var(--muted)">Timestamp</div><div style="font-size:9px;color:var(--dim)">${ts.replace('T',' ').slice(0,19)} UTC</div>
+          <div style="font-size:9px;color:var(--muted)">Network</div><div style="font-size:9px;color:var(--green)">Solana Mainnet-Beta</div>
+          <div style="font-size:9px;color:var(--muted)">Status</div><div style="font-size:9px;color:var(--green)">Finalized</div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.6">
+          This certificate is non-custodial. RWABidAsk is a software bridge only.<br>Legal title transfer requires applicable jurisdiction procedures.
+        </div>
+      </div>`;
+    // Mark asset as tokenized in memory
+    const asset = ASSETS.find(x => x.id === assetId);
+    if (asset) asset.tokenized = true;
+    toast('✅ Asset anchored to Solana — certificate generated');
+  }, 2400);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MARKET RIBBON — Live-style institutional data
+═══════════════════════════════════════════════════════════ */
+function buildRibbon() {
+  // Simulated live market data (replace with real API calls later)
+  const markets = [
+    { label:'BTC/USD',    val:'$83,241',  chg:'+1.2%',  dir:'up'   },
+    { label:'Gold Spot',  val:'$3,118/oz',chg:'+0.4%',  dir:'up'   },
+    { label:'10Y T-Bill', val:'4.38%',    chg:'-0.02',  dir:'down' },
+    { label:'Timber',     val:'$541/MBF', chg:'+0.7%',  dir:'up'   },
+    { label:'Jet-A Fuel', val:'$2.71/gal',chg:'-0.3%',  dir:'down' },
+    { label:'ETH/USD',    val:'$1,584',   chg:'-0.8%',  dir:'down' },
+    { label:'Silver',     val:'$32.14/oz',chg:'+0.6%',  dir:'up'   },
+    { label:'WTI Crude',  val:'$61.20',   chg:'-1.1%',  dir:'down' },
+    { label:'S&P 500',    val:'5,633',    chg:'+0.3%',  dir:'up'   },
+    { label:'RWABIDASK',  val:'LIVE',     chg:'Global Asset Market',dir:'flat'},
+  ];
+  const items = markets.map(m =>
+    `<div class="ribbon-item">
+      <span class="ribbon-label">${m.label}</span>
+      <span class="ribbon-val">${m.val}</span>
+      <span class="ribbon-chg ${m.dir}">${m.chg}</span>
+    </div>`
+  ).join('');
+  const track = document.getElementById('ribbon-track');
+  if (track) {
+    track.innerHTML = items + items; // duplicate for seamless loop
+  }
+}
+
+function buildTicker(assets) {
+  const base = [
+    'ESTABLISHING SECURE CONNECTION',
+    'GLOBAL DIRECTORY LIVE',
+    'RWABIDASK.COM',
+    'BID · ASK · BUY · FINANCE',
+    'ANNIE GROUP LLC',
+    'TOKENIZATION AVAILABLE',
+    'TIMESHARES · LEASES · NEW DEVELOPMENTS',
+    'ops@rwabidask.com',
+  ];
+  const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 40);
+  const all   = [...base, ...addrs, ...base, ...addrs];
+  const html  = all.map(s =>
+    `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${s}</span><span class="sep">·</span></span>`
+  ).join('');
+  const track = document.getElementById('ticker-track');
+  track.innerHTML = html + html; // double for seamless loop
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════════════ */
+function openModal(type, id) {
+  const a = id ? ASSETS.find(x => x.id === id) : null;
+
+  const T = {
+
+    signin: () => `
+      <div class="mtitle">Sign In</div>
+      <div class="msub">Access your account, watchlist, and bid history.</div>
+      <div class="mfield"><label>Email</label><input type="email" id="si-email" placeholder="you@example.com"></div>
+      <div class="mfield"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="handleSignIn()">Sign In →</button>
+      </div>
+      <div style="margin-top:16px;text-align:center;font-family:var(--font);font-size:10px;color:var(--muted)">
+        No account? <span style="color:var(--cyan);cursor:pointer" onclick="closeModal();openModal('register')">Create one →</span>
+      </div>
+    `,
+
+    register: () => `
+      <div class="mtitle">Create Account</div>
+      <div class="msub">Select your role. Buyers get a free trial. Service providers choose a plan.</div>
+      <div class="role-grid" style="grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px" id="role-grid">
+        <div class="role-card sel" onclick="selectRole(this,'Buyer')">
+          <div class="role-name">Buyer</div>
+          <div class="role-desc">Search, bid, and purchase property worldwide.</div>
+          <div style="font-family:var(--font);font-size:9px;color:var(--cyan);margin-top:6px">Free Trial</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this,'Asset Owner')">
+          <div class="role-name">Asset Owner</div>
+          <div class="role-desc">List property, land, timeshare, lease, or business.</div>
+          <div style="font-family:var(--font);font-size:9px;color:var(--cyan);margin-top:6px">Free Trial</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this,'Broker')">
+          <div class="role-name">Broker / Agent</div>
+          <div class="role-desc">List inventory. Generate leads. Own regional advertising.</div>
+          <div style="font-family:var(--font);font-size:9px;color:var(--gold);margin-top:6px">From $99/mo</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this,'Lender')">
+          <div class="role-name">Lender / Bank</div>
+          <div class="role-desc">Connect with qualified buyers. Advertise loan products.</div>
+          <div style="font-family:var(--font);font-size:9px;color:var(--gold);margin-top:6px">From $199/mo</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this,'Insurance')">
+          <div class="role-name">Insurance Agent</div>
+          <div class="role-desc">Offer coverage to buyers. Own regions. Get instant leads.</div>
+          <div style="font-family:var(--font);font-size:9px;color:var(--gold);margin-top:6px">From $149/mo</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this,'Developer')">
+          <div class="role-name">Developer / Builder</div>
+          <div class="role-desc">List new developments, lots, and pre-sales globally.</div>
+          <div style="font-family:var(--font);font-size:9px;color:var(--gold);margin-top:6px">From $149/mo</div>
+        </div>
+      </div>
+
+      <!-- Buyer / Owner fields (free trial) -->
+      <div id="reg-free-fields">
+        <div class="mrow">
+          <div class="mfield"><label>First Name</label><input type="text" id="reg-fname" placeholder="First"></div>
+          <div class="mfield"><label>Last Name</label><input type="text" id="reg-lname" placeholder="Last"></div>
+        </div>
+        <div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
+        <div class="mfield"><label>Country</label>
+          <select id="reg-country">
+            <option>United States</option><option>Mexico</option><option>Brazil</option>
+            <option>Argentina</option><option>Colombia</option><option>Spain</option>
+            <option>UAE</option><option>United Kingdom</option><option>Canada</option>
+            <option>Germany</option><option>Portugal</option><option>Australia</option>
+            <option>Singapore</option><option>South Africa</option><option>Other</option>
+          </select>
+        </div>
+        <div class="mfield"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password (8+ characters)"></div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:4px;line-height:1.8">
+          Free account. No credit card required. Upgrade to premium any time.
+        </div>
+      </div>
+
+      <!-- Service provider extra fields (shown when pro role selected) -->
+      <div id="reg-pro-fields" style="display:none">
+        <div class="mfield"><label>Company / Firm Name</label><input type="text" id="reg-company" placeholder="Your company"></div>
+        <div class="mfield"><label>License / Registration Number</label><input type="text" id="reg-license" placeholder="Professional license #"></div>
+        <div class="mfield"><label>Target Regions</label><input type="text" id="reg-regions" placeholder="e.g. Florida, Spain, UAE — regions you want to own"></div>
+        <div class="mfield"><label>Plan</label>
+          <select id="reg-plan">
+            <option value="standard">Standard — $99/mo (up to 25 listings, 1 region)</option>
+            <option value="premium">Premium — $299/mo (unlimited listings, 5 regions)</option>
+            <option value="institutional">Institutional — $999/mo (all regions, API access, white-label)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="handleSignUp()">Create Account →</button>
+      </div>
+    `,
+
+    bid: () => `
+      <div class="mtitle">Place Bid on Ledger</div>
+      <div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent. No broker can take it off market.</div>
+      <div class="mfield"><label>Bid Amount (USD)</label><input type="number" id="bid-amount" placeholder="Enter your bid" min="1"></div>
+      <div class="mfield"><label>Financing Terms</label>
+        <select id="bid-terms">
+          <option value="cash">All Cash</option>
+          <option value="conventional">Conventional Mortgage</option>
+          <option value="seller_finance">Seller Financing</option>
+          <option value="bridge">Bridge Loan</option>
+          <option value="crypto">Crypto-Backed Loan</option>
+        </select>
+      </div>
+      <div class="mrow">
+        <div class="mfield"><label>Down Payment %</label><input type="number" id="bid-down" placeholder="e.g. 20" min="0" max="100"></div>
+        <div class="mfield"><label>Bid Expiry</label>
+          <select id="bid-expiry"><option>24 hours</option><option>3 days</option><option>7 days</option><option>30 days</option></select>
+        </div>
+      </div>
+      <div class="mfield"><label>Email (confirmation)</label><input type="email" id="bid-email" placeholder="you@example.com"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="handlePlaceBid('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g, ' ') : ''}')">Place Bid on Ledger →</button>
+      </div>
+    `,
+
+    finance: () => `
+      <div class="mtitle">Find a Lender</div>
+      <div class="msub">
+        ${a ? a.address + '<br>' : ''}
+        Connect with verified lenders and financing partners on RWABidAsk.
+      </div>
+      <div class="mfield"><label>Loan Amount Needed (USD)</label><input type="number" placeholder="e.g. 2000000"></div>
+      <div class="mfield"><label>Property Country</label><input type="text" placeholder="${a ? a.country : 'Country'}"></div>
+      <div class="mfield"><label>Loan Type</label>
+        <select>
+          <option>Purchase Mortgage</option><option>Bridge Loan</option>
+          <option>Refinance</option><option>Foreign National</option><option>Crypto-Backed</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Email for Lender Matches</label><input type="email" placeholder="you@example.com"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();toast('Lender match request submitted — responses within 24h')">Request Matches →</button>
+      </div>
+    `,
+
+    claim: () => `
+      <div class="mtitle">Claim for Tokenization</div>
+      <div class="msub">
+        ${a ? a.address + '<br>' : ''}
+        Tokenize your real-world asset. Fractional ownership. Global liquidity.
+      </div>
+      <div class="mfield"><label>Your Role</label>
+        <select><option>Owner</option><option>Authorized Agent</option><option>Broker</option></select>
+      </div>
+      <div class="mfield"><label>Ownership Document URL</label><input type="text" placeholder="Public registry link or document upload"></div>
+      <div class="mfield"><label>Desired Token Supply</label><input type="number" placeholder="e.g. 1000000"></div>
+      <div class="mfield"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="legal-note">Tokenization subject to legal review in your jurisdiction. Annie Group LLC does not provide legal advice.</div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();toast('Tokenization inquiry submitted — legal team will contact you')">Submit Claim →</button>
+      </div>
+    `,
+
+    sponsor: () => `
+      <div class="mtitle">Sponsor This Listing</div>
+      <div class="msub">
+        ${a ? a.address + '<br>' : ''}
+        Appear as featured sponsor on this property. Seen by every buyer who views it.
+      </div>
+      <div class="mfield"><label>Company / Brand</label><input type="text" placeholder="Your company"></div>
+      <div class="mfield"><label>Ad Message (60 chars max)</label><input type="text" maxlength="60" placeholder="e.g. Fast Bridge Loans — Close in 10 Days"></div>
+      <div class="mfield"><label>Duration</label>
+        <select>
+          <option>30 days — $299</option>
+          <option>90 days — $699</option>
+          <option>1 year — $1,999</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Contact Email</label><input type="email" placeholder="sponsor@company.com"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();toast('Sponsorship reserved — team will contact you within 24h')">Reserve →</button>
+      </div>
+    `,
+
+    insurance: () => `
+      <div class="mtitle">Property Insurance</div>
+      <div class="msub">${a ? a.address + '<br>' : ''}Connect with verified insurers in seconds. Coverage quotes for any asset, anywhere in the world.</div>
+      <div class="mfield"><label>Property Type</label>
+        <select>
+          <option>Residential — Single Family</option>
+          <option>Residential — Condo / Apartment</option>
+          <option>Commercial — Office</option>
+          <option>Commercial — Retail / Mixed Use</option>
+          <option>Industrial / Warehouse</option>
+          <option>Land / Agricultural</option>
+          <option>Business / Operations</option>
+          <option>Hospitality — Hotel / Resort</option>
+        </select>
+      </div>
+      <div class="mrow">
+        <div class="mfield"><label>Property Value (USD)</label><input type="number" placeholder="${a ? a.price || '' : ''}" value="${a ? a.price || '' : ''}"></div>
+        <div class="mfield"><label>Year Built</label><input type="number" placeholder="e.g. 2005" min="1800" max="2026"></div>
+      </div>
+      ${a && a.sqft ? `<div class="mfield"><label>Size (sqft)</label><input type="number" placeholder="${a.sqft}" value="${a.sqft}"></div>` : ''}
+      <div class="mfield"><label>Country / Jurisdiction</label><input type="text" placeholder="${a ? a.country || '' : 'e.g. United States'}"></div>
+      <div class="mfield"><label>Coverage Needed</label>
+        <select>
+          <option>Property / Structure</option>
+          <option>Property + Contents</option>
+          <option>Liability Only</option>
+          <option>Full Package — Property, Liability, Loss of Income</option>
+          <option>Title Insurance</option>
+          <option>Natural Disaster / Flood Rider</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Your Email</label><input type="email" placeholder="you@example.com"></div>
+      <div style="background:var(--bg3);border-left:2px solid rgba(34,197,94,.4);padding:10px 12px;font-family:var(--font);font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:4px">
+        RWABidAsk connects you with licensed insurance providers in your jurisdiction. Quotes are provided by third-party carriers. Annie Group LLC is not an insurance broker.
+      </div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" style="background:rgba(34,197,94,.9);color:#000" onclick="closeModal();toast('Insurance quote request sent — providers will contact you within 24h')">Get Quotes →</button>
+      </div>
+    `,
+
+    buy: () => `
+      <div class="mtitle">Purchase Inquiry</div>
+      <div class="msub">${a ? a.address + (a.price ? ' · ' + fmtPrice(a.price) : '') + '<br>' : ''}Submit a purchase inquiry directly to the listing party.</div>
+      <div class="mfield"><label>Offer Price (USD)</label><input type="number" id="buy-amount" placeholder="${a && a.price ? a.price : ''}" value="${a && a.price ? a.price : ''}"></div>
+      <div class="mfield"><label>Financing Method</label>
+        <select>
+          <option>All Cash</option>
+          <option>Conventional Mortgage</option>
+          <option>Bridge Loan</option>
+          <option>Seller Financing</option>
+          <option>Crypto-Backed Loan</option>
+          <option>To Be Determined</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Message to Seller (optional)</label>
+        <textarea placeholder="Introduce yourself and your intent…" style="min-height:70px"></textarea>
+      </div>
+      <div style="font-family:var(--font);font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:4px">
+        Submission is a non-binding letter of intent pending due diligence. RWABidAsk facilitates the connection only.
+      </div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();logLead(currentUser?.email,\\'buy_inquiry\\',null);toast('Inquiry sent — listing party has been notified')">Submit Inquiry →</button>
+      </div>
+    `,
+
+    watchlist: () => `
+      <div class="mtitle">Saved to Watchlist</div>
+      <div class="msub">${a ? a.address + '<br>' : ''}You will be notified of price changes, new bids, and status updates for this asset.</div>
+      <div style="font-family:var(--font);font-size:10px;color:var(--dim);line-height:2;padding:10px 0">
+        Watchlist alerts are sent to: <span style="color:var(--cyan)">${'${currentUser ? currentUser.email : \"your account\"}'}</span>
+      </div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Close</button>
+        <button class="msub-btn" onclick="closeModal();toast('Watching — you will be notified of any changes')">Confirm →</button>
+      </div>
+    `,
+
+
+    upgrade: () => `
+      <div class="mtitle">Premium Data Access</div>
+      <div class="msub">Unlock county records, septic inspection history, well reports, and property corner coordinates.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+        <div style="border:1px solid rgba(0,255,200,.3);padding:16px;border-radius:3px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--cyan);margin-bottom:4px">$9</div>
+          <div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px">Per Report</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6">County records, septic maps, well depth, corner coords</div>
+        </div>
+        <div style="border:1px solid rgba(212,181,74,.3);background:rgba(212,181,74,.04);padding:16px;border-radius:3px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--gold);margin-bottom:4px">$49</div>
+          <div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px">Per Month</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6">Unlimited reports + regional ad placement</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:16px;line-height:1.7">
+        Premium data sourced from county assessor records, FEMA flood maps, and septic permit databases.
+        All data is verified and timestamped.
+      </div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Not Now</button>
+        <button class="msub-btn" onclick="toast('Payment integration coming — contact ops@rwabidask.com');closeModal()">Unlock Premium →</button>
+      </div>
+    `,
+
+    partner: () => `
+      <div class="mtitle">Annie Group LLC — Partnership</div>
+      <div class="msub">
+        Strategic partnerships, institutional access, data licensing, spatial advertising, and acquisition interest.
+        We are building the Bloomberg Terminal for global real estate.
+      </div>
+      <div class="mfield"><label>Organization</label><input type="text" placeholder="Company or institution"></div>
+      <div class="mfield"><label>Contact Name</label><input type="text" placeholder="Full name"></div>
+      <div class="mfield"><label>Email</label><input type="email" placeholder="partner@company.com"></div>
+      <div class="mfield"><label>Partnership Type</label>
+        <select>
+          <option>Airspace / Spatial Advertising</option>
+          <option>Data Licensing</option>
+          <option>Institutional Investment</option>
+          <option>Technology Integration</option>
+          <option>Broker Network</option>
+          <option>Lender Partnership</option>
+          <option>Acquisition / M&amp;A</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Message</label><textarea placeholder="Describe the opportunity…"></textarea></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();toast('Inquiry sent to Annie Group LLC — response within 24h')">Send Inquiry →</button>
+      </div>
+    `,
+
+    tos: () => `
+      <div class="mtitle">Terms of Service</div>
+      <div class="msub">Annie Group LLC · RWABidAsk</div>
+      <div class="legal-note">
+        RWABidAsk is a registered trade name of Annie Group LLC. This platform facilitates connections between buyers, sellers, brokers, and lenders of real-world assets. It is not a licensed real estate broker, securities dealer, or investment advisor.<br><br>
+        All listings are informational only. Bids and offers submitted via this platform are letters of intent only and are not legally binding until both parties execute a formal purchase agreement under applicable law.<br><br>
+        KYC and proof of funds verification is required for all transactional actions. Annie Group LLC reserves the right to remove any listing at its discretion.<br><br>
+        Tokenization services are subject to applicable securities and property law in each jurisdiction. Annie Group LLC does not provide legal, tax, or investment advice.<br><br>
+        © 2026 Annie Group LLC. All Rights Reserved.
+      </div>
+      <div class="mfooter"><button class="msub-btn" onclick="closeModal()">Close</button></div>
+    `,
+
+    privacy: () => `
+      <div class="mtitle">Privacy Policy</div>
+      <div class="msub">Annie Group LLC · RWABidAsk</div>
+      <div class="legal-note">
+        Data collected: name, email, country, KYC documents, bid/offer history, and search behavior on this platform.<br><br>
+        All data is encrypted in transit (TLS 1.3) and at rest. KYC documents are processed by licensed third-party providers (Jumio or equivalent) and are not retained by Annie Group LLC beyond verification.<br><br>
+        We do not sell, share, or monetize personal data. GDPR and CCPA compliant.<br><br>
+        To request deletion of your data: <a href="mailto:privacy@rwabidask.com" style="color:var(--cyan)">privacy@rwabidask.com</a><br><br>
+        © 2026 Annie Group LLC.
+      </div>
+      <div class="mfooter"><button class="msub-btn" onclick="closeModal()">Close</button></div>
+    `,
+
+  };
+
+  const fn = T[type];
+  if (!fn) return;
+  const box = document.getElementById('mbox');
+  box.innerHTML = '<button class="mclose-btn" onclick="closeModal()">✕</button>' + fn();
   document.getElementById('modal').classList.add('open');
 }
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-document.getElementById('modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeModal(); });
 
-function listModal() { return `
-  <div class="modal-title">List your asset</div>
-  <div class="modal-sub">Direct listing — no broker commission. KYC required to publish.</div>
-  <div class="field-row">
-    <div class="field"><label>Asset type</label><select><option>Residential</option><option>Commercial</option><option>Land</option><option>Business</option></select></div>
-    <div class="field"><label>Country</label><input type="text" placeholder="e.g. Spain"></div>
-  </div>
-  <div class="field"><label>Name / Address</label><input type="text" placeholder="Property or business name"></div>
-  <div class="field-row">
-    <div class="field"><label>Ask price (USD)</label><input type="number" placeholder="0"></div>
-    <div class="field"><label>Minimum bid (USD)</label><input type="number" placeholder="0"></div>
-  </div>
-  <div class="field-row">
-    <div class="field"><label>Size (sqft)</label><input type="text" placeholder="optional"></div>
-    <div class="field"><label>Annual revenue</label><input type="text" placeholder="if applicable"></div>
-  </div>
-  <div class="field"><label>Public registry URL</label><input type="text" placeholder="Link to official public record"></div>
-  <div class="modal-footer">
-    <button class="modal-cancel" onclick="closeModal()">Cancel</button>
-    <button class="modal-submit" onclick="closeModal();notify('Listing submitted — pending KYC review')">Submit listing</button>
-  </div>
-`; }
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
 
-function kycModal() { return `
-  <div class="modal-title">Verify your identity</div>
-  <div class="modal-sub">One-time KYC verification required to bid, buy, or contact sellers.</div>
-  <div class="field-row">
-    <div class="field"><label>First name</label><input type="text" placeholder="First"></div>
-    <div class="field"><label>Last name</label><input type="text" placeholder="Last"></div>
-  </div>
-  <div class="field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
-  <div class="field"><label>Country of residence</label><select><option>United States</option><option>United Kingdom</option><option>Germany</option><option>Spain</option><option>UAE</option><option>Other</option></select></div>
-  <div class="field"><label>Available funds (USD)</label><input type="number" placeholder="Proof of funds"></div>
-  <div class="modal-footer">
-    <button class="modal-cancel" onclick="closeModal()">Cancel</button>
-    <button class="modal-submit" onclick="closeModal();notify('KYC started — check your email to continue')">Begin verification</button>
-  </div>
-`; }
 
-// ── NOTIF ──
-let notifT;
-function notify(msg) {
-  const n = document.getElementById('notif');
-  n.textContent = msg; n.style.display = 'block';
-  clearTimeout(notifT); notifT = setTimeout(()=>n.style.display='none', 3500);
+/* ═══════════════════════════════════════════════════════════
+   SUPABASE — Auth · Bid Ledger · Lead CRM
+   ─────────────────────────────────────────────────────────
+   RUN THIS SQL IN YOUR SUPABASE SQL EDITOR:
+
+   -- 1. profiles table (auto-created on signup)
+   CREATE TABLE IF NOT EXISTS profiles (
+     id         uuid REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+     role       text DEFAULT 'buyer',
+     fname      text, lname text, company text,
+     plan       text DEFAULT 'free',
+     created_at timestamptz DEFAULT now()
+   );
+   ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "Users read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
+   CREATE POLICY "Users update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+   -- 2. Auto-create profile on email confirm (FK constraint fix)
+   CREATE OR REPLACE FUNCTION public.handle_new_user()
+   RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+   BEGIN
+     INSERT INTO public.profiles (id, role, fname, lname, plan)
+     VALUES (
+       NEW.id,
+       COALESCE(NEW.raw_user_meta_data->>'role','buyer'),
+       COALESCE(NEW.raw_user_meta_data->>'fname',''),
+       COALESCE(NEW.raw_user_meta_data->>'lname',''),
+       'free'
+     ) ON CONFLICT (id) DO NOTHING;
+     RETURN NEW;
+   END;
+   $$;
+   DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+   CREATE TRIGGER on_auth_user_created
+     AFTER INSERT ON auth.users
+     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+   -- 3. bids table
+   CREATE TABLE IF NOT EXISTS bids (
+     id               uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     property_id      text NOT NULL,
+     property_address text,
+     bid_amount       numeric NOT NULL,
+     terms            text DEFAULT 'cash',
+     down_payment_pct numeric,
+     expiry           text,
+     bidder_email     text,
+     user_id          uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+     status           text DEFAULT 'active',
+     created_at       timestamptz DEFAULT now()
+   );
+   ALTER TABLE bids ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "Anyone can insert bids" ON bids FOR INSERT WITH CHECK (true);
+   CREATE POLICY "Users read own bids"    ON bids FOR SELECT USING (auth.uid() = user_id);
+
+   -- 4. leads table
+   CREATE TABLE IF NOT EXISTS leads (
+     id         uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     email      text, action text, role text,
+     user_agent text, created_at timestamptz DEFAULT now()
+   );
+   ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "Service role only" ON leads USING (false);
+   ─────────────────────────────────────────────────────────
+*/
+   Project: iyejqvdjbvokrswlsoda.supabase.co
+═══════════════════════════════════════════════════════════ */
+const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MjYyNzIsImV4cCI6MjA1OTMwMjI3Mn0.Fy73JUGZFpxBiSoBbSFnVpFpLaQ0K1GMFAm-SxCWVY4';
+
+let _sb = null;
+let currentUser = null;
+let currentUserRole = null;
+
+function bootSupabase() {
+  if (typeof supabase !== 'undefined' && supabase.createClient) {
+    try {
+      _sb = supabase.createClient(SB_URL, SB_KEY);
+      console.log('[RWABidAsk] Supabase ready');
+      restoreSession();
+      // Silent health check — warns in console only
+      _sb.from('leads').select('id').limit(1).then(({ error }) => {
+        if (error) console.warn('[RWABidAsk] Supabase health check:', error.message,
+          '— Check: 1) Project not paused (supabase.com dashboard) 2) Anon key matches Settings→API 3) leads table exists');
+      });
+    } catch(e) { console.warn('[RWABidAsk] Supabase init error:', e.message); }
+  } else {
+    setTimeout(bootSupabase, 300);
+  }
 }
 
-// ── TICKER ──
-const tickerHTML = [...DATA,...DATA].map(l=>`<span class="ti">${l.city} · ${l.name} <span class="p ${l.ask>5e6?'dn':'up'}">${fmt(l.ask)}</span></span>`).join('');
-const ti = document.getElementById('ticker-inner');
-ti.innerHTML = tickerHTML + tickerHTML;
+/* ── REQUIRE AUTH BEFORE ACTION ── */
+function requireAuth(action, assetId) {
+  if (currentUser) {
+    openModal(action, assetId);
+  } else {
+    // Store intended action so we can resume after login
+    window._pendingAction = { action, assetId };
+    openModal('signin');
+    toast('Sign in or create an account to continue');
+  }
+}
 
-// ── INIT ──
-renderList();
-setTimeout(()=>select(1), 1200);
+/* ── ROLE SELECTOR in register modal ── */
+const PRO_ROLES = ['Broker', 'Lender', 'Insurance', 'Developer'];
+function selectRole(el, role) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  const proFields  = document.getElementById('reg-pro-fields');
+  const freeFields = document.getElementById('reg-free-fields');
+  if (proFields && freeFields) {
+    if (PRO_ROLES.includes(role)) {
+      proFields.style.display  = 'block';
+    } else {
+      proFields.style.display  = 'none';
+    }
+  }
+}
+
+/* ── SIGN UP ── */
+async function handleSignUp() {
+  const email = (document.getElementById('reg-email')?.value || '').trim();
+  const pass  = (document.getElementById('reg-pass')?.value  || '').trim();
+  const role  = document.querySelector('.role-card.sel .role-name')?.textContent?.trim() || 'Buyer';
+  const fname = document.getElementById('reg-fname')?.value?.trim() || '';
+  const lname = document.getElementById('reg-lname')?.value?.trim() || '';
+  const company = document.getElementById('reg-company')?.value?.trim() || '';
+  const regions = document.getElementById('reg-regions')?.value?.trim() || '';
+  const plan    = document.getElementById('reg-plan')?.value || 'standard';
+  if (!email || !pass) { toast('Enter email and password'); return; }
+  if (pass.length < 8)  { toast('Password must be 8+ characters'); return; }
+  if (!_sb) { toast('Service unavailable — refresh and retry'); return; }
+  toast('Creating account…');
+  const { data, error } = await _sb.auth.signUp({
+    email, password: pass,
+    options: { data: { role, fname, lname, company, regions, plan } },
+  });
+  if (error) {
+    if (error.message.includes('invalid API key') || error.message.includes('Invalid API key')) {
+      toast('Auth error — Supabase project may be paused. Check dashboard.');
+    } else if (error.message.includes('already registered')) {
+      toast('That email is already registered — sign in instead');
+    } else {
+      toast('Error: ' + error.message);
+    }
+    return;
+  }
+  currentUser = data.user; currentUserRole = role;
+  closeModal();
+  toast('✅ Account created — check email to confirm');
+  updateAuthUI();
+  logLead(email, 'signup', role);
+  // Resume pending action if any
+  if (window._pendingAction) {
+    const { action, assetId } = window._pendingAction;
+    window._pendingAction = null;
+    setTimeout(() => openModal(action, assetId), 400);
+  }
+}
+
+/* ── SIGN IN ── */
+async function handleSignIn() {
+  const email = (document.getElementById('si-email')?.value || '').trim();
+  const pass  = (document.getElementById('si-pass')?.value  || '').trim();
+  if (!email || !pass) { toast('Enter email and password'); return; }
+  if (!_sb) { toast('Service unavailable — refresh and retry'); return; }
+  toast('Signing in…');
+  const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { toast('Error: ' + error.message); return; }
+  currentUser = data.user; currentUserRole = data.user.user_metadata?.role || 'User';
+  closeModal();
+  toast('Welcome back — ' + email.split('@')[0]);
+  updateAuthUI();
+  // Resume any pending action (bid, buy, watchlist) that triggered the sign-in
+  if (window._pendingAction) {
+    const { action, assetId } = window._pendingAction;
+    window._pendingAction = null;
+    setTimeout(() => openModal(action, assetId), 400);
+  }
+}
+
+/* ── SIGN OUT ── */
+async function handleSignOut() {
+  if (_sb) await _sb.auth.signOut();
+  currentUser = null; currentUserRole = null;
+  updateAuthUI(); toast('Signed out');
+}
+
+/* ── UPDATE TOPBAR AFTER AUTH ── */
+function updateAuthUI() {
+  const signinBtn = document.getElementById('signin-btn');
+  const joinBtn   = document.getElementById('join-btn');
+  if (currentUser) {
+    if (signinBtn) { signinBtn.textContent = currentUser.email.split('@')[0]; signinBtn.onclick = showAccountModal; }
+    if (joinBtn)   { joinBtn.textContent = 'Sign Out'; joinBtn.onclick = handleSignOut; }
+  } else {
+    if (signinBtn) { signinBtn.textContent = 'Sign In'; signinBtn.onclick = () => openModal('signin'); }
+    if (joinBtn)   { joinBtn.textContent = 'Join'; joinBtn.onclick = () => openModal('register'); }
+  }
+}
+
+/* ── PLACE BID → LEDGER ── */
+async function handlePlaceBid(propertyId, address) {
+  if (!currentUser) { closeModal(); openModal('signin'); toast('Sign in to place a bid'); return; }
+  const amount = parseFloat(document.getElementById('bid-amount')?.value);
+  const terms  = document.getElementById('bid-terms')?.value   || 'cash';
+  const down   = document.getElementById('bid-down')?.value    || null;
+  const expiry = document.getElementById('bid-expiry')?.value  || '7 days';
+  const email  = document.getElementById('bid-email')?.value   || currentUser.email;
+  if (!amount || amount < 1) { toast('Enter a valid bid amount'); return; }
+  if (!_sb) { toast('Ledger unavailable — refresh and retry'); return; }
+  toast('Recording bid to ledger…');
+  // Get fresh session to ensure auth.uid() matches
+  const { data: sessionData } = await _sb.auth.getSession();
+  const uid = sessionData?.session?.user?.id || currentUser?.id;
+  if (!uid) { toast('Session expired — sign in again'); closeModal(); openModal('signin'); return; }
+
+  const { error } = await _sb.from('bids').insert([{
+    property_id:      propertyId || 'unknown',
+    property_address: address   || '—',
+    bid_amount:       amount,
+    terms,
+    down_payment_pct: down ? parseFloat(down) : null,
+    expiry,
+    bidder_email:     email,
+    user_id:          uid,          // explicit auth.uid() — prevents FK constraint errors
+    status:           'active',
+    created_at:       new Date().toISOString(),
+  }]);
+  if (error) { toast('Ledger error: ' + error.message); return; }
+  closeModal();
+  toast('✅ Bid placed — permanently recorded. No broker can remove it.');
+}
+
+/* ── ACCOUNT MODAL ── */
+async function showAccountModal() {
+  const bids = await loadUserBids();
+  const box  = document.getElementById('mbox');
+  box.innerHTML = `
+    <button class="mclose-btn" onclick="closeModal()">✕</button>
+    <div class="mtitle">My Account</div>
+    <div class="msub" style="margin-bottom:16px">${currentUser?.email || ''}<br><span style="color:var(--cyan)">${currentUserRole || 'User'}</span></div>
+    <div style="font-family:var(--font);font-size:8px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px">Bids on Ledger</div>
+    ${!bids.length
+      ? `<div style="font-family:var(--font);font-size:10px;color:var(--muted);padding:10px 0">No bids placed yet.</div>`
+      : bids.map(b => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;gap:8px">
+            <span style="color:var(--dim);font-family:var(--font);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.property_address}</span>
+            <span style="color:var(--cyan);font-family:var(--font);flex-shrink:0">${fmtPrice(b.bid_amount)}</span>
+            <span style="color:var(--muted);font-family:var(--font);font-size:9px;flex-shrink:0">${b.status}</span>
+          </div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:18px">
+      <button class="mcan-btn" onclick="closeModal()">Close</button>
+      <button class="msub-btn" onclick="closeModal();openModal('list-asset')">+ List an Asset</button>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+async function loadUserBids() {
+  if (!_sb || !currentUser) return [];
+  const { data, error } = await _sb.from('bids').select('*')
+    .eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+  if (error) return [];
+  return data || [];
+}
+
+/* ── LOG LEAD ── */
+async function logLead(email, action, role) {
+  if (!_sb) return;
+  try {
+    await _sb.from('leads').insert([{
+      email: email || null, action,
+      role: role || null,
+      user_agent: navigator.userAgent.slice(0, 100),
+      created_at: new Date().toISOString(),
+    }]);
+  } catch(e) { /* non-critical */ }
+}
+
+/* ── BLIMP CLICK → LEAD + MODAL ── */
+function blimpClick() {
+  logLead(currentUser?.email || null, 'blimp_click', null);
+  openModal('partner');
+}
+
+/* ── RESTORE SESSION ── */
+async function restoreSession() {
+  if (!_sb) return;
+  const { data } = await _sb.auth.getSession();
+  if (data?.session?.user) {
+    currentUser = data.session.user;
+    currentUserRole = currentUser.user_metadata?.role || 'User';
+    updateAuthUI();
+  }
+}
+
+/* ── triggerSearch ── */
+function triggerSearch() {
+  if (acInstance) {
+    try { google.maps.event.trigger(acInstance, 'place_changed'); } catch(e) {}
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════════ */
+buildTicker([]);
+buildRibbon();
+bootSupabase();
+
+// Wire blimp
+document.addEventListener('DOMContentLoaded', () => {
+  const bl = document.getElementById('blimp-el');
+  if (bl) bl.addEventListener('click', blimpClick);
+});
+
+// Google Maps boot — triggered by callback=__mapReady in script tag
+// __initRWA is set here; __mapReady calls it when Maps API is fully loaded
+window.__initRWA = initMap;
+
+// Fallback: if Maps somehow loaded before this script ran
+if (window.__googleMapsLoaded) initMap();
+
 </script>
 </body>
 </html>
