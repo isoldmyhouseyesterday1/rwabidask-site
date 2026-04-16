@@ -2004,40 +2004,29 @@ async function fetchListingsFromSupabase() {
       return [];
     }
     
-    const transformed = data.map(row => {
-      // UNIVERSAL COORDINATE NORMALIZATION - FIXES THE ISSUE
-      const lat = parseFloat(row.lat ?? row.latitude ?? row.Latitude ?? row.lat_coord);
-      const lng = parseFloat(row.lng ?? row.longitude ?? row.Longitude ?? row.lon_coord ?? row.lng_coord);
-      
-      if (isNaN(lat) || isNaN(lng) || lat === 0 && lng === 0) {
-        console.warn(`[RWABidAsk] Skipping asset ${row.id} - invalid coordinates`);
-        return null;
-      }
-      
-      return {
-        id: row.id,
-        address: row.address || row.property_address || 'Address not specified',
-        city: row.city || 'Unknown',
-        country: row.country || 'Global',
-        lat: lat,
-        lng: lng,
-        price: parseFloat(row.price) || 0,
-        type: (row.asset_type || row.type || 'residential').toLowerCase(),
-        sqft: row.sqft ? parseInt(row.sqft) : null,
-        status: row.listing_status || 'For Sale',
-        source: 'Supabase Ledger',
-        days: row.days_on_market || 0,
-        broker_active: row.broker_active !== false,
-        tokenized: row.tokenized === true,
-        structures: row.structures || [],
-        infrastructure: row.infrastructure || {},
-        land: row.land || {},
-        financials: row.financials || {},
-        bids: row.bids || [],
-        image_url: row.image_url || null,
-        description: row.description || null
-      };
-    }).filter(Boolean);
+    const transformed = data.map(row => ({
+      id: row.id,
+      address: row.address || row.property_address || 'Address not specified',
+      city: row.city || 'Unknown',
+      country: row.country || 'Global',
+      lat: parseFloat(row.latitude) || parseFloat(row.lat) || 0,
+      lng: parseFloat(row.longitude) || parseFloat(row.lng) || 0,
+      price: parseFloat(row.price) || 0,
+      type: (row.asset_type || row.type || 'residential').toLowerCase(),
+      sqft: row.sqft ? parseInt(row.sqft) : null,
+      status: row.listing_status || 'For Sale',
+      source: 'Supabase Ledger',
+      days: row.days_on_market || 0,
+      broker_active: row.broker_active !== false,
+      tokenized: row.tokenized === true,
+      structures: row.structures || [],
+      infrastructure: row.infrastructure || {},
+      land: row.land || {},
+      financials: row.financials || {},
+      bids: row.bids || [],
+      image_url: row.image_url || null,
+      description: row.description || null
+    })).filter(a => a.lat !== 0 && a.lng !== 0);
     
     console.log(`[RWABidAsk] Loaded ${transformed.length} listings from Supabase`);
     return transformed;
@@ -2244,7 +2233,7 @@ function syncMarkersToSearch(assetsToShow) {
 }
 
 // ============================================================
-// GOOGLE MAPS 3D with gmp-steadystate fix AND WATCHDOG TIMER
+// GOOGLE MAPS 3D with gmp-steadystate fix
 // ============================================================
 async function initMap() {
   try {
@@ -2256,20 +2245,9 @@ async function initMap() {
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
     
-    // WATCHDOG TIMER: Force render after 4 seconds if steadystate never fires
-    const watchdogTimer = setTimeout(() => {
-      if (!markersRendered && ASSETS.length > 0) {
-        console.log('[RWABidAsk] WATCHDOG: Forcing marker render after 4s timeout');
-        isMapReady = true;
-        renderDOMMarkers();
-        markersRendered = true;
-      }
-    }, 4000);
-    
     // CRITICAL FIX: Wait for steady state before rendering markers
     map3dEl.addEventListener('gmp-steadystate', () => {
       console.log('[RWABidAsk] Map steady state reached');
-      clearTimeout(watchdogTimer);
       isMapReady = true;
       if (ASSETS.length > 0 && !markersRendered) {
         renderDOMMarkers();
@@ -2342,7 +2320,7 @@ async function initPlacesSearch() {
   } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
 }
 
-function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 45 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
+function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 25 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 25 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
 function flyGlobe() { flyTo(20, 10, 12000000, 0); }
 function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
 function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
@@ -2495,7 +2473,7 @@ function reprojectMarkersWithMatrix() {
       const width = rect.width, height = rect.height;
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
-        const worldX = asset.lng, worldY = asset.lat, worldZ = 45; // ALTITUDE FIX: 45 meters above ground
+        const worldX = asset.lng, worldY = asset.lat, worldZ = 25;
         const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
         const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
         const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
@@ -2564,12 +2542,7 @@ function openDrawer(a) {
 }
 function closeDrawer() { document.getElementById('asset-drawer').classList.remove('open'); }
 function openMobileDrawer(a) { renderDetail(a); document.getElementById('right').classList.add('open-drawer'); document.body.style.overflow = 'hidden'; }
-function renderMobileListView(assets) { 
-  const container = document.getElementById('mobile-list-view');
-  if (!container) return;
-  const physicalAssets = assets.filter(a => isPhysicalAsset(a.type));
-  container.innerHTML = physicalAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
-}
+function renderMobileListView(assets) { /* kept for mobile compatibility */ }
 
 // ============================================================
 // TICKER & RIBBON
@@ -2609,20 +2582,7 @@ function openModal(type, id) { toast('Auth system ready — ' + type + ' modal w
 function closeModal() {}
 function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
 function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
-function initMobileUI() { 
-  const viewToggle = document.getElementById('mobile-view-toggle');
-  const listView = document.getElementById('mobile-list-view');
-  const mapCol = document.getElementById('map-col');
-  if (viewToggle) {
-    viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const view = btn.dataset.view;
-        if (view === 'globe') { mapCol.style.display = 'block'; listView.classList.remove('active'); }
-        else { mapCol.style.display = 'none'; listView.classList.add('active'); renderMobileListView(ASSETS); }
-      });
-    });
-  }
-}
+function initMobileUI() { /* mobile UI handler stub */ }
 
 // ============================================================
 // BOOT SEQUENCE
