@@ -541,9 +541,10 @@ html, body {
   /* ── PRICE TAG MARKERS ── */
 .price-marker {
   position: absolute;
-  display: flex; /* Ensure it is flex, not none */
-  visibility: hidden; /* We hide it via visibility so projectMarker can "wake" it up */
-  pointer-events: auto; 
+  display: flex !important;
+  left: 0;    /* transform-based positioning needs an explicit anchor */
+  top: 0;
+  pointer-events: auto;
   z-index: 10;
   will-change: transform;
 }
@@ -603,6 +604,12 @@ html, body {
 .price-marker.heat-hot  .price-tag-val { color: #ff5a5a; }
 .price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,80,80,.6), transparent); }
 .price-marker.heat-hot  .price-dot  { background: #ff5a5a; box-shadow: 0 0 6px #ff5a5a; }
+
+/* ── STANDARD / REGULAR ASSETS — cyan style (explicit class) ── */
+.price-marker.standard .price-tag     { border-color: rgba(0,255,200,.55); }
+.price-marker.standard .price-tag-val { color: var(--cyan); }
+.price-marker.standard .price-stem    { background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0)); }
+.price-marker.standard .price-dot     { background: var(--cyan); box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5); }
 
 /* ── ANCHOR / FEATURED — pulsing gold glow ────────────────── */
 @keyframes anchor-glow {
@@ -3177,16 +3184,13 @@ function renderDOMMarkers() {
   domMarkers = {};
 
   const range = map3dEl.range || 22000000;
-  
-  // THE MONOPOLY GATE: 
-  // Let's set this to 25,000,000 JUST ONCE to see if they appear.
-  // If they appear, we know the math works, and then we can 
-  // tighten it back to 300,000 for your regional view.
-  if (range <= 25000000) { 
-    const premiums = ASSETS.filter(a => a.anchor);
-    console.log("Rendering " + premiums.length + " markers...");
-    premiums.forEach(a => _addPriceMarker(a));
-  }
+
+  // REGION GATE: board is completely empty above 300km
+  // Drop inside the region and the whole board populates at once
+  if (range > RANGE_GATE) return;
+
+  // Inside region — show all viewport assets uniformly (gold + cyan together)
+  viewportVisible(ASSETS).forEach(a => _addPriceMarker(a));
 }
   
 // 1. Create a timer variable at the top of this block
@@ -3207,48 +3211,39 @@ if (map3dEl) {
   map3dEl.addEventListener('gmp-headingchange', stabilizedCameraChange);
 }
 
-// 3. OPEN THE GATES (Set to 25 Million so markers show up now)
-const RANGE_ALL     = 25000000; 
-const RANGE_PREMIUM = 25000000; 
-const MARKER_RANGE_THRESHOLD = RANGE_ALL;
+// ── RANGE THRESHOLDS ──────────────────────────────────────────
+// RANGE_GATE = 300km: unified gate — below this, the whole board populates at once.
+// Above this (space view), the map is completely empty.
+const RANGE_GATE             = 300000;
+const RANGE_ALL              = RANGE_GATE;
+const RANGE_PREMIUM          = RANGE_GATE;
+const MARKER_RANGE_THRESHOLD = RANGE_GATE;
 
-function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_ALL; }
-function premiumMarkersVisible() { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_PREMIUM; }
+function markersVisible()        { return !!(map3dEl) && (map3dEl.range || 22000000) <= RANGE_GATE; }
+function premiumMarkersVisible() { return markersVisible(); }
 
 function onCameraChange() {
-  // Clear any existing timer to prevent overlapping calls
-  if (typeof _cameraChangeTimer !== 'undefined') {
-    clearTimeout(_cameraChangeTimer);
-  }
+  if (typeof _cameraChangeTimer !== 'undefined') clearTimeout(_cameraChangeTimer);
 
-  // Wrap everything in a single, clean setTimeout
   _cameraChangeTimer = setTimeout(() => {
     if (!map3dEl) return;
-
     const range = map3dEl.range || 22000000;
-    
-    // 1. Re-render the markers based on the current zoom
-    renderDOMMarkers(); 
 
-    // 2. Position all active markers and ensure they are visible
-    Object.values(domMarkers).forEach(({ el, asset }) => {
-      if (el) {
-        // Force display to 'flex' so we override the 'none' from CSS
-        el.style.display = 'flex'; 
-        projectMarker(asset, el);
-      }
-    });
-
-    // 3. Update the ticker based on what's visible
-    // If range is high, show premium; if low, show all visible
-    if (range <= 50000) {
-      buildTicker(viewportVisible(ASSETS));
-    } else {
-      const premiums = ASSETS.filter(a => a.anchor);
-      buildTicker(viewportVisible(premiums));
+    if (range > RANGE_GATE) {
+      // Space view — board is empty, hide everything
+      Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+      return;
     }
 
-  }, 80); // This is the '80' that was causing the error!
+    // Inside region: rebuild board if empty (e.g. after zoom-in crossing the gate),
+    // then reproject all pins to their current screen coordinates
+    if (Object.keys(domMarkers).length === 0) renderDOMMarkers();
+    reprojectMarkers(); // ← keeps pins locked to ground during rotation and zoom
+
+    // Viewport-only ticker
+    buildTicker(viewportVisible(ASSETS));
+
+  }, 80);
 }
 
 // Returns assets visible in the current map viewport (approximate)
@@ -3288,8 +3283,8 @@ function _addPriceMarker(asset) {
   if (!layer) return;
 
   const el = document.createElement('div');
-  // 1. Maintain your branding: Anchor assets get gold glow
-  el.className = 'price-marker' + (asset.anchor ? ' anchor' : '');
+  // Gold (.anchor) vs Cyan (.standard) — drives all color theming via CSS
+  el.className = 'price-marker' + (asset.anchor ? ' anchor' : ' standard');
   el.title = asset.address || 'Asset';
 
   const priceStr = (typeof fmtPrice === 'function') ? fmtPrice(asset.price) : `$${asset.price}`;
@@ -3317,49 +3312,35 @@ function _addPriceMarker(asset) {
     if (typeof selectAsset === 'function') selectAsset(asset.id);
   });
 
-  // 3. Force the physical display before calculating position
-  el.style.display = 'flex'; 
-  el.style.visibility = 'visible';
-  
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
 
-  // 4. THE CRITICAL JUMP: Manually fire the projection
-  // We wrap it in a tiny timeout to ensure the DOM has painted the element
-  setTimeout(() => {
-    projectMarker(asset, el);
-  }, 0);
+  // Fire projection after a single animation frame so the element has dimensions
+  requestAnimationFrame(() => projectMarker(asset, el));
 }
 
 function projectMarker(asset, el) {
   if (!map3dEl || !el) return;
 
   try {
-    // 1. Get the 3D pixel coordinates from Google
     const lat = parseFloat(asset.lat);
     const lng = parseFloat(asset.lng);
-    
-    const point = map3dEl.project({ lat, lng, altitude: 20 }); // Float it slightly
 
-    // 2. The "Monopoly House" Logic
+    // altitude:20 floats tags above terrain and 3D buildings
+    const point = map3dEl.project({ lat, lng, altitude: 20 });
+
     if (point && !point.behind) {
-      // Force it to be visible
-      el.style.display = 'flex';
-      el.style.visibility = 'visible';
-      el.style.opacity = '1';
-
-      // Position the tag exactly on the map
-      // We use 'translate' because it's smoother for 3D performance
+      // Transform-based positioning — smooth and GPU-composited
       el.style.transform = `translate(-50%, -100%) translate(${point.x}px, ${point.y}px)`;
-      
-      // Depth sorting: keeps closer houses on top of far ones
-      el.style.zIndex = Math.floor(1000000 - point.distance);
+      el.style.display   = 'flex';
+      // Depth sort: nearer assets render above far ones
+      el.style.zIndex    = String(Math.floor(1000000 - (point.distance || 0)));
     } else {
-      // It's on the other side of the planet
+      // Asset is behind the globe — hide it
       el.style.display = 'none';
     }
   } catch (err) {
-    console.error("Marker Projection Error:", err);
+    console.warn('[RWABidAsk] projectMarker error:', err.message);
     el.style.display = 'none';
   }
 }
@@ -4977,8 +4958,6 @@ function _projectToScreen(asset, mapRect) {
 }
 
 // Hook clustering into onCameraChange — rebuild clusters on every camera move
-// NOTE: onCameraChange already defined above with full tier logic.
-// We extend it here to handle cluster rendering for the >300km tier.
 const _origOnCameraChange = onCameraChange;
 let _clusterTimer = null;
 function onCameraChange() {
@@ -4988,10 +4967,10 @@ function onCameraChange() {
     const mapRect = document.getElementById('map-col')?.getBoundingClientRect();
     const range = map3dEl?.range || 22000000;
     if (range > CLUSTER_THRESHOLD) {
-      // >300km: show viewport-only cluster bubbles for non-anchors
+      // Space/high-altitude view: cluster bubbles for non-anchors in viewport
       buildClusters(viewportVisible(ASSETS.filter(a => !a.anchor)), mapRect);
     } else {
-      clearClusters(); // ≤300km: individual markers take over
+      clearClusters(); // Inside region — individual markers take over
     }
   }, 120);
 }
