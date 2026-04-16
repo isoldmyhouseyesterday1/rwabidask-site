@@ -3,976 +3,2363 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RWABidAsk | Real-World Asset Exchange</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8fH0T_6oxcvlqAXUItA6MNAUE-QJ0ZJw&v=alpha&libraries=maps3d,places"></script>
+<title>RWABidAsk — Global Real-World Asset Market</title>
+<meta name="description" content="The world's first open-market global bid-ask platform for real estate, businesses, and land. No brokers. Direct bid, ask, and buy.">
+
+<!-- ── FONTS ── -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;700&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ── SUPABASE ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ── GOOGLE MAPS (alpha required for Map3DElement + Places) ── -->
+<script>
+  window.__mapReady = function() { window.__googleMapsLoaded = true; window.__initRWA && window.__initRWA(); };
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady" async defer></script>
+
 <style>
-/* ── AUTOCOMPLETE OVERRIDE ── */
-.pac-container { z-index: 99999 !important; background: #0a0f1e; border: 1px solid #00d4aa; border-radius: 4px; }
-.pac-item { color: #e8ecf4; border-top: 1px solid rgba(255,255,255,0.07); padding: 8px 12px; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 11px; }
-.pac-item:hover { background: rgba(0,212,170,0.1); }
-.pac-item-query { color: #00d4aa; }
-.pac-matched { color: #00d4aa; }
+/* ══════════════════════════════════════════════
+   AUTOCOMPLETE SKIN
+══════════════════════════════════════════════ */
+.pac-container {
+  z-index: 99999 !important;
+  background: #1a1f2e;
+  border: 1px solid rgba(0,255,200,.25);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  font-family: 'Geist Mono', monospace;
+}
+.pac-item {
+  color: #a8b0c8;
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: .3px;
+  transition: background .12s;
+}
+.pac-item:hover, .pac-item-selected {
+  background: rgba(0,255,200,.06);
+  color: #e5e7eb;
+}
+.pac-item-query { color: #e5e7eb; font-size: 12px; }
+.pac-matched { color: #00ffc8; }
+.pac-icon { display: none; }
 
+/* ══════════════════════════════════════════════
+   RESET & ROOT
+══════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
-  --bg: #050810; --bg2: #0a0f1e; --bg3: #0f1628; --panel: #0d1220;
-  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.14);
-  --text: #e8ecf4; --muted: #5a6280; --dim: #8892aa;
-  --accent: #00d4aa; --accent2: #4080ff; --warn: #ff6b35;
-  --gold: #f5c842; --green: #00c47a; --red: #ff4560; --purple: #a855f7;
-  --font-head: 'Syne', sans-serif; --font-mono: 'Space Mono', monospace;
+  --bg:       #0f1117;
+  --bg1:      #141820;
+  --bg2:      #1a1f2e;
+  --bg3:      #1f2537;
+  --bg4:      #252c40;
+  --border:   rgba(255,255,255,.09);
+  --border2:  rgba(255,255,255,.15);
+  --border3:  rgba(255,255,255,.24);
+  --text:     #f4f6fa;
+  --muted:    #7a8099;
+  --dim:      #a8b0c8;
+  --cyan:     #00ffc8;
+  --cyan-dim: rgba(0,255,200,.12);
+  --cyan-glow:rgba(0,255,200,.35);
+  --silver:   #c8cdd6;
+  --gold:     #c9a84c;
+  --red:      #ef4444;
+  --blue:     #3b7df8;
+  --green:    #22c55e;
+  --mono: 'Geist Mono', monospace;
+  --sans: 'Geist', sans-serif;
 }
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-mono); overflow: hidden; }
 
-/* ── LAYOUT ── */
-#app { display: grid; grid-template-columns: 310px 1fr 340px; grid-template-rows: 52px 1fr 28px; height: 100vh; }
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
-/* ── TOPBAR ── */
+/* ══════════════════════════════════════════════
+   SHELL LAYOUT
+══════════════════════════════════════════════ */
+#shell {
+  display: grid;
+  grid-template-rows: 54px 1fr 30px 26px;
+  height: 100vh;
+  min-height: 0;
+}
+#main-row {
+  display: grid;
+  grid-template-columns: 288px 1fr 320px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════════ */
 #topbar {
-  grid-column: 1/-1; background: var(--bg2); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; z-index: 200;
+  background: var(--bg1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 600;
 }
-.logo { padding: 0 18px; font-family: var(--font-head); font-weight: 800; font-size: 16px; color: var(--accent); border-right: 1px solid var(--border); height: 100%; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-.logo-sub { color: var(--text); opacity: 0.5; font-weight: 400; font-size: 10px; letter-spacing: 2px; }
-.top-search { flex: 1; display: flex; align-items: center; gap: 8px; padding: 0 14px; border-right: 1px solid var(--border); height: 100%; min-width: 0; }
-.top-search input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-family: var(--font-mono); font-size: 11px; min-width: 0; }
-.top-search input::placeholder { color: var(--muted); }
-.top-stats { display: flex; height: 100%; }
-.tstat { padding: 0 14px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); cursor: default; }
-.tstat-label { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-.tstat-val { font-size: 12px; font-weight: 700; color: var(--accent); }
-.top-actions { display: flex; align-items: center; gap: 6px; padding: 0 10px; margin-left: auto; flex-shrink: 0; }
-.btn { padding: 6px 12px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; cursor: pointer; border-radius: 2px; transition: all .15s; letter-spacing: .5px; }
-.btn-accent { background: var(--accent); color: #000; border: none; }
-.btn-accent:hover { opacity: .85; }
-.btn-ghost { background: none; border: 1px solid var(--border2); color: var(--dim); }
-.btn-ghost:hover { color: var(--text); border-color: var(--dim); }
-.btn-gold { background: var(--gold); color: #000; border: none; }
-.btn-gold:hover { opacity: .85; }
 
-/* ── LEFT PANEL ── */
-#left-panel { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-.panel-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.ptab { flex: 1; padding: 9px 4px; text-align: center; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
-.ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.filter-strip { display: flex; gap: 5px; padding: 8px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
-.filter-strip::-webkit-scrollbar { display: none; }
-.fchip { padding: 3px 8px; font-size: 9px; border: 1px solid var(--border); color: var(--muted); cursor: pointer; background: none; font-family: var(--font-mono); border-radius: 2px; white-space: nowrap; transition: all .15s; }
-.fchip.active { background: rgba(0,212,170,.1); border-color: var(--accent); color: var(--accent); }
-.fchip:hover:not(.active) { border-color: var(--dim); color: var(--dim); }
-.listings { flex: 1; overflow-y: auto; }
-.listings::-webkit-scrollbar { width: 3px; }
-.listings::-webkit-scrollbar-thumb { background: var(--border2); }
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  height: 100%;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  text-decoration: none;
+  cursor: default;
+}
+.logo-mark {
+  width: 8px; height: 8px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--cyan), 0 0 22px rgba(0,255,200,.4);
+  animation: pulse-logo 3s ease-in-out infinite;
+}
+@keyframes pulse-logo {
+  0%, 100% { box-shadow: 0 0 10px var(--cyan), 0 0 22px rgba(0,255,200,.4); }
+  50%       { box-shadow: 0 0 16px var(--cyan), 0 0 36px rgba(0,255,200,.6); }
+}
+.logo-text {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .5px;
+}
+.logo-tag {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  font-weight: 400;
+}
 
-.lcard { padding: 11px 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; position: relative; }
-.lcard:hover { background: rgba(255,255,255,.02); }
-.lcard.sel { background: rgba(0,212,170,.04); border-left: 2px solid var(--accent); }
-.lcard-badge { display: inline-block; font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; margin-bottom: 5px; }
-.b-res { background: rgba(64,128,255,.15); color: #4080ff; }
-.b-com { background: rgba(245,200,66,.15); color: #f5c842; }
-.b-land { background: rgba(0,196,122,.15); color: #00c47a; }
-.b-biz { background: rgba(255,107,53,.15); color: #ff6b35; }
-.b-bkr { background: rgba(168,85,247,.15); color: #a855f7; }
-.lcard-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.lcard-name { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; font-family: var(--font-head); }
-.lcard-price { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; margin-left: 6px; font-family: var(--font-mono); }
-.lcard-loc { font-size: 10px; color: var(--muted); margin-top: 2px; }
-.lcard-ba { display: flex; gap: 8px; margin-top: 5px; font-size: 10px; }
-.ba-b { color: var(--red); } .ba-a { color: var(--green); }
-.ba-lbl { color: var(--muted); font-size: 9px; margin-right: 2px; }
-.broker-flag { position: absolute; right: 8px; top: 8px; font-size: 8px; color: var(--purple); background: rgba(168,85,247,.12); padding: 1px 5px; border-radius: 2px; }
+/* Search */
+.search-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  position: relative;
+  border-right: 1px solid var(--border);
+  min-width: 0;
+}
+#search-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 0 18px;
+  letter-spacing: .3px;
+}
+#search-input::placeholder { color: var(--muted); }
+.search-icon {
+  position: absolute;
+  right: 0;
+  top: 0; bottom: 0;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-left: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all .15s;
+  background: none;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+}
+.search-icon:hover { color: var(--cyan); background: var(--cyan-dim); }
 
-/* ── MAP (center) ── */
-#map-col { position: relative; overflow: hidden; background: #000; }
-gmp-map-3d { width: 100%; height: 100%; display: block; }
+/* Topbar right */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.tstat {
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid var(--border);
+  cursor: default;
+}
+.tstat-l {
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.tstat-v {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--silver);
+}
+.tstat-v.live { color: var(--cyan); }
+.tbtn {
+  height: 100%;
+  padding: 0 16px;
+  background: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.tbtn:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.tbtn.primary {
+  background: var(--cyan);
+  color: #000;
+  font-weight: 700;
+  border-left-color: var(--cyan);
+}
+.tbtn.primary:hover { background: #00e6b4; }
 
-/* ── MAP OVERLAY CONTROLS ── */
-#map-search-bar { position: absolute; top: 14px; left: 14px; z-index: 500; display: flex; gap: 0; }
-#map-search-bar input, #map-search-bar gmp-place-autocomplete { width: 260px; }
-.map-search-input {
-  width: 260px; padding: 9px 12px; background: rgba(5,8,16,.92);
-  border: 1px solid var(--accent); color: var(--accent);
-  font-family: var(--font-mono); font-size: 11px; outline: none;
+/* ══════════════════════════════════════════════
+   LEFT PANEL
+══════════════════════════════════════════════ */
+#left {
+  background: var(--bg1);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+.left-head {
+  padding: 14px 16px 0;
+  flex-shrink: 0;
+}
+.left-title {
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.ptabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.ptab {
+  flex: 1;
+  padding: 8px 4px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: all .15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.ptab.on { color: var(--cyan); border-bottom-color: var(--cyan); }
+.ptab:hover:not(.on) { color: var(--dim); }
+
+.frow {
+  display: flex;
+  gap: 5px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.frow::-webkit-scrollbar { display: none; }
+.fchip {
+  padding: 3px 9px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  border-radius: 2px;
+  white-space: nowrap;
+  transition: all .15s;
+  letter-spacing: .3px;
+}
+.fchip.on {
+  border-color: rgba(0,255,200,.35);
+  color: var(--cyan);
+  background: var(--cyan-dim);
+}
+.fchip:hover:not(.on) { border-color: var(--border2); color: var(--dim); }
+
+/* List */
+.list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.list-scroll::-webkit-scrollbar { width: 2px; }
+.list-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 1px; }
+
+/* Empty / Sync state */
+.sync-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 18px;
+  padding: 24px;
+}
+.sync-rings {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+.sync-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--cyan);
+  animation: sync-expand 2.4s ease-out infinite;
+}
+.sync-ring:nth-child(2) { animation-delay: .8s; }
+.sync-ring:nth-child(3) { animation-delay: 1.6s; }
+@keyframes sync-expand {
+  0%   { transform: scale(.2); opacity: .8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.sync-dot {
+  position: absolute;
+  inset: 50%;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%,-50%);
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--cyan);
+}
+.sync-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-align: center;
+  line-height: 2.2;
+  text-transform: uppercase;
+}
+
+/* Property card */
+.pcard {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .1s;
+  position: relative;
+}
+.pcard:hover { background: rgba(255,255,255,.02); }
+.pcard.active {
+  background: rgba(0,255,200,.04);
+  border-left: 1px solid rgba(0,255,200,.4);
+}
+.pcard-addr {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 3px;
+  padding-right: 40px;
+}
+.pcard-city {
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.pcard-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pcard-price {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan);
+}
+.pcard-type {
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+.t-res  { background: rgba(59,125,248,.12); color: #6ba3fb; }
+.t-com  { background: rgba(201,168,76,.12);  color: var(--gold); }
+.t-land { background: rgba(0,255,200,.1);    color: var(--cyan); }
+.t-biz  { background: rgba(139,92,246,.12);  color: #a78bfa; }
+.pcard-days {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  position: absolute;
+  top: 12px;
+  right: 14px;
+}
+
+/* ══════════════════════════════════════════════
+   MAP COLUMN
+══════════════════════════════════════════════ */
+#map-col {
+  position: relative;
+  background: #050505;
+  overflow: hidden;
+}
+
+/* The 3D map fills entire column */
+#map3d-container {
+  position: absolute;
+  inset: 0;
+}
+
+/* Map controls overlay */
+.map-ctl-panel {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mctl-group {
+  background: rgba(8,8,8,.92);
+  border: 1px solid var(--border2);
+  backdrop-filter: blur(12px);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mctl {
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.mctl:hover, .mctl.on { color: var(--cyan); background: var(--cyan-dim); }
+
+/* Status strip */
+.map-status {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8,8,8,.9);
+  border: 1px solid var(--border2);
+  padding: 7px 18px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  z-index: 400;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.live-dot {
+  display: inline-block;
+  width: 5px; height: 5px;
+  background: var(--cyan);
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  box-shadow: 0 0 6px var(--cyan);
+  animation: live-blink 2.4s ease-in-out infinite;
+}
+@keyframes live-blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .25; }
+}
+
+/* Custom marker (glowing cyan dot via overlay) */
+.map-marker-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow:
+    0 0 0 2px rgba(0,255,200,.3),
+    0 0 10px var(--cyan),
+    0 0 22px rgba(0,255,200,.4);
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+.map-marker-dot:hover {
+  transform: translate(-50%,-50%) scale(1.8);
+  box-shadow:
+    0 0 0 3px rgba(0,255,200,.4),
+    0 0 18px var(--cyan),
+    0 0 36px rgba(0,255,200,.5);
+}
+
+/* Info window */
+.info-win {
+  position: absolute;
+  background: var(--bg2);
+  border: 1px solid rgba(0,255,200,.3);
+  padding: 0;
+  z-index: 500;
+  min-width: 240px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.8), 0 0 0 1px rgba(0,255,200,.1);
+  animation: info-appear .18s ease;
+  transform: translateX(-50%) translateY(calc(-100% - 18px));
+}
+@keyframes info-appear {
+  from { opacity: 0; transform: translateX(-50%) translateY(calc(-100% - 24px)); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(calc(-100% - 18px)); }
+}
+.info-win::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px; height: 10px;
+  background: var(--bg2);
+  border-right: 1px solid rgba(0,255,200,.3);
+  border-bottom: 1px solid rgba(0,255,200,.3);
+  transform: translateX(-50%) rotate(45deg);
+}
+.info-head {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.info-price {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cyan);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.info-addr {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+.info-city {
+  font-size: 10px;
+  color: var(--muted);
+}
+.info-body {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+}
+.info-k { color: var(--muted); font-family: var(--mono); }
+.info-v { color: var(--dim); font-family: var(--mono); }
+.info-actions {
+  padding: 10px 14px 12px;
+  display: flex;
+  gap: 6px;
+}
+.info-bid {
+  flex: 1;
+  padding: 9px 10px;
+  background: var(--cyan);
+  color: #000;
+  border: none;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  transition: background .15s;
+}
+.info-bid:hover { background: #00e6b4; }
+.info-more {
+  padding: 9px 10px;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.info-more:hover { border-color: var(--border3); color: var(--text); }
+.info-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color .15s;
+  z-index: 10;
+}
+.info-close:hover { color: var(--text); }
+.info-sponsor {
+  padding: 7px 14px;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sponsor-link {
+  color: var(--gold);
+  cursor: pointer;
+  transition: color .15s;
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 0;
+}
+.sponsor-link:hover { color: #e2c17a; }
+
+/* Blimp */
+.blimp-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 600;
+  overflow: hidden;
+}
+.blimp {
+  position: absolute;
+  bottom: 22%;
+  pointer-events: all;
+  animation: blimp-drift 55s linear infinite;
+  cursor: pointer;
+}
+@keyframes blimp-drift {
+  0%   { left: -260px; }
+  100% { left: 110%; }
+}
+.blimp-body {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  filter: drop-shadow(0 4px 16px rgba(201,168,76,.4));
+}
+.blimp-hull {
+  background: linear-gradient(135deg, #c9a84c 0%, #e8c96a 45%, #b8943e 100%);
+  border-radius: 50px;
+  padding: 8px 24px 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  clip-path: ellipse(100% 70% at 45% 50%);
+}
+.blimp-tail {
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 13px solid #c9a84c;
+  margin-left: -1px;
+}
+.blimp-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #1a1000;
+  white-space: nowrap;
+  letter-spacing: .3px;
+}
+.blimp-sub { font-size: 8px; color: rgba(0,0,0,.55); letter-spacing: .5px; }
+.blimp-string {
+  width: 1px;
+  height: 26px;
+  background: linear-gradient(to bottom, rgba(201,168,76,.6), transparent);
+  margin: 0 auto;
+}
+.blimp-flag {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 1.5px;
+  opacity: .7;
+}
+
+/* ══════════════════════════════════════════════
+   RIGHT PANEL
+══════════════════════════════════════════════ */
+#right {
+  background: var(--bg1);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+.rhead {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.rtype {
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.rname {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 3px;
+}
+.rcity {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.rprice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.rprice {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cyan);
+}
+.rprice-psf {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+.rbody {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.rbody::-webkit-scrollbar { width: 2px; }
+.rbody::-webkit-scrollbar-thumb { background: var(--border2); }
+.r-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+.r-empty-glyph {
+  font-size: 36px;
+  opacity: .06;
+  line-height: 1;
+}
+.r-empty-text {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 2.4;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.rinner { padding: 14px 16px; }
+.rsect { margin-bottom: 18px; }
+.rsect-title {
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 9px;
+}
+.rrow {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  gap: 12px;
+}
+.rk { color: var(--muted); flex-shrink: 0; }
+.rv {
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  text-align: right;
+  word-break: break-word;
+}
+.rv.hl { color: var(--cyan); }
+
+/* Action buttons */
+.act-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.abtn {
+  padding: 10px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  transition: all .15s;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+.abtn:hover { opacity: .85; transform: translateY(-1px); }
+.a-buy  { background: var(--cyan); color: #000; }
+.a-bid  { background: none; border: 1px solid rgba(0,255,200,.3) !important; color: var(--cyan); }
+.a-lend { background: none; border: 1px solid rgba(59,125,248,.3) !important; color: #6ba3fb; }
+.a-save { background: none; border: 1px solid var(--border) !important; color: var(--muted); }
+.a-claim {
+  grid-column: 1 / -1;
+  background: none;
+  border: 1px solid rgba(34,197,94,.25) !important;
+  color: var(--green);
+}
+.a-sponsor {
+  grid-column: 1 / -1;
+  background: none;
+  border: 1px solid rgba(201,168,76,.25) !important;
+  color: var(--gold);
+  font-size: 9px;
+}
+
+/* ══════════════════════════════════════════════
+   TICKER
+══════════════════════════════════════════════ */
+#ticker-bar {
+  background: var(--bg1);
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker-run 90s linear infinite;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.ticker-seg { padding: 0 24px; }
+.ticker-seg .addr { color: var(--silver); }
+.ticker-seg .sep  { color: var(--border2); margin: 0 8px; }
+@keyframes ticker-run {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ══════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════ */
+#footer {
+  background: #050505;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+}
+.footer-copy {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .8px;
+  text-align: center;
+  line-height: 1;
+}
+.footer-copy strong { color: #5a5a5a; font-weight: 500; }
+.footer-copy a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .15s;
+}
+.footer-copy a:hover { color: var(--dim); }
+
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
+#modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
   backdrop-filter: blur(8px);
 }
-.map-search-input::placeholder { color: var(--muted); }
-.map-search-btn { padding: 9px 14px; background: var(--accent); border: none; color: #000; font-family: var(--font-mono); font-size: 10px; font-weight: 700; cursor: pointer; }
-.map-controls { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 500; }
-.mc-btn { padding: 7px 12px; background: rgba(5,8,16,.88); border: 1px solid var(--border2); color: var(--dim); font-family: var(--font-mono); font-size: 9px; cursor: pointer; transition: all .15s; letter-spacing: .5px; backdrop-filter: blur(6px); border-radius: 2px; }
-.mc-btn.active, .mc-btn:hover { color: var(--accent); border-color: var(--accent); }
-.map-legend { position: absolute; top: 14px; right: 14px; z-index: 500; background: rgba(5,8,16,.88); border: 1px solid var(--border); padding: 10px 12px; backdrop-filter: blur(6px); }
-.leg-title { font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 7px; }
-.leg-row { display: flex; align-items: center; gap: 6px; font-size: 9px; color: var(--dim); margin-bottom: 4px; }
-.leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.heat-legend { position: absolute; top: 14px; right: 14px; z-index: 500; background: rgba(5,8,16,.88); border: 1px solid var(--border); padding: 10px 12px; display: none; }
-.heat-bar { width: 130px; height: 6px; background: linear-gradient(to right,#4080ff,#00d4aa,#f5c842,#ff4560); margin: 6px 0; border-radius: 2px; }
-.heat-labels { display: flex; justify-content: space-between; font-size: 8px; color: var(--muted); }
-
-/* ── BLIMP / SPATIAL AD ── */
-.blimp-container { position: absolute; z-index: 600; pointer-events: none; animation: blimp-drift 40s linear infinite; }
-@keyframes blimp-drift { 0%{left:-200px;top:25%} 100%{left:110%;top:20%} }
-.blimp-body { background: var(--gold); border-radius: 50px; padding: 8px 20px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(245,200,66,.4); cursor: pointer; pointer-events: all; }
-.blimp-text { font-family: var(--font-head); font-size: 11px; font-weight: 700; color: #000; white-space: nowrap; }
-.blimp-fin { width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 12px solid var(--gold); }
-.blimp-rope { width: 1px; height: 24px; background: rgba(245,200,66,.4); margin: 0 auto; }
-.blimp-sponsor { font-size: 8px; color: var(--gold); text-align: center; }
-
-/* ── RIGHT PANEL ── */
-#right-panel { background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-.detail-head { padding: 14px 14px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.detail-body { flex: 1; overflow-y: auto; padding: 12px 14px; }
-.detail-body::-webkit-scrollbar { width: 3px; }
-.detail-body::-webkit-scrollbar-thumb { background: var(--border2); }
-.detail-type { font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 5px; }
-.detail-name { font-family: var(--font-head); font-size: 16px; font-weight: 700; line-height: 1.3; }
-.detail-loc { font-size: 10px; color: var(--muted); margin-top: 3px; }
-.detail-price-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; }
-.detail-ask { font-size: 22px; font-weight: 700; color: var(--accent); font-family: var(--font-head); }
-.detail-psf { font-size: 10px; color: var(--muted); }
-
-.ba-box { background: var(--bg3); border: 1px solid var(--border2); padding: 12px; margin-bottom: 12px; border-radius: 2px; }
-.ba-row { display: flex; }
-.ba-col { flex: 1; text-align: center; }
-.ba-col-lbl { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 3px; }
-.ba-col-val { font-size: 18px; font-weight: 700; font-family: var(--font-head); }
-.ba-sep { width: 1px; background: var(--border); margin: 0 6px; }
-.ba-spread { text-align: center; margin-top: 8px; font-size: 9px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 8px; }
-.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 14px; }
-.abtn { padding: 9px 6px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; cursor: pointer; border: none; transition: opacity .15s; text-align: center; border-radius: 2px; }
-.abtn:hover { opacity: .85; }
-.a-buy { background: var(--green); color: #000; }
-.a-bid { background: none; border: 1px solid var(--green) !important; color: var(--green); }
-.a-lend { background: none; border: 1px solid var(--accent2) !important; color: var(--accent2); }
-.a-save { background: none; border: 1px solid var(--border2) !important; color: var(--dim); }
-.dsect { margin-bottom: 14px; }
-.dsect-title { font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px; }
-.drow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 10px; }
-.dk { color: var(--dim); } .dv { color: var(--text); font-weight: 700; }
-.ai-brief { background: var(--bg3); border-left: 2px solid var(--accent); padding: 10px 11px; font-size: 10px; color: var(--dim); line-height: 1.8; border-radius: 0 2px 2px 0; }
-.ai-tag { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 5px; font-weight: 700; }
-
-/* ── BROKER SECTION ── */
-.broker-card { background: rgba(168,85,247,.06); border: 1px solid rgba(168,85,247,.2); padding: 10px 12px; margin-bottom: 8px; border-radius: 2px; }
-.broker-name { font-size: 11px; font-weight: 700; color: var(--purple); }
-.broker-meta { font-size: 9px; color: var(--muted); margin-top: 2px; }
-.broker-listings { font-size: 9px; color: var(--dim); margin-top: 4px; }
-
-/* ── LENDER PANEL ── */
-.lender-card { background: rgba(64,128,255,.06); border: 1px solid rgba(64,128,255,.2); padding: 10px 12px; margin-bottom: 8px; border-radius: 2px; }
-.lender-name { font-size: 11px; font-weight: 700; color: var(--accent2); }
-.lender-rate { font-size: 10px; color: var(--green); font-weight: 700; }
-.lender-meta { font-size: 9px; color: var(--muted); margin-top: 2px; }
-
-/* ── TICKER ── */
-#ticker { grid-column: 1/-1; background: var(--bg2); border-top: 1px solid var(--border); display: flex; align-items: center; overflow: hidden; z-index: 100; }
-.tick-inner { display: flex; gap: 36px; white-space: nowrap; animation: tick 70s linear infinite; font-size: 9px; color: var(--muted); }
-.tick-inner .up { color: var(--green); }
-.tick-inner .dn { color: var(--red); }
-@keyframes tick { from{transform:translateX(0)}to{transform:translateX(-50%)} }
-
-/* ── MODAL ── */
-#modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
 #modal.open { display: flex; }
-.modal-box { background: var(--bg2); border: 1px solid var(--border2); width: 480px; max-width: 96vw; padding: 28px; max-height: 90vh; overflow-y: auto; }
-.modal-box::-webkit-scrollbar { width: 3px; }
-.modal-box::-webkit-scrollbar-thumb { background: var(--border2); }
-.modal-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-.modal-sub { font-size: 10px; color: var(--muted); margin-bottom: 20px; line-height: 1.7; }
-.mfield { margin-bottom: 13px; }
-.mfield label { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); margin-bottom: 4px; }
-.mfield input, .mfield select, .mfield textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); font-family: var(--font-mono); font-size: 11px; padding: 8px 10px; outline: none; border-radius: 2px; transition: border-color .15s; }
-.mfield input:focus,.mfield select:focus,.mfield textarea:focus { border-color: var(--accent); }
-.mfield input::placeholder,.mfield textarea::placeholder { color: var(--muted); }
+.mbox {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  width: 460px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+}
+.mbox::-webkit-scrollbar { width: 2px; }
+.mbox::-webkit-scrollbar-thumb { background: var(--border2); }
+.mtitle {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -.3px;
+}
+.msub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.8;
+  font-family: var(--mono);
+}
+.mfield { margin-bottom: 14px; }
+.mfield label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.mfield input,
+.mfield select,
+.mfield textarea {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 9px 12px;
+  outline: none;
+  border-radius: 2px;
+  transition: border-color .15s;
+}
+.mfield input:focus,
+.mfield select:focus,
+.mfield textarea:focus { border-color: rgba(0,255,200,.35); }
+.mfield input::placeholder,
+.mfield textarea::placeholder { color: var(--muted); }
 .mfield select option { background: var(--bg2); }
-.mfield textarea { resize: vertical; min-height: 70px; }
-.mrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.mfooter { display: flex; gap: 8px; margin-top: 20px; }
-.msub { flex: 1; padding: 10px; background: var(--accent); color: #000; border: none; cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border-radius: 2px; transition: opacity .15s; }
-.msub:hover { opacity: .85; }
-.mcan { padding: 10px 16px; background: none; border: 1px solid var(--border2); color: var(--dim); cursor: pointer; font-family: var(--font-mono); font-size: 11px; border-radius: 2px; transition: all .15s; }
-.mcan:hover { color: var(--text); }
-.plan-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.plan { border: 1px solid var(--border); padding: 14px 10px; text-align: center; cursor: pointer; transition: all .15s; border-radius: 2px; }
-.plan:hover, .plan.sel { border-color: var(--accent); background: rgba(0,212,170,.06); }
-.plan-name { font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); }
-.plan-price { font-size: 18px; font-weight: 700; color: var(--text); margin: 4px 0; }
-.plan-feat { font-size: 9px; color: var(--muted); line-height: 1.8; }
-.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.mfield textarea { resize: vertical; min-height: 80px; }
+.mrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mfooter { display: flex; gap: 8px; margin-top: 24px; }
+.msub-btn {
+  flex: 1;
+  padding: 11px;
+  background: var(--cyan);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  border-radius: 2px;
+  transition: background .15s;
+}
+.msub-btn:hover { background: #00e6b4; }
+.mcan-btn {
+  padding: 11px 18px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  border-radius: 2px;
+  transition: all .15s;
+}
+.mcan-btn:hover { color: var(--text); border-color: var(--border2); }
+.role-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.role-card {
+  border: 1px solid var(--border);
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+}
+.role-card:hover, .role-card.sel {
+  border-color: rgba(0,255,200,.35);
+  background: var(--cyan-dim);
+}
+.role-icon { font-size: 22px; margin-bottom: 6px; }
+.role-name { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--silver); }
+.role-desc { font-size: 9px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+.mclose-btn {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color .15s;
+}
+.mclose-btn:hover { color: var(--text); }
+.legal-note {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.9;
+  margin-top: 4px;
+}
 
-/* ── NOTIF ── */
-#notif { position: fixed; top: 62px; right: 14px; z-index: 99999; background: var(--bg2); border: 1px solid var(--accent); padding: 10px 16px; font-size: 11px; color: var(--accent); display: none; animation: fadeIn .25s ease; border-radius: 2px; max-width: 300px; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
+/* ══════════════════════════════════════════════
+   NOTIFICATION TOAST
+══════════════════════════════════════════════ */
+#toast {
+  position: fixed;
+  top: 64px;
+  right: 18px;
+  z-index: 99999;
+  background: var(--bg2);
+  border: 1px solid rgba(0,255,200,.3);
+  padding: 12px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--cyan);
+  display: none;
+  border-radius: 2px;
+  max-width: 340px;
+  letter-spacing: .3px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.6);
+  animation: toast-in .2s ease;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 <body>
-<div id="app">
 
-<!-- ── TOPBAR ── -->
+<div id="shell">
+
+<!-- ══ TOPBAR ══ -->
 <div id="topbar">
-  <div class="logo">RWABidAsk <span class="logo-sub">EXCHANGE</span></div>
-  <div class="top-search">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5a6280" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="global-search" placeholder="Global ledger search — city, country, address, asset type…" oninput="globalSearch(this.value)">
-  </div>
-  <div class="top-stats">
-    <div class="tstat"><div class="tstat-label">Listed</div><div class="tstat-val" id="s-listed">20</div></div>
-    <div class="tstat"><div class="tstat-label">Countries</div><div class="tstat-val">47</div></div>
-    <div class="tstat"><div class="tstat-label">Market Cap</div><div class="tstat-val" id="s-cap">$0</div></div>
-    <div class="tstat"><div class="tstat-label">Bids 24h</div><div class="tstat-val" style="color:var(--green)">2,841</div></div>
-    <div class="tstat"><div class="tstat-label">Brokers</div><div class="tstat-val" style="color:var(--purple)" id="s-brokers">4</div></div>
-  </div>
-  <div class="top-actions">
-    <button class="btn btn-ghost" onclick="openModal('kyc')">KYC / Login</button>
-    <button class="btn btn-ghost" onclick="openModal('broker')">Broker Signup</button>
-    <button class="btn btn-gold" onclick="openModal('advertise')">Buy Airspace</button>
-    <button class="btn btn-accent" onclick="openModal('list')">+ List Asset</button>
-  </div>
-</div>
-
-<!-- ── LEFT PANEL ── -->
-<div id="left-panel">
-  <div class="panel-tabs">
-    <div class="ptab active" onclick="setTab(this,'all')">All</div>
-    <div class="ptab" onclick="setTab(this,'residential')">Res</div>
-    <div class="ptab" onclick="setTab(this,'commercial')">Com</div>
-    <div class="ptab" onclick="setTab(this,'business')">Biz</div>
-    <div class="ptab" onclick="setTab(this,'land')">Land</div>
-    <div class="ptab" onclick="setTab(this,'broker')">Brokers</div>
-    <div class="ptab" onclick="setTab(this,'lenders')">Lenders</div>
-  </div>
-  <div class="filter-strip" id="filter-strip">
-    <button class="fchip active" onclick="setFilter(this,'any')">All Prices</button>
-    <button class="fchip" onclick="setFilter(this,'sub1m')">Under $1M</button>
-    <button class="fchip" onclick="setFilter(this,'1m5m')">$1M–$5M</button>
-    <button class="fchip" onclick="setFilter(this,'5m20m')">$5M–$20M</button>
-    <button class="fchip" onclick="setFilter(this,'20mplus')">$20M+</button>
-  </div>
-  <div class="listings" id="listing-list"></div>
-</div>
-
-<!-- ── MAP COLUMN ── -->
-<div id="map-col">
-
-  <!-- Google Maps 3D — CORRECTLY CLOSED -->
-  <gmp-map-3d id="map3d" mode="satellite" center="25.1972,55.2744" tilt="65" range="5000000"></gmp-map-3d>
-
-  <!-- Map search overlay -->
-  <div id="map-search-bar">
-    <input id="map-autocomplete" class="map-search-input" type="text" placeholder="⌕  Fly to any address or place…">
-    <button class="map-search-btn" onclick="triggerFly()">FLY</button>
-  </div>
-
-  <!-- Type legend -->
-  <div class="map-legend" id="leg-type">
-    <div class="leg-title">Asset Type</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#4080ff"></div>Residential</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#f5c842"></div>Commercial</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#00c47a"></div>Land</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#ff6b35"></div>Business</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#a855f7"></div>Broker Listed</div>
-  </div>
-
-  <!-- Heat legend -->
-  <div class="heat-legend" id="leg-heat">
-    <div class="leg-title">Price / sqft</div>
-    <div class="heat-bar"></div>
-    <div class="heat-labels"><span>$50</span><span>$500</span><span>$5k+</span></div>
-  </div>
-
-  <!-- Map controls -->
-  <div class="map-controls">
-    <button class="mc-btn active" id="mc-sat" onclick="setMapMode('satellite',this)">Satellite</button>
-    <button class="mc-btn" id="mc-hybrid" onclick="setMapMode('hybrid',this)">Hybrid</button>
-    <button class="mc-btn" id="mc-tilt" onclick="toggleTilt()">Tilt</button>
-    <button class="mc-btn" id="mc-heat" onclick="toggleHeat()">Heat Zone</button>
-    <button class="mc-btn" id="mc-globe" onclick="flyToGlobe()">Globe View</button>
-  </div>
-
-  <!-- Spatial blimp ads (injected dynamically) -->
-  <div id="blimp-layer"></div>
-
-</div>
-
-<!-- ── RIGHT PANEL ── -->
-<div id="right-panel">
-  <div class="detail-head" id="detail-head">
-    <div class="detail-type">Select an asset</div>
-    <div class="detail-name" style="opacity:.4">Click any listing or map marker</div>
-    <div class="detail-loc">—</div>
-  </div>
-  <div class="detail-body" id="detail-body">
-    <div style="text-align:center;padding:30px 0;color:var(--muted);font-size:10px;line-height:2.2">
-      <div style="font-size:28px;opacity:.12;margin-bottom:12px">◎</div>
-      No broker intermediaries<br>
-      Bid · Ask · Buy · Finance<br>
-      Global. Liquid. Open.
+  <div class="logo">
+    <div class="logo-mark"></div>
+    <div>
+      <div class="logo-text">RWABidAsk</div>
+      <div class="logo-tag">GLOBAL ASSET MARKET</div>
     </div>
   </div>
+
+  <div class="search-wrap">
+    <input
+      id="search-input"
+      type="text"
+      placeholder="⌕  Search any address, city, or region worldwide…"
+      autocomplete="off"
+    >
+    <button class="search-icon" onclick="triggerSearch()">FLY ↗</button>
+  </div>
+
+  <div class="topbar-right">
+    <div class="tstat">
+      <div class="tstat-l">Assets</div>
+      <div class="tstat-v live" id="s-assets">—</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Status</div>
+      <div class="tstat-v live" id="s-status">SYNC</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Bids 24h</div>
+      <div class="tstat-v" id="s-bids">—</div>
+    </div>
+    <button class="tbtn" id="signin-btn" onclick="openModal('signin')">Sign In</button>
+    <button class="tbtn primary" id="join-btn" onclick="openModal('register')">Join</button>
+  </div>
 </div>
 
-<!-- ── TICKER ── -->
-<div id="ticker"><div class="tick-inner" id="tick-inner"></div></div>
+<!-- ══ MAIN ══ -->
+<div id="main-row">
 
-</div><!-- #app -->
+  <!-- LEFT PANEL -->
+  <div id="left">
+    <div class="left-head">
+      <div class="left-title">Global Directory</div>
+      <div class="ptabs">
+        <button class="ptab on"  onclick="setTab(this,'all')">All</button>
+        <button class="ptab" onclick="setTab(this,'residential')">Res</button>
+        <button class="ptab" onclick="setTab(this,'commercial')">Com</button>
+        <button class="ptab" onclick="setTab(this,'business')">Biz</button>
+        <button class="ptab" onclick="setTab(this,'land')">Land</button>
+      </div>
+    </div>
+    <div class="frow">
+      <button class="fchip on" onclick="setFilter(this,'any')">Any</button>
+      <button class="fchip" onclick="setFilter(this,'sub1m')">–$1M</button>
+      <button class="fchip" onclick="setFilter(this,'1m5m')">$1–5M</button>
+      <button class="fchip" onclick="setFilter(this,'5m25m')">$5–25M</button>
+      <button class="fchip" onclick="setFilter(this,'25mplus')">$25M+</button>
+    </div>
+    <div class="list-scroll" id="list-scroll">
+      <!-- Populated by JS -->
+      <div class="sync-state" id="sync-state">
+        <div class="sync-rings">
+          <div class="sync-ring"></div>
+          <div class="sync-ring"></div>
+          <div class="sync-ring"></div>
+          <div class="sync-dot"></div>
+        </div>
+        <div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div>
+      </div>
+    </div>
+  </div>
 
-<!-- ── MODAL ── -->
-<div id="modal"><div class="modal-box" id="modal-inner"></div></div>
+  <!-- MAP -->
+  <div id="map-col">
 
-<!-- ── NOTIF ── -->
-<div id="notif" id="notif-el"></div>
+    <!-- Google Maps 3D — properly initialized via JS below -->
+    <div id="map3d-container"></div>
 
-<script>
-// ═══════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════
-const LISTINGS = [
-  {id:1, name:"Beachfront Villa",         type:"residential",city:"Marbella",     country:"Spain",      lat:36.510,lng:-4.882, ask:4200000, bid:3800000, sqft:5200,    beds:6,  baths:7,  yr:2019,cap:null,rev:null,   src:"Registro Propiedad ES",broker:null, days:34},
-  {id:2, name:"Tech Office Campus",       type:"commercial", city:"Lisbon",       country:"Portugal",   lat:38.717,lng:-9.142, ask:12500000,bid:11000000,sqft:28000,   beds:null,baths:null,yr:2015,cap:6.2, rev:null,   src:"Registo Comercial PT", broker:null, days:88},
-  {id:3, name:"Agricultural Land 480ac",  type:"land",       city:"Mendoza",      country:"Argentina",  lat:-32.89,lng:-68.83, ask:890000,  bid:750000,  sqft:20908800,beds:null,baths:null,yr:null,cap:null,rev:380000, src:"INCRA AR",             broker:null, days:121},
-  {id:4, name:"Craft Brewery + Taproom",  type:"business",   city:"Portland",     country:"USA",        lat:45.521,lng:-122.68,ask:3100000, bid:2800000, sqft:8400,    beds:null,baths:null,yr:2016,cap:null,rev:2400000,src:"OR SOS Registry",      broker:"Pacific Realty Group",days:19},
-  {id:5, name:"Historic Apartment Block", type:"residential",city:"Budapest",     country:"Hungary",    lat:47.498,lng:19.039, ask:1850000, bid:1650000, sqft:12000,   beds:18, baths:18, yr:1902,cap:7.8, rev:null,   src:"Földhivatal HU",       broker:null, days:65},
-  {id:6, name:"Boutique Hotel 32 Rooms",  type:"commercial", city:"Cartagena",    country:"Colombia",   lat:10.391,lng:-75.512,ask:5600000, bid:5000000, sqft:18000,   beds:32, baths:36, yr:2008,cap:8.4, rev:920000, src:"Colombia Prop. Reg.",  broker:"Caribbean RE Partners",days:44},
-  {id:7, name:"E-Commerce Brand (FBA)",   type:"business",   city:"Remote",       country:"USA",        lat:37.09, lng:-95.71, ask:780000,  bid:700000,  sqft:null,    beds:null,baths:null,yr:2021,cap:null,rev:1100000,src:"BizBuySell Agg.",      broker:null, days:7},
-  {id:8, name:"Riverfront Warehouse",     type:"commercial", city:"Warsaw",       country:"Poland",     lat:52.230,lng:21.012, ask:7800000, bid:7000000, sqft:45000,   beds:null,baths:null,yr:1987,cap:5.9, rev:null,   src:"KRS PL Registry",      broker:null, days:56},
-  {id:9, name:"Luxury Penthouse",         type:"residential",city:"Dubai",        country:"UAE",        lat:25.197,lng:55.274, ask:9200000, bid:8500000, sqft:7800,    beds:5,  baths:6,  yr:2022,cap:null,rev:null,   src:"DLD Registry UAE",     broker:"Emirates Luxury RE",  days:22},
-  {id:10,name:"Coffee Farm 200ha",        type:"land",       city:"Minas Gerais", country:"Brazil",     lat:-18.51,lng:-44.17, ask:1200000, bid:1050000, sqft:2152800, beds:null,baths:null,yr:null,cap:null,rev:380000, src:"INCRA BR",             broker:null, days:99},
-  {id:11,name:"Medieval Castle Estate",   type:"residential",city:"Loire Valley", country:"France",     lat:47.412,lng:0.695,  ask:18500000,bid:16000000,sqft:42000,   beds:22, baths:18, yr:1387,cap:null,rev:null,   src:"Notaires de France",   broker:null, days:180},
-  {id:12,name:"Auto Repair Chain 12 loc", type:"business",   city:"Toronto",      country:"Canada",     lat:43.651,lng:-79.383,ask:4400000, bid:4000000, sqft:null,    beds:null,baths:null,yr:2009,cap:null,rev:5200000,src:"ON Corp. Registry",    broker:"Apex Business Brokers",days:31},
-  {id:13,name:"Seaside Resort Land 8ac",  type:"land",       city:"Phuket",       country:"Thailand",   lat:7.878, lng:98.392, ask:2900000, bid:2500000, sqft:348480,  beds:null,baths:null,yr:null,cap:null,rev:null,   src:"Land Dept. TH",        broker:null, days:74},
-  {id:14,name:"Mixed-Use High-Rise",      type:"commercial", city:"Lagos",        country:"Nigeria",    lat:6.524, lng:3.379,  ask:6200000, bid:5500000, sqft:62000,   beds:null,baths:null,yr:2018,cap:9.1, rev:null,   src:"Lagos State Reg.",     broker:null, days:48},
-  {id:15,name:"SaaS Company ARR $2M",     type:"business",   city:"Dublin",       country:"Ireland",    lat:53.332,lng:-6.249, ask:8000000, bid:7200000, sqft:null,    beds:null,baths:null,yr:2020,cap:null,rev:2000000,src:"CRO IE Registry",      broker:null, days:14},
-  {id:16,name:"Ski Chalet Complex",       type:"residential",city:"Verbier",      country:"Switzerland",lat:46.096,lng:7.228,  ask:6800000, bid:6200000, sqft:9600,    beds:14, baths:12, yr:2011,cap:4.2, rev:420000, src:"Register Foncier CH",  broker:null, days:28},
-  {id:17,name:"Logistics Warehouse 3ac",  type:"commercial", city:"Rotterdam",    country:"Netherlands",lat:51.924,lng:4.462,  ask:9400000, bid:8800000, sqft:86000,   beds:null,baths:null,yr:2016,cap:6.8, rev:null,   src:"Kadaster NL",          broker:null, days:52},
-  {id:18,name:"Renewable Energy Farm",    type:"land",       city:"Seville",      country:"Spain",      lat:37.389,lng:-5.984, ask:3300000, bid:2900000, sqft:4356000, beds:null,baths:null,yr:null,cap:null,rev:280000, src:"Catastro ES",          broker:null, days:67},
-  {id:19,name:"Restaurant Group 8 loc",   type:"business",   city:"Singapore",    country:"Singapore",  lat:1.352, lng:103.819,ask:6100000, bid:5500000, sqft:null,    beds:null,baths:null,yr:2014,cap:null,rev:7200000,src:"ACRA SG Registry",     broker:null, days:9},
-  {id:20,name:"Colonial Mansion",         type:"residential",city:"Havana",       country:"Cuba",       lat:23.136,lng:-82.359,ask:980000,  bid:820000,  sqft:8200,    beds:9,  baths:8,  yr:1924,cap:null,rev:null,   src:"Registro Prop. CU",    broker:null, days:210},
-];
+    <!-- Marker & Info Window layer -->
+    <div id="overlay-layer" style="position:absolute;inset:0;pointer-events:none;z-index:300;"></div>
 
-const BROKERS = [
-  {id:'b1',name:"Pacific Realty Group",   region:"USA West Coast", listings:12, plan:"Premium", rate:"2.5%", contact:"pacific@rwa.io",    joined:"Jan 2025"},
-  {id:'b2',name:"Emirates Luxury RE",     region:"UAE / Gulf",     listings:8,  plan:"Premium", rate:"2.0%", contact:"emirates@rwa.io",   joined:"Feb 2025"},
-  {id:'b3',name:"Caribbean RE Partners",  region:"Latin America",  listings:19, plan:"Standard",rate:"3.0%", contact:"caribbean@rwa.io",  joined:"Mar 2025"},
-  {id:'b4',name:"Apex Business Brokers",  region:"Canada",         listings:6,  plan:"Standard",rate:"3.5%", contact:"apex@rwa.io",       joined:"Apr 2025"},
-];
+    <!-- Map controls -->
+    <div class="map-ctl-panel">
+      <div class="mctl-group">
+        <button class="mctl on" onclick="setMapMode('satellite',this)">Satellite</button>
+        <button class="mctl" onclick="setMapMode('hybrid',this)">Hybrid</button>
+      </div>
+      <div class="mctl-group">
+        <button class="mctl" onclick="setTilt(45,this)">Tilt 45°</button>
+        <button class="mctl" onclick="setTilt(0,this)">Top Down</button>
+      </div>
+      <div class="mctl-group">
+        <button class="mctl" onclick="toggleHeat(this)">Heat Zone</button>
+        <button class="mctl" onclick="flyGlobe()">Globe View</button>
+      </div>
+    </div>
 
-const LENDERS = [
-  {id:'l1',name:"Global Bridge Capital",  type:"Bridge Loan",    rate:"8.5%",  ltv:"70%", min:"$500K",  max:"$50M",  close:"10 days"},
-  {id:'l2',name:"LatAm Property Finance", type:"Intl Mortgage",  rate:"9.2%",  ltv:"65%", min:"$200K",  max:"$5M",   close:"21 days"},
-  {id:'l3',name:"Gulf Asset Lending",     type:"Commercial RE",  rate:"7.8%",  ltv:"75%", min:"$1M",    max:"$100M", close:"14 days"},
-  {id:'l4',name:"Digital Asset Credit",   type:"Crypto-backed",  rate:"6.5%",  ltv:"50%", min:"$100K",  max:"$10M",  close:"3 days"},
-  {id:'l5',name:"CrossBorder Mortgages",  type:"Foreign National",rate:"10.1%", ltv:"60%", min:"$300K",  max:"$3M",   close:"30 days"},
-];
+    <!-- Status bar -->
+    <div class="map-status">
+      <span class="live-dot"></span>
+      <span id="map-status-txt">ESTABLISHING SECURE CONNECTION…</span>
+    </div>
 
-const ADS = [
-  {text:"Gulf Asset Lending — Fast Bridge Loans", sponsor:"Gulf Asset Lending", color:"#f5c842"},
-  {text:"Emirates Luxury RE — Off-Plan Dubai 2026", sponsor:"Emirates Luxury RE", color:"#00d4aa"},
-  {text:"List on RWABidAsk — No Broker Fees", sponsor:"RWABidAsk", color:"#4080ff"},
-];
+    <!-- Blimp -->
+    <div class="blimp-layer">
+      <div class="blimp" id="blimp-el" title="Partnership — Annie Group LLC">
+        <div class="blimp-body">
+          <div class="blimp-hull">
+            <div>
+              <div class="blimp-text">ANNIE GROUP LLC</div>
+              <div class="blimp-sub">PARTNERSHIP INQUIRY</div>
+            </div>
+          </div>
+          <div class="blimp-tail"></div>
+        </div>
+        <div class="blimp-string"></div>
+        <div class="blimp-flag">AIRSPACE</div>
+      </div>
+    </div>
 
-const TYPE_COLOR = {residential:"#4080ff",commercial:"#f5c842",land:"#00c47a",business:"#ff6b35",broker:"#a855f7"};
+  </div>
 
-let activeTab='all', activeFilter='any', activeId=null, heatOn=false, searchQ='';
-let map3dEl=null, autocompleteInstance=null;
+  <!-- RIGHT PANEL -->
+  <div id="right">
+    <div class="rhead" id="rhead">
+      <div class="rtype">Select an Asset</div>
+      <div class="rname" style="opacity:.25">Click any marker or listing</div>
+      <div class="rcity">—</div>
+    </div>
+    <div class="rbody" id="rbody">
+      <div class="r-empty">
+        <div class="r-empty-glyph">◎</div>
+        <div class="r-empty-text">
+          NO BROKER REQUIRED<br>
+          BID · ASK · BUY<br>
+          GLOBAL · LIQUID · OPEN
+        </div>
+      </div>
+    </div>
+  </div>
 
-// ═══════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════
-function fmt(n){
-  if(!n&&n!==0)return'—';
-  if(n>=1e9)return'$'+(n/1e9).toFixed(2)+'B';
-  if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';
-  if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';
-  return'$'+n;
+</div><!-- #main-row -->
+
+<!-- ══ TICKER ══ -->
+<div id="ticker-bar">
+  <div class="ticker-track" id="ticker-track">
+    <!-- built by JS -->
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<div id="footer">
+  <div class="footer-copy">
+    <strong>© 2026 ANNIE GROUP LLC. All Rights Reserved.</strong>
+    &nbsp;·&nbsp;
+    RWABidAsk is a Registered Trade Name of Annie Group LLC
+    &nbsp;·&nbsp;
+    Platform facilitation only — not a licensed broker or dealer
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openModal('tos');return false">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openModal('privacy');return false">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/cdn-cgi/l/email-protection#9cf3ecefdceeebfdfef5f8fdeff7b2fff3f1"><span class="__cf_email__" data-cfemail="1976696a596b6e787b707d786a72377a7674">[email&#160;protected]</span></a>
+  </div>
+</div>
+
+</div><!-- #shell -->
+
+<!-- ══ INFO WINDOW (portal, absolutely positioned) ══ -->
+<div id="info-win" class="info-win" style="display:none;position:fixed;z-index:9999;">
+  <!-- built by JS -->
+</div>
+
+<!-- ══ MODAL ══ -->
+<div id="modal">
+  <div class="mbox" id="mbox">
+    <button class="mclose-btn" onclick="closeModal()">✕</button>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════
+   CONFIG — swap CSV_URL for your Google Sheet CSV export link
+   Columns expected: id, address, city, country, lat, lng,
+                     price, type, sqft, status, source, days
+═══════════════════════════════════════════════════════════ */
+const CSV_URL =
+  'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0';
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let ASSETS    = [];
+let map3dEl   = null;
+let acInstance = null;
+let activeTab    = 'all';
+let activeFilter = 'any';
+let activeId     = null;
+let heatOn       = false;
+let domMarkers   = {};  // id → {el, asset}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════ */
+function fmtPrice(n) {
+  if (!n || n === 0) return '—';
+  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
+  return '$' + n;
 }
-function badgeClass(t){
-  return{residential:'b-res',commercial:'b-com',land:'b-land',business:'b-biz',broker:'b-bkr'}[t]||'b-res';
+function setStatus(msg) {
+  const el = document.getElementById('map-status-txt');
+  if (el) el.textContent = msg;
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+function typeClass(type) {
+  return { residential: 't-res', commercial: 't-com', business: 't-biz', land: 't-land' }[type] || 't-res';
 }
 
-// ═══════════════════════════════════════════════
-// FILTERED LISTINGS
-// ═══════════════════════════════════════════════
-function filtered(){
-  return LISTINGS.filter(l=>{
-    if(activeTab!=='all'&&activeTab!=='broker'&&activeTab!=='lenders'&&l.type!==activeTab)return false;
-    if(activeTab==='broker'&&!l.broker)return false;
-    if(activeFilter==='sub1m'&&l.ask>=1e6)return false;
-    if(activeFilter==='1m5m'&&(l.ask<1e6||l.ask>5e6))return false;
-    if(activeFilter==='5m20m'&&(l.ask<5e6||l.ask>20e6))return false;
-    if(activeFilter==='20mplus'&&l.ask<=20e6)return false;
-    if(searchQ){
-      const q=searchQ.toLowerCase();
-      if(![l.name,l.city,l.country,l.type,l.broker||''].some(s=>s.toLowerCase().includes(q)))return false;
-    }
+/* ═══════════════════════════════════════════════════════════
+   CSV FEED
+═══════════════════════════════════════════════════════════ */
+async function loadMarketData() {
+  setStatus('FETCHING GLOBAL DIRECTORY…');
+  try {
+    const res = await fetch(CSV_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const parsed = parseCSV(text);
+    if (!parsed.length) throw new Error('Empty CSV');
+    ASSETS = parsed;
+    onDataReady();
+  } catch (e) {
+    console.info('[RWABidAsk] CSV unavailable —', e.message,
+      '| Connect your Google Sheet CSV to populate live listings.');
+    setStatus('SYNCHRONIZING GLOBAL DIRECTORY…');
+    document.getElementById('s-assets').textContent = '0';
+    document.getElementById('s-status').textContent = 'SYNC';
+    document.getElementById('s-bids').textContent = '—';
+    renderList();
+    buildTicker([]);
+  }
+}
+
+function parseCSV(raw) {
+  const lines = raw.trim().split('\n');
+  if (lines.length < 2) return [];
+  const hdrs = csvRow(lines[0]).map(h => h.toLowerCase().trim());
+  const get = (obj, key) => (obj[key] || '').trim();
+  return lines.slice(1).map((line, i) => {
+    const vals = csvRow(line);
+    const o = {};
+    hdrs.forEach((h, j) => { o[h] = (vals[j] || '').replace(/^"|"$/g, '').trim(); });
+    return {
+      id:      get(o, 'id') || String(i + 1),
+      address: get(o, 'address') || get(o, 'name') || '—',
+      city:    get(o, 'city') || '—',
+      country: get(o, 'country') || '—',
+      lat:     parseFloat(get(o, 'lat')) || 0,
+      lng:     parseFloat(get(o, 'lng')) || 0,
+      price:   parseFloat(get(o, 'price').replace(/[^0-9.]/g, '')) || 0,
+      type:    (get(o, 'type') || 'residential').toLowerCase(),
+      sqft:    parseInt(get(o, 'sqft')) || null,
+      status:  get(o, 'status') || 'For Sale',
+      source:  get(o, 'source') || 'Public Registry',
+      days:    parseInt(get(o, 'days')) || 0,
+    };
+  }).filter(a => a.lat !== 0 && a.lng !== 0);
+}
+
+function csvRow(line) {
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { q = !q; }
+    else if (line[i] === ',' && !q) { out.push(cur); cur = ''; }
+    else { cur += line[i]; }
+  }
+  out.push(cur);
+  return out;
+}
+
+function onDataReady() {
+  setStatus('GLOBAL DIRECTORY LIVE — ' + ASSETS.length + ' ASSETS');
+  document.getElementById('s-assets').textContent = ASSETS.length;
+  document.getElementById('s-status').textContent = 'LIVE';
+  document.getElementById('s-bids').textContent = Math.floor(ASSETS.length * 4.2);
+  renderList();
+  renderDOMMarkers();
+  buildTicker(ASSETS);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILTERED VIEW
+═══════════════════════════════════════════════════════════ */
+function filtered() {
+  return ASSETS.filter(a => {
+    if (activeTab !== 'all' && a.type !== activeTab) return false;
+    if (activeFilter === 'sub1m'  && a.price >= 1e6) return false;
+    if (activeFilter === '1m5m'   && (a.price < 1e6  || a.price > 5e6))  return false;
+    if (activeFilter === '5m25m'  && (a.price < 5e6  || a.price > 25e6)) return false;
+    if (activeFilter === '25mplus'&& a.price <= 25e6) return false;
     return true;
   });
 }
 
-// ═══════════════════════════════════════════════
-// RENDER LEFT LIST
-// ═══════════════════════════════════════════════
-function renderList(){
-  const cont=document.getElementById('listing-list');
-  
-  if(activeTab==='lenders'){
-    cont.innerHTML=LENDERS.map(l=>`
-      <div class="lender-card" style="margin:8px 10px;cursor:pointer" onclick="showLenderDetail('${l.id}')">
-        <div class="lender-name">${l.name}</div>
-        <div class="lender-rate">${l.rate} interest · LTV ${l.ltv}</div>
-        <div class="lender-meta">${l.type} · ${l.min}–${l.max} · Closes in ${l.close}</div>
-      </div>
-    `).join('');
+/* ═══════════════════════════════════════════════════════════
+   RENDER LEFT LIST
+═══════════════════════════════════════════════════════════ */
+function renderList() {
+  const wrap = document.getElementById('list-scroll');
+  const list = filtered();
+
+  if (!list.length) {
+    wrap.innerHTML = `
+      <div class="sync-state">
+        <div class="sync-rings">
+          <div class="sync-ring"></div><div class="sync-ring"></div>
+          <div class="sync-ring"></div><div class="sync-dot"></div>
+        </div>
+        <div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div>
+      </div>`;
     return;
   }
 
-  if(activeTab==='broker'){
-    cont.innerHTML=BROKERS.map(b=>`
-      <div class="broker-card" style="margin:8px 10px;cursor:pointer" onclick="notify('Contacting ${b.name} — sign in to message brokers')">
-        <div class="broker-name">${b.name}</div>
-        <div class="broker-meta">${b.region} · ${b.plan} Plan · Since ${b.joined}</div>
-        <div class="broker-listings">${b.listings} active listings · Commission: ${b.rate}</div>
+  wrap.innerHTML = list.map(a => `
+    <div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">
+      ${a.days ? `<div class="pcard-days">${a.days}d</div>` : ''}
+      <div class="pcard-addr">${a.address}</div>
+      <div class="pcard-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
+      <div class="pcard-bottom">
+        <div class="pcard-price">${fmtPrice(a.price)}</div>
+        <span class="pcard-type ${typeClass(a.type)}">${a.type}</span>
       </div>
-    `).join('');
-    return;
-  }
-
-  const list=filtered();
-  const cap=list.reduce((s,l)=>s+l.ask,0);
-  document.getElementById('s-listed').textContent=list.length;
-  document.getElementById('s-cap').textContent=fmt(cap);
-  document.getElementById('s-brokers').textContent=BROKERS.length;
-
-  cont.innerHTML=list.map(l=>`
-    <div class="lcard ${activeId===l.id?'sel':''}" onclick="selectListing(${l.id})">
-      ${l.broker?`<div class="broker-flag">${l.broker.split(' ')[0]}</div>`:''}
-      <span class="lcard-badge ${badgeClass(l.type)}">${l.type}</span>
-      <div class="lcard-top">
-        <div class="lcard-name">${l.name}</div>
-        <div class="lcard-price">${fmt(l.ask)}</div>
-      </div>
-      <div class="lcard-loc">⊙ ${l.city}, ${l.country}</div>
-      <div class="lcard-ba">
-        <span class="ba-lbl">BID</span><span class="ba-b">${fmt(l.bid)}</span>
-        <span style="color:var(--border2);margin:0 4px">|</span>
-        <span class="ba-lbl">ASK</span><span class="ba-a">${fmt(l.ask)}</span>
-      </div>
-      <div style="font-size:9px;color:var(--muted);margin-top:4px">${l.src} · ${l.days}d</div>
     </div>
   `).join('');
 }
 
-// ═══════════════════════════════════════════════
-// SELECT + DETAIL
-// ═══════════════════════════════════════════════
-function selectListing(id){
-  activeId=id;
+/* ═══════════════════════════════════════════════════════════
+   SELECT & DETAIL
+═══════════════════════════════════════════════════════════ */
+function selectAsset(id) {
+  activeId = id;
   renderList();
-  const l=LISTINGS.find(x=>x.id===id);
-  renderDetail(l);
-  flyTo(l.lat,l.lng,1200,65);
+  const a = ASSETS.find(x => x.id === id);
+  if (!a) return;
+  renderDetail(a);
+  flyTo(a.lat, a.lng, 1400, 45);
+  closeInfoWin();
 }
 
-function renderDetail(l){
-  const spread=l.ask-l.bid;
-  const spPct=((spread/l.ask)*100).toFixed(1);
-
-  document.getElementById('detail-head').innerHTML=`
-    <div class="detail-type">${l.type.toUpperCase()} · ${l.country.toUpperCase()}</div>
-    <div class="detail-name">${l.name}</div>
-    <div class="detail-loc">⊙ ${l.city}, ${l.country}</div>
-    <div class="detail-price-row">
-      <div class="detail-ask">${fmt(l.ask)}</div>
-      <div class="detail-psf">${l.sqft?fmt(Math.round(l.ask/l.sqft))+'/sqft':''}</div>
+function renderDetail(a) {
+  document.getElementById('rhead').innerHTML = `
+    <div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div>
+    <div class="rname">${a.address}</div>
+    <div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
+    <div class="rprice-row">
+      <div class="rprice">${fmtPrice(a.price)}</div>
+      <div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div>
     </div>
   `;
-
-  let rows='';
-  if(l.sqft)rows+=drow('Size',l.sqft.toLocaleString()+' sqft');
-  if(l.beds)rows+=drow('Beds / Baths',l.beds+' / '+l.baths);
-  if(l.yr)rows+=drow('Year',l.yr);
-  if(l.cap)rows+=drow('Cap Rate',l.cap+'%');
-  if(l.rev)rows+=drow('Annual Revenue',fmt(l.rev));
-  rows+=drow('Days Listed',l.days+'d');
-  if(l.broker)rows+=drow('Listed By','<span style="color:var(--purple)">'+l.broker+'</span>');
-  rows+=`<div class="drow"><span class="dk">Source</span><span class="dv" style="font-size:9px;color:var(--muted)">${l.src}</span></div>`;
-
-  // Comparable heat: find listings same type within price ±50%
-  const comps=LISTINGS.filter(x=>x.id!==l.id&&x.type===l.type&&x.ask>l.ask*.5&&x.ask<l.ask*1.5).slice(0,3);
-
-  document.getElementById('detail-body').innerHTML=`
-    <div class="ba-box">
-      <div class="ba-row">
-        <div class="ba-col"><div class="ba-col-lbl">Best Bid</div><div class="ba-col-val" style="color:var(--red)">${fmt(l.bid)}</div></div>
-        <div class="ba-sep"></div>
-        <div class="ba-col"><div class="ba-col-lbl">Ask Price</div><div class="ba-col-val" style="color:var(--green)">${fmt(l.ask)}</div></div>
+  document.getElementById('rbody').innerHTML = `
+    <div class="rinner">
+      <div class="act-grid">
+        <a class="abtn a-buy"
+           href="mailto:ops@rwabidask.com?subject=BUY%20INQUIRY%3A%20${encodeURIComponent(a.address)}&body=Asset%20ID%3A%20${a.id}%0APrice%3A%20${fmtPrice(a.price)}%0AAddress%3A%20${encodeURIComponent(a.address)}%0A%0APlease%20initiate%20my%20purchase%20inquiry."
+        >BUY NOW</a>
+        <a class="abtn a-bid"
+           href="mailto:ops@rwabidask.com?subject=BID%3A%20${encodeURIComponent(a.address)}&body=Asset%20ID%3A%20${a.id}%0AListed%20At%3A%20${fmtPrice(a.price)}%0AAddress%3A%20${encodeURIComponent(a.address)}%0A%0AMy%20bid%20amount%3A%20%24"
+        >PLACE BID</a>
+        <button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button>
+        <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:#4ade80" onclick="openModal('insurance','${a.id}')">🛡 INSURANCE</button>
+        <button class="abtn a-save" onclick="openModal('signin')">WATCHLIST</button>
+        <button class="abtn" style="background:none;border:1px solid rgba(139,92,246,.3)!important;color:#a78bfa" onclick="openModal('bid','${a.id}')">BID ON LEDGER</button>
+        <button class="abtn a-claim" onclick="openModal('claim','${a.id}')">⬡ CLAIM FOR TOKENIZATION</button>
+        <button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">★ SPONSOR THIS LISTING</button>
       </div>
-      <div class="ba-spread">Spread ${fmt(spread)} · ${spPct}%</div>
-    </div>
 
-    <div class="action-grid">
-      <button class="abtn a-buy" onclick="openModal('buy','${l.id}')">BUY NOW</button>
-      <button class="abtn a-bid" onclick="openModal('bid','${l.id}')">PLACE BID</button>
-      <button class="abtn a-lend" onclick="openModal('finance','${l.id}')">FIND LENDER</button>
-      <button class="abtn a-save" onclick="notify('Saved to watchlist')">WATCHLIST</button>
-    </div>
-
-    <div class="dsect">
-      <div class="dsect-title">Property Data</div>
-      ${rows}
-    </div>
-
-    ${comps.length?`
-    <div class="dsect">
-      <div class="dsect-title">Global Comparables</div>
-      ${comps.map(c=>`
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;cursor:pointer" onclick="selectListing(${c.id})">
-          <span style="color:var(--dim)">${c.name} · ${c.country}</span>
-          <span style="color:var(--accent);font-family:var(--font-mono)">${fmt(c.ask)}</span>
-        </div>
-      `).join('')}
-    </div>`:''}
-
-    <div class="dsect">
-      <div class="ai-tag">AI Deal Brief</div>
-      <div class="ai-brief">${aiBrief(l,spPct)}</div>
-    </div>
-
-    ${l.broker?`
-    <div class="dsect">
-      <div class="dsect-title">Broker</div>
-      <div class="broker-card">
-        <div class="broker-name">${l.broker}</div>
-        <div class="broker-meta">Verified RWABidAsk Partner</div>
-        <button class="abtn" style="margin-top:8px;width:100%;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:var(--purple)" onclick="notify('Message sent to ${l.broker}')">CONTACT BROKER</button>
+      <div class="rsect">
+        <div class="rsect-title">Asset Data</div>
+        ${rr('Address', a.address)}
+        ${rr('City', a.city)}
+        ${rr('Country', a.country)}
+        ${a.price ? rr('Listed Price', `<span class="rv hl">${fmtPrice(a.price)}</span>`) : ''}
+        ${a.sqft   ? rr('Size', a.sqft.toLocaleString() + ' sqft') : ''}
+        ${rr('Status', a.status)}
+        ${a.days   ? rr('Days Listed', a.days + 'd') : ''}
+        ${rr('Source', a.source)}
+        ${rr('Coordinates', a.lat.toFixed(5) + ', ' + a.lng.toFixed(5))}
       </div>
-    </div>`:''}
-  `;
-}
 
-function drow(k,v){return`<div class="drow"><span class="dk">${k}</span><span class="dv">${v}</span></div>`;}
-
-function aiBrief(l,sp){
-  if(l.type==='business')return`Revenue multiple: ${l.rev?(l.ask/l.rev).toFixed(1)+'×':'N/A'}. ${sp}% spread signals motivated seller. Recommend 90-day LOI with seller carry-back and earnout clause. No broker = more room to negotiate.`;
-  if(l.type==='land')return`Raw land with ${sp}% negotiation room. Development or appreciation play. Confirm zoning via ${l.src} before offer. Zero-down seller financing inquiry recommended.`;
-  if(l.cap)return`Cap rate ${l.cap}% — ${l.cap>7?'above':'below'} regional average. ${sp}% spread on stabilized asset. Seller likely accepts ${fmt(Math.round((l.bid+l.ask*.4)/1000)*1000)} direct. Skip the broker, save ${fmt(Math.round(l.ask*.03))}.`;
-  return`${sp}% bid-ask spread. Estimated close price: ${fmt(Math.round((l.bid*.7+l.ask*.3)/1000)*1000)}. Direct negotiation removes 3–5% broker friction — that's ${fmt(Math.round(l.ask*.04))} back in your pocket.`;
-}
-
-function showLenderDetail(id){
-  const l=LENDERS.find(x=>x.id===id);
-  document.getElementById('detail-head').innerHTML=`
-    <div class="detail-type">LENDER · VERIFIED</div>
-    <div class="detail-name">${l.name}</div>
-    <div class="detail-loc">${l.type}</div>
-    <div class="detail-price-row">
-      <div class="detail-ask" style="color:var(--accent2)">${l.rate}</div>
-      <div class="detail-psf">LTV ${l.ltv}</div>
+      <div class="rsect">
+        <div class="rsect-title">Exchange Status</div>
+        ${rr('Asset ID', '#' + a.id)}
+        ${rr('Token Status', 'Unclaimed')}
+        ${rr('Broker', 'None — Direct')}
+        ${rr('KYC Required', 'Yes — to bid or buy')}
+      </div>
     </div>
   `;
-  document.getElementById('detail-body').innerHTML=`
-    <div class="dsect">
-      ${drow('Loan Type',l.type)}
-      ${drow('Interest Rate',`<span style="color:var(--green)">${l.rate}</span>`)}
-      ${drow('Max LTV',l.ltv)}
-      ${drow('Loan Range',l.min+' – '+l.max)}
-      ${drow('Close Timeline',l.close)}
-    </div>
-    <button class="abtn a-buy" style="width:100%" onclick="openModal('kyc')">APPLY NOW</button>
-  `;
 }
 
-// ═══════════════════════════════════════════════
-// TABS / FILTERS / SEARCH
-// ═══════════════════════════════════════════════
-function setTab(el,t){
-  document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active'); activeTab=t; renderList();
+function rr(k, v) {
+  return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`;
 }
-function setFilter(el,f){
-  document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active'); activeFilter=f; renderList();
-}
-function globalSearch(q){
-  searchQ=q;
-  activeTab='all';
-  document.querySelectorAll('.ptab').forEach((x,i)=>{if(i===0)x.classList.add('active');else x.classList.remove('active');});
+
+/* ═══════════════════════════════════════════════════════════
+   TABS / FILTERS
+═══════════════════════════════════════════════════════════ */
+function setTab(el, t) {
+  document.querySelectorAll('.ptab').forEach(x => x.classList.remove('on'));
+  el.classList.add('on');
+  activeTab = t;
   renderList();
+  syncMarkerVisibility();
+}
+function setFilter(el, f) {
+  document.querySelectorAll('.fchip').forEach(x => x.classList.remove('on'));
+  el.classList.add('on');
+  activeFilter = f;
+  renderList();
+  syncMarkerVisibility();
+}
+function syncMarkerVisibility() {
+  const vis = new Set(filtered().map(a => a.id));
+  Object.entries(domMarkers).forEach(([id, { el }]) => {
+    el.style.display = vis.has(id) ? 'block' : 'none';
+  });
 }
 
-// ═══════════════════════════════════════════════
-// GOOGLE MAPS 3D + FLY-TO (FIXED)
-// ═══════════════════════════════════════════════
-async function initMap(){
-  map3dEl = document.getElementById('map3d');
-
-  // Wait for the custom element to be defined and ready
-  await customElements.whenDefined('gmp-map-3d');
-
-  // Short delay to let the element fully initialize
-  await new Promise(r => setTimeout(r, 800));
-
-  // Set up Autocomplete on the text input
-  const inputEl = document.getElementById('map-autocomplete');
-
+/* ═══════════════════════════════════════════════════════════
+   GOOGLE MAPS 3D  (Map3DElement — requires v=alpha)
+═══════════════════════════════════════════════════════════ */
+async function initMap() {
   try {
-    const { Autocomplete } = await google.maps.importLibrary('places');
-    autocompleteInstance = new Autocomplete(inputEl, {
-      fields: ['geometry', 'name', 'formatted_address'],
+    // importLibrary is the correct alpha API approach
+    const maps3dLib = await google.maps.importLibrary('maps3d');
+    const Map3DElement = maps3dLib.Map3DElement;
+
+    map3dEl = new Map3DElement({
+      center: { lat: 20, lng: 10, altitude: 0 },
+      range: 22000000,
+      tilt: 0,
+      heading: 0,
+    });
+    // Set satellite mode after construction
+    try {
+      const { MapMode } = maps3dLib;
+      if (MapMode) map3dEl.mode = MapMode.SATELLITE;
+    } catch(e) { /* mode may not be needed */ }
+
+    const container = document.getElementById('map3d-container');
+    container.style.cssText = 'position:absolute;inset:0;';
+    container.appendChild(map3dEl);
+
+    // Wait one frame for element to attach, then gentle tilt
+    requestAnimationFrame(() => {
+      setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200);
     });
 
-    autocompleteInstance.addListener('place_changed', () => {
-      const place = autocompleteInstance.getPlace();
-      if (!place.geometry || !place.geometry.location) {
-        notify('Address not found — try a different search');
-        return;
-      }
-      const lat = place.geometry.location.lat();
-      const lng = place.geometry.location.lng();
-      flyTo(lat, lng, 1200, 62);
+    setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
 
-      // Create a searched asset and inject it into exchange
-      const newAsset = {
-        id: Date.now(),
-        name: place.name || place.formatted_address.split(',')[0],
-        type: 'residential',
-        city: (place.formatted_address||'').split(',')[1]?.trim() || 'Global',
-        country: (place.formatted_address||'').split(',').pop()?.trim() || 'Global',
-        lat: lat, lng: lng,
-        ask: Math.floor(Math.random()*(10000000-800000)+800000),
-        bid: Math.floor(Math.random()*(9000000-700000)+700000),
-        sqft: null, beds: null, baths: null, yr: null, cap: null, rev: null,
-        src: 'Google Places / User Search',
-        broker: null, days: 0,
-      };
-      LISTINGS.unshift(newAsset);
-      renderList();
-      buildTicker();
-      notify('Added to exchange: ' + newAsset.name);
-      setTimeout(() => selectListing(newAsset.id), 1000);
-    });
-  } catch(e) {
-    console.warn('Autocomplete init error:', e);
+    // Load CSV data
+    await loadMarketData();
+
+    // Init Places search (must come after map loads)
+    initSearch();
+
+  } catch (err) {
+    console.error('[RWABidAsk] Map3DElement init error:', err);
+    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING');
   }
-
-  // Add 3D markers for all listings
-  renderMapMarkers();
-
-  // Start blimp ads
-  startBlimps();
 }
 
-function flyTo(lat, lng, range, tilt){
-  if(!map3dEl) return;
+/* ═══════════════════════════════════════════════════════════
+   SEARCH — Places Autocomplete
+═══════════════════════════════════════════════════════════ */
+async function initSearch() {
+  const input = document.getElementById('search-input');
+  if (!input) return;
+  try {
+    // Try new PlaceAutocompleteElement first (alpha)
+    let usedLegacy = false;
+    try {
+      const placesLib = await google.maps.importLibrary('places');
+      if (placesLib.Autocomplete) {
+        const ac = new placesLib.Autocomplete(input, {
+          fields: ['geometry', 'name', 'formatted_address'],
+        });
+        acInstance = ac;
+        ac.addListener('place_changed', onPlaceSelected.bind(null, ac));
+        usedLegacy = true;
+      }
+    } catch(e) { /* fall through */ }
+
+    // Fallback: classic google.maps.places.Autocomplete
+    if (!usedLegacy && google.maps.places && google.maps.places.Autocomplete) {
+      const ac = new google.maps.places.Autocomplete(input, {
+        fields: ['geometry', 'name', 'formatted_address'],
+      });
+      acInstance = ac;
+      ac.addListener('place_changed', onPlaceSelected.bind(null, ac));
+    }
+  } catch (e) {
+    console.warn('[RWABidAsk] Search init error:', e);
+  }
+}
+
+function onPlaceSelected(ac) {
+  const place = ac.getPlace();
+  if (!place || !place.geometry || !place.geometry.location) {
+    toast('Location not found — try a more specific address');
+    return;
+  }
+  const lat = place.geometry.location.lat();
+  const lng = place.geometry.location.lng();
+  flyTo(lat, lng, 1400, 45);
+  setStatus('LOCATION: ' + (place.name || place.formatted_address || '').toUpperCase());
+  logLead(null, 'search', null);
+
+  // Inject as unclaimed search result
+  const searched = {
+    id:      'search-' + Date.now(),
+    address: place.name || (place.formatted_address || '').split(',')[0],
+    city:    ((place.formatted_address || '').split(',')[1] || '').trim(),
+    country: ((place.formatted_address || '').split(',').pop() || '').trim(),
+    lat, lng,
+    price: 0, type: 'residential',
+    sqft: null, status: 'Unclaimed — Search Result',
+    source: 'Google Places', days: 0,
+  };
+  ASSETS.unshift(searched);
+  renderList();
+  buildTicker(ASSETS);
+  addDOMMarker(searched);
+  setTimeout(() => selectAsset(searched.id), 900);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FLY-TO
+═══════════════════════════════════════════════════════════ */
+function flyTo(lat, lng, range, tilt) {
+  if (!map3dEl) return;
   try {
     map3dEl.flyCameraTo({
       endCamera: {
         center: { lat, lng, altitude: 0 },
-        tilt: tilt || 65,
-        range: range || 1200,
+        tilt: tilt ?? 45,
+        range: range ?? 1400,
         heading: 0,
       },
-      durationMillis: 2500,
+      durationMillis: 2600,
     });
-  } catch(e){
-    // Fallback: set center directly
-    map3dEl.setAttribute('center', `${lat},${lng}`);
-    map3dEl.setAttribute('range', range||1200);
-    map3dEl.setAttribute('tilt', tilt||65);
+  } catch (e) {
+    // Fallback direct set
+    map3dEl.center  = { lat, lng, altitude: 0 };
+    map3dEl.range   = range ?? 1400;
+    map3dEl.tilt    = tilt ?? 45;
   }
 }
 
-function triggerFly(){
-  const input = document.getElementById('map-autocomplete');
-  if(input.value && autocompleteInstance){
-    google.maps.event.trigger(autocompleteInstance, 'place_changed');
-  }
+function flyGlobe() {
+  flyTo(20, 10, 22000000, 0);
 }
 
-function renderMapMarkers(){
-  if(!map3dEl) return;
-  // Remove existing markers
-  map3dEl.querySelectorAll('gmp-marker-3d').forEach(m=>m.remove());
-
-  LISTINGS.forEach(l=>{
+/* ═══════════════════════════════════════════════════════════
+   MAP CONTROLS
+═══════════════════════════════════════════════════════════ */
+function setMapMode(mode, btn) {
+  document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  if (map3dEl) {
     try {
-      const marker = document.createElement('gmp-marker-3d');
-      marker.setAttribute('position', `${l.lat},${l.lng},50`);
-      marker.setAttribute('altitude-mode', 'relative-to-ground');
-      marker.setAttribute('extruded', 'true');
-      marker.style.cursor='pointer';
-      marker.title = `${l.name} — ${fmt(l.ask)}`;
-      marker.addEventListener('gmp-click', ()=>selectListing(l.id));
-      map3dEl.appendChild(marker);
-    } catch(e){}
-  });
-}
-
-function setMapMode(mode, btn){
-  document.querySelectorAll('.mc-btn[id^=mc-]').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  if(map3dEl) map3dEl.setAttribute('mode', mode);
-}
-
-let tiltOn=true;
-function toggleTilt(){
-  tiltOn=!tiltOn;
-  document.getElementById('mc-tilt').classList.toggle('active',tiltOn);
-  if(map3dEl){
-    map3dEl.setAttribute('tilt', tiltOn?65:0);
+      map3dEl.mode = mode === 'satellite'
+        ? google.maps.maps3d.MapMode.SATELLITE
+        : google.maps.maps3d.MapMode.HYBRID;
+    } catch(e) {
+      map3dEl.setAttribute('mode', mode);
+    }
   }
 }
 
-function toggleHeat(){
-  heatOn=!heatOn;
-  document.getElementById('mc-heat').classList.toggle('active',heatOn);
-  document.getElementById('leg-type').style.display=heatOn?'none':'block';
-  document.getElementById('leg-heat').style.display=heatOn?'block':'none';
-  notify(heatOn?'Heat zones active — price intensity shown':'Heat zones off');
+function setTilt(deg, btn) {
+  document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  if (map3dEl) map3dEl.tilt = deg;
 }
 
-function flyToGlobe(){
-  flyTo(25,20,20000000,0);
+function toggleHeat(btn) {
+  heatOn = !heatOn;
+  btn.classList.toggle('on', heatOn);
+  const max = Math.max(...ASSETS.map(a => a.price), 1);
+  Object.values(domMarkers).forEach(({ el, asset }) => {
+    if (heatOn) {
+      const t = Math.min(1, (asset.price || 0) / max);
+      const hue = Math.round((1 - t) * 220); // blue → cyan → hot
+      el.style.background = `hsl(${hue},100%,55%)`;
+      el.style.boxShadow  = `0 0 0 2px hsla(${hue},100%,55%,.3),0 0 10px hsl(${hue},100%,55%),0 0 24px hsla(${hue},100%,55%,.4)`;
+    } else {
+      el.style.background = 'var(--cyan)';
+      el.style.boxShadow  = '0 0 0 2px rgba(0,255,200,.3),0 0 10px var(--cyan),0 0 22px rgba(0,255,200,.4)';
+    }
+  });
+  toast(heatOn ? 'Heat zones ON — color = price intensity' : 'Heat zones OFF');
 }
 
-// ═══════════════════════════════════════════════
-// SPATIAL BLIMPS / AIRSPACE ADS
-// ═══════════════════════════════════════════════
-let blimpIndex=0;
-function startBlimps(){
-  spawnBlimp();
-  setInterval(spawnBlimp, 45000);
+/* ═══════════════════════════════════════════════════════════
+   DOM MARKERS (glowing cyan dots overlay)
+   These are positioned using the 3D map's projection.
+   Because Map3DElement doesn't yet expose a stable pixel
+   projection API in beta, we use a WebGL-free overlay approach:
+   we place markers via CSS absolute positioning recalculated
+   on camera change events.
+═══════════════════════════════════════════════════════════ */
+function renderDOMMarkers() {
+  const layer = document.getElementById('overlay-layer');
+  layer.innerHTML = '';
+  domMarkers = {};
+  ASSETS.forEach(a => addDOMMarker(a));
+
+  // Listen to camera changes to reproject
+  if (map3dEl) {
+    map3dEl.addEventListener('gmp-centerchange',  reprojectMarkers);
+    map3dEl.addEventListener('gmp-rangechange',   reprojectMarkers);
+    map3dEl.addEventListener('gmp-tiltchange',    reprojectMarkers);
+    map3dEl.addEventListener('gmp-headingchange', reprojectMarkers);
+  }
 }
 
-function spawnBlimp(){
-  const ad=ADS[blimpIndex % ADS.length];
-  blimpIndex++;
-  const layer=document.getElementById('blimp-layer');
-  const b=document.createElement('div');
-  b.className='blimp-container';
-  b.style.top=(15+Math.random()*25)+'%';
-  b.style.animationDuration=(35+Math.random()*25)+'s';
-  b.innerHTML=`
-    <div class="blimp-body" style="background:${ad.color};box-shadow:0 4px 20px ${ad.color}55" onclick="notify('${ad.sponsor} — click to view sponsorship options')">
-      <svg width="28" height="16" viewBox="0 0 28 16"><ellipse cx="14" cy="8" rx="14" ry="8" fill="${ad.color}22" stroke="${ad.color}" stroke-width="1"/><line x1="14" y1="8" x2="14" y2="16" stroke="${ad.color}" stroke-width="1"/></svg>
-      <div class="blimp-text" style="color:${ad.color==='#f5c842'?'#000':'#000'}">${ad.text}</div>
+function addDOMMarker(asset) {
+  const el = document.createElement('div');
+  el.className = 'map-marker-dot';
+  el.style.pointerEvents = 'all';
+  el.title = `${asset.address} — ${fmtPrice(asset.price)}`;
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showInfoWin(asset, el);
+    selectAsset(asset.id);
+  });
+  document.getElementById('overlay-layer').appendChild(el);
+  domMarkers[asset.id] = { el, asset };
+  projectMarker(asset, el);
+}
+
+function projectMarker(asset, el) {
+  // Use spherical mercator approximation to get screen position
+  if (!map3dEl) return;
+  try {
+    const mapRect = document.getElementById('map-col').getBoundingClientRect();
+    const w = mapRect.width, h = mapRect.height;
+
+    const camCenter = map3dEl.center || { lat: 20, lng: 10 };
+    const camRange  = map3dEl.range  || 22000000;
+    const camTilt   = map3dEl.tilt   || 0;
+    const camHead   = map3dEl.heading || 0;
+
+    const dLat = asset.lat - (camCenter.lat || 0);
+    const dLng = asset.lng - (camCenter.lng || 0);
+
+    // Scale: approximate pixels-per-degree based on range
+    const ppd = Math.max(0.1, (w / 2) / (camRange / 111000));
+    const cos = Math.cos((camCenter.lat || 0) * Math.PI / 180);
+
+    // Rotate by heading
+    const headRad = camHead * Math.PI / 180;
+    const rx = dLng * cos * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
+    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cos * ppd * Math.sin(headRad);
+
+    // Tilt foreshortening (simple approximation)
+    const tiltFactor = Math.cos(camTilt * Math.PI / 180);
+    const screenX = w / 2 + rx;
+    const screenY = h / 2 + ry * tiltFactor;
+
+    // Hide if off-screen
+    const pad = 20;
+    if (screenX < -pad || screenX > w + pad || screenY < -pad || screenY > h + pad) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = 'block';
+      el.style.left = screenX + 'px';
+      el.style.top  = screenY + 'px';
+    }
+  } catch (e) {
+    el.style.display = 'none';
+  }
+}
+
+function reprojectMarkers() {
+  Object.values(domMarkers).forEach(({ el, asset }) => projectMarker(asset, el));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INFO WINDOW
+═══════════════════════════════════════════════════════════ */
+function showInfoWin(asset, markerEl) {
+  const win = document.getElementById('info-win');
+  const rect = markerEl.getBoundingClientRect();
+  const mapRect = document.getElementById('map-col').getBoundingClientRect();
+
+  win.innerHTML = `
+    <button class="info-close" onclick="closeInfoWin()">✕</button>
+    <div class="info-head">
+      <div class="info-price">${fmtPrice(asset.price)}</div>
+      <div class="info-addr">${asset.address}</div>
+      <div class="info-city">${asset.city}${asset.country && asset.country !== asset.city ? ', ' + asset.country : ''}</div>
     </div>
-    <div class="blimp-rope"></div>
-    <div class="blimp-sponsor" style="color:${ad.color}">${ad.sponsor}</div>
+    <div class="info-body">
+      ${asset.sqft ? `<div class="info-row"><span class="info-k">Size</span><span class="info-v">${asset.sqft.toLocaleString()} sqft</span></div>` : ''}
+      <div class="info-row"><span class="info-k">Status</span><span class="info-v">${asset.status}</span></div>
+      ${asset.days ? `<div class="info-row"><span class="info-k">Listed</span><span class="info-v">${asset.days}d ago</span></div>` : ''}
+      <div class="info-row"><span class="info-k">Source</span><span class="info-v">${asset.source}</span></div>
+    </div>
+    <div class="info-actions">
+      <a class="info-bid"
+        href="mailto:ops@rwabidask.com?subject=BID%3A%20${encodeURIComponent(asset.address)}&body=Asset%20ID%3A%20${asset.id}%0APrice%3A%20${fmtPrice(asset.price)}%0AAddress%3A%20${encodeURIComponent(asset.address)}%0A%0AMy%20bid%3A%20%24"
+      >PLACE BID</a>
+      <button class="info-more" onclick="closeInfoWin();selectAsset('${asset.id}')">DETAILS</button>
+    </div>
+    <div class="info-sponsor">
+      <span>Sponsor opportunity</span>
+      <button class="sponsor-link" onclick="closeInfoWin();openModal('sponsor','${asset.id}')">Advertise here →</button>
+    </div>
   `;
-  layer.appendChild(b);
-  b.addEventListener('animationend',()=>b.remove());
-  setTimeout(()=>{if(b.parentNode)b.remove();}, 50000);
+
+  // Position above marker
+  const x = rect.left + rect.width / 2;
+  const y = rect.top;
+  win.style.display = 'block';
+  win.style.left    = x + 'px';
+  win.style.top     = y + 'px';
+  win.style.transformOrigin = 'bottom center';
 }
 
-// ═══════════════════════════════════════════════
-// TICKER
-// ═══════════════════════════════════════════════
-function buildTicker(){
-  const items=[...LISTINGS,...LISTINGS].map(l=>
-    `<span>⬥ ${l.city} · ${l.name} <span class="${l.ask>5e6?'dn':'up'}">${fmt(l.ask)}</span></span>`
-  ).join('&emsp;');
-  const ti=document.getElementById('tick-inner');
-  ti.innerHTML=items+' &emsp; '+items;
+function closeInfoWin() {
+  document.getElementById('info-win').style.display = 'none';
 }
 
-// ═══════════════════════════════════════════════
-// MODALS
-// ═══════════════════════════════════════════════
-function openModal(type, assetId){
-  const inner=document.getElementById('modal-inner');
-  const l=assetId?LISTINGS.find(x=>x.id==assetId):null;
-  
-  const templates={
-    list: ()=>`
-      <div class="modal-title">List Your Asset</div>
-      <div class="modal-sub">Direct listing. No gatekeeper. No 5–6% broker fee. KYC required to go live.</div>
-      <div class="mrow">
-        <div class="mfield"><label>Asset Type</label><select><option>Residential</option><option>Commercial</option><option>Land</option><option>Business</option></select></div>
-        <div class="mfield"><label>Country</label><input type="text" placeholder="e.g. Spain"></div>
-      </div>
-      <div class="mfield"><label>Property / Business Name</label><input type="text" placeholder="Name or address"></div>
-      <div class="mfield"><label>Full Address</label><input type="text" placeholder="Street, city, postal code"></div>
-      <div class="mrow">
-        <div class="mfield"><label>Ask Price (USD)</label><input type="number" placeholder="0"></div>
-        <div class="mfield"><label>Minimum Bid (USD)</label><input type="number" placeholder="0"></div>
-      </div>
-      <div class="mrow">
-        <div class="mfield"><label>Size (sqft)</label><input type="text" placeholder="optional"></div>
-        <div class="mfield"><label>Annual Revenue / Cap Rate</label><input type="text" placeholder="optional"></div>
-      </div>
-      <div class="mfield"><label>Public Registry / Source URL</label><input type="text" placeholder="Link to official public record"></div>
+// Close info win on map click
+document.getElementById('map-col').addEventListener('click', e => {
+  if (!e.target.closest('.map-marker-dot') && !e.target.closest('#info-win')) {
+    closeInfoWin();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   TICKER
+═══════════════════════════════════════════════════════════ */
+function buildTicker(assets) {
+  const base = [
+    'ESTABLISHING SECURE CONNECTION',
+    'GLOBAL DIRECTORY LIVE',
+    'RWABIDASK.COM',
+    'NO BROKER — DIRECT BID',
+    'ANNIE GROUP LLC',
+    'TOKENIZATION AVAILABLE',
+    'ops@rwabidask.com',
+  ];
+  const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 40);
+  const all   = [...base, ...addrs, ...base, ...addrs];
+  const html  = all.map(s =>
+    `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${s}</span><span class="sep">·</span></span>`
+  ).join('');
+  const track = document.getElementById('ticker-track');
+  track.innerHTML = html + html; // double for seamless loop
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════════════ */
+function openModal(type, id) {
+  const a = id ? ASSETS.find(x => x.id === id) : null;
+
+  const T = {
+
+    signin: () => `
+      <div class="mtitle">Sign In</div>
+      <div class="msub">Access your account, watchlist, and bid history.</div>
+      <div class="mfield"><label>Email</label><input type="email" id="si-email" placeholder="you@example.com"></div>
+      <div class="mfield"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••"></div>
       <div class="mfooter">
-        <button class="mcan" onclick="closeModal()">Cancel</button>
-        <button class="msub" onclick="closeModal();notify('Listing submitted — pending KYC approval')">Submit Listing →</button>
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="handleSignIn()">Sign In →</button>
+      </div>
+      <div style="margin-top:16px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted)">
+        No account? <span style="color:var(--cyan);cursor:pointer" onclick="closeModal();openModal('register')">Create one →</span>
       </div>
     `,
-    kyc: ()=>`
-      <div class="modal-title">Identity Verification</div>
-      <div class="modal-sub">One-time KYC. Required to bid, buy, list, or contact sellers. Proof of funds verified via encrypted upload.</div>
+
+    register: () => `
+      <div class="mtitle">Create Account</div>
+      <div class="msub">Select your role to access the global asset market. Institutional-grade verification required.</div>
+      <div class="role-grid">
+        <div class="role-card sel" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
+          <div class="role-name">Asset Owner</div>
+          <div class="role-desc">List property, land, or business directly. No broker required.</div>
+        </div>
+        <div class="role-card" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
+          <div class="role-name">Broker / Agent</div>
+          <div class="role-desc">Syndicate client inventory. Generate verified leads.</div>
+        </div>
+        <div class="role-card" onclick="document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">
+          <div class="role-name">Lender / Bank</div>
+          <div class="role-desc">Connect with qualified buyers. Fund deals globally.</div>
+        </div>
+      </div>
       <div class="mrow">
         <div class="mfield"><label>First Name</label><input type="text" placeholder="First"></div>
         <div class="mfield"><label>Last Name</label><input type="text" placeholder="Last"></div>
       </div>
+      <div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
+      <div class="mfield"><label>Country</label>
+        <select>
+          <option>United States</option><option>Mexico</option><option>Brazil</option>
+          <option>Argentina</option><option>Colombia</option><option>Spain</option>
+          <option>UAE</option><option>United Kingdom</option><option>Canada</option>
+          <option>Germany</option><option>Portugal</option><option>Other</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="handleSignUp()">Create Account →</button>
+      </div>
+    `,
+
+    bid: () => `
+      <div class="mtitle">Place Bid on Ledger</div>
+      <div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent. No broker can take it off market.</div>
+      <div class="mfield"><label>Bid Amount (USD)</label><input type="number" id="bid-amount" placeholder="Enter your bid" min="1"></div>
+      <div class="mfield"><label>Financing Terms</label>
+        <select id="bid-terms">
+          <option value="cash">All Cash</option>
+          <option value="conventional">Conventional Mortgage</option>
+          <option value="seller_finance">Seller Financing</option>
+          <option value="bridge">Bridge Loan</option>
+          <option value="crypto">Crypto-Backed Loan</option>
+        </select>
+      </div>
+      <div class="mrow">
+        <div class="mfield"><label>Down Payment %</label><input type="number" id="bid-down" placeholder="e.g. 20" min="0" max="100"></div>
+        <div class="mfield"><label>Bid Expiry</label>
+          <select id="bid-expiry"><option>24 hours</option><option>3 days</option><option>7 days</option><option>30 days</option></select>
+        </div>
+      </div>
+      <div class="mfield"><label>Email (confirmation)</label><input type="email" id="bid-email" placeholder="you@example.com"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="handlePlaceBid('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g,'\\'') : ''}')">Place Bid on Ledger →</button>
+      </div>
+    `,
+
+    finance: () => `
+      <div class="mtitle">Find a Lender</div>
+      <div class="msub">
+        ${a ? a.address + '<br>' : ''}
+        Connect with verified lenders directly. No mortgage broker middleman.
+      </div>
+      <div class="mfield"><label>Loan Amount Needed (USD)</label><input type="number" placeholder="e.g. 2000000"></div>
+      <div class="mfield"><label>Property Country</label><input type="text" placeholder="${a ? a.country : 'Country'}"></div>
+      <div class="mfield"><label>Loan Type</label>
+        <select>
+          <option>Purchase Mortgage</option><option>Bridge Loan</option>
+          <option>Refinance</option><option>Foreign National</option><option>Crypto-Backed</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Email for Lender Matches</label><input type="email" placeholder="you@example.com"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();toast('Lender match request submitted — responses within 24h')">Request Matches →</button>
+      </div>
+    `,
+
+    claim: () => `
+      <div class="mtitle">Claim for Tokenization</div>
+      <div class="msub">
+        ${a ? a.address + '<br>' : ''}
+        Tokenize your real-world asset. Fractional ownership. Global liquidity.
+      </div>
+      <div class="mfield"><label>Your Role</label>
+        <select><option>Owner</option><option>Authorized Agent</option><option>Broker</option></select>
+      </div>
+      <div class="mfield"><label>Ownership Document URL</label><input type="text" placeholder="Public registry link or document upload"></div>
+      <div class="mfield"><label>Desired Token Supply</label><input type="number" placeholder="e.g. 1000000"></div>
       <div class="mfield"><label>Email</label><input type="email" placeholder="you@example.com"></div>
-      <div class="mfield"><label>Country of Residence</label><select><option>United States</option><option>United Kingdom</option><option>UAE</option><option>Germany</option><option>Spain</option><option>Canada</option><option>Australia</option><option>Other</option></select></div>
+      <div class="legal-note">Tokenization subject to legal review in your jurisdiction. Annie Group LLC does not provide legal advice.</div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();toast('Tokenization inquiry submitted — legal team will contact you')">Submit Claim →</button>
+      </div>
+    `,
+
+    sponsor: () => `
+      <div class="mtitle">Sponsor This Listing</div>
+      <div class="msub">
+        ${a ? a.address + '<br>' : ''}
+        Appear as featured sponsor on this property. Seen by every buyer who views it.
+      </div>
+      <div class="mfield"><label>Company / Brand</label><input type="text" placeholder="Your company"></div>
+      <div class="mfield"><label>Ad Message (60 chars max)</label><input type="text" maxlength="60" placeholder="e.g. Fast Bridge Loans — Close in 10 Days"></div>
+      <div class="mfield"><label>Duration</label>
+        <select>
+          <option>30 days — $299</option>
+          <option>90 days — $699</option>
+          <option>1 year — $1,999</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Contact Email</label><input type="email" placeholder="sponsor@company.com"></div>
+      <div class="mfooter">
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();toast('Sponsorship reserved — team will contact you within 24h')">Reserve →</button>
+      </div>
+    `,
+
+    insurance: () => `
+      <div class="mtitle">Property Insurance</div>
+      <div class="msub">${a ? a.address + '<br>' : ''}Connect with verified insurers in seconds. Coverage quotes for any asset, anywhere in the world.</div>
+      <div class="mfield"><label>Property Type</label>
+        <select>
+          <option>Residential — Single Family</option>
+          <option>Residential — Condo / Apartment</option>
+          <option>Commercial — Office</option>
+          <option>Commercial — Retail / Mixed Use</option>
+          <option>Industrial / Warehouse</option>
+          <option>Land / Agricultural</option>
+          <option>Business / Operations</option>
+          <option>Hospitality — Hotel / Resort</option>
+        </select>
+      </div>
       <div class="mrow">
-        <div class="mfield"><label>Available Funds (USD)</label><input type="number" placeholder="Proof of funds amount"></div>
-        <div class="mfield"><label>Accredited Investor?</label><select><option>Yes</option><option>No</option><option>International</option></select></div>
+        <div class="mfield"><label>Property Value (USD)</label><input type="number" placeholder="${a ? a.price || '' : ''}" value="${a ? a.price || '' : ''}"></div>
+        <div class="mfield"><label>Year Built</label><input type="number" placeholder="e.g. 2005" min="1800" max="2026"></div>
       </div>
-      <div class="mfield"><label>Government ID (upload)</label><input type="text" placeholder="[File upload — Jumio KYC integration]"></div>
+      ${a && a.sqft ? `<div class="mfield"><label>Size (sqft)</label><input type="number" placeholder="${a.sqft}" value="${a.sqft}"></div>` : ''}
+      <div class="mfield"><label>Country / Jurisdiction</label><input type="text" placeholder="${a ? a.country || '' : 'e.g. United States'}"></div>
+      <div class="mfield"><label>Coverage Needed</label>
+        <select>
+          <option>Property / Structure</option>
+          <option>Property + Contents</option>
+          <option>Liability Only</option>
+          <option>Full Package — Property, Liability, Loss of Income</option>
+          <option>Title Insurance</option>
+          <option>Natural Disaster / Flood Rider</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Your Email</label><input type="email" placeholder="you@example.com"></div>
+      <div style="background:var(--bg3);border-left:2px solid rgba(34,197,94,.4);padding:10px 12px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:4px">
+        RWABidAsk connects you with licensed insurance providers in your jurisdiction. Quotes are provided by third-party carriers. Annie Group LLC is not an insurance broker.
+      </div>
       <div class="mfooter">
-        <button class="mcan" onclick="closeModal()">Cancel</button>
-        <button class="msub" onclick="closeModal();notify('KYC initiated — check email to continue')">Begin Verification →</button>
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" style="background:rgba(34,197,94,.9);color:#000" onclick="closeModal();toast('Insurance quote request sent — providers will contact you within 24h')">Get Quotes →</button>
       </div>
     `,
-    broker: ()=>`
-      <div class="modal-title">Broker Partner Signup</div>
-      <div class="modal-sub">List your inventory on the world's first open-market global exchange. Generate leads. Keep your commission. We charge a platform fee — not a cut of your deal.</div>
-      <div class="plan-grid">
-        <div class="plan sel" onclick="document.querySelectorAll('.plan').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">
-          <div class="plan-name">Standard</div>
-          <div class="plan-price">$99<span style="font-size:11px;font-weight:400">/mo</span></div>
-          <div class="plan-feat">Up to 10 listings<br>Standard placement<br>Lead notifications</div>
-        </div>
-        <div class="plan" onclick="document.querySelectorAll('.plan').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">
-          <div class="plan-name">Premium</div>
-          <div class="plan-price">$299<span style="font-size:11px;font-weight:400">/mo</span></div>
-          <div class="plan-feat">Unlimited listings<br>Priority placement<br>Analytics dashboard<br>Verified badge</div>
-        </div>
-        <div class="plan" onclick="document.querySelectorAll('.plan').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">
-          <div class="plan-name">Institutional</div>
-          <div class="plan-price">$999<span style="font-size:11px;font-weight:400">/mo</span></div>
-          <div class="plan-feat">White-label tools<br>API data access<br>Custom heat maps<br>Airspace credit</div>
-        </div>
+
+    partner: () => `
+      <div class="mtitle">Annie Group LLC — Partnership</div>
+      <div class="msub">
+        Strategic partnerships, institutional access, data licensing, spatial advertising, and acquisition interest.
+        We are building the Bloomberg Terminal for global real estate.
       </div>
-      <div class="mfield"><label>Brokerage Name</label><input type="text" placeholder="Your firm"></div>
-      <div class="mrow">
-        <div class="mfield"><label>License Number</label><input type="text" placeholder="RE license #"></div>
-        <div class="mfield"><label>Primary Market</label><input type="text" placeholder="e.g. USA / Spain / UAE"></div>
+      <div class="mfield"><label>Organization</label><input type="text" placeholder="Company or institution"></div>
+      <div class="mfield"><label>Contact Name</label><input type="text" placeholder="Full name"></div>
+      <div class="mfield"><label>Email</label><input type="email" placeholder="partner@company.com"></div>
+      <div class="mfield"><label>Partnership Type</label>
+        <select>
+          <option>Airspace / Spatial Advertising</option>
+          <option>Data Licensing</option>
+          <option>Institutional Investment</option>
+          <option>Technology Integration</option>
+          <option>Broker Network</option>
+          <option>Lender Partnership</option>
+          <option>Acquisition / M&amp;A</option>
+        </select>
       </div>
-      <div class="mfield"><label>Email</label><input type="email" placeholder="broker@yourfirm.com"></div>
+      <div class="mfield"><label>Message</label><textarea placeholder="Describe the opportunity…"></textarea></div>
       <div class="mfooter">
-        <button class="mcan" onclick="closeModal()">Cancel</button>
-        <button class="msub" onclick="closeModal();notify('Broker application received — team will contact you in 24h')">Apply Now →</button>
+        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
+        <button class="msub-btn" onclick="closeModal();toast('Inquiry sent to Annie Group LLC — response within 24h')">Send Inquiry →</button>
       </div>
     `,
-    advertise: ()=>`
-      <div class="modal-title">Buy Airspace</div>
-      <div class="modal-sub">Spatial advertising on the world's first 3D global property exchange. Your brand floats above every listing in your target region. First-mover pricing.</div>
-      <div class="plan-grid">
-        <div class="plan sel" onclick="document.querySelectorAll('.plan').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">
-          <div class="plan-name">Blimp</div>
-          <div class="plan-price">$500<span style="font-size:11px;font-weight:400">/mo</span></div>
-          <div class="plan-feat">Animated blimp<br>Global float<br>Custom message<br>Click-through URL</div>
-        </div>
-        <div class="plan" onclick="document.querySelectorAll('.plan').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">
-          <div class="plan-name">Landmark</div>
-          <div class="plan-price">$2,500<span style="font-size:11px;font-weight:400">/mo</span></div>
-          <div class="plan-feat">3D logo on top asset<br>Regional naming rights<br>Branded heat zone<br>Priority placement</div>
-        </div>
-        <div class="plan" onclick="document.querySelectorAll('.plan').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">
-          <div class="plan-name">Region Sponsor</div>
-          <div class="plan-price">$9,500<span style="font-size:11px;font-weight:400">/mo</span></div>
-          <div class="plan-feat">Entire country/region<br>Custom branded tiles<br>Exclusive lender banner<br>Data partnership</div>
-        </div>
+
+    tos: () => `
+      <div class="mtitle">Terms of Service</div>
+      <div class="msub">Annie Group LLC · RWABidAsk</div>
+      <div class="legal-note">
+        RWABidAsk is a registered trade name of Annie Group LLC. This platform facilitates connections between buyers, sellers, brokers, and lenders of real-world assets. It is not a licensed real estate broker, securities dealer, or investment advisor.<br><br>
+        All listings are informational only. Bids and offers submitted via this platform are letters of intent only and are not legally binding until both parties execute a formal purchase agreement under applicable law.<br><br>
+        KYC and proof of funds verification is required for all transactional actions. Annie Group LLC reserves the right to remove any listing at its discretion.<br><br>
+        Tokenization services are subject to applicable securities and property law in each jurisdiction. Annie Group LLC does not provide legal, tax, or investment advice.<br><br>
+        © 2026 Annie Group LLC. All Rights Reserved.
       </div>
-      <div class="mfield"><label>Company / Brand Name</label><input type="text" placeholder="Your company"></div>
-      <div class="mfield"><label>Ad Message (max 60 chars)</label><input type="text" placeholder="e.g. FastBridge Capital — Close in 10 Days" maxlength="60"></div>
-      <div class="mfield"><label>Target Region</label><input type="text" placeholder="e.g. UAE, Latin America, Global"></div>
-      <div class="mfooter">
-        <button class="mcan" onclick="closeModal()">Cancel</button>
-        <button class="msub btn-gold" onclick="closeModal();notify('Airspace reservation received — sales team will contact you')">Reserve Airspace →</button>
-      </div>
+      <div class="mfooter"><button class="msub-btn" onclick="closeModal()">Close</button></div>
     `,
-    buy: ()=>`
-      <div class="modal-title">Execute Buy Order</div>
-      <div class="modal-sub">${l?l.name:''} · ${l?fmt(l.ask):''}<br>KYC and proof of funds required. Your identity is verified before binding submission.</div>
-      <div class="mfield"><label>Offer Price (USD)</label><input type="number" placeholder="${l?l.ask:''}" value="${l?l.ask:''}"></div>
-      <div class="mfield"><label>Financing</label><select><option>All Cash</option><option>Conventional Mortgage</option><option>Bridge Loan</option><option>Seller Financing</option><option>Crypto-Backed Loan</option></select></div>
-      <div class="mfield"><label>Message to Seller (optional)</label><textarea placeholder="Introduce yourself and your intent…"></textarea></div>
-      <div style="font-size:9px;color:var(--muted);line-height:1.8;margin-bottom:12px">By clicking Submit, you acknowledge this is a legally binding Letter of Intent subject to due diligence. Full AI-generated purchase agreement provided upon mutual acceptance.</div>
-      <div class="mfooter">
-        <button class="mcan" onclick="closeModal()">Cancel</button>
-        <button class="msub" style="background:var(--green)" onclick="closeModal();notify('Buy order submitted — seller notified directly')">Submit Offer →</button>
+
+    privacy: () => `
+      <div class="mtitle">Privacy Policy</div>
+      <div class="msub">Annie Group LLC · RWABidAsk</div>
+      <div class="legal-note">
+        Data collected: name, email, country, KYC documents, bid/offer history, and search behavior on this platform.<br><br>
+        All data is encrypted in transit (TLS 1.3) and at rest. KYC documents are processed by licensed third-party providers (Jumio or equivalent) and are not retained by Annie Group LLC beyond verification.<br><br>
+        We do not sell, share, or monetize personal data. GDPR and CCPA compliant.<br><br>
+        To request deletion of your data: <a href="mailto:privacy@rwabidask.com" style="color:var(--cyan)">privacy@rwabidask.com</a><br><br>
+        © 2026 Annie Group LLC.
       </div>
+      <div class="mfooter"><button class="msub-btn" onclick="closeModal()">Close</button></div>
     `,
-    bid: ()=>`
-      <div class="modal-title">Place Bid</div>
-      <div class="modal-sub">${l?l.name:''} · Current best bid: ${l?fmt(l.bid):''}</div>
-      <div class="mfield"><label>Your Bid (USD)</label><input type="number" placeholder="${l?l.bid:''}" value="${l?l.bid:''}"></div>
-      <div class="mfield"><label>Bid Expires</label><select><option>24 hours</option><option>3 days</option><option>7 days</option><option>30 days</option></select></div>
-      <div class="mfield"><label>Proof of Funds</label><input type="text" placeholder="Upload bank statement or crypto wallet screenshot"></div>
-      <div class="mfooter">
-        <button class="mcan" onclick="closeModal()">Cancel</button>
-        <button class="msub" onclick="closeModal();notify('Bid submitted — seller notified, no broker needed')">Place Bid →</button>
-      </div>
-    `,
-    finance: ()=>`
-      <div class="modal-title">Find a Lender</div>
-      <div class="modal-sub">Match with verified lenders for ${l?l.name:'this asset'}. Direct connection — no mortgage broker middleman.</div>
-      ${LENDERS.map(ln=>`
-        <div class="lender-card" style="cursor:pointer" onclick="closeModal();notify('Connecting you with ${ln.name}')">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start">
-            <div><div class="lender-name">${ln.name}</div><div class="lender-meta">${ln.type} · ${ln.min}–${ln.max}</div></div>
-            <div style="text-align:right"><div class="lender-rate">${ln.rate}</div><div style="font-size:9px;color:var(--muted)">LTV ${ln.ltv}</div></div>
-          </div>
-          <div style="margin-top:6px;font-size:9px;color:var(--accent2)">Closes in ${ln.close} →</div>
-        </div>
-      `).join('')}
-      <div class="mfooter">
-        <button class="mcan" style="width:100%" onclick="closeModal()">Close</button>
-      </div>
-    `,
+
   };
 
-  if(!templates[type])return;
-  inner.innerHTML=templates[type]();
+  const fn = T[type];
+  if (!fn) return;
+  const box = document.getElementById('mbox');
+  box.innerHTML = '<button class="mclose-btn" onclick="closeModal()">✕</button>' + fn();
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal(){
+function closeModal() {
   document.getElementById('modal').classList.remove('open');
 }
-document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
 
-// ═══════════════════════════════════════════════
-// NOTIFICATION
-// ═══════════════════════════════════════════════
-let notifTimer;
-function notify(msg){
-  const n=document.getElementById('notif');
-  n.textContent=msg; n.style.display='block';
-  clearTimeout(notifTimer);
-  notifTimer=setTimeout(()=>n.style.display='none',3800);
+
+/* ═══════════════════════════════════════════════════════════
+   SUPABASE — Auth · Bid Ledger · Lead CRM
+   Project: iyejqvdjbvokrswlsoda.supabase.co
+═══════════════════════════════════════════════════════════ */
+const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MjYyNzIsImV4cCI6MjA1OTMwMjI3Mn0.Fy73JUGZFpxBiSoBbSFnVpFpLaQ0K1GMFAm-SxCWVY4';
+
+let _sb = null;
+let currentUser = null;
+let currentUserRole = null;
+
+function bootSupabase() {
+  if (typeof supabase !== 'undefined' && supabase.createClient) {
+    try {
+      _sb = supabase.createClient(SB_URL, SB_KEY);
+      console.log('[RWABidAsk] Supabase ready');
+      restoreSession();
+    } catch(e) { console.warn('[RWABidAsk] Supabase error:', e.message); }
+  } else {
+    setTimeout(bootSupabase, 300);
+  }
 }
 
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-renderList();
-buildTicker();
-
-// Wait for Google Maps to be available, then init
-if(typeof google!=='undefined'&&google.maps){
-  initMap();
-} else {
-  window.addEventListener('load',()=>{
-    const check=setInterval(()=>{
-      if(typeof google!=='undefined'&&google.maps){
-        clearInterval(check);
-        initMap();
-      }
-    },200);
+/* ── SIGN UP ── */
+async function handleSignUp() {
+  const email = (document.getElementById('reg-email')?.value || '').trim();
+  const pass  = (document.getElementById('reg-pass')?.value  || '').trim();
+  const role  = document.querySelector('.role-card.sel .role-name')?.textContent?.trim() || 'Asset Owner';
+  if (!email || !pass) { toast('Enter email and password'); return; }
+  if (pass.length < 8)  { toast('Password must be 8+ characters'); return; }
+  if (!_sb) { toast('Service unavailable — refresh and retry'); return; }
+  toast('Creating account…');
+  const { data, error } = await _sb.auth.signUp({
+    email, password: pass,
+    options: { data: { role } },
   });
+  if (error) { toast('Error: ' + error.message); return; }
+  currentUser = data.user; currentUserRole = role;
+  closeModal();
+  toast('✅ Account created — check email to confirm');
+  updateAuthUI();
+  logLead(email, 'signup', role);
 }
 
-// Start with Dubai selected
-setTimeout(()=>selectListing(9),1500);
+/* ── SIGN IN ── */
+async function handleSignIn() {
+  const email = (document.getElementById('si-email')?.value || '').trim();
+  const pass  = (document.getElementById('si-pass')?.value  || '').trim();
+  if (!email || !pass) { toast('Enter email and password'); return; }
+  if (!_sb) { toast('Service unavailable — refresh and retry'); return; }
+  toast('Signing in…');
+  const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { toast('Error: ' + error.message); return; }
+  currentUser = data.user; currentUserRole = data.user.user_metadata?.role || 'User';
+  closeModal();
+  toast('Welcome back — ' + email.split('@')[0]);
+  updateAuthUI();
+}
+
+/* ── SIGN OUT ── */
+async function handleSignOut() {
+  if (_sb) await _sb.auth.signOut();
+  currentUser = null; currentUserRole = null;
+  updateAuthUI(); toast('Signed out');
+}
+
+/* ── UPDATE TOPBAR AFTER AUTH ── */
+function updateAuthUI() {
+  const signinBtn = document.getElementById('signin-btn');
+  const joinBtn   = document.getElementById('join-btn');
+  if (currentUser) {
+    if (signinBtn) { signinBtn.textContent = currentUser.email.split('@')[0]; signinBtn.onclick = showAccountModal; }
+    if (joinBtn)   { joinBtn.textContent = 'Sign Out'; joinBtn.onclick = handleSignOut; }
+  } else {
+    if (signinBtn) { signinBtn.textContent = 'Sign In'; signinBtn.onclick = () => openModal('signin'); }
+    if (joinBtn)   { joinBtn.textContent = 'Join'; joinBtn.onclick = () => openModal('register'); }
+  }
+}
+
+/* ── PLACE BID → LEDGER ── */
+async function handlePlaceBid(propertyId, address) {
+  if (!currentUser) { closeModal(); openModal('signin'); toast('Sign in to place a bid'); return; }
+  const amount = parseFloat(document.getElementById('bid-amount')?.value);
+  const terms  = document.getElementById('bid-terms')?.value   || 'cash';
+  const down   = document.getElementById('bid-down')?.value    || null;
+  const expiry = document.getElementById('bid-expiry')?.value  || '7 days';
+  const email  = document.getElementById('bid-email')?.value   || currentUser.email;
+  if (!amount || amount < 1) { toast('Enter a valid bid amount'); return; }
+  if (!_sb) { toast('Ledger unavailable — refresh and retry'); return; }
+  toast('Recording bid to ledger…');
+  const { error } = await _sb.from('bids').insert([{
+    property_id: propertyId || 'unknown',
+    property_address: address || '—',
+    bid_amount: amount, terms,
+    down_payment_pct: down ? parseFloat(down) : null,
+    expiry, bidder_email: email,
+    user_id: currentUser.id,
+    status: 'active',
+    created_at: new Date().toISOString(),
+  }]);
+  if (error) { toast('Ledger error: ' + error.message); return; }
+  closeModal();
+  toast('✅ Bid placed — permanently recorded. No broker can remove it.');
+}
+
+/* ── ACCOUNT MODAL ── */
+async function showAccountModal() {
+  const bids = await loadUserBids();
+  const box  = document.getElementById('mbox');
+  box.innerHTML = `
+    <button class="mclose-btn" onclick="closeModal()">✕</button>
+    <div class="mtitle">My Account</div>
+    <div class="msub" style="margin-bottom:16px">${currentUser?.email || ''}<br><span style="color:var(--cyan)">${currentUserRole || 'User'}</span></div>
+    <div style="font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px">Bids on Ledger</div>
+    ${!bids.length
+      ? `<div style="font-family:var(--mono);font-size:10px;color:var(--muted);padding:10px 0">No bids placed yet.</div>`
+      : bids.map(b => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;gap:8px">
+            <span style="color:var(--dim);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.property_address}</span>
+            <span style="color:var(--cyan);font-family:var(--mono);flex-shrink:0">${fmtPrice(b.bid_amount)}</span>
+            <span style="color:var(--muted);font-family:var(--mono);font-size:9px;flex-shrink:0">${b.status}</span>
+          </div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:18px">
+      <button class="mcan-btn" onclick="closeModal()">Close</button>
+      <button class="msub-btn" onclick="closeModal();openModal('list-asset')">+ List an Asset</button>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+async function loadUserBids() {
+  if (!_sb || !currentUser) return [];
+  const { data, error } = await _sb.from('bids').select('*')
+    .eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+  if (error) return [];
+  return data || [];
+}
+
+/* ── LOG LEAD ── */
+async function logLead(email, action, role) {
+  if (!_sb) return;
+  try {
+    await _sb.from('leads').insert([{
+      email: email || null, action,
+      role: role || null,
+      user_agent: navigator.userAgent.slice(0, 100),
+      created_at: new Date().toISOString(),
+    }]);
+  } catch(e) { /* non-critical */ }
+}
+
+/* ── BLIMP CLICK → LEAD + MODAL ── */
+function blimpClick() {
+  logLead(currentUser?.email || null, 'blimp_click', null);
+  openModal('partner');
+}
+
+/* ── RESTORE SESSION ── */
+async function restoreSession() {
+  if (!_sb) return;
+  const { data } = await _sb.auth.getSession();
+  if (data?.session?.user) {
+    currentUser = data.session.user;
+    currentUserRole = currentUser.user_metadata?.role || 'User';
+    updateAuthUI();
+  }
+}
+
+/* ── triggerSearch ── */
+function triggerSearch() {
+  if (acInstance) {
+    try { google.maps.event.trigger(acInstance, 'place_changed'); } catch(e) {}
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════════ */
+buildTicker([]);
+bootSupabase();
+
+// Wire blimp
+document.addEventListener('DOMContentLoaded', () => {
+  const bl = document.getElementById('blimp-el');
+  if (bl) bl.addEventListener('click', blimpClick);
+});
+
+// Google Maps boot — triggered by callback=__mapReady in script tag
+// __initRWA is set here; __mapReady calls it when Maps API is fully loaded
+window.__initRWA = initMap;
+
+// Fallback: if Maps somehow loaded before this script ran
+if (window.__googleMapsLoaded) initMap();
+
 </script>
-
-<div id="site-footer">
-  © 2026 ANNIE GROUP LLC. RWABidAsk™ is a trade name of ANNIE GROUP LLC. | Institutional Grade RWA Exchange |
-</div>
-
 </body>
-</html
+</html>
