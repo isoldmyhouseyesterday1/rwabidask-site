@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>GAM — Global Asset Market | Institutional Digitization Platform</title>
-<meta name="description" content="GAM — Global Asset Market. Institutional digitization of real estate, debt, energy infrastructure, IP, minerals, and aviation on the Persistent Ledger.">
+<title>RWABidAsk — Global Asset Market | Institutional Digitization Platform</title>
+<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, energy infrastructure, IP, minerals, and aviation on the Persistent Ledger.">
 
 <!-- ── FONTS ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1884,7 +1884,7 @@ html, body {
   <div class="logo">
     <div class="logo-mark"></div>
     <div>
-      <div class="logo-text">GAM</div>
+      <div class="logo-text">RWABidAsk</div>
       <div class="logo-tag">GLOBAL ASSET MARKET</div>
     </div>
   </div>
@@ -1904,7 +1904,7 @@ html, body {
   </div>
 
   <div class="topbar-right">
-    <div class="tstat" title="Total value of all assets registered on GAM Persistent Ledger">
+    <div class="tstat" title="Total value of all assets registered on RWABidAsk Persistent Ledger">
       <div class="tstat-l">GMC</div>
       <div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div>
     </div>
@@ -2059,7 +2059,7 @@ html, body {
   <div class="footer-copy">
     <strong>© 2026 ANNIE GROUP LLC. All Rights Reserved.</strong>
     &nbsp;·&nbsp;
-    Global Asset Market (GAM) is a Registered Trade Name of Annie Group LLC
+    RWABidAsk is a Registered Trade Name of Annie Group LLC
     &nbsp;·&nbsp;
     Non-Custodial Asset Digitization Platform — Not a Broker, Dealer, or Investment Advisor
     &nbsp;·&nbsp;
@@ -2674,7 +2674,7 @@ function csvRow(line) {
 }
 
 function onDataReady() {
-  setStatus('GAM PERSISTENT LEDGER LIVE — ' + ASSETS.length + ' ASSETS');
+  setStatus('RWABidAsk PERSISTENT LEDGER LIVE — ' + ASSETS.length + ' ASSETS');
   document.getElementById('s-assets').textContent = ASSETS.length;
   document.getElementById('s-status').textContent = 'LIVE';
   document.getElementById('s-bids').textContent = Math.floor(ASSETS.length * 4.2);
@@ -2701,6 +2701,7 @@ function filtered() {
 /* ═══════════════════════════════════════════════════════════
    RENDER LEFT LIST
 ═══════════════════════════════════════════════════════════ */
+  
 function renderList() {
   const wrap = document.getElementById('list-scroll');
   const list = filtered();
@@ -3352,7 +3353,8 @@ function openDrawer(a) {
           <span class="savings-v strike">$${trad.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
         </div>
         <div class="savings-row">
-          <span class="savings-k">GAM Digital Processing & Notarization Fee</span>
+          <span class="savings-k">RWABidAsk Digital Processing & Notarization Fee</span>
+R
           <span class="savings-v fee">$${rwafee.toLocaleString('en-US', {maximumFractionDigits:0})}</span>
         </div>
         <div class="savings-total">
@@ -3379,9 +3381,10 @@ function openDrawer(a) {
           <div class="ledger-dot ${isMinted ? 'minted' : ''}"></div>
           <div class="ledger-label">${isMinted ? 'Recorded on Persistent Ledger' : 'Pending — manifest not yet registered'}</div>
         </div>
+R
         ${isMinted
           ? `<div class="ledger-hash-preview">${hashHex}</div>`
-          : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitization creates a permanent, immutable record of the asset manifest, ownership chain, and bid history on the GAM Persistent Ledger.</div>`
+          : `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.6">Digitization creates a permanent, immutable record of the asset manifest, ownership chain, and bid history on the RWABidAsk Persistent Ledger.</div>`
         }
         <button class="digitize-btn" id="digitize-btn-${a.id}" ${isMinted ? 'disabled' : ''}
           onclick="${isMinted ? '' : `initiateDigitizePayment('${a.id}','${hashHex}')`}">
@@ -3875,27 +3878,27 @@ function runMintAnimation(assetId, hash, btn) {
   setTimeout(() => {
     const ts  = new Date().toISOString();
     const slot = Math.floor(Math.random() * 9000000) + 280000000;
-    const ledgerEntryId = 'GAM-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    const ledgerEntryId = 'RWABidAsk-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
     card.innerHTML = `
       <div style="text-align:center;padding:8px 0 12px">
-        <div class="mint-seal">✓ VERIFIED — GAM PERSISTENT LEDGER</div>
+        <div class="mint-seal">✓ VERIFIED — RWABidAsk PERSISTENT LEDGER</div>
         <div class="mint-qr"></div>
         <div style="font-size:9px;color:var(--dim);margin-bottom:8px">Certificate of Digital Record</div>
         <div class="mint-hash">${hash}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:left">
           <div style="font-size:9px;color:var(--muted)">Ledger Entry ID</div><div style="font-size:9px;color:var(--dim)">${ledgerEntryId}</div>
           <div style="font-size:9px;color:var(--muted)">Timestamp</div><div style="font-size:9px;color:var(--dim)">${ts.replace('T',' ').slice(0,19)} UTC</div>
-          <div style="font-size:9px;color:var(--muted)">Platform</div><div style="font-size:9px;color:var(--green)">GAM Persistent Ledger — Annie Group LLC</div>
+          <div style="font-size:9px;color:var(--muted)">Platform</div><div style="font-size:9px;color:var(--green)">RWABidAsk Persistent Ledger — Annie Group LLC</div>
           <div style="font-size:9px;color:var(--muted)">Status</div><div style="font-size:9px;color:var(--green)">Finalized</div>
         </div>
         <div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.6">
-          This certificate is non-custodial. GAM is a non-custodial software service and digital notary. We do not hold, manage, or move user funds. Legal title transfer requires applicable jurisdiction procedures.
+          This certificate is non-custodial. RWABidAsk is a non-custodial software service and digital notary. We do not hold, manage, or move user funds. Legal title transfer requires applicable jurisdiction procedures.
         </div>
       </div>`;
     // Mark asset as tokenized in memory
     const asset = ASSETS.find(x => x.id === assetId);
     if (asset) asset.tokenized = true;
-    toast('✅ Asset registered — digital certificate issued on GAM Ledger');
+    toast('✅ Asset registered — digital certificate issued on RWABidAsk Ledger');
   }, 2400);
 }
 
@@ -3958,20 +3961,20 @@ function openModal(type, id) {
   const T = {
 
     tos_gate: () => `
-      <div class="mtitle" style="color:var(--gold)">GAM Platform Agreement</div>
-      <div class="msub" style="margin-bottom:14px">Before accessing your account or creating a new one, you must accept the GAM Terms of Service.</div>
+      <div class="mtitle" style="color:var(--gold)">RWABidAsk Platform Agreement</div>
+      <div class="msub" style="margin-bottom:14px">Before accessing your account or creating a new one, you must accept the RWABidAsk Terms of Service.</div>
       <div style="background:var(--bg3);border:1px solid var(--border2);padding:14px 16px;margin-bottom:16px;max-height:260px;overflow-y:auto;font-size:10px;color:var(--dim);line-height:1.9;border-radius:3px">
         <div style="font-size:10px;font-weight:700;color:var(--cyan);margin-bottom:10px;letter-spacing:.5px">GLOBAL ASSET MARKET — PLATFORM TERMS OF SERVICE</div>
         <strong style="color:var(--silver)">§1 — Non-Custodial Service</strong><br>
-        GAM is a software service and digital notary. We do not hold, manage, custody, or move user funds, digital assets, or physical property at any time. All transactions are arranged directly between principals.<br><br>
+        RWABidAsk is a software service and digital notary. We do not hold, manage, custody, or move user funds, digital assets, or physical property at any time. All transactions are arranged directly between principals.<br><br>
         <strong style="color:var(--silver)">§2 — Data Permanence (The Moat)</strong><br>
-        All data uploaded to the GAM Persistent Ledger — including photographs, legal documents, assay reports, and deeds — becomes a permanent part of the GAM Ledger record. Listings may expire or be withdrawn, but the underlying historical data record is perpetual and non-erasable.<br><br>
+        All data uploaded to the RWABidAsk Persistent Ledger — including photographs, legal documents, assay reports, and deeds — becomes a permanent part of the RWABidAsk Ledger record. Listings may expire or be withdrawn, but the underlying historical data record is perpetual and non-erasable.<br><br>
         <strong style="color:var(--silver)">§3 — Metadata Monetization License</strong><br>
-        By registering an asset, users grant GAM (Annie Group LLC) an irrevocable, worldwide, royalty-free license to aggregate, anonymize, and monetize manifest metadata for market intelligence, index publication, and institutional data products. No personally identifiable information is sold.<br><br>
+        By registering an asset, users grant RWABidAsk (Annie Group LLC) an irrevocable, worldwide, royalty-free license to aggregate, anonymize, and monetize manifest metadata for market intelligence, index publication, and institutional data products. No personally identifiable information is sold.<br><br>
         <strong style="color:var(--silver)">§4 — Not a Broker or Dealer</strong><br>
-        GAM is not a licensed real estate broker, securities dealer, investment advisor, insurance provider, or escrow agent in any jurisdiction. All bids, offers, and inquiries are non-binding letters of intent until both parties execute formal agreements under applicable law.<br><br>
+        RWABidAsk is not a licensed real estate broker, securities dealer, investment advisor, insurance provider, or escrow agent in any jurisdiction. All bids, offers, and inquiries are non-binding letters of intent until both parties execute formal agreements under applicable law.<br><br>
         <strong style="color:var(--silver)">§5 — Verified Lead Fee</strong><br>
-        Brokers and institutional partners accessing verified buyer/seller leads via GAM are subject to a $9.99 per Verified Lead fee — representing a 75%+ saving over comparable platform models.<br><br>
+        Brokers and institutional partners accessing verified buyer/seller leads via RWABidAsk are subject to a $9.99 per Verified Lead fee — representing a 75%+ saving over comparable platform models.<br><br>
         <strong style="color:var(--silver)">§6 — Jurisdiction</strong><br>
         This agreement is governed by the laws of the State of Washington, USA. Disputes subject to binding arbitration under AAA Commercial Rules.<br><br>
         © 2026 Annie Group LLC. All Rights Reserved.
@@ -3979,7 +3982,7 @@ function openModal(type, id) {
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
         <input type="checkbox" id="tos-check" style="width:16px;height:16px;accent-color:var(--cyan);cursor:pointer">
         <label for="tos-check" style="font-size:10px;color:var(--dim);cursor:pointer;line-height:1.6">
-          I have read and accept the GAM Platform Terms of Service and understand that this is a non-custodial software platform.
+          I have read and accept the RWABidAsk Platform Terms of Service and understand that this is a non-custodial software platform.
         </label>
       </div>
       <div class="mfooter">
@@ -4110,10 +4113,10 @@ function openModal(type, id) {
       <div class="mtitle">Institutional Lender Qualification</div>
       <div class="msub" style="margin-bottom:14px">
         ${a ? a.address + '<br>' : ''}
-        Complete the qualification profile to access GAM's verified lender network.
+        Complete the qualification profile to access RWABidAsk's verified lender network.
       </div>
       <div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.3);padding:10px 14px;margin-bottom:14px;font-size:9px;color:var(--muted);line-height:1.9">
-        GAM routes qualified borrowers to verified institutional lenders. Only Credit Tier 650+ profiles are submitted.
+        RWABidAsk routes qualified borrowers to verified institutional lenders. Only Credit Tier 650+ profiles are submitted.
       </div>
       <div class="mrow">
         <div class="mfield"><label>Full Legal Name</label><input type="text" id="ql-name" placeholder="As on title"></div>
@@ -4211,7 +4214,7 @@ function openModal(type, id) {
       const insStd = insStdMap[assetType] || 'Property & Casualty';
       return `
       <div class="mtitle">Insurance Qualification</div>
-      <div class="msub">${a ? a.address + '<br>' : ''}Submit your qualification profile to access coverage from GAM's verified insurer network.</div>
+      <div class="msub">${a ? a.address + '<br>' : ''}Submit your qualification profile to access coverage from RWABidAsk's verified insurer network.</div>
       <div style="background:var(--bg3);border-left:2px solid rgba(34,197,94,.3);padding:9px 14px;margin-bottom:14px;font-size:10px;color:var(--dim);line-height:1.8">
         <strong style="color:var(--green)">Applicable Coverage Standard:</strong> ${insStd}
       </div>
@@ -4692,19 +4695,19 @@ function triggerSearch() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   GAM — NEW FUNCTIONS BLOCK
+   RWABidAsk — NEW FUNCTIONS BLOCK
    TOS Gate · Qualification Funnel · Watchlist · GMC · Cluster
 ═══════════════════════════════════════════════════════════ */
 
 /* ── TOS GATE — must accept before sign in / join ── */
-let _tosAccepted = !!(sessionStorage.getItem('gam_tos_accepted'));
+let _tosAccepted = !!(sessionStorage.getItem('RWABidAsk_tos_accepted'));
 
 function acceptTOS() {
   if (!document.getElementById('tos-check')?.checked) {
     toast('Please check the box to accept the terms');
     return;
   }
-  sessionStorage.setItem('gam_tos_accepted', '1');
+  sessionStorage.setItem('RWABidAsk_tos_accepted', '1');
   _tosAccepted = true;
   closeModal();
   setTimeout(() => openModal('signin'), 120);
@@ -4942,7 +4945,7 @@ function initiateDigitizePayment(assetId, hash) {
   const box = document.getElementById('mbox');
   box.innerHTML = `
     <button class="mclose-btn" onclick="closeModal()">✕</button>
-    <div class="mtitle">GAM Digital Processing & Notarization Fee</div>
+    <div class="mtitle">RWABidAsk Digital Processing & Notarization Fee</div>
     <div class="msub">${a.address}</div>
     <div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.4);padding:12px 16px;margin:14px 0;font-size:11px;color:var(--dim);line-height:1.9">
       <div style="font-size:22px;font-weight:800;color:var(--cyan);margin-bottom:4px">$${fee.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
@@ -4959,7 +4962,7 @@ function initiateDigitizePayment(assetId, hash) {
       <div class="mfield"><label>CVV</label><input type="text" id="pay-cvv" placeholder="•••" maxlength="4"></div>
     </div>
     <div style="font-size:9px;color:var(--muted);line-height:1.8;margin-bottom:4px">
-      Payments processed via Stripe. Card data never stored by GAM.
+      Payments processed via Stripe. Card data never stored by RWABidAsk.
       Deploy <code style="color:var(--cyan)">/api/create-checkout-session</code> to enable live Stripe Checkout.
     </div>
     <div class="mfooter">
@@ -4998,17 +5001,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bl) bl.addEventListener('click', blimpClick);
 });
 
-// Google Maps boot — triggered by callback=__mapReady in script tag
-// __initRWA is set here; __mapReady calls it when Maps API is fully loaded
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════════ */
+buildTicker([]);
+buildRibbon();
+bootSupabase();
+
+// Wire blimp
+document.addEventListener('DOMContentLoaded', () => {
+  const bl = document.getElementById('blimp-el');
+  if (bl) bl.addEventListener('click', blimpClick);
+});
+
+// Google Maps boot
 window.__initRWA = initMap;
 
-} // Closes viewportVisible (or whichever function was last)
-
-  // Manually trigger the first render so the map isn't empty on start
-setTimeout(() => { if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); }, 500);
-  
-// Fallback: if Maps somehow loaded before this script ran
-if (window.__googleMapsLoaded) initMap();
+// Manually trigger the first render
+setTimeout(() => { 
+  if(typeof renderDOMMarkers === 'function') renderDOMMarkers(); 
+}, 500);
 
 </script>
 </body>
