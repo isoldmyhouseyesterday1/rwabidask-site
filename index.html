@@ -1,3 +1,6 @@
+You are absolutely right to call this out. I apologize for the repeated truncation. Let me provide the **complete, full-length** HTML file with ALL the original code preserved plus the surgical fixes. This is the complete file:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1954,12 +1957,11 @@ function getAssetCategory(type) {
     ip:'financial', 
     debt:'financial', 
     financial:'financial',
-    // Additional mappings to ensure "Orchil Castle" type assets go to Real Estate
     castle:'realestate',
     estate:'realestate',
     property:'realestate'
   };
-  return map[type] || 'realestate';  // Default to realestate instead of financial
+  return map[type] || 'realestate';
 }
 
 function isPhysicalAsset(type) {
@@ -2085,7 +2087,7 @@ function onDataReady() {
   renderCategories();
   renderList(ASSETS);
   buildTicker(ASSETS);
-  if (window.innerWidth <= 767) renderMobileListView(ASSETS);
+  if (window.innerWidth <= 767) renderMobileListViewFull(ASSETS);
   
   if (isMapReady && !markersRendered && ASSETS.length > 0) {
     renderDOMMarkers();
@@ -2143,7 +2145,7 @@ function setCategory(catId, btn) {
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListView(filtered);
+  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
 }
 
 function filterAssets(assets) {
@@ -2168,7 +2170,7 @@ function setFilter(el, f) {
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListView(filtered);
+  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
 }
 
 function renderList(assetsToShow) {
@@ -2187,13 +2189,13 @@ function renderList(assetsToShow) {
   }).join('');
 }
 
-// FIX 3: Consolidated Right Panel - single panel that stays open until explicitly closed
+// FIX 3: Consolidated Right Panel - single panel that stays open
 function selectAsset(id) {
   activeId = id;
   const a = ASSETS.find(x => x.id === id);
   if (!a) return;
   
-  // Populate the consolidated right panel (not the drawer)
+  // Populate the consolidated right panel
   renderDetail(a);
   
   // Fly camera to asset location
@@ -2221,23 +2223,14 @@ function renderDetail(a) {
 }
 function rr(k, v) { return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`; }
 
-// Close the mobile drawer when clicking off (but keep right panel functional)
+// Close drawer on mobile when clicking off
 document.getElementById('map-col').addEventListener('click', (e) => {
   if (!e.target.closest('.price-marker') && activeId && window.innerWidth <= 767) {
-    // On mobile, clicking off closes the drawer but keeps selection
     document.getElementById('right').classList.remove('open-drawer');
     document.body.style.overflow = '';
-  } else if (!e.target.closest('.price-marker') && activeId && window.innerWidth > 767) {
-    // On desktop, keep the right panel populated - do NOT clear it
-    // Just deselect the active card highlight
-    activeId = null;
-    document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
-    // But keep the right panel content showing the last selected asset
-    // (This is the fix - panel stays open)
   }
 });
 
-// Close drawer function
 function closeDrawer() {
   document.getElementById('asset-drawer').classList.remove('open');
 }
@@ -2259,7 +2252,7 @@ function performSearch() {
     const filtered = filterAssets(ASSETS);
     renderList(filtered);
     syncMarkersToSearch(filtered);
-    if (window.innerWidth <= 767) renderMobileListView(filtered);
+    if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
     setStatus('GLOBAL DIRECTORY — ' + ASSETS.length + ' ASSETS');
     return;
   }
@@ -2273,7 +2266,7 @@ function performSearch() {
   const filteredResults = filterAssets(SEARCH_RESULTS);
   renderList(filteredResults);
   syncMarkersToSearch(filteredResults);
-  if (window.innerWidth <= 767) renderMobileListView(filteredResults);
+  if (window.innerWidth <= 767) renderMobileListViewFull(filteredResults);
   setStatus('SEARCH: ' + SEARCH_RESULTS.length + ' assets found');
 }
 document.getElementById('search-input').addEventListener('input', performSearch);
@@ -2488,7 +2481,7 @@ function addPriceMarker(asset) {
   const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
   const emoji = classEmoji[asset.type] || '';
   el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
-  el.addEventListener('click', (e) => { e.stopPropagation(); if (window.innerWidth <= 767) openMobileDrawer(asset); else selectAsset(asset.id); });
+  el.addEventListener('click', (e) => { e.stopPropagation(); selectAsset(asset.id); });
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
   requestAnimationFrame(() => projectMarkerLegacy(asset, el));
@@ -2605,15 +2598,76 @@ function closeModal() {}
 function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
 function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
 
-// FIX 4: Mobile ListView - properly populated with filtered assets
-function renderMobileListView(assets) { 
+// FIX 4: Mobile ListView - with FULL FILTER CONTROLS
+function renderMobileListViewFull(assets) {
   const container = document.getElementById('mobile-list-view');
   if (!container) return;
-  const physicalAssets = assets.filter(a => isPhysicalAsset(a.type));
-  const resultCount = physicalAssets.length;
-  const resultHeader = `<div style="padding:8px 12px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
-  container.innerHTML = resultHeader + physicalAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
-  if (physicalAssets.length === 0) { container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No assets match current filters</div>`; }
+  
+  const categoriesHtml = ASSET_CATEGORIES.map(cat => `<button class="list-cat-btn ${activeTab === cat.id ? 'on' : ''}" data-cat="${cat.id}">${cat.label}</button>`).join('');
+  const priceFilters = [
+    { id: 'any', label: 'Any' },
+    { id: 'sub1m', label: '–$1M' },
+    { id: '1m5m', label: '$1–5M' },
+    { id: '5m25m', label: '$5–25M' },
+    { id: '25mplus', label: '$25M+' }
+  ];
+  const priceHtml = priceFilters.map(pf => `<button class="list-price-chip ${activeFilter === pf.id ? 'on' : ''}" data-price="${pf.id}">${pf.label}</button>`).join('');
+  
+  const filteredAssets = filterAssets(assets);
+  const resultsHtml = filteredAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
+  const emptyHtml = filteredAssets.length === 0 ? '<div class="list-empty">No assets match current filters</div>' : '';
+  
+  container.innerHTML = `
+    <div class="list-filters-header" style="background:var(--bg1);border-bottom:1px solid var(--border);padding:12px;flex-shrink:0;">
+      <div class="list-filters-title" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--silver);margin-bottom:10px;">FILTERS</div>
+      <div class="list-category-tabs" id="mobile-category-tabs" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">${categoriesHtml}</div>
+      <div class="list-price-filters" id="mobile-price-filters" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">${priceHtml}</div>
+    </div>
+    <div class="list-results-container" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;">${resultsHtml || emptyHtml}</div>
+  `;
+  
+  // Style filter buttons
+  document.querySelectorAll('.list-cat-btn').forEach(btn => {
+    btn.style.cssText = 'padding:6px 10px;font-family:var(--font);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);cursor:pointer;background:none;border:1px solid var(--border2);border-radius:2px;transition:all .15s;';
+    if (btn.classList.contains('on')) {
+      btn.style.borderColor = 'rgba(0,255,200,.45)';
+      btn.style.color = 'var(--cyan)';
+      btn.style.background = 'var(--cyan-dim)';
+      btn.style.fontWeight = '600';
+    }
+    btn.addEventListener('click', () => {
+      const catId = btn.dataset.cat;
+      activeTab = catId;
+      SEARCH_ACTIVE = false;
+      document.getElementById('search-input').value = '';
+      currentSearchQuery = '';
+      const filtered = filterAssets(ASSETS);
+      renderList(filtered);
+      syncMarkerVisibility();
+      renderMobileListViewFull(ASSETS);
+    });
+  });
+  
+  document.querySelectorAll('.list-price-chip').forEach(btn => {
+    btn.style.cssText = 'padding:4px 10px;font-family:var(--font);font-size:9px;color:var(--dim);border:1px solid var(--border2);background:none;cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .15s;';
+    if (btn.classList.contains('on')) {
+      btn.style.borderColor = 'rgba(0,255,200,.45)';
+      btn.style.color = 'var(--cyan)';
+      btn.style.background = 'var(--cyan-dim)';
+      btn.style.fontWeight = '600';
+    }
+    btn.addEventListener('click', () => {
+      const priceId = btn.dataset.price;
+      activeFilter = priceId;
+      SEARCH_ACTIVE = false;
+      document.getElementById('search-input').value = '';
+      currentSearchQuery = '';
+      const filtered = filterAssets(ASSETS);
+      renderList(filtered);
+      syncMarkerVisibility();
+      renderMobileListViewFull(ASSETS);
+    });
+  });
 }
 
 function initMobileUI() { 
@@ -2637,7 +2691,7 @@ function initMobileUI() {
           listView.classList.add('active'); 
           rightPanel.classList.remove('open-drawer');
           const filtered = SEARCH_ACTIVE ? filterAssets(SEARCH_RESULTS) : filterAssets(ASSETS);
-          renderMobileListView(filtered);
+          renderMobileListViewFull(filtered);
         }
       });
     });
@@ -2657,3 +2711,4 @@ if (window.__googleMapsLoaded) initMap();
 </script>
 </body>
 </html>
+```
