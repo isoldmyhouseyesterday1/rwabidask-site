@@ -478,11 +478,11 @@ body { min-width: 900px; overflow-x: auto; }
   pointer-events: auto;
   z-index: 10;
   will-change: transform;
-  cursor: pointer;
+  transform: translate(-50%,-100%) translate(-9999px,-9999px);
 }
 .price-marker:hover { 
   filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); 
-  transform: scale(1.06); 
+  transform: translate(-50%,-100%) scale(1.06); 
 }
 .price-tag {
   background: rgba(14,22,46,.97);
@@ -511,7 +511,6 @@ body { min-width: 900px; overflow-x: auto; }
   width: 1px;
   height: 20px;
   background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0));
-  margin: 0 auto;
 }
 .price-dot {
   width: 6px;
@@ -519,7 +518,6 @@ body { min-width: 900px; overflow-x: auto; }
   border-radius: 50%;
   background: var(--cyan);
   box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5);
-  margin: 0 auto;
   margin-top: -1px;
 }
 .price-marker.heat-warm .price-tag { border-color: rgba(255,180,0,.6); }
@@ -1887,7 +1885,7 @@ body { min-width: 900px; overflow-x: auto; }
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#0f607f7c4f7d786e6d666b6e7c64216c6062"><span class="__cf_email__" data-cfemail="3f504f4c7f4d485e5d565b5e4c54115c5052">[email&#160;protected]</span></a>
+    <a href="/cdn-cgi/l/email-protection#0f607f7c4f7d786e6d666b6e7c64216c6062"><span class="__cf_email__" data-cfemail="7d120d0e3d0f0a1c1f14191c0e16531e1210">[email&#160;protected]</span></a>
   </div>
 </div>
 
@@ -1968,7 +1966,6 @@ let domMarkers = {};
 
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-// FIX: Show markers when zoomed in enough (range <= 6000km)
 const MARKER_VISIBLE_RANGE = 6000000;
 let isAuthenticated = false;
 
@@ -2008,7 +2005,6 @@ async function fetchListingsFromSupabase() {
     }
     
     const transformed = data.map(row => {
-      // UNIVERSAL COORDINATE NORMALIZATION
       const lat = parseFloat(row.lat ?? row.latitude ?? row.Latitude ?? row.lat_coord);
       const lng = parseFloat(row.lng ?? row.longitude ?? row.Longitude ?? row.lon_coord ?? row.lng_coord);
       
@@ -2243,13 +2239,12 @@ function syncMarkersToSearch(assetsToShow) {
 }
 
 // ============================================================
-// GOOGLE MAPS 3D - FULLY ZOOMED OUT GLOBE VIEW
+// GOOGLE MAPS 3D with gmp-steadystate fix AND WATCHDOG TIMER
 // ============================================================
 async function initMap() {
   try {
     const maps3dLib = await google.maps.importLibrary('maps3d');
     const Map3DElement = maps3dLib.Map3DElement;
-    // FIX: Set initial range to 22000000 (full globe view - zoomed out)
     map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 22000000, tilt: 0, heading: 0 });
     try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
     const container = document.getElementById('map3d-container');
