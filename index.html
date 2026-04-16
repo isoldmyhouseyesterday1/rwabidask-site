@@ -1965,6 +1965,7 @@ const CSV_URL = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?for
 let ASSETS = [];
 let SEARCH_RESULTS = [];
 let SEARCH_ACTIVE = false;
+let currentSearchQuery = '';
 
 const SEED_ASSETS = [
   { id:'sea-001', address:'2450 Eastlake Ave E', city:'Seattle', country:'USA', lat:47.6423, lng:-122.3256, price:1850000, type:'residential', sqft:3200, status:'For Sale', source:'NWMLS', days:14, structures:[{label:'Main House',sqft:2800,beds:4,baths:3,built:2003}], infrastructure:{roof:'Composition',hvac:'Forced Air'}, land:{acres:0.12}, financials:{tax_annual:14200}, bids:[], broker_active:true, tokenized:false },
@@ -2117,6 +2118,7 @@ function setCategory(catId, btn) {
   activeTab = catId;
   SEARCH_ACTIVE = false;
   document.getElementById('search-input').value = '';
+  currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
@@ -2139,6 +2141,7 @@ function setFilter(el, f) {
   activeFilter = f;
   SEARCH_ACTIVE = false;
   document.getElementById('search-input').value = '';
+  currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
@@ -2147,11 +2150,13 @@ function setFilter(el, f) {
 function renderList(assetsToShow) {
   const wrap = document.getElementById('list-scroll');
   const list = assetsToShow;
+  const resultCount = list.length;
+  const resultHeader = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
   if (!list.length) {
     wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS FOUND<br>ADJUST FILTERS</div></div>`;
     return;
   }
-  wrap.innerHTML = list.map(a => {
+  wrap.innerHTML = resultHeader + list.map(a => {
     const mainStruct = a.structures && a.structures[0];
     const bedbath = mainStruct && mainStruct.beds ? `${mainStruct.beds}bd · ${mainStruct.baths}ba${a.sqft ? ' · ' + a.sqft.toLocaleString() + ' sf' : ''}` : (a.sqft ? a.sqft.toLocaleString() + ' sqft' : '');
     return `<div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">${a.days ? `<div class="pcard-days">${a.days}d</div>` : ''}<div class="pcard-addr">${a.address}</div><div class="pcard-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>${bedbath ? `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${bedbath}</div>` : ''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`;
@@ -2180,11 +2185,12 @@ function renderDetail(a) {
 function rr(k, v) { return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`; }
 
 /* ═══════════════════════════════════════════════════════════
-   ADVANCED SEARCH ENGINE — Filters by Asset Type, Location, Name
+   UNIFIED SEARCH ENGINE — Multi-parameter (Asset Name, Type, City, Country, Price)
    Real-time sync with List View AND Globe markers
 ═══════════════════════════════════════════════════════════ */
 function performSearch() {
   const query = document.getElementById('search-input').value.trim().toLowerCase();
+  currentSearchQuery = query;
   if (query.length === 0) {
     SEARCH_ACTIVE = false;
     const filtered = filterAssets(ASSETS);
@@ -2200,7 +2206,11 @@ function performSearch() {
     a.city.toLowerCase().includes(query) ||
     a.type.toLowerCase().includes(query) ||
     (a.country && a.country.toLowerCase().includes(query)) ||
-    (a.structures && a.structures[0] && a.structures[0].type && a.structures[0].type.toLowerCase().includes(query))
+    (a.structures && a.structures[0] && a.structures[0].type && a.structures[0].type.toLowerCase().includes(query)) ||
+    (a.aviation && a.aviation.registration && a.aviation.registration.toLowerCase().includes(query)) ||
+    (a.maritime && a.maritime.imo && a.maritime.imo.toLowerCase().includes(query)) ||
+    (a.resources && a.resources.resource_type && a.resources.resource_type.toLowerCase().includes(query)) ||
+    (a.financial && a.financial.instrument && a.financial.instrument.toLowerCase().includes(query))
   );
   const filteredResults = filterAssets(SEARCH_RESULTS);
   renderList(filteredResults);
@@ -2328,13 +2338,14 @@ function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn);
 
 /* ═══════════════════════════════════════════════════════════
    DOM MARKERS — LOCKED TO COORDINATES (Matrix Projection)
+   ALTITUDE LOCK: Z=0 surface anchoring (no floating)
    CLEAN BOOT: NO MARKERS ON LOAD — only after zoom AND authentication
-   VIEWPORT CULLING: Only markers in visible frustum are rendered
+   VIEWPORT CULLING (FRUSTUM): Only markers in visible frustum are rendered
    AUTH GATE: Persistent modal — no escape until authenticated
 ═══════════════════════════════════════════════════════════ */
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-const MARKER_VISIBLE_RANGE = 3000000;
+const MARKER_VISIBLE_RANGE = 2500000; // 2,500km for billion-scale performance
 let markersHaveBeenShown = false;
 let isAuthenticated = false;
 
@@ -2346,9 +2357,7 @@ async function checkAuthAndShowGate() {
     isAuthenticated = true;
     const gate = document.getElementById('auth-gate');
     if (gate) gate.classList.add('hidden');
-    // Remove any lingering escape listeners
     document.removeEventListener('keydown', preventEscape);
-    // Re-render markers now that user is authenticated
     if (map3dEl) {
       onCameraChange();
     }
@@ -2356,9 +2365,7 @@ async function checkAuthAndShowGate() {
     isAuthenticated = false;
     const gate = document.getElementById('auth-gate');
     if (gate) gate.classList.remove('hidden');
-    // Prevent escape key and background click from closing gate
     document.addEventListener('keydown', preventEscape);
-    // Hide all markers when not authenticated
     Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
   }
 }
@@ -2371,7 +2378,6 @@ function preventEscape(e) {
   }
 }
 
-// Prevent background clicks on gate
 document.getElementById('auth-gate')?.addEventListener('click', (e) => {
   if (e.target === e.currentTarget) {
     e.preventDefault();
@@ -2382,12 +2388,12 @@ document.getElementById('auth-gate')?.addEventListener('click', (e) => {
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
   if (isCameraProcessing) return;
+  
   cameraDebounceTimer = setTimeout(() => {
     isCameraProcessing = true;
     try {
       if (!map3dEl) return;
       
-      // If not authenticated, hide all markers and return
       if (!isAuthenticated) {
         Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
         isCameraProcessing = false;
@@ -2397,7 +2403,6 @@ function onCameraChange() {
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
-      // Clear selection when camera moves (prevents "haunting" marker)
       if (activeId) {
         activeId = null;
         const rhead = document.getElementById('rhead');
@@ -2418,7 +2423,6 @@ function onCameraChange() {
       
       if (isZoomedIn) {
         markersHaveBeenShown = true;
-        // Get base assets (filtered by search if active)
         const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
         const visibleAssets = getVisibleAssetsInViewport(baseAssets);
         const visibleIds = new Set(visibleAssets.map(a => a.id));
@@ -2432,7 +2436,6 @@ function onCameraChange() {
         
         reprojectMarkersWithMatrix();
       } else {
-        // Hide all markers when zoomed out beyond 3,000km (clean globe)
         Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
       }
       const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
@@ -2482,7 +2485,6 @@ function renderDOMMarkers() {
   domMarkers = {};
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
   physicalAssets.forEach(a => _addPriceMarker(a));
-  // INITIAL STATE: ALL MARKERS HIDDEN (clean globe on load)
   Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
 }
 function addDOMMarker(asset) { _addPriceMarker(asset); }
@@ -2544,7 +2546,7 @@ function reprojectMarkersWithMatrix() {
       const width = rect.width, height = rect.height;
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
-        const worldX = asset.lng, worldY = asset.lat, worldZ = 0;
+        const worldX = asset.lng, worldY = asset.lat, worldZ = 0; // ALTITUDE LOCK: Z=0
         const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
         const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
         const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
@@ -2575,7 +2577,6 @@ function syncMarkerVisibility() {
   });
 }
 
-// Deselect when clicking on map background (not a marker)
 document.getElementById('map-col').addEventListener('click', (e) => {
   if (!e.target.closest('.price-marker')) {
     if (activeId) {
@@ -2598,7 +2599,7 @@ document.getElementById('map-col').addEventListener('click', (e) => {
   }
 });
   
-  /* ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    INSTITUTIONAL ASSET DRAWER (Desktop)
 ═══════════════════════════════════════════════════════════ */
 function openDrawer(a) {
@@ -2682,7 +2683,9 @@ function renderMobileListView(assetsToShow) {
   const container = document.getElementById('mobile-list-view');
   if (!container) return;
   const physicalAssets = assetsToShow.filter(a => isPhysicalAsset(a.type));
-  container.innerHTML = physicalAssets.map(a => `<div class="list-tile" onclick="openMobileDrawerFromTile('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
+  const resultCount = physicalAssets.length;
+  const resultHeader = `<div style="padding:8px 12px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
+  container.innerHTML = resultHeader + physicalAssets.map(a => `<div class="list-tile" onclick="openMobileDrawerFromTile('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
   if (physicalAssets.length === 0) { container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No assets match current filters</div>`; }
 }
 function openMobileDrawerFromTile(assetId) { const a = ASSETS.find(x => x.id === assetId); if (a) openMobileDrawer(a); }
@@ -2786,7 +2789,6 @@ window.__initRWA = initMap;
 setTimeout(() => { console.log("[RWABidAsk] BOOT SEQUENCE: Forcing Marker Render..."); if (typeof renderDOMMarkers === 'function') renderDOMMarkers(); }, 1000);
 if (window.__googleMapsLoaded) initMap();
 
-// Override restoreSession to check auth gate
 const originalRestore = restoreSession;
 restoreSession = async function() {
   await originalRestore();
