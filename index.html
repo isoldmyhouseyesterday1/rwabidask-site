@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>RWABidAsk — Global Asset Market | Institutional Digitization Platform</title>
-<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy, infrastructure, IP, minerals, aviation and maritime transport on the Persistent Ledger.">
+<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy, infrastructure, IP, minerals, aviation and maritime transport.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,235 +21,187 @@
 </script>
 
 <script>
-  window.__mapReady = function() { window.__googleMapsLoaded = true; window.__initRWA && window.__initRWA(); };
+  window.__mapReady = function() { window.__googleMapsLoaded = true; if (window.__initRWA) window.__initRWA(); };
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady" async defer></script>
 
 <style>
-.dismissButton,[class*="dismissButton"],div[style*="z-index:1000000"],.gm-style-pbc,.gm-err-container{display:none!important;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#1c2540;--bg1:#232d4e;--bg2:#2a3560;--bg3:#303d6e;--bg4:#38477c;--border:rgba(255,255,255,.14);--border2:rgba(255,255,255,.24);--border3:rgba(255,255,255,.38);--text:#f0f4ff;--muted:#8fa0c8;--dim:#c8d4f0;--cyan:#00ffc8;--cyan-dim:rgba(0,255,200,.14);--cyan-glow:rgba(0,255,200,.4);--silver:#dde4f5;--gold:#e2c55a;--red:#ff6b6b;--blue:#6ba8ff;--green:#3ee688;--font:'Inter',system-ui,sans-serif;}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden;-webkit-font-smoothing:antialiased;}
+:root{--bg:#1c2540;--bg1:#232d4e;--bg2:#2a3560;--bg3:#303d6e;--bg4:#38477c;--border:rgba(255,255,255,.14);--border2:rgba(255,255,255,.24);--border3:rgba(255,255,255,.38);--text:#f0f4ff;--muted:#8fa0c8;--dim:#c8d4f0;--cyan:#00ffc8;--cyan-dim:rgba(0,255,200,.14);--silver:#dde4f5;--gold:#e2c55a;--red:#ff6b6b;--blue:#6ba8ff;--green:#3ee688;--font:'Inter',system-ui,sans-serif;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden;}
 #shell{display:grid;grid-template-rows:24px 54px 1fr 30px 26px;height:100vh;min-height:0;min-width:900px;}
-#main-row{display:grid;grid-template-columns:288px 1fr 320px;min-height:0;overflow:hidden;min-width:0;}
+#main-row{display:grid;grid-template-columns:288px 1fr 320px;min-height:0;overflow:hidden;}
 body{min-width:900px;overflow-x:auto;}
-#topbar{background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;position:relative;z-index:600;}
-.logo{display:flex;align-items:center;gap:10px;padding:0 22px;height:100%;border-right:1px solid var(--border);flex-shrink:0;text-decoration:none;cursor:default;}
-.logo-mark{width:8px;height:8px;background:var(--cyan);border-radius:50%;box-shadow:0 0 10px var(--cyan),0 0 22px rgba(0,255,200,.4);animation:pulse-logo 3s ease-in-out infinite;}
-@keyframes pulse-logo{0%,100%{box-shadow:0 0 10px var(--cyan),0 0 22px rgba(0,255,200,.4);}50%{box-shadow:0 0 16px var(--cyan),0 0 36px rgba(0,255,200,.6);}}
-.logo-text{font-size:15px;font-weight:700;color:var(--text);letter-spacing:.3px;}
-.logo-tag{font-size:8px;color:var(--dim);letter-spacing:2px;font-weight:500;}
-.search-wrap{flex:1;display:flex;align-items:center;height:100%;position:relative;border-right:1px solid var(--border);min-width:0;}
+.dismissButton,[class*="dismissButton"],div[style*="z-index:1000000"],.gm-style-pbc,.gm-err-container{display:none!important;}
+#topbar{background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;z-index:600;}
+.logo{display:flex;align-items:center;gap:10px;padding:0 22px;height:100%;border-right:1px solid var(--border);cursor:default;}
+.logo-mark{width:8px;height:8px;background:var(--cyan);border-radius:50%;box-shadow:0 0 10px var(--cyan);animation:pulse-logo 3s ease-in-out infinite;}
+@keyframes pulse-logo{0%,100%{box-shadow:0 0 10px var(--cyan);}50%{box-shadow:0 0 16px var(--cyan);}}
+.logo-text{font-size:15px;font-weight:700;color:var(--text);}
+.logo-tag{font-size:8px;color:var(--dim);letter-spacing:2px;}
+.search-wrap{flex:1;display:flex;align-items:center;height:100%;position:relative;border-right:1px solid var(--border);}
 #search-input{width:100%;height:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:13px;padding:0 18px;}
 #search-input::placeholder{color:var(--muted);}
-.search-icon{position:absolute;right:0;top:0;bottom:0;padding:0 18px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-left:1px solid var(--border);color:var(--dim);transition:all .15s;background:none;}
-.search-icon svg{display:block;}
+.search-icon{position:absolute;right:0;top:0;bottom:0;padding:0 18px;display:flex;align-items:center;cursor:pointer;border-left:1px solid var(--border);background:none;color:var(--dim);}
 .search-icon:hover{color:var(--cyan);background:var(--cyan-dim);}
 .topbar-right{display:flex;align-items:center;height:100%;}
 .tstat{padding:0 16px;height:100%;display:flex;flex-direction:column;justify-content:center;border-left:1px solid var(--border);cursor:default;}
-.tstat-l{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:2px;}
+.tstat-l{font-size:9px;font-weight:600;text-transform:uppercase;color:var(--dim);}
 .tstat-v{font-size:14px;font-weight:700;color:var(--silver);}
 .tstat-v.live{color:var(--cyan);}
-.tbtn{height:100%;padding:0 16px;background:none;border:none;border-left:1px solid var(--border);color:var(--silver);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;transition:all .15s;white-space:nowrap;}
+.tbtn{height:100%;padding:0 16px;background:none;border:none;border-left:1px solid var(--border);color:var(--silver);font-size:11px;font-weight:600;cursor:pointer;text-transform:uppercase;}
 .tbtn:hover{color:var(--text);background:rgba(255,255,255,.05);}
-.tbtn.primary{background:var(--cyan);color:#000;font-weight:700;border-left-color:var(--cyan);}
-.tbtn.primary:hover{background:#00e6b4;}
-#left{background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
-.left-head{padding:14px 16px 0;flex-shrink:0;}
+.tbtn.primary{background:var(--cyan);color:#000;border-left-color:var(--cyan);}
+#left{background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.left-head{padding:14px 16px 0;}
 .left-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--silver);margin-bottom:12px;}
 .ptabs{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--border);gap:2px;}
-.ptab{padding:8px 8px;text-align:center;font-family:var(--font);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;}
+.ptab{padding:8px;font-size:9px;text-transform:uppercase;color:var(--dim);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;}
 .ptab.on{color:var(--cyan);border-bottom-color:var(--cyan);font-weight:700;}
-.ptab:hover:not(.on){color:var(--silver);}
-.frow{display:flex;gap:5px;padding:9px 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;}
-.frow::-webkit-scrollbar{display:none;}
-.fchip{padding:3px 9px;font-family:var(--font);font-size:9px;color:var(--dim);border:1px solid var(--border2);background:none;cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .15s;letter-spacing:.3px;}
+.frow{display:flex;gap:5px;padding:9px 14px;border-bottom:1px solid var(--border);overflow-x:auto;}
+.fchip{padding:3px 9px;font-size:9px;color:var(--dim);border:1px solid var(--border2);background:none;cursor:pointer;border-radius:2px;white-space:nowrap;}
 .fchip.on{border-color:rgba(0,255,200,.45);color:var(--cyan);background:var(--cyan-dim);font-weight:600;}
-.fchip:hover:not(.on){border-color:var(--border3);color:var(--silver);}
-.list-scroll{flex:1;overflow-y:auto;min-height:0;}
+.list-scroll{flex:1;overflow-y:auto;}
 .list-scroll::-webkit-scrollbar{width:2px;}
-.list-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:1px;}
-.sync-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:18px;padding:24px;}
-.sync-rings{position:relative;width:44px;height:44px;}
-.sync-ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--cyan);animation:sync-expand 2.4s ease-out infinite;}
-.sync-ring:nth-child(2){animation-delay:.8s;}
-.sync-ring:nth-child(3){animation-delay:1.6s;}
-@keyframes sync-expand{0%{transform:scale(.2);opacity:.8;}100%{transform:scale(1.6);opacity:0;}}
-.sync-dot{position:absolute;inset:50%;width:6px;height:6px;transform:translate(-50%,-50%);background:var(--cyan);border-radius:50%;box-shadow:0 0 10px var(--cyan);}
-.sync-label{font-size:10px;color:var(--dim);letter-spacing:2px;text-align:center;line-height:2.2;text-transform:uppercase;}
-.pcard{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative;}
+.pcard{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;position:relative;}
 .pcard:hover{background:rgba(255,255,255,.02);}
 .pcard.active{background:rgba(0,255,200,.04);border-left:1px solid rgba(0,255,200,.4);}
-.pcard-addr{font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:3px;padding-right:40px;}
+.pcard-addr{font-size:12px;font-weight:600;color:var(--text);padding-right:40px;}
 .pcard-city{font-size:11px;color:var(--dim);margin-bottom:5px;}
 .pcard-bottom{display:flex;justify-content:space-between;align-items:center;}
 .pcard-price{font-size:14px;font-weight:700;color:var(--cyan);}
-.pcard-type{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:2px 8px;border-radius:2px;}
+.pcard-type{font-size:9px;font-weight:600;text-transform:uppercase;padding:2px 8px;border-radius:2px;}
 .t-res{background:rgba(59,125,248,.12);color:#6ba3fb;}
 .t-com{background:rgba(201,168,76,.12);color:var(--gold);}
-.t-land{background:rgba(0,255,200,.1);color:var(--cyan);}
-.t-biz{background:rgba(139,92,246,.12);color:#a78bfa;}
 .t-avi{background:rgba(91,150,255,.12);color:var(--blue);}
 .t-mar{background:rgba(34,150,200,.12);color:#22c8e8;}
-.t-res2{background:rgba(201,168,76,.12);color:var(--gold);}
 .t-fin{background:rgba(46,212,122,.12);color:var(--green);}
-.pcard-days{font-family:var(--font);font-size:9px;color:var(--muted);position:absolute;top:12px;right:14px;}
 #map-col{position:relative;background:#111928;overflow:hidden;}
 #map3d-container{position:absolute;inset:0;width:100%;height:100%;}
 .map-ctl-panel{position:absolute;top:14px;right:14px;z-index:400;display:flex;flex-direction:column;gap:4px;}
 .mctl-group{background:rgba(26,34,60,.94);border:1px solid var(--border2);backdrop-filter:blur(12px);padding:5px;display:flex;flex-direction:column;gap:2px;}
-.mctl{padding:6px 12px;background:none;border:none;color:var(--dim);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .15s;text-align:left;border-radius:2px;white-space:nowrap;}
+.mctl{padding:6px 12px;background:none;border:none;color:var(--dim);font-size:10px;font-weight:500;text-transform:uppercase;cursor:pointer;border-radius:2px;}
 .mctl:hover,.mctl.on{color:var(--cyan);background:var(--cyan-dim);}
-.map-status{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(26,34,60,.92);border:1px solid var(--border2);padding:7px 18px;font-family:var(--font);font-size:10px;color:var(--silver);letter-spacing:1.2px;text-transform:uppercase;backdrop-filter:blur(8px);z-index:400;white-space:nowrap;pointer-events:none;}
-.live-dot{display:inline-block;width:5px;height:5px;background:var(--cyan);border-radius:50%;margin-right:8px;vertical-align:middle;box-shadow:0 0 6px var(--cyan);animation:live-blink 2.4s ease-in-out infinite;}
+.map-status{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(26,34,60,.92);border:1px solid var(--border2);padding:7px 18px;font-size:10px;color:var(--silver);text-transform:uppercase;backdrop-filter:blur(8px);z-index:400;white-space:nowrap;pointer-events:none;}
+.live-dot{display:inline-block;width:5px;height:5px;background:var(--cyan);border-radius:50%;margin-right:8px;animation:live-blink 2.4s infinite;}
 @keyframes live-blink{0%,100%{opacity:1;}50%{opacity:.25;}}
-.price-marker{position:absolute;display:flex!important;left:0;top:0;pointer-events:auto;z-index:10;will-change:transform;cursor:pointer;}
-.price-marker:hover{filter:drop-shadow(0 6px 24px rgba(0,255,200,.5));transform:scale(1.06);}
-.price-tag{background:rgba(14,22,46,.97);border:1px solid rgba(0,255,200,.55);border-radius:5px;padding:5px 10px;white-space:nowrap;line-height:1;backdrop-filter:blur(8px);box-shadow:0 2px 12px rgba(0,0,0,.5);}
-.price-tag-val{font-size:12px;font-weight:800;color:var(--cyan);letter-spacing:.1px;}
-.price-tag-type{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:1px;}
+.price-marker{position:absolute;display:flex!important;left:0;top:0;pointer-events:auto;z-index:10;cursor:pointer;}
+.price-tag{background:rgba(14,22,46,.97);border:1px solid rgba(0,255,200,.55);border-radius:5px;padding:5px 10px;white-space:nowrap;backdrop-filter:blur(8px);}
+.price-tag-val{font-size:12px;font-weight:800;color:var(--cyan);}
+.price-tag-type{font-size:8px;color:var(--muted);text-transform:uppercase;margin-top:1px;}
 .price-stem{width:1px;height:20px;background:linear-gradient(to bottom,rgba(0,255,200,.6),rgba(0,255,200,0));margin:0 auto;}
-.price-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan),0 0 14px rgba(0,255,200,.5);margin:0 auto;margin-top:-1px;}
-#right{background:var(--bg1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
-.rhead{padding:16px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.price-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);margin:0 auto;margin-top:-1px;}
+#right{background:var(--bg1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.rhead{padding:16px 16px 14px;border-bottom:1px solid var(--border);}
 .rtype{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.8px;color:var(--cyan);opacity:.7;margin-bottom:6px;}
-.rname{font-size:15px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:4px;}
+.rname{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
 .rcity{font-size:12px;color:var(--dim);margin-bottom:12px;}
 .rprice-row{display:flex;justify-content:space-between;align-items:flex-end;}
-.rprice{font-size:24px;font-weight:700;color:var(--cyan);letter-spacing:-.5px;}
-.rprice-psf{font-family:var(--font);font-size:10px;color:var(--muted);}
-.rbody{flex:1;overflow-y:auto;min-height:0;}
+.rprice{font-size:24px;font-weight:700;color:var(--cyan);}
+.rprice-psf{font-size:10px;color:var(--muted);}
+.rbody{flex:1;overflow-y:auto;}
 .rbody::-webkit-scrollbar{width:2px;}
-.rbody::-webkit-scrollbar-thumb{background:var(--border2);}
 .r-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:24px;text-align:center;}
-.r-empty-glyph{font-size:36px;opacity:.06;line-height:1;}
-.r-empty-text{font-family:var(--font);font-size:9px;color:var(--muted);line-height:2.4;letter-spacing:1px;text-transform:uppercase;}
+.r-empty-glyph{font-size:36px;opacity:.06;}
+.r-empty-text{font-size:9px;color:var(--muted);text-transform:uppercase;}
 .rinner{padding:14px 16px;}
 .rsect{margin-bottom:18px;}
-.rsect-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.8px;color:var(--cyan);margin-bottom:9px;border-bottom:1px solid rgba(0,255,200,.2);padding-bottom:5px;opacity:.9;}
+.rsect-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.8px;color:var(--cyan);margin-bottom:9px;border-bottom:1px solid rgba(0,255,200,.2);padding-bottom:5px;}
 .rrow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;gap:12px;}
-.rk{color:var(--dim);flex-shrink:0;font-size:11px;}
-.rv{color:var(--silver);font-size:11px;text-align:right;word-break:break-word;}
+.rk{color:var(--dim);font-size:11px;}
+.rv{color:var(--silver);font-size:11px;text-align:right;}
 .rv.hl{color:var(--cyan);font-weight:600;}
 .act-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;}
-.abtn{padding:10px 8px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;border:none;border-radius:2px;letter-spacing:.6px;text-transform:uppercase;transition:all .15s;text-align:center;text-decoration:none;display:block;}
-.abtn:hover{opacity:.85;transform:translateY(-1px);}
+.abtn{padding:10px 8px;font-size:10px;font-weight:700;cursor:pointer;border:none;border-radius:2px;text-transform:uppercase;text-align:center;}
+.abtn:hover{opacity:.85;}
 .a-buy{background:var(--cyan);color:#000;}
 .a-bid{background:none;border:1px solid rgba(0,255,200,.3)!important;color:var(--cyan);}
 .a-lend{background:none;border:1px solid rgba(59,125,248,.3)!important;color:#6ba3fb;}
 .a-save{background:none;border:1px solid var(--border)!important;color:var(--muted);}
 .a-claim{grid-column:1/-1;background:none;border:1px solid rgba(34,197,94,.25)!important;color:var(--green);}
 .a-sponsor{grid-column:1/-1;background:none;border:1px solid rgba(201,168,76,.25)!important;color:var(--gold);font-size:9px;}
-#market-ribbon{background:#0d1526;border-bottom:1px solid rgba(0,255,200,.1);overflow:hidden;display:flex;align-items:center;z-index:800;flex-shrink:0;}
-.ribbon-track{display:flex;white-space:nowrap;animation:ribbon-run 60s linear infinite;font-size:10px;font-weight:500;letter-spacing:.3px;gap:0;}
-.ribbon-track:hover{animation-play-state:paused;}
-.ribbon-item{display:flex;align-items:center;gap:6px;padding:0 20px;border-right:1px solid rgba(255,255,255,.06);cursor:default;}
-.ribbon-label{color:var(--muted);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;}
-.ribbon-val{color:var(--silver);font-weight:600;font-variant-numeric:tabular-nums;}
+#market-ribbon{background:#0d1526;border-bottom:1px solid rgba(0,255,200,.1);overflow:hidden;display:flex;align-items:center;z-index:800;}
+.ribbon-track{display:flex;white-space:nowrap;animation:ribbon-run 60s linear infinite;font-size:10px;gap:0;}
+@keyframes ribbon-run{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ribbon-item{display:flex;align-items:center;gap:6px;padding:0 20px;border-right:1px solid rgba(255,255,255,.06);}
+.ribbon-label{color:var(--muted);font-size:9px;}
+.ribbon-val{color:var(--silver);}
 .ribbon-chg.up{color:var(--green);}
 .ribbon-chg.down{color:var(--red);}
-.ribbon-chg.flat{color:var(--muted);}
-@keyframes ribbon-run{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 #ticker-bar{background:var(--bg1);border-top:1px solid var(--border);overflow:hidden;display:flex;align-items:center;}
-.ticker-track{display:flex;white-space:nowrap;animation:ticker-run 90s linear infinite;font-size:9px;color:var(--dim);letter-spacing:1px;}
+.ticker-track{display:flex;white-space:nowrap;animation:ticker-run 90s linear infinite;font-size:9px;color:var(--dim);}
+@keyframes ticker-run{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 .ticker-seg{padding:0 24px;}
 .ticker-seg .addr{color:var(--silver);}
 .ticker-seg .sep{color:var(--border2);margin:0 8px;}
-@keyframes ticker-run{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 #footer{background:#161e38;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:0 20px;}
-.footer-copy{font-size:9px;color:var(--muted);letter-spacing:.6px;text-align:center;line-height:1;}
-.footer-copy strong{color:var(--dim);font-weight:500;}
-.footer-copy a{color:var(--muted);text-decoration:none;transition:color .15s;}
+.footer-copy{font-size:9px;color:var(--muted);text-align:center;}
+.footer-copy strong{color:var(--dim);}
+.footer-copy a{color:var(--muted);text-decoration:none;}
 .footer-copy a:hover{color:var(--dim);}
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
 #modal.open{display:flex;}
 .mbox{background:var(--bg2);border:1px solid var(--border2);width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:32px;position:relative;}
-.mbox::-webkit-scrollbar{width:2px;}
-.mbox::-webkit-scrollbar-thumb{background:var(--border2);}
-.mtitle{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.4px;}
-.msub{font-size:12px;color:var(--dim);margin-bottom:24px;line-height:1.7;}
-.mfield{margin-bottom:14px;}
-.mfield label{display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--dim);margin-bottom:5px;}
-.mfield input,.mfield select,.mfield textarea{width:100%;background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px;outline:none;border-radius:3px;transition:border-color .15s,box-shadow .15s;}
-.mfield input:focus,.mfield select:focus,.mfield textarea:focus{border-color:rgba(0,255,200,.5);box-shadow:0 0 0 2px rgba(0,255,200,.08);}
-.mfield input::placeholder,.mfield textarea::placeholder{color:var(--muted);}
-.mfield select option{background:var(--bg2);}
-.mfield textarea{resize:vertical;min-height:80px;}
-.mrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.mfooter{display:flex;gap:8px;margin-top:24px;}
-.msub-btn{flex:1;padding:11px;background:var(--cyan);color:#000;border:none;cursor:pointer;font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.5px;border-radius:2px;transition:background .15s;}
-.msub-btn:hover{background:#00e6b4;}
-.mcan-btn{padding:11px 18px;background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:var(--font);font-size:11px;border-radius:2px;transition:all .15s;}
-.mcan-btn:hover{color:var(--text);border-color:var(--border2);}
-.mclose-btn{position:absolute;top:14px;right:18px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;transition:color .15s;}
-.mclose-btn:hover{color:var(--text);}
-#toast{position:fixed;top:64px;right:18px;z-index:99999;background:var(--bg2);border:1px solid rgba(0,255,200,.3);padding:12px 18px;font-family:var(--font);font-size:11px;color:var(--cyan);display:none;border-radius:2px;max-width:340px;letter-spacing:.3px;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:toast-in .2s ease;}
+.mclose-btn{position:absolute;top:14px;right:18px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
+#toast{position:fixed;top:64px;right:18px;z-index:99999;background:var(--bg2);border:1px solid rgba(0,255,200,.3);padding:12px 18px;font-size:11px;color:var(--cyan);display:none;border-radius:2px;animation:toast-in .2s ease;}
 @keyframes toast-in{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
-#asset-drawer{position:fixed;top:78px;right:0;bottom:30px;width:min(480px,38vw);background:var(--bg1);border-left:1px solid rgba(0,255,200,.2);display:flex;flex-direction:column;z-index:700;transform:translateX(105%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:-20px 0 60px rgba(0,0,0,.6);will-change:transform;}
+#asset-drawer{position:fixed;top:78px;right:0;bottom:30px;width:min(480px,38vw);background:var(--bg1);border-left:1px solid rgba(0,255,200,.2);display:flex;flex-direction:column;z-index:700;transform:translateX(105%);transition:transform .32s cubic-bezier(.4,0,.2,1);}
 #asset-drawer.open{transform:translateX(0);}
 #overlay-layer{position:absolute;inset:0;z-index:999;pointer-events:none;overflow:visible;}
 @media (max-width:767px){
-#shell{grid-template-rows:48px 1fr;height:100dvh;min-width:unset;width:100vw;overflow-x:hidden!important;}
+#shell{grid-template-rows:48px 1fr;height:100dvh;min-width:unset;width:100vw;}
 #market-ribbon,#ticker-bar,#footer,#left{display:none!important;}
-#right{position:fixed!important;bottom:0!important;left:0!important;right:0!important;top:auto!important;width:100%!important;height:70vh!important;max-height:70vh!important;border-left:none!important;border-top:2px solid rgba(0,255,200,.3)!important;border-radius:16px 16px 0 0!important;transform:translateY(100%)!important;transition:transform .3s cubic-bezier(.4,0,.2,1)!important;z-index:2000!important;background:var(--bg1)!important;overflow-y:auto!important;display:block!important;}
+#right{position:fixed!important;bottom:0!important;left:0!important;right:0!important;top:auto!important;width:100%!important;height:70vh!important;border-left:none!important;border-top:2px solid rgba(0,255,200,.3)!important;border-radius:16px 16px 0 0!important;transform:translateY(100%)!important;transition:transform .3s cubic-bezier(.4,0,.2,1)!important;z-index:2000!important;background:var(--bg1)!important;overflow-y:auto!important;display:block!important;}
 #right.open-drawer{transform:translateY(0)!important;}
 #right::before{content:'';display:block;width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:10px auto 6px;}
 .rhead,.rinner{padding:12px 16px;}
 .rbody{overflow-y:auto!important;max-height:calc(70vh - 180px);}
-#topbar{height:48px;padding:0 8px;background:var(--bg1);border-bottom:1px solid var(--border);position:relative;z-index:100;}
+#topbar{height:48px;padding:0 8px;}
 .tstat,.logo-tag{display:none;}
-.tbtn{display:inline-block!important;padding:0 8px;font-size:10px;border-left:none;margin-left:4px;}
-.tbtn.primary{background:var(--cyan);color:#000;border-radius:2px;padding:0 10px;margin-left:4px;}
+.tbtn{padding:0 8px;font-size:10px;border-left:none;margin-left:4px;}
+.tbtn.primary{padding:0 10px;border-radius:2px;}
 .logo{padding:0 12px;border-right:none;}
 .logo-text{font-size:14px;}
-.search-wrap{margin-left:8px;flex:1;}
+.search-wrap{margin-left:8px;}
 #search-input{font-size:12px;}
-body,#main-row{overflow-x:hidden!important;width:100vw!important;}
-#main-row{grid-template-columns:1fr!important;width:100vw!important;position:relative;overflow:hidden;}
-#map-col{position:relative!important;left:0!important;width:100vw!important;height:100%!important;overflow:hidden;display:block!important;}
-#map3d-container{position:absolute;inset:0;width:100%;height:100%;display:block!important;visibility:visible!important;}
-.map-ctl-panel{top:8px;right:8px;z-index:200;}
-.mctl-group{padding:3px;gap:0;}
-.mctl{padding:4px 8px;font-size:8px;}
-.map-status{bottom:60px;font-size:8px;padding:4px 12px;white-space:nowrap;background:rgba(0,0,0,.7);}
+#main-row{grid-template-columns:1fr!important;width:100vw!important;}
+#map-col{position:relative!important;width:100vw!important;height:100%!important;display:block!important;}
+#map3d-container{position:absolute;inset:0;width:100%;height:100%;display:block!important;}
 .view-toggle{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:rgba(14,22,46,.95);backdrop-filter:blur(12px);border:1px solid rgba(0,255,200,.25);border-radius:40px;padding:4px;z-index:400;}
-.view-toggle-btn{padding:8px 20px;font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;background:none;border:none;border-radius:32px;color:var(--muted);cursor:pointer;transition:all .15s;}
+.view-toggle-btn{padding:8px 20px;font-size:12px;font-weight:600;text-transform:uppercase;background:none;border:none;border-radius:32px;color:var(--muted);cursor:pointer;}
 .view-toggle-btn.active{background:var(--cyan);color:#000;}
 .list-view{position:fixed;top:48px;left:0;right:0;bottom:0;background:var(--bg);z-index:350;overflow-y:auto;display:none;flex-direction:column;}
 .list-view.active{display:flex;}
-.list-tile{background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
-.list-tile:active{background:var(--bg2);}
-.list-tile-type{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:6px;}
-.list-tile-addr{font-size:13px;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:4px;}
+.list-tile{background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:8px;cursor:pointer;}
+.list-tile-type{font-size:9px;font-weight:600;text-transform:uppercase;color:var(--cyan);margin-bottom:6px;}
+.list-tile-addr{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
 .list-tile-loc{font-size:10px;color:var(--dim);margin-bottom:8px;}
 .list-tile-price{font-size:16px;font-weight:700;color:var(--cyan);}
-.mobile-filters-header{background:var(--bg1);border-bottom:1px solid var(--border);padding:12px;flex-shrink:0;}
-.mobile-filters-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--silver);margin-bottom:10px;}
+.mobile-filters-header{background:var(--bg1);border-bottom:1px solid var(--border);padding:12px;}
+.mobile-filters-title{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--silver);margin-bottom:10px;}
 .mobile-category-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;}
-.mobile-price-filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.mobile-price-filters{display:flex;flex-wrap:wrap;gap:6px;}
 .list-results-container{flex:1;overflow-y:auto;padding:12px;}
 #asset-drawer{display:none;}
 .price-marker{z-index:500!important;}
 .price-tag{padding:5px 9px;}
 .price-tag-val{font-size:11px;}
-.price-tag-type{font-size:7px;}
 }
-.auth-gate{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,14,23,0.98);backdrop-filter:blur(8px);z-index:10000;display:flex;align-items:center;justify-content:center;font-family:var(--font);}
+.auth-gate{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,14,23,0.98);backdrop-filter:blur(8px);z-index:10000;display:flex;align-items:center;justify-content:center;}
 .auth-gate.hidden{display:none;}
-.auth-gate-card{background:var(--bg1);border:1px solid var(--border2);padding:40px 48px;max-width:440px;width:90%;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.4);}
+.auth-gate-card{background:var(--bg1);border:1px solid var(--border2);padding:40px 48px;max-width:440px;width:90%;text-align:center;}
 .auth-gate-title{font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--silver);margin-bottom:12px;}
 .auth-gate-sub{font-size:11px;color:var(--muted);line-height:1.8;margin-bottom:28px;}
 .auth-gate-buttons{display:flex;gap:12px;justify-content:center;}
-.auth-gate-btn{padding:12px 28px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;transition:all 0.2s;}
+.auth-gate-btn{padding:12px 28px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;}
 .auth-gate-btn.primary{background:var(--cyan);color:#000;}
 .auth-gate-btn.primary:hover{background:#00e6b4;}
 .auth-gate-btn.secondary{background:transparent;border:1px solid var(--border2);color:var(--silver);}
-.auth-gate-btn.secondary:hover{border-color:var(--border3);color:var(--text);background:rgba(255,255,255,.03);}
 .selection-modal{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;}
 .selection-modal h3{font-size:16px;margin-bottom:16px;color:var(--cyan);}
 .selection-category{margin-bottom:16px;}
-.selection-category-title{font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border2);text-transform:uppercase;letter-spacing:1px;}
-.selection-option{padding:10px 14px;margin:4px 0;background:var(--bg3);border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .15s;font-size:11px;}
+.selection-category-title{font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border2);text-transform:uppercase;}
+.selection-option{padding:10px 14px;margin:4px 0;background:var(--bg3);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:11px;}
 .selection-option:hover{border-color:var(--cyan);background:var(--cyan-dim);}
 </style>
 </head>
@@ -259,7 +211,7 @@ body,#main-row{overflow-x:hidden!important;width:100vw!important;}
 <div id="topbar">
 <div class="logo"><div class="logo-mark"></div><div><div class="logo-text">RWABidAsk</div><div class="logo-tag">GLOBAL ASSET MARKET</div></div></div>
 <div class="search-wrap"><input id="search-input" type="text" placeholder="Global Asset Navigation — search any address, city, or region…" autocomplete="off"><button class="search-icon" onclick="performSearch()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button></div>
-<div class="topbar-right"><div class="tstat"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div></div><div class="tstat"><div class="tstat-l">Assets</div><div class="tstat-v live" id="s-assets">—</div></div><div class="tstat"><div class="tstat-l">Status</div><div class="tstat-v live" id="s-status">SYNC</div></div><div class="tstat"><div class="tstat-l">Bids 24h</div><div class="tstat-v" id="s-bids">—</div></div><button class="tbtn" id="signin-btn" onclick="openModal('tos_gate')">Sign In</button><button class="tbtn primary" id="join-btn" onclick="openModal('tos_gate')">Join</button></div>
+<div class="topbar-right"><div class="tstat"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div></div><div class="tstat"><div class="tstat-l">Assets</div><div class="tstat-v live" id="s-assets">—</div></div><div class="tstat"><div class="tstat-l">Status</div><div class="tstat-v live" id="s-status">SYNC</div></div><div class="tstat"><div class="tstat-l">Bids 24h</div><div class="tstat-v" id="s-bids">—</div></div><button class="tbtn" id="signin-btn">Sign In</button><button class="tbtn primary" id="join-btn">Join</button></div>
 </div>
 <div id="main-row">
 <div id="left"><div class="left-head"><div class="left-title">Global Directory</div><div class="ptabs" id="category-tabs"></div><div class="frow" id="price-filters"><button class="fchip on" onclick="setFilter(this,'any')">Any</button><button class="fchip" onclick="setFilter(this,'sub1m')">–$1M</button><button class="fchip" onclick="setFilter(this,'1m5m')">$1–5M</button><button class="fchip" onclick="setFilter(this,'5m25m')">$5–25M</button><button class="fchip" onclick="setFilter(this,'25mplus')">$25M+</button></div></div><div class="list-scroll" id="list-scroll"><div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div></div></div></div>
@@ -274,7 +226,7 @@ body,#main-row{overflow-x:hidden!important;width:100vw!important;}
 <div id="toast"></div>
 <div class="view-toggle" id="mobile-view-toggle"><button class="view-toggle-btn active" data-view="globe">GLOBE</button><button class="view-toggle-btn" data-view="list">LIST</button></div>
 <div class="list-view" id="mobile-list-view"></div>
-<div class="auth-gate" id="auth-gate"><div class="auth-gate-card"><div class="auth-gate-title">RWABidAsk | Access Terminal</div><div class="auth-gate-sub">Sign in or create an account to access the Global Asset Directory, Persistent Ledger, and institutional bidding platform.</div><div class="auth-gate-buttons"><button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('tos_gate')">Request Access</button><button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button></div></div></div>
+<div class="auth-gate" id="auth-gate"><div class="auth-gate-card"><div class="auth-gate-title">RWABidAsk | Access Terminal</div><div class="auth-gate-sub">Sign in or create an account to access the Global Asset Directory, Persistent Ledger, and institutional bidding platform.</div><div class="auth-gate-buttons"><button class="auth-gate-btn secondary" id="request-access-btn">Request Access</button><button class="auth-gate-btn primary" id="signin-gate-btn">Sign In</button></div></div></div>
 
 <script>
 'use strict';
@@ -282,38 +234,28 @@ let isMapReady=false,markersRendered=false;
 const ASSET_CATEGORIES=[{id:'all',label:'ALL',physical:false},{id:'realestate',label:'REAL ESTATE',physical:true},{id:'commercial',label:'COMMERCIAL',physical:true},{id:'aviation',label:'AVIATION',physical:true},{id:'maritime',label:'MARITIME',physical:true},{id:'resources',label:'NATURAL RESOURCES',physical:true},{id:'infrastructure',label:'INFRASTRUCTURE',physical:true},{id:'financial',label:'FINANCIALS',physical:false}];
 function getAssetCategory(type){const lt=(type||'').toLowerCase();if(lt==='castle'||lt==='estate'||lt.includes('castle')||lt.includes('estate'))return'realestate';const map={residential:'realestate',land:'realestate',commercial:'commercial',business:'commercial',aviation:'aviation',maritime:'maritime',resources:'resources',minerals:'resources',energy:'infrastructure',ip:'financial',debt:'financial',financial:'financial'};return map[lt]||'realestate';}
 function isPhysicalAsset(type){const cat=getAssetCategory(type);const catObj=ASSET_CATEGORIES.find(c=>c.id===cat);return catObj?catObj.physical:false;}
-let ASSETS=[],SEARCH_RESULTS=[],SEARCH_ACTIVE=false,currentSearchQuery='',map3dEl=null,acInstance=null,activeTab='all',activeFilter='any',activeId=null,heatOn=false,domMarkers={},cameraDebounceTimer=null,isCameraProcessing=false;const MARKER_VISIBLE_RANGE=6000000;let isAuthenticated=false,_sb=null,currentUser=null,currentUserRole=null,watchlistState={};
+let ASSETS=[],SEARCH_RESULTS=[],SEARCH_ACTIVE=false,currentSearchQuery='',map3dEl=null,activeTab='all',activeFilter='any',activeId=null,heatOn=false,domMarkers={},cameraDebounceTimer=null,isCameraProcessing=false;const MARKER_VISIBLE_RANGE=6000000;let isAuthenticated=false,_sb=null,currentUser=null,watchlistState={};
 const SB_URL='https://iyejqvdjbvokrswlsoda.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
 
-// LENDING MATRIX
-const LENDING_OPTIONS={
-'Real Estate & Infrastructure':['Commercial Mortgage-Backed Securities (CMBS)','Construction & Development Loans','Mezzanine Financing','Bridge & Hard Money Loans','Residential Institutional Financing'],
-'Corporate & Industrial':['Asset-Backed Lending (ABL)','Project Finance (Non-Recourse)','Equipment Leasing & Hire Purchase','Venture Debt'],
-'Specialized & Digital':['Trade & Supply Chain Finance','Aviation & Maritime Finance','Crypto-Collateralized Fiat Loans','Tokenized Debt Issuance','Sovereign & Municipal Lending']};
-
-// INSURANCE MATRIX
-const INSURANCE_OPTIONS={
-'Property & Casualty (Physical)':['All-Risk Property Insurance','General & Product Liability','Business Interruption Insurance','Catastrophic Cover (Flood, Earthquake, Fire)'],
-'Specialty & High-Stakes':['War, Terrorism, & Political Violence','Expropriation & Political Risk','Aviation & Marine Hull/Cargo','Environmental & Pollution Liability'],
-'Legal & Financial (Transactional)':['Title Insurance (Physical & Digital)','Credit & Default Insurance','Representations & Warranties (R&W)','Surety Bonds & Performance Guarantees'],
-'Digital & Cyber':['Smart Contract Audit & Exploit Insurance','Cyber Liability & Data Breach','Digital Asset Indemnity']};
+const LENDING_OPTIONS={'Real Estate & Infrastructure':['CMBS','Construction Loans','Mezzanine Financing','Bridge Loans','Residential Institutional'],'Corporate & Industrial':['Asset-Backed Lending','Project Finance','Equipment Leasing','Venture Debt'],'Specialized & Digital':['Trade Finance','Aviation Finance','Crypto-Collateralized','Tokenized Debt','Sovereign Lending']};
+const INSURANCE_OPTIONS={'Property & Casualty':['All-Risk','General Liability','Business Interruption','Catastrophic Cover'],'Specialty & High-Stakes':['War & Terrorism','Political Risk','Aviation/Marine Hull','Environmental Liability'],'Legal & Financial':['Title Insurance','Credit Default','R&W Insurance','Surety Bonds'],'Digital & Cyber':['Smart Contract Audit','Cyber Liability','Digital Asset Indemnity']};
 
 async function logTransaction(userId,assetId,actionType){if(!_sb){toast('System busy');return false;}try{await _sb.from('transactions').insert({user_id:userId,asset_id:assetId,action_type:actionType,created_at:new Date().toISOString()});toast(`✓ ${actionType} inquiry logged. Our escrow team will contact you.`);return true;}catch(err){toast('Unable to log inquiry');return false;}}
 async function logLead(userId,assetId,leadType,selection){if(!_sb){toast('System busy');return false;}try{await _sb.from('partner_leads').insert({user_id:userId,asset_id:assetId,lead_type:leadType,selection:selection,status:'pending',created_at:new Date().toISOString()});toast(`✓ ${selection} request confirmed. A specialist will contact you within 24 hours.`);return true;}catch(err){toast('Request logged. We will contact you soon.');return false;}}
 async function toggleWatchlist(userId,assetId){if(!_sb){toast('Sign in to use watchlist');return false;}try{const{data:existing}=await _sb.from('watchlists').select('id').eq('user_id',userId).eq('asset_id',assetId);if(existing&&existing.length>0){await _sb.from('watchlists').delete().eq('user_id',userId).eq('asset_id',assetId);watchlistState[assetId]=false;toast('✓ Removed from watchlist');return false;}else{await _sb.from('watchlists').insert({user_id:userId,asset_id:assetId,created_at:new Date().toISOString()});watchlistState[assetId]=true;toast('✓ Added to watchlist');return true;}}catch(err){toast('Watchlist update failed');return false;}}
 async function loadWatchlistState(userId){if(!_sb||!userId)return;try{const{data}=await _sb.from('watchlists').select('asset_id').eq('user_id',userId);if(data){watchlistState={};data.forEach(item=>{watchlistState[item.asset_id]=true;});}}catch(err){}}
-async function handleBid(assetId){if(!currentUser){toast('Please sign in to place a bid');openModal('signin');return;}await logTransaction(currentUser.id,assetId,'Bid');}
-async function handleInquiry(assetId){if(!currentUser){toast('Please sign in to inquire');openModal('signin');return;}await logTransaction(currentUser.id,assetId,'Inquiry');}
+async function handleBid(assetId){if(!currentUser){toast('Please sign in to place a bid');showAuthModal();return;}await logTransaction(currentUser.id,assetId,'Bid');}
+async function handleInquiry(assetId){if(!currentUser){toast('Please sign in to inquire');showAuthModal();return;}await logTransaction(currentUser.id,assetId,'Inquiry');}
 function showNestedSelectionModal(title,categories,callback){const modal=document.getElementById('modal');const mbox=document.getElementById('mbox');let catsHtml='';for(const[catName,items]of Object.entries(categories)){catsHtml+=`<div class="selection-category"><div class="selection-category-title">${catName}</div>${items.map(opt=>`<div class="selection-option" onclick="selectOption('${opt.replace(/'/g,"\\'")}')">${opt}</div>`).join('')}</div>`;}mbox.innerHTML=`<button class="mclose-btn" onclick="closeModal()">✕</button><div class="selection-modal"><h3>${title}</h3>${catsHtml}</div>`;window._selectionCallback=callback;modal.classList.add('open');}
 window.selectOption=function(selection){if(window._selectionCallback)window._selectionCallback(selection);closeModal();};
-function handleLender(assetId){if(!currentUser){toast('Please sign in to continue');openModal('signin');return;}showNestedSelectionModal('Global Lending & Financing Matrix',LENDING_OPTIONS,async(selection)=>{await logLead(currentUser.id,assetId,'Lender Request',selection);});}
-function handleInsurance(assetId){if(!currentUser){toast('Please sign in to continue');openModal('signin');return;}showNestedSelectionModal('Global Insurance & Risk Mitigation Matrix',INSURANCE_OPTIONS,async(selection)=>{await logLead(currentUser.id,assetId,'Insurance Request',selection);});}
-async function handleWatchlist(assetId){if(!currentUser){toast('Please sign in to use watchlist');openModal('signin');return;}await toggleWatchlist(currentUser.id,assetId);if(activeId===assetId){const a=ASSETS.find(x=>x.id===assetId);if(a)renderDetail(a);}}
-async function handleTokenize(assetId){if(!currentUser){toast('Please sign in to claim an asset');openModal('signin');return;}await logLead(currentUser.id,assetId,'Tokenization Inquiry','Asset Owner Claim');}
-async function handleSponsor(assetId){if(!currentUser){toast('Please sign in as an agent');openModal('signin');return;}await logLead(currentUser.id,assetId,'Sponsor Request','Agent Listing');}
-async function fetchListingsFromSupabase(){if(!_sb)return[];try{setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');const{data,error}=await _sb.from('listings').select('*').eq('status','active').order('created_at',{ascending:false});if(error||!data||data.length===0){setStatus('NO ASSETS IN LEDGER');return[];}return data.map(row=>{const lat=parseFloat(row.lat??row.latitude??row.lat_coord);const lng=parseFloat(row.lng??row.longitude??row.lon_coord??row.lng_coord);if(isNaN(lat)||isNaN(lng))return null;return{id:row.id,address:row.address||row.property_address||'Address not specified',city:row.city||'Unknown',country:row.country||'Global',lat,lng,price:parseFloat(row.price)||0,type:(row.asset_type||row.type||'residential').toLowerCase(),sqft:row.sqft?parseInt(row.sqft):null,status:row.listing_status||'For Sale',source:'Supabase Ledger',days:row.days_on_market||0,broker_active:row.broker_active!==false,tokenized:!!row.tokenized,structures:row.structures||[],financials:row.financials||{},bids:row.bids||[]};}).filter(Boolean);}catch(e){setStatus('LEDGER FETCH FAILED');return[];}}
+function handleLender(assetId){if(!currentUser){toast('Please sign in to continue');showAuthModal();return;}showNestedSelectionModal('Global Lending & Financing Matrix',LENDING_OPTIONS,async(selection)=>{await logLead(currentUser.id,assetId,'Lender Request',selection);});}
+function handleInsurance(assetId){if(!currentUser){toast('Please sign in to continue');showAuthModal();return;}showNestedSelectionModal('Global Insurance & Risk Mitigation Matrix',INSURANCE_OPTIONS,async(selection)=>{await logLead(currentUser.id,assetId,'Insurance Request',selection);});}
+async function handleWatchlist(assetId){if(!currentUser){toast('Please sign in to use watchlist');showAuthModal();return;}await toggleWatchlist(currentUser.id,assetId);if(activeId===assetId){const a=ASSETS.find(x=>x.id===assetId);if(a)renderDetail(a);}}
+async function handleTokenize(assetId){if(!currentUser){toast('Please sign in to claim an asset');showAuthModal();return;}await logLead(currentUser.id,assetId,'Tokenization Inquiry','Asset Owner Claim');}
+async function handleSponsor(assetId){if(!currentUser){toast('Please sign in as an agent');showAuthModal();return;}await logLead(currentUser.id,assetId,'Sponsor Request','Agent Listing');}
+async function fetchListingsFromSupabase(){if(!_sb)return[];try{setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');const{data,error}=await _sb.from('listings').select('*').eq('status','active').order('created_at',{ascending:false});if(error||!data||data.length===0){setStatus('NO ASSETS IN LEDGER');return[];}return data.map(row=>{const lat=parseFloat(row.lat??row.latitude??row.lat_coord);const lng=parseFloat(row.lng??row.longitude??row.lon_coord??row.lng_coord);if(isNaN(lat)||isNaN(lng))return null;return{id:row.id,address:row.address||row.property_address||'Address not specified',city:row.city||'Unknown',country:row.country||'Global',lat,lng,price:parseFloat(row.price)||0,type:(row.asset_type||row.type||'residential').toLowerCase(),sqft:row.sqft?parseInt(row.sqft):null,status:row.listing_status||'For Sale',source:'Supabase Ledger',days:row.days_on_market||0,tokenized:!!row.tokenized,structures:row.structures||[],financials:row.financials||{},bids:row.bids||[]};}).filter(Boolean);}catch(e){setStatus('LEDGER FETCH FAILED');return[];}}
 async function loadMarketData(){const fetched=await fetchListingsFromSupabase();ASSETS=fetched;onDataReady();}
-function onDataReady(){setStatus(`RWABidAsk PERMANENT LEDGER — ${ASSETS.length} ASSETS REGISTERED`);document.getElementById('s-assets').textContent=ASSETS.length;document.getElementById('s-status').textContent='LIVE';document.getElementById('s-bids').textContent=Math.floor(ASSETS.length*2.3);updateGMC(ASSETS);renderCategories();renderList(ASSETS);buildTicker(ASSETS);if(window.innerWidth<=767)renderMobileListViewFull(ASSETS);if(isMapReady&&!markersRendered&&ASSETS.length>0){setTimeout(()=>{renderDOMMarkers();markersRendered=true;console.log('Markers rendered from onDataReady');},500);}}
+function onDataReady(){setStatus(`RWABidAsk PERMANENT LEDGER — ${ASSETS.length} ASSETS REGISTERED`);document.getElementById('s-assets').textContent=ASSETS.length;document.getElementById('s-status').textContent='LIVE';document.getElementById('s-bids').textContent=Math.floor(ASSETS.length*2.3);updateGMC(ASSETS);renderCategories();renderList(ASSETS);buildTicker(ASSETS);if(window.innerWidth<=767)renderMobileListViewFull(ASSETS);if(isMapReady&&!markersRendered&&ASSETS.length>0){setTimeout(()=>{renderDOMMarkers();markersRendered=true;console.log('Markers rendered from onDataReady, count:',Object.keys(domMarkers).length);},500);}}
 function fmtPrice(n){if(!n||n===0)return'—';if(n>=1e9)return'$'+(n/1e9).toFixed(2)+'B';if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n;}
 function setStatus(msg){const el=document.getElementById('map-status-txt');if(el)el.textContent=msg;}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>{t.style.display='none';},4000);}
@@ -322,14 +264,14 @@ function renderCategories(){const container=document.getElementById('category-ta
 function setCategory(catId,btn){document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');activeTab=catId;SEARCH_ACTIVE=false;document.getElementById('search-input').value='';currentSearchQuery='';const filtered=filterAssets(ASSETS);renderList(filtered);syncMarkerVisibility();if(window.innerWidth<=767)renderMobileListViewFull(filtered);}
 function filterAssets(assets){let filtered=assets;if(activeTab!=='all')filtered=filtered.filter(a=>getAssetCategory(a.type)===activeTab);if(activeFilter==='sub1m')filtered=filtered.filter(a=>a.price<1e6);else if(activeFilter==='1m5m')filtered=filtered.filter(a=>a.price>=1e6&&a.price<=5e6);else if(activeFilter==='5m25m')filtered=filtered.filter(a=>a.price>5e6&&a.price<=25e6);else if(activeFilter==='25mplus')filtered=filtered.filter(a=>a.price>25e6);return filtered;}
 function setFilter(el,f){document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('on'));el.classList.add('on');activeFilter=f;SEARCH_ACTIVE=false;document.getElementById('search-input').value='';currentSearchQuery='';const filtered=filterAssets(ASSETS);renderList(filtered);syncMarkerVisibility();if(window.innerWidth<=767)renderMobileListViewFull(filtered);}
-function renderList(assetsToShow){const wrap=document.getElementById('list-scroll');const list=assetsToShow;const resultCount=list.length;const resultHeader=`<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount!==1?'s':''}</div>`;if(!list.length){wrap.innerHTML=`<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;return;}wrap.innerHTML=resultHeader+list.map(a=>`<div class="pcard ${activeId===a.id?'active':''}" onclick="selectAsset('${a.id}')">${a.days?`<div class="pcard-days">${a.days}d</div>`:''}<div class="pcard-addr">${a.address}</div><div class="pcard-city">${a.city}${a.country&&a.country!==a.city?', '+a.country:''}</div>${a.sqft?`<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${a.sqft.toLocaleString()} sqft</div>`:''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`).join('');}
+function renderList(assetsToShow){const wrap=document.getElementById('list-scroll');const list=assetsToShow;const resultCount=list.length;const resultHeader=`<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount!==1?'s':''}</div>`;if(!list.length){wrap.innerHTML=`<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;return;}wrap.innerHTML=resultHeader+list.map(a=>`<div class="pcard ${activeId===a.id?'active':''}" onclick="selectAsset('${a.id}')">${a.days?`<div class="pcard-days">${a.days}d</div>`:''}<div class="pcard-addr">${a.address}</div><div class="pcard-city">${a.city}${a.country&&a.country!==a.city?', '+a.country:''}</div>${a.sqft?`<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${a.sqft.toLocaleString()} sqft</div>`:''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`).join('');}
 function selectAsset(id){activeId=id;const a=ASSETS.find(x=>x.id===id);if(!a)return;renderDetail(a);flyTo(a.lat,a.lng,1400,45);if(window.innerWidth<=767){document.getElementById('right').classList.add('open-drawer');document.body.style.overflow='hidden';}const filtered=SEARCH_ACTIVE?SEARCH_RESULTS:filterAssets(ASSETS);renderList(filtered);}
-function renderDetail(a){const isWatched=watchlistState[a.id]||false;document.getElementById('rhead').innerHTML=`<div class="rtype">${(a.type||'').toUpperCase()} · ${(a.status||'').toUpperCase()}</div><div class="rname">${a.address}</div><div class="rcity">${a.city}${a.country&&a.country!==a.city?', '+a.country:''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft?fmtPrice(Math.round(a.price/a.sqft))+'/sqft':''}</div></div>`;const structs=a.structures||[];const structHTML=structs.length?`<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s,i)=>`<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label||('Structure '+(i+1))}</div>${s.sqft?`<div class="rrow"><span class="rk">Size</span><span class="rv">${s.sqft.toLocaleString()} sqft</span></div>`:''}${s.beds?`<div class="rrow"><span class="rk">Beds</span><span class="rv">${s.beds}</span></div>`:''}${s.baths?`<div class="rrow"><span class="rk">Baths</span><span class="rv">${s.baths}</span></div>`:''}</div>`).join('')}</div>`:'';const fin=a.financials||{};const finHTML=`<div class="rsect"><div class="rsect-title">Financial Data</div>${a.price?`<div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>`:''}${a.sqft?`<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price/a.sqft))}</span></div>`:''}${fin.tax_annual?`<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>`:''}${a.days?`<div class="rrow"><span class="rk">Days Listed</span><span class="rv">${a.days}d</span></div>`:''}<div class="rrow"><span class="rk">Source</span><span class="rv">${a.source||'Public Registry'}</span></div></div>`;const bidsHTML=`<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>${(a.bids&&a.bids.length)?a.bids.map(b=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px"><span style="color:var(--cyan);font-weight:600">${fmtPrice(b.amount)}</span><span style="color:var(--muted)">${b.terms||'cash'}</span><span style="color:var(--dim)">${b.expiry||''}</span></div>`).join(''):`<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>`}</div>`;document.getElementById('rbody').innerHTML=`<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="handleInquiry('${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="handleBid('${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="handleLender('${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="handleInsurance('${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="handleWatchlist('${a.id}')">${isWatched?'✓ WATCHED':'WATCHLIST'}</button><button class="abtn a-claim" onclick="handleTokenize('${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="handleSponsor('${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div><div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div><div class="rrow"><span class="rk">Token Status</span><span class="rv">${a.tokenized?'⬡ On-Chain':'Unclaimed'}</span></div><div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div></div></div>`;}
+function renderDetail(a){const isWatched=watchlistState[a.id]||false;document.getElementById('rhead').innerHTML=`<div class="rtype">${(a.type||'').toUpperCase()} · ${(a.status||'').toUpperCase()}</div><div class="rname">${a.address}</div><div class="rcity">${a.city}${a.country&&a.country!==a.city?', '+a.country:''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft?fmtPrice(Math.round(a.price/a.sqft))+'/sqft':''}</div></div>`;const structs=a.structures||[];const structHTML=structs.length?`<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s,i)=>`<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label||('Structure '+(i+1))}</div>${s.sqft?`<div class="rrow"><span class="rk">Size</span><span class="rv">${s.sqft.toLocaleString()} sqft</span></div>`:''}${s.beds?`<div class="rrow"><span class="rk">Beds</span><span class="rv">${s.beds}</span></div>`:''}${s.baths?`<div class="rrow"><span class="rk">Baths</span><span class="rv">${s.baths}</span></div>`:''}</div>`).join('')}</div>`:'';const fin=a.financials||{};const finHTML=`<div class="rsect"><div class="rsect-title">Financial Data</div>${a.price?`<div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>`:''}${a.sqft?`<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price/a.sqft))}</span></div>`:''}${fin.tax_annual?`<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>`:''}${a.days?`<div class="rrow"><span class="rk">Days Listed</span><span class="rv">${a.days}d</span></div>`:''}<div class="rrow"><span class="rk">Source</span><span class="rv">${a.source||'Public Registry'}</span></div></div>`;const bidsHTML=`<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;">All bids are permanent. No broker can remove them.</div>${(a.bids&&a.bids.length)?a.bids.map(b=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px"><span style="color:var(--cyan);font-weight:600">${fmtPrice(b.amount)}</span><span style="color:var(--muted)">${b.terms||'cash'}</span><span style="color:var(--dim)">${b.expiry||''}</span></div>`).join(''):`<div style="padding:4px 0">No bids yet — be the first.</div>`}</div>`;document.getElementById('rbody').innerHTML=`<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="handleInquiry('${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="handleBid('${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="handleLender('${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="handleInsurance('${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="handleWatchlist('${a.id}')">${isWatched?'✓ WATCHED':'WATCHLIST'}</button><button class="abtn a-claim" onclick="handleTokenize('${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="handleSponsor('${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div><div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div><div class="rrow"><span class="rk">Token Status</span><span class="rv">${a.tokenized?'⬡ On-Chain':'Unclaimed'}</span></div><div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div></div></div>`;}
 function performSearch(){const query=document.getElementById('search-input').value.trim().toLowerCase();currentSearchQuery=query;if(query.length===0){SEARCH_ACTIVE=false;const filtered=filterAssets(ASSETS);renderList(filtered);syncMarkersToSearch(filtered);if(window.innerWidth<=767)renderMobileListViewFull(filtered);setStatus('GLOBAL DIRECTORY — '+ASSETS.length+' ASSETS');return;}SEARCH_ACTIVE=true;SEARCH_RESULTS=ASSETS.filter(a=>a.address.toLowerCase().includes(query)||a.city.toLowerCase().includes(query)||a.type.toLowerCase().includes(query)||(a.country&&a.country.toLowerCase().includes(query)));const filteredResults=filterAssets(SEARCH_RESULTS);renderList(filteredResults);syncMarkersToSearch(filteredResults);if(window.innerWidth<=767)renderMobileListViewFull(filteredResults);setStatus('SEARCH: '+SEARCH_RESULTS.length+' assets found');}
 document.getElementById('search-input').addEventListener('input',performSearch);
 function syncMarkersToSearch(assetsToShow){if(!map3dEl)return;const currentRange=map3dEl.range||22000000;const isZoomedIn=currentRange<=MARKER_VISIBLE_RANGE;if(!isZoomedIn||!isAuthenticated){Object.values(domMarkers).forEach(({el})=>{el.style.display='none';});return;}const visibleInViewport=getVisibleAssetsInViewport(assetsToShow);const visibleIds=new Set(visibleInViewport.map(a=>a.id));Object.keys(domMarkers).forEach(id=>{const marker=domMarkers[id];const asset=marker.asset;const isInSearch=assetsToShow.some(a=>a.id===asset.id);const isInViewport=visibleIds.has(id);const shouldBeVisible=isPhysicalAsset(asset.type)&&isInSearch&&isInViewport;marker.el.style.display=shouldBeVisible?'flex':'none';});}
-async function initMap(){try{const maps3dLib=await google.maps.importLibrary('maps3d');const Map3DElement=maps3dLib.Map3DElement;map3dEl=new Map3DElement({center:{lat:20,lng:10,altitude:0},range:22000000,tilt:0,heading:0});try{const{MapMode}=maps3dLib;if(MapMode)map3dEl.mode=MapMode.SATELLITE;}catch(e){}const container=document.getElementById('map3d-container');container.style.cssText='position:absolute;inset:0;width:100%;height:100%;';container.appendChild(map3dEl);const watchdogTimer=setTimeout(()=>{if(!markersRendered&&ASSETS.length>0){isMapReady=true;renderDOMMarkers();markersRendered=true;console.log('Watchdog: Forced marker render');}},4000);map3dEl.addEventListener('gmp-steadystate',()=>{clearTimeout(watchdogTimer);isMapReady=true;if(ASSETS.length>0&&!markersRendered){renderDOMMarkers();markersRendered=true;console.log('Steady state: Markers rendered');}});const _onCam=()=>{if(cameraDebounceTimer)clearTimeout(cameraDebounceTimer);cameraDebounceTimer=setTimeout(onCameraChange,100);};map3dEl.addEventListener('gmp-centerchange',_onCam);map3dEl.addEventListener('gmp-rangechange',_onCam);map3dEl.addEventListener('gmp-tiltchange',_onCam);map3dEl.addEventListener('gmp-headingchange',_onCam);requestAnimationFrame(()=>{setTimeout(()=>{try{map3dEl.tilt=15;}catch(e){}},1200);});setStatus('GLOBE LOADED — FETCHING DIRECTORY…');await loadMarketData();if(isMapReady&&ASSETS.length>0&&!markersRendered){setTimeout(()=>{renderDOMMarkers();markersRendered=true;},500);}setTimeout(()=>{if(map3dEl&&ASSETS.length>0&&!markersRendered){renderDOMMarkers();markersRendered=true;console.log('Fallback: Markers rendered');}},1500);initPlacesSearch();}catch(err){setStatus('MAP UNAVAILABLE');console.error(err);}}
-async function initPlacesSearch(){const input=document.getElementById('search-input');if(!input)return;try{const placesLib=await google.maps.importLibrary('places');if(placesLib.PlaceAutocompleteElement){try{const acEl=new placesLib.PlaceAutocompleteElement();acEl.style.cssText='width:100%;height:100%;border:none;outline:none;background:transparent;color:#f0f4ff;font-family:Inter,system-ui,sans-serif;font-size:13px;padding:0 18px;position:relative;z-index:9999;';const wrap=input.parentNode;input.style.display='none';wrap.insertBefore(acEl,input);acInstance=acEl;acEl.addEventListener('gmp-select',async(evt)=>{try{const prediction=evt.placePrediction;if(!prediction)return;const place=prediction.toPlace();await place.fetchFields({fields:['location','displayName','formattedAddress']});const lat=place.location.lat();const lng=place.location.lng();flyTo(lat,lng,1400,45);setStatus('LOCATION: '+(place.displayName||'').toUpperCase().slice(0,60));}catch(err){toast('Location lookup failed');}});return;}catch(e){input.style.display='';}}const AcClass=placesLib.Autocomplete||(google.maps.places&&google.maps.places.Autocomplete);if(AcClass){const ac=new AcClass(input,{fields:['geometry','name','formatted_address']});acInstance=ac;ac.addListener('place_changed',()=>{const place=ac.getPlace();if(!place?.geometry?.location){toast('Location not found');return;}const lat=place.geometry.location.lat();const lng=place.geometry.location.lng();flyTo(lat,lng,1400,45);setStatus('LOCATION: '+(place.name||'').toUpperCase().slice(0,60));});}}catch(e){console.warn(e);}}
+async function initMap(){try{const maps3dLib=await google.maps.importLibrary('maps3d');const Map3DElement=maps3dLib.Map3DElement;map3dEl=new Map3DElement({center:{lat:20,lng:10,altitude:0},range:22000000,tilt:0,heading:0});try{const{MapMode}=maps3dLib;if(MapMode)map3dEl.mode=MapMode.SATELLITE;}catch(e){}const container=document.getElementById('map3d-container');container.innerHTML='';container.appendChild(map3dEl);const watchdogTimer=setTimeout(()=>{if(!markersRendered&&ASSETS.length>0){isMapReady=true;renderDOMMarkers();markersRendered=true;console.log('Watchdog: Forced marker render');}},4000);map3dEl.addEventListener('gmp-steadystate',()=>{clearTimeout(watchdogTimer);isMapReady=true;if(ASSETS.length>0&&!markersRendered){renderDOMMarkers();markersRendered=true;console.log('Steady state: Markers rendered');}});const _onCam=()=>{if(cameraDebounceTimer)clearTimeout(cameraDebounceTimer);cameraDebounceTimer=setTimeout(onCameraChange,100);};map3dEl.addEventListener('gmp-centerchange',_onCam);map3dEl.addEventListener('gmp-rangechange',_onCam);map3dEl.addEventListener('gmp-tiltchange',_onCam);setStatus('GLOBE LOADED — FETCHING DIRECTORY…');await loadMarketData();if(isMapReady&&ASSETS.length>0&&!markersRendered){setTimeout(()=>{renderDOMMarkers();markersRendered=true;},500);}setTimeout(()=>{if(map3dEl&&ASSETS.length>0&&!markersRendered){renderDOMMarkers();markersRendered=true;}},1500);initPlacesSearch();}catch(err){setStatus('MAP UNAVAILABLE');console.error(err);}}
+async function initPlacesSearch(){const input=document.getElementById('search-input');if(!input)return;try{const placesLib=await google.maps.importLibrary('places');const AcClass=placesLib.Autocomplete||(google.maps.places&&google.maps.places.Autocomplete);if(AcClass){const ac=new AcClass(input,{fields:['geometry','name']});ac.addListener('place_changed',()=>{const place=ac.getPlace();if(!place?.geometry?.location){toast('Location not found');return;}const lat=place.geometry.location.lat();const lng=place.geometry.location.lng();flyTo(lat,lng,1400,45);setStatus('LOCATION: '+(place.name||'').toUpperCase().slice(0,60));});}}catch(e){console.warn(e);}}
 function flyTo(lat,lng,range,tilt){if(!map3dEl)return;try{map3dEl.flyCameraTo({endCamera:{center:{lat,lng,altitude:45},tilt:tilt??45,range:range??1400,heading:0},durationMillis:1800});}catch(e){map3dEl.center={lat,lng,altitude:45};map3dEl.range=range??1400;map3dEl.tilt=tilt??45;}}
 function flyGlobe(){flyTo(20,10,22000000,0);}
 function setMapMode(mode,btn){document.querySelectorAll('.mctl').forEach(b=>b.classList.remove('on'));btn.classList.add('on');if(map3dEl){try{map3dEl.mode=mode==='satellite'?google.maps.maps3d.MapMode.SATELLITE:google.maps.maps3d.MapMode.HYBRID;}catch(e){map3dEl.setAttribute('mode',mode);}}}
@@ -337,25 +279,24 @@ function setTilt(deg,btn){document.querySelectorAll('.mctl').forEach(b=>b.classL
 function toggleHeat(btn){heatOn=!heatOn;btn.classList.toggle('on',heatOn);const prices=ASSETS.map(a=>a.price).filter(Boolean);const max=Math.max(...prices,1);const p33=max*0.33;const p66=max*0.66;Object.values(domMarkers).forEach(({el,asset})=>{el.classList.remove('heat-warm','heat-hot');if(heatOn&&asset.price){if(asset.price>p66)el.classList.add('heat-hot');else if(asset.price>p33)el.classList.add('heat-warm');}});toast(heatOn?'Heat zones ON — cyan=low · gold=mid · red=high':'Heat zones OFF');}
 function onCameraChange(){if(cameraDebounceTimer)clearTimeout(cameraDebounceTimer);if(isCameraProcessing)return;cameraDebounceTimer=setTimeout(()=>{isCameraProcessing=true;try{if(!map3dEl)return;if(!isAuthenticated){Object.values(domMarkers).forEach(({el})=>{el.style.display='none';});isCameraProcessing=false;return;}const currentRange=map3dEl.range||22000000;const isZoomedIn=currentRange<=MARKER_VISIBLE_RANGE;if(isZoomedIn){const baseAssets=SEARCH_ACTIVE?SEARCH_RESULTS:ASSETS;const visibleAssets=getVisibleAssetsInViewport(baseAssets);const visibleIds=new Set(visibleAssets.map(a=>a.id));Object.keys(domMarkers).forEach(id=>{const marker=domMarkers[id];const asset=marker.asset;const shouldBeVisible=isPhysicalAsset(asset.type)&&visibleIds.has(id);marker.el.style.display=shouldBeVisible?'flex':'none';});reprojectMarkersWithMatrix();}else{Object.values(domMarkers).forEach(({el})=>{el.style.display='none';el.style.transform='translate(-50%,-100%) translate(-9999px,-9999px)';});}const viewportList=getVisibleAssetsInViewport(ASSETS).slice(0,30);buildTicker(viewportList);}catch(err){console.warn(err.message);}finally{isCameraProcessing=false;}},150);}
 function getVisibleAssetsInViewport(assets){if(!map3dEl)return assets.slice(0,50);try{const center=map3dEl.center||{lat:20,lng:10};const range=map3dEl.range||22000000;const degSpread=Math.min(30,(range/111000)*1.5);const latMin=center.lat-degSpread;const latMax=center.lat+degSpread;const lngSpread=degSpread/Math.max(0.2,Math.cos(center.lat*Math.PI/180));const lngMin=center.lng-lngSpread;const lngMax=center.lng+lngSpread;return assets.filter(a=>a.lat>=latMin&&a.lat<=latMax&&a.lng>=lngMin&&a.lng<=lngMax);}catch(e){return assets.slice(0,50);}}
-function renderDOMMarkers(){const layer=document.getElementById('overlay-layer');if(!layer||!map3dEl){console.warn('No layer or map3dEl');return;}layer.innerHTML='';domMarkers={};const physicalAssets=ASSETS.filter(a=>isPhysicalAsset(a.type));console.log(`Rendering ${physicalAssets.length} markers`);physicalAssets.forEach(a=>addPriceMarker(a));Object.values(domMarkers).forEach(({el})=>{el.style.display='none';el.style.transform='translate(-50%,-100%) translate(-9999px,-9999px)';});if(window.innerWidth<=767){setTimeout(()=>{reprojectMarkersWithMatrix();},200);}}
+function renderDOMMarkers(){const layer=document.getElementById('overlay-layer');if(!layer||!map3dEl){console.warn('No layer or map3dEl');return;}layer.innerHTML='';domMarkers={};const physicalAssets=ASSETS.filter(a=>isPhysicalAsset(a.type));console.log(`Rendering ${physicalAssets.length} markers on ${window.innerWidth<=767?'mobile':'desktop'}`);physicalAssets.forEach(a=>addPriceMarker(a));Object.values(domMarkers).forEach(({el})=>{el.style.display='none';el.style.transform='translate(-50%,-100%) translate(-9999px,-9999px)';});if(window.innerWidth<=767){setTimeout(()=>{reprojectMarkersWithMatrix();console.log('Mobile: Reprojected markers');},300);}}
 function addPriceMarker(asset){const layer=document.getElementById('overlay-layer');if(!layer)return;const el=document.createElement('div');el.className='price-marker standard';el.title=asset.address||'Asset';el.innerHTML=`<div class="price-tag"><div class="price-tag-val">${fmtPrice(asset.price)}</div><div class="price-tag-type">${asset.type||'asset'}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;el.addEventListener('click',(e)=>{e.stopPropagation();selectAsset(asset.id);});layer.appendChild(el);domMarkers[asset.id]={el,asset};requestAnimationFrame(()=>projectMarkerLegacy(asset,el));}
 function projectMarkerLegacy(asset,el){if(!map3dEl||!el)return;try{const mapCol=document.getElementById('map-col');if(!mapCol)return;const rect=mapCol.getBoundingClientRect();const W=rect.width,H=rect.height;if(!W||!H)return;const camCenter=map3dEl.center||{lat:20,lng:10};const camRange=map3dEl.range||22000000;const camTilt=map3dEl.tilt||0;const camHead=map3dEl.heading||0;const dLat=asset.lat-camCenter.lat;const dLng=asset.lng-camCenter.lng;const ppd=(W/2)/Math.max(1,camRange/111320);const cosLat=Math.cos(camCenter.lat*Math.PI/180);const headRad=camHead*Math.PI/180;const rx=dLng*cosLat*ppd*Math.cos(headRad)+dLat*ppd*Math.sin(headRad);const ry=-dLat*ppd*Math.cos(headRad)+dLng*cosLat*ppd*Math.sin(headRad);const tiltFactor=Math.max(0.1,Math.cos(camTilt*Math.PI/180));const sx=W/2+rx;const sy=H/2+ry*tiltFactor;const globeRadius=Math.min(W,H)*0.48;const dx=sx-W/2,dy=sy-H/2;const distFromCenter=Math.sqrt(dx*dx+dy*dy);const isBehindGlobe=camRange>3000000&&distFromCenter>globeRadius*1.1;if(isBehindGlobe){el.style.transform='translate(-50%,-100%) translate(-9999px,-9999px)';}else{el.style.transform=`translate(-50%, -100%) translate(${sx}px, ${sy}px)`;el.style.zIndex=String(Math.floor(1000-distFromCenter/10));}}catch(err){console.warn(err.message);}}
 function reprojectMarkersWithMatrix(){if(!map3dEl)return;if(map3dEl.createViewProjectionMatrix){try{const mapCol=document.getElementById('map-col');if(!mapCol)return;const rect=mapCol.getBoundingClientRect();if(!rect.width||!rect.height)return;const matrix=map3dEl.createViewProjectionMatrix();const width=rect.width,height=rect.height;Object.values(domMarkers).forEach(({el,asset})=>{if(!isPhysicalAsset(asset.type)){el.style.display='none';return;}const worldX=asset.lng,worldY=asset.lat,worldZ=45;const screenX=matrix[0]*worldX+matrix[4]*worldY+matrix[8]*worldZ+matrix[12];const screenY=matrix[1]*worldX+matrix[5]*worldY+matrix[9]*worldZ+matrix[13];const screenW=matrix[3]*worldX+matrix[7]*worldY+matrix[11]*worldZ+matrix[15];if(screenW<=0){el.style.display='none';return;}let x=(screenX/screenW+1)*0.5*width;let y=(-screenY/screenW+1)*0.5*height;if(x<-200||x>width+200||y<-200||y>height+200){el.style.display='none';return;}el.style.display='flex';el.style.transform=`translate(-50%, -100%) translate(${x}px, ${y}px)`;});return;}catch(e){console.warn('Matrix projection failed');}}Object.values(domMarkers).forEach(({el,asset})=>{projectMarkerLegacy(asset,el);});}
-function syncMarkerVisibility(){if(!markersVisible()){Object.values(domMarkers).forEach(({el})=>{el.style.display='none';});return;}const baseAssets=SEARCH_ACTIVE?SEARCH_RESULTS:ASSETS;const visibleAssets=getVisibleAssetsInViewport(baseAssets);const visibleIds=new Set(visibleAssets.map(a=>a.id));Object.entries(domMarkers).forEach(([id,{el,asset}])=>{const shouldBeVisible=isPhysicalAsset(asset.type)&&visibleIds.has(id);el.style.display=shouldBeVisible?'flex':'none';});}
-function markersVisible(){return!!(map3dEl)&&(map3dEl.range||12e6)<=MARKER_VISIBLE_RANGE;}
-document.getElementById('map-col').addEventListener('click',(e)=>{if(!e.target.closest('.price-marker')&&activeId&&window.innerWidth<=767){document.getElementById('right').classList.remove('open-drawer');document.body.style.overflow='';}else if(!e.target.closest('.price-marker')&&activeId&&window.innerWidth>767){activeId=null;document.querySelectorAll('.pcard').forEach(card=>card.classList.remove('active'));}});
-function closeDrawer(){document.getElementById('asset-drawer').classList.remove('open');}
 function buildRibbon(){const markets=[{label:'BTC/USD',val:'$83,241',chg:'+1.2%',dir:'up'},{label:'Gold Spot',val:'$3,118/oz',chg:'+0.4%',dir:'up'},{label:'10Y T-Bill',val:'4.38%',chg:'-0.02',dir:'down'}];const items=markets.map(m=>`<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');const track=document.getElementById('ribbon-track');if(track)track.innerHTML=items+items;}
 function buildTicker(assets){const base=['RWABIDASK.COM','GLOBAL LEDGER LIVE','BID · ASK · BUY'];const addrs=assets.map(a=>a.address).filter(Boolean).slice(0,20);const segments=addrs.length>0?[...base,...addrs]:base;const all=[...segments,...segments];const html=all.map(s=>`<span class="ticker-seg"><span class="${addrs.includes(s)?'addr':''}">${s}</span><span class="sep">·</span></span>`).join('');const track=document.getElementById('ticker-track');if(track){track.innerHTML=html;track.style.animation='none';track.offsetHeight;track.style.animation='ticker-run 90s linear infinite';}}
 function updateGMC(assets){const total=assets.reduce((sum,a)=>sum+(a.price||0),0);const el=document.getElementById('s-gmc');if(!el)return;if(total>=1e12)el.textContent='$'+(total/1e12).toFixed(2)+'T';else if(total>=1e9)el.textContent='$'+(total/1e9).toFixed(1)+'B';else if(total>=1e6)el.textContent='$'+(total/1e6).toFixed(1)+'M';else el.textContent='$'+total.toLocaleString();}
 function bootSupabase(){if(typeof supabase!=='undefined'&&supabase.createClient){try{_sb=supabase.createClient(SB_URL,SB_KEY);console.log('[RWABidAsk] Supabase ready');restoreSession();}catch(e){console.warn(e);}}else{setTimeout(bootSupabase,300);}}
-async function restoreSession(){if(!_sb)return;const{data}=await _sb.auth.getSession();if(data?.session?.user){currentUser=data.session.user;currentUserRole=currentUser.user_metadata?.role||'Investor';updateAuthUI();isAuthenticated=true;document.getElementById('auth-gate')?.classList.add('hidden');if(map3dEl)onCameraChange();await loadWatchlistState(currentUser.id);if(activeId)renderDetail(ASSETS.find(a=>a.id===activeId));}else{isAuthenticated=false;document.getElementById('auth-gate')?.classList.remove('hidden');}}
-function updateAuthUI(){const signinBtn=document.getElementById('signin-btn');const joinBtn=document.getElementById('join-btn');if(currentUser){if(signinBtn){signinBtn.textContent=currentUser.email.split('@')[0];signinBtn.onclick=()=>toast('Account menu coming soon');}if(joinBtn){joinBtn.textContent='Sign Out';joinBtn.onclick=async()=>{if(_sb)await _sb.auth.signOut();currentUser=null;isAuthenticated=false;updateAuthUI();document.getElementById('auth-gate')?.classList.remove('hidden');toast('Signed out');};}}else{if(signinBtn){signinBtn.textContent='Sign In';signinBtn.onclick=()=>openModal('signin');}if(joinBtn){joinBtn.textContent='Join';joinBtn.onclick=()=>openModal('register');}}}
-function openModal(type,id){if(type==='signin'){toast('Sign-in would open Supabase Auth modal');}else if(type==='register'){toast('Registration would open Supabase Auth modal');}else if(type==='tos_gate'){toast('Terms acceptance required before sign in');}else{toast('Modal: '+type);}}
+async function restoreSession(){if(!_sb)return;const{data}=await _sb.auth.getSession();if(data?.session?.user){currentUser=data.session.user;isAuthenticated=true;document.getElementById('auth-gate')?.classList.add('hidden');updateAuthButtons();if(map3dEl)onCameraChange();await loadWatchlistState(currentUser.id);if(activeId)renderDetail(ASSETS.find(a=>a.id===activeId));}else{isAuthenticated=false;document.getElementById('auth-gate')?.classList.remove('hidden');updateAuthButtons();}}
+function updateAuthButtons(){const signinBtn=document.getElementById('signin-btn');const joinBtn=document.getElementById('join-btn');if(currentUser){if(signinBtn){signinBtn.textContent=currentUser.email?.split('@')[0]||'Account';signinBtn.onclick=()=>toast('Account menu coming soon');}if(joinBtn){joinBtn.textContent='Sign Out';joinBtn.onclick=async()=>{if(_sb)await _sb.auth.signOut();currentUser=null;isAuthenticated=false;updateAuthButtons();document.getElementById('auth-gate')?.classList.remove('hidden');toast('Signed out');};}}else{if(signinBtn){signinBtn.textContent='Sign In';signinBtn.onclick=()=>showAuthModal();}if(joinBtn){joinBtn.textContent='Join';joinBtn.onclick=()=>showAuthModal();}}}
+function showAuthModal(){toast('Opening Supabase Auth...');if(_sb){_sb.auth.signInWithOAuth({provider:'google'}).catch(()=>{toast('Auth setup: Use Supabase dashboard to configure providers');});}else{toast('Supabase loading, please wait...');}}
+function openModal(type,id){if(type==='tos')toast('Terms of Service would open here');else if(type==='privacy')toast('Privacy Policy would open here');else toast('Modal: '+type);}
 function closeModal(){document.getElementById('modal').classList.remove('open');}
-function renderMobileListViewFull(assets){const container=document.getElementById('mobile-list-view');if(!container)return;console.log('Rendering mobile list view with',assets.length,'assets');const filteredAssets=filterAssets(assets);console.log('Filtered assets:',filteredAssets.length);const filtersHtml=`<div class="mobile-filters-header"><div class="mobile-filters-title">FILTERS</div><div class="mobile-category-tabs">${ASSET_CATEGORIES.map(cat=>`<button class="fchip ${activeTab===cat.id?'on':''}" onclick="setCategory('${cat.id}',this)">${cat.label}</button>`).join('')}</div><div class="mobile-price-filters">${['any','sub1m','1m5m','5m25m','25mplus'].map(f=>`<button class="fchip ${activeFilter===f?'on':''}" onclick="setFilter(this,'${f}')">${f==='any'?'Any':f==='sub1m'?'–$1M':f==='1m5m'?'$1–5M':f==='5m25m'?'$5–25M':'$25M+'}</button>`).join('')}</div></div>`;const resultsHtml=`<div class="list-results-container">${filteredAssets.map(a=>`<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country?', '+a.country:''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('')}</div>`;container.innerHTML=filtersHtml+resultsHtml;if(filteredAssets.length===0)container.innerHTML=filtersHtml+'<div style="text-align:center;padding:40px;color:var(--muted)">No assets match filters</div>';}
-function initMobileUI(){const viewToggle=document.getElementById('mobile-view-toggle');const listView=document.getElementById('mobile-list-view');const mapCol=document.getElementById('map-col');const rightPanel=document.getElementById('right');if(viewToggle){viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn=>{btn.addEventListener('click',()=>{const view=btn.dataset.view;viewToggle.querySelectorAll('.view-toggle-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(view==='globe'){mapCol.style.display='block';listView.classList.remove('active');rightPanel.classList.remove('open-drawer');if(map3dEl&&markersRendered){setTimeout(()=>reprojectMarkersWithMatrix(),100);}if(map3dEl)map3dEl.style.visibility='visible';}else{mapCol.style.display='none';listView.classList.add('active');rightPanel.classList.remove('open-drawer');renderMobileListViewFull(SEARCH_ACTIVE?filterAssets(SEARCH_RESULTS):ASSETS);}});});}document.addEventListener('click',(e)=>{if(rightPanel&&rightPanel.classList.contains('open-drawer')&&!rightPanel.contains(e.target)&&!e.target.closest('.price-marker')&&!e.target.closest('.list-tile')&&!e.target.closest('.pcard')){rightPanel.classList.remove('open-drawer');document.body.style.overflow='';}});window.addEventListener('resize',()=>{if(window.innerWidth<=767&&map3dEl&&markersRendered){setTimeout(()=>reprojectMarkersWithMatrix(),200);}});}
-buildTicker([]);buildRibbon();bootSupabase();document.addEventListener('DOMContentLoaded',()=>{initMobileUI();console.log('DOM loaded, mobile UI initialized');});window.__initRWA=initMap;if(window.__googleMapsLoaded)initMap();
+function renderMobileListViewFull(assets){const container=document.getElementById('mobile-list-view');if(!container)return;const filteredAssets=filterAssets(assets);console.log('Mobile list view rendering',filteredAssets.length,'assets');const filtersHtml=`<div class="mobile-filters-header"><div class="mobile-filters-title">FILTERS</div><div class="mobile-category-tabs">${ASSET_CATEGORIES.map(cat=>`<button class="fchip ${activeTab===cat.id?'on':''}" onclick="setCategory('${cat.id}',this)">${cat.label}</button>`).join('')}</div><div class="mobile-price-filters">${['any','sub1m','1m5m','5m25m','25mplus'].map(f=>`<button class="fchip ${activeFilter===f?'on':''}" onclick="setFilter(this,'${f}')">${f==='any'?'Any':f==='sub1m'?'–$1M':f==='1m5m'?'$1–5M':f==='5m25m'?'$5–25M':'$25M+'}</button>`).join('')}</div></div>`;const resultsHtml=`<div class="list-results-container">${filteredAssets.map(a=>`<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country?', '+a.country:''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('')}</div>`;container.innerHTML=filtersHtml+resultsHtml;if(filteredAssets.length===0)container.innerHTML=filtersHtml+'<div style="text-align:center;padding:40px;color:var(--muted)">No assets match filters</div>';}
+function initMobileUI(){const viewToggle=document.getElementById('mobile-view-toggle');const listView=document.getElementById('mobile-list-view');const mapCol=document.getElementById('map-col');const rightPanel=document.getElementById('right');if(viewToggle){viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn=>{btn.addEventListener('click',()=>{const view=btn.dataset.view;viewToggle.querySelectorAll('.view-toggle-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(view==='globe'){mapCol.style.display='block';listView.classList.remove('active');rightPanel.classList.remove('open-drawer');if(map3dEl&&markersRendered){setTimeout(()=>reprojectMarkersWithMatrix(),100);}}else{mapCol.style.display='none';listView.classList.add('active');rightPanel.classList.remove('open-drawer');const assetsToShow=SEARCH_ACTIVE?filterAssets(SEARCH_RESULTS):ASSETS;renderMobileListViewFull(assetsToShow);console.log('Switched to list view with',assetsToShow.length,'assets');}});});}document.addEventListener('click',(e)=>{if(rightPanel&&rightPanel.classList.contains('open-drawer')&&!rightPanel.contains(e.target)&&!e.target.closest('.price-marker')&&!e.target.closest('.list-tile')&&!e.target.closest('.pcard')){rightPanel.classList.remove('open-drawer');document.body.style.overflow='';}});window.addEventListener('resize',()=>{if(window.innerWidth<=767&&map3dEl&&markersRendered){setTimeout(()=>reprojectMarkersWithMatrix(),200);}});}
+document.getElementById('request-access-btn')?.addEventListener('click',()=>showAuthModal());
+document.getElementById('signin-gate-btn')?.addEventListener('click',()=>showAuthModal());
+buildTicker([]);buildRibbon();bootSupabase();document.addEventListener('DOMContentLoaded',()=>{initMobileUI();console.log('DOM loaded');});window.__initRWA=initMap;if(window.__googleMapsLoaded)initMap();
 </script>
 </body>
 </html>
