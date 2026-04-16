@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>RWABidAsk — Global Asset Market | Institutional Digitization Platform</title>
-<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy,  infrastructure, IP, minerals, aviation and maritime transport on the Persistent Ledger.">
+<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy, infrastructure, IP, minerals, aviation and maritime transport on the Persistent Ledger.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1113,18 +1113,23 @@ body { min-width: 900px; overflow-x: auto; }
     position: relative;
     z-index: 100;
   }
-  .tstat, .logo-tag, .tbtn:not(.primary) { display: none; }
-  .logo { padding: 0 12px; border-right: none; }
-  .logo-text { font-size: 14px; }
-  .tbtn.primary {
-    padding: 0 12px;
+  .tstat, .logo-tag { display: none; }
+  .tbtn {
+    display: inline-block !important;
+    padding: 0 8px;
     font-size: 10px;
+    border-left: none;
+    margin-left: 4px;
+  }
+  .tbtn.primary {
     background: var(--cyan);
     color: #000;
     border-radius: 2px;
-    border-left: none;
-    margin-left: auto;
+    padding: 0 10px;
+    margin-left: 4px;
   }
+  .logo { padding: 0 12px; border-right: none; }
+  .logo-text { font-size: 14px; }
   .search-wrap { margin-left: 8px; flex: 1; }
   #search-input { font-size: 12px; }
   #main-row {
@@ -2191,11 +2196,14 @@ function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn);
 
 /* ═══════════════════════════════════════════════════════════
    DOM MARKERS — LOCKED TO COORDINATES (Matrix Projection)
-   REGIONAL VIEWPORT CLIPPING: Only markers in visible viewport + range < 3,000,000
+   CLEAN BOOT: NO MARKERS ON LOAD — only after zoom or search
+   ALTITUDE LOCK: Pins anchored to surface (Z=0, not floating)
+   VIEWPORT CULLING: Only markers in visible frustum are rendered
 ═══════════════════════════════════════════════════════════ */
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
 const MARKER_VISIBLE_RANGE = 3000000;
+let markersHaveBeenShown = false;
 
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
@@ -2206,19 +2214,41 @@ function onCameraChange() {
       if (!map3dEl) return;
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
+      
+      // Clear selection when camera moves (prevents "haunting" marker)
+      if (activeId) {
+        activeId = null;
+        const rhead = document.getElementById('rhead');
+        if (rhead) {
+          rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
+        }
+        const rbody = document.getElementById('rbody');
+        if (rbody) {
+          rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
+        }
+        document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
+        if (window.innerWidth <= 767) {
+          const rightPanel = document.getElementById('right');
+          if (rightPanel) rightPanel.classList.remove('open-drawer');
+          document.body.style.overflow = '';
+        }
+      }
+      
       if (isZoomedIn) {
-        // Get assets visible in current 3D viewport (frustum culling)
+        markersHaveBeenShown = true;
         const visibleAssets = getVisibleAssetsInViewport(ASSETS);
         const visibleIds = new Set(visibleAssets.map(a => a.id));
+        
         Object.keys(domMarkers).forEach(id => {
           const marker = domMarkers[id];
           const asset = marker.asset;
           const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
           marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
         });
+        
         reprojectMarkersWithMatrix();
       } else {
-        // Hide all markers when zoomed out beyond 3,000km
+        // Hide all markers when zoomed out beyond 3,000km (clean globe)
         Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
       }
       const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
@@ -2233,10 +2263,7 @@ function getVisibleAssetsInViewport(assets) {
   try {
     const center = map3dEl.center || { lat: 20, lng: 10 };
     const range = map3dEl.range || 22000000;
-    const heading = map3dEl.heading || 0;
-    const tilt = map3dEl.tilt || 0;
     
-    // Convert range to degrees (rough approximation for bounding box)
     const degSpread = Math.min(180, (range / 111000) * 1.4);
     const latMin = center.lat - degSpread;
     const latMax = center.lat + degSpread;
@@ -2244,15 +2271,11 @@ function getVisibleAssetsInViewport(assets) {
     const lngMin = center.lng - lngSpread;
     const lngMax = center.lng + lngSpread;
     
-    // First filter by bounding box
     const bboxFiltered = assets.filter(a => 
       a.lat >= latMin && a.lat <= latMax &&
       a.lng >= lngMin && a.lng <= lngMax
     );
     
-    // Additional frustum culling: filter out markers behind the globe
-    // For markers on the back face, their screen projection would be behind the camera
-    // We use a simple dot product test with the camera's view direction
     const camLatRad = center.lat * Math.PI / 180;
     const camLngRad = center.lng * Math.PI / 180;
     const viewDir = { x: Math.cos(camLatRad) * Math.cos(camLngRad), y: Math.sin(camLatRad), z: Math.cos(camLatRad) * Math.sin(camLngRad) };
@@ -2262,7 +2285,7 @@ function getVisibleAssetsInViewport(assets) {
       const assetLngRad = a.lng * Math.PI / 180;
       const assetVec = { x: Math.cos(assetLatRad) * Math.cos(assetLngRad), y: Math.sin(assetLatRad), z: Math.cos(assetLatRad) * Math.sin(assetLngRad) };
       const dot = viewDir.x * assetVec.x + viewDir.y * assetVec.y + viewDir.z * assetVec.z;
-      return dot > -0.2; // Only show front-facing hemisphere + small back-face buffer
+      return dot > -0.2;
     });
   } catch(e) { return assets.slice(0, 100); }
 }
@@ -2275,6 +2298,8 @@ function renderDOMMarkers() {
   domMarkers = {};
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
   physicalAssets.forEach(a => _addPriceMarker(a));
+  // INITIAL STATE: ALL MARKERS HIDDEN (clean globe on load)
+  Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
 }
 function addDOMMarker(asset) { _addPriceMarker(asset); }
 function _addPriceMarker(asset) {
@@ -2365,6 +2390,29 @@ function syncMarkerVisibility() {
   });
 }
 
+// Deselect when clicking on map background (not a marker)
+document.getElementById('map-col').addEventListener('click', (e) => {
+  if (!e.target.closest('.price-marker')) {
+    if (activeId) {
+      activeId = null;
+      const rhead = document.getElementById('rhead');
+      if (rhead) {
+        rhead.innerHTML = `<div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div>`;
+      }
+      const rbody = document.getElementById('rbody');
+      if (rbody) {
+        rbody.innerHTML = `<div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>`;
+      }
+      document.querySelectorAll('.pcard').forEach(card => card.classList.remove('active'));
+      if (window.innerWidth <= 767) {
+        const rightPanel = document.getElementById('right');
+        if (rightPanel) rightPanel.classList.remove('open-drawer');
+        document.body.style.overflow = '';
+      }
+    }
+  }
+});
+  
 /* ═══════════════════════════════════════════════════════════
    INSTITUTIONAL ASSET DRAWER (Desktop)
 ═══════════════════════════════════════════════════════════ */
@@ -2424,7 +2472,6 @@ function openDrawer(a) {
 function drq(k, v) { return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`; }
 function dr(k, v) { return `<div class="drawer-row"><span class="drawer-k">${k}</span><span class="drawer-v">${v || '—'}</span></div>`; }
 function closeDrawer() { document.getElementById('asset-drawer').classList.remove('open'); document.getElementById('right').style.zIndex = ''; document.getElementById('map-col').classList.remove('drawer-open'); }
-document.getElementById('map-col').addEventListener('click', e => { if (!e.target.closest('.price-marker') && !e.target.closest('#asset-drawer')) { closeDrawer(); } });
 
 /* ═══════════════════════════════════════════════════════════
    MOBILE UI — 75vh Slide-up Drawer with Smooth Scroll
@@ -2505,7 +2552,7 @@ function updateGMC(assets) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MODAL SYSTEM
+   MODAL SYSTEM (Complete)
 ═══════════════════════════════════════════════════════════ */
 function openModal(type, id) { const a = id ? ASSETS.find(x => x.id === id) : null; const box = document.getElementById('mbox'); if (type === 'bid') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Place Bid on Ledger</div><div class="msub">${a ? a.address : 'Selected asset'}<br>Bids are recorded to the permanent ledger. Permanent. No broker can take it off market.</div><div class="mfield"><label>Bid Amount (USD)</label><input type="number" id="bid-amount" placeholder="Enter your bid" min="1"></div><div class="mfield"><label>Financing Terms</label><select id="bid-terms"><option value="cash">All Cash</option><option value="conventional">Conventional Mortgage</option><option value="seller_finance">Seller Financing</option><option value="bridge">Bridge Loan</option><option value="crypto">Crypto-Backed Loan</option></select></div><div class="mrow"><div class="mfield"><label>Down Payment %</label><input type="number" id="bid-down" placeholder="e.g. 20" min="0" max="100"></div><div class="mfield"><label>Bid Expiry</label><select id="bid-expiry"><option>24 hours</option><option>3 days</option><option>7 days</option><option>30 days</option></select></div></div><div class="mfield"><label>Email (confirmation)</label><input type="email" id="bid-email" placeholder="you@example.com"></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="handlePlaceBid('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g, ' ') : ''}')">Place Bid on Ledger →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'tos_gate') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle" style="color:var(--gold)">RWABidAsk Platform Agreement</div><div class="msub" style="margin-bottom:14px">Before accessing your account or creating a new one, you must accept the RWABidAsk Terms of Service.</div><div style="background:var(--bg3);border:1px solid var(--border2);padding:14px 16px;margin-bottom:16px;max-height:260px;overflow-y:auto;font-size:10px;color:var(--dim);line-height:1.9;border-radius:3px"><div style="font-size:10px;font-weight:700;color:var(--cyan);margin-bottom:10px">GLOBAL ASSET MARKET — PLATFORM TERMS OF SERVICE</div><strong style="color:var(--silver)">§1 — Non-Custodial Service</strong><br>RWABidAsk is a software service and digital notary. We do not hold, manage, custody, or move user funds, digital assets, or physical property at any time.<br><br><strong style="color:var(--silver)">§2 — Data Permanence (The Moat)</strong><br>All data uploaded to the RWABidAsk Permanent Ledger becomes a permanent part of the record.<br><br><strong style="color:var(--silver)">§3 — Metadata Monetization License</strong><br>By registering an asset, users grant RWABidAsk an irrevocable license to aggregate and anonymize metadata.<br><br><strong style="color:var(--silver)">§4 — Not a Broker or Dealer</strong><br>RWABidAsk is not a licensed real estate broker, securities dealer, investment advisor, or escrow agent.<br><br><strong style="color:var(--silver)">§5 — Verified Lead Fee</strong><br>Brokers accessing verified leads pay a $9.99 per lead fee.<br><br><strong style="color:var(--silver)">§6 — Jurisdiction</strong><br>Governing law: State of Washington, USA.<br><br>© 2026 Annie Group LLC. All Rights Reserved.</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><input type="checkbox" id="tos-check" style="width:16px;height:16px;accent-color:var(--cyan);cursor:pointer"><label for="tos-check" style="font-size:10px;color:var(--dim);cursor:pointer;line-height:1.6">I have read and accept the RWABidAsk Platform Terms of Service.</label></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Decline</button><button class="msub-btn" onclick="acceptTOS()">Accept & Continue →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'signin') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Sign In</div><div class="msub">Access your account, watchlist, and bid history.</div><div class="mfield"><label>Email</label><input type="email" id="si-email" placeholder="you@example.com"></div><div class="mfield"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••"></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="handleSignIn()">Sign In →</button></div><div style="margin-top:16px;text-align:center;font-size:10px;color:var(--muted)">No account? <span style="color:var(--cyan);cursor:pointer" onclick="closeModal();openModal('register')">Create one →</span></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'register') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Create Account</div><div class="msub">Select your role. Buyers get a free trial. Service providers choose a plan.</div><div class="role-grid" id="role-grid"><div class="role-card sel" onclick="selectRole(this,'Buyer')"><div class="role-name">Buyer</div><div class="role-desc">Search, bid, and purchase property worldwide.</div><div style="font-size:9px;color:var(--cyan);margin-top:6px">Free Trial</div></div><div class="role-card" onclick="selectRole(this,'Asset Owner')"><div class="role-name">Asset Owner</div><div class="role-desc">List property, land, timeshare, lease, or business.</div><div style="font-size:9px;color:var(--cyan);margin-top:6px">Free Trial</div></div><div class="role-card" onclick="selectRole(this,'Broker')"><div class="role-name">Broker / Agent</div><div class="role-desc">List inventory. Generate leads. Own regional advertising.</div><div style="font-size:9px;color:var(--gold);margin-top:6px">From $99/mo</div></div><div class="role-card" onclick="selectRole(this,'Lender')"><div class="role-name">Lender / Bank</div><div class="role-desc">Connect with qualified buyers. Advertise loan products.</div><div style="font-size:9px;color:var(--gold);margin-top:6px">From $199/mo</div></div><div class="role-card" onclick="selectRole(this,'Insurance')"><div class="role-name">Insurance Agent</div><div class="role-desc">Offer coverage to buyers. Own regions. Get instant leads.</div><div style="font-size:9px;color:var(--gold);margin-top:6px">From $149/mo</div></div><div class="role-card" onclick="selectRole(this,'Developer')"><div class="role-name">Developer / Builder</div><div class="role-desc">List new developments, lots, and pre-sales globally.</div><div style="font-size:9px;color:var(--gold);margin-top:6px">From $149/mo</div></div></div><div id="reg-free-fields"><div class="mrow"><div class="mfield"><label>First Name</label><input type="text" id="reg-fname" placeholder="First"></div><div class="mfield"><label>Last Name</label><input type="text" id="reg-lname" placeholder="Last"></div></div><div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div><div class="mfield"><label>Country</label><select id="reg-country"><option>United States</option><option>Mexico</option><option>Brazil</option><option>Argentina</option><option>Colombia</option><option>Spain</option><option>UAE</option><option>United Kingdom</option><option>Canada</option><option>Germany</option><option>Portugal</option><option>Australia</option><option>Singapore</option><option>South Africa</option><option>Other</option></select></div><div class="mfield"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password (8+ characters)"></div><div style="font-size:9px;color:var(--muted);margin-bottom:4px">Free account. No credit card required. Upgrade to premium any time.</div></div><div id="reg-pro-fields" style="display:none"><div class="mfield"><label>Company / Firm Name</label><input type="text" id="reg-company" placeholder="Your company"></div><div class="mfield"><label>License / Registration Number</label><input type="text" id="reg-license" placeholder="Professional license #"></div><div class="mfield"><label>Target Regions</label><input type="text" id="reg-regions" placeholder="e.g. Florida, Spain, UAE"></div><div class="mfield"><label>Plan</label><select id="reg-plan"><option value="standard">Standard — $99/mo</option><option value="premium">Premium — $299/mo</option><option value="institutional">Institutional — $999/mo</option></select></div></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="handleSignUp()">Create Account →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'finance') { const assetId = id || ''; box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Institutional Lender Qualification</div><div class="msub">${a ? a.address + '<br>' : ''}Complete the qualification profile to access RWABidAsk's verified lender network.</div><div style="background:var(--bg3);border-left:2px solid rgba(0,255,200,.3);padding:10px 14px;margin-bottom:14px;font-size:9px;color:var(--muted);line-height:1.9">RWABidAsk routes qualified borrowers to verified institutional lenders. Only Credit Tier 650+ profiles are submitted.</div><div class="mrow"><div class="mfield"><label>Full Legal Name</label><input type="text" id="ql-name" placeholder="As on title"></div><div class="mfield"><label>Entity Type</label><select id="ql-entity"><option>Individual</option><option>LLC</option><option>Trust</option><option>Corporation</option><option>Fund</option></select></div></div><div class="mfield"><label>Loan Amount (USD)</label><input type="number" id="ql-amount" placeholder="e.g. 2000000"></div><div class="mfield"><label>Loan Purpose</label><select id="ql-purpose"><option>Purchase — Residential</option><option>Purchase — Commercial</option><option>Bridge / Short-Term</option><option>Refinance / Cash-Out</option><option>Construction / Development</option><option>Portfolio Acquisition</option></select></div><div class="mfield"><label>Verified Proof of Liquidity (USD)</label><select id="ql-liquidity"><option>Under $250k</option><option>$250k – $500k</option><option>$500k – $1M</option><option>$1M – $5M</option><option>$5M – $25M</option><option>$25M+</option></select></div><div class="mfield"><label>Credit Tier</label><select id="ql-credit"><option value="700plus">700+ (Prime)</option><option value="650to700">650–700 (Near-Prime)</option><option value="below650">Below 650</option></select></div><div class="mfield"><label>Collateral Type</label><select id="ql-collateral"><option>Real Property — Residential</option><option>Real Property — Commercial</option><option>Aircraft / Aviation</option><option>Vessel / Maritime</option><option>Mineral Rights / Timberland</option><option>Corporate Debt / Securities</option><option>IP Portfolio / Royalties</option><option>Energy Infrastructure</option></select></div><div class="mfield"><label>Contact Email</label><input type="email" id="ql-email" placeholder="${currentUser?.email || 'you@example.com'}" value="${currentUser?.email || ''}"></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="submitQualification('lender', '${assetId}')">Submit Qualification →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'insurance') { const assetId = id || ''; const assetType = a ? (a.type || '').toLowerCase() : 'residential'; const insStdMap = { aviation:'Hull & Liability', maritime:'Marine P&I', resources:'Environmental & Title Indemnity', land:'Title & Environmental Indemnity', financial:'Counterparty Default Protection', debt:'Counterparty Default Protection', ip:'Infringement & Royalty Indemnity', energy:'Hyperscale Infrastructure Coverage', minerals:'Environmental & Title Indemnity' }; const insStd = insStdMap[assetType] || 'Property & Casualty'; box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Insurance Qualification</div><div class="msub">${a ? a.address + '<br>' : ''}Submit your qualification profile to access coverage from RWABidAsk's verified insurer network.</div><div style="background:var(--bg3);border-left:2px solid rgba(34,197,94,.3);padding:9px 14px;margin-bottom:14px;font-size:10px;color:var(--dim);line-height:1.8"><strong style="color:var(--green)">Applicable Coverage Standard:</strong> ${insStd}</div><div class="mfield"><label>Property Type</label><select><option>Residential — Single Family</option><option>Residential — Condo</option><option>Commercial — Office</option><option>Commercial — Retail</option><option>Industrial / Warehouse</option><option>Land / Agricultural</option><option>Business / Operations</option><option>Hospitality — Hotel</option></select></div><div class="mrow"><div class="mfield"><label>Property Value (USD)</label><input type="number" placeholder="${a ? a.price || '' : ''}" value="${a ? a.price || '' : ''}"></div><div class="mfield"><label>Year Built</label><input type="number" placeholder="e.g. 2005"></div></div>${a && a.sqft ? `<div class="mfield"><label>Size (sqft)</label><input type="number" placeholder="${a.sqft}" value="${a.sqft}"></div>` : ''}<div class="mfield"><label>Country / Jurisdiction</label><input type="text" placeholder="${a ? a.country || '' : 'e.g. United States'}"></div><div class="mfield"><label>Coverage Needed</label><select><option>Property / Structure</option><option>Property + Contents</option><option>Liability Only</option><option>Full Package</option><option>Title Insurance</option><option>Natural Disaster / Flood Rider</option></select></div><div class="mfield"><label>Your Email</label><input type="email" placeholder="you@example.com"></div><div style="background:var(--bg3);border-left:2px solid rgba(34,197,94,.4);padding:10px 12px;font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:4px">RWABidAsk connects you with licensed insurance providers in your jurisdiction.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" style="background:rgba(34,197,94,.9);color:#000" onclick="submitQualification('insurance', '${assetId}')">Submit Qualification →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'buy') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Purchase Inquiry</div><div class="msub">${a ? a.address + (a.price ? ' · ' + fmtPrice(a.price) : '') + '<br>' : ''}Submit a purchase inquiry directly to the listing party.</div><div class="mfield"><label>Offer Price (USD)</label><input type="number" id="buy-amount" placeholder="${a && a.price ? a.price : ''}" value="${a && a.price ? a.price : ''}"></div><div class="mfield"><label>Financing Method</label><select><option>All Cash</option><option>Conventional Mortgage</option><option>Bridge Loan</option><option>Seller Financing</option><option>Crypto-Backed Loan</option><option>To Be Determined</option></select></div><div class="mfield"><label>Message to Seller (optional)</label><textarea placeholder="Introduce yourself and your intent…" style="min-height:70px"></textarea></div><div style="font-size:9px;color:var(--muted);margin-bottom:4px">Submission is a non-binding letter of intent pending due diligence. RWABidAsk facilitates the connection only.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="closeModal();logLead(currentUser?.email,'buy_inquiry',null);toast('Inquiry sent — listing party has been notified')">Submit Inquiry →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'watchlist') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Add to Watchlist</div><div class="msub">${a ? a.address + (a.price ? ' · ' + fmtPrice(a.price) : '') + '<br>' : ''}You will be notified of price changes, new bids, and status updates.</div><div style="font-size:10px;color:var(--dim);padding:10px 0">Alerts to: <span style="color:var(--cyan)">${currentUser ? currentUser.email : 'your account'}</span></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="addToWatchlist('${a ? a.id : ''}','${a ? (a.address||'').replace(/'/g,' ') : ''}')">Confirm Watchlist →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'upgrade') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Premium Data Access</div><div class="msub">Unlock county records, septic inspection history, well reports, and property corner coordinates.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px"><div style="border:1px solid rgba(0,255,200,.3);padding:16px;border-radius:3px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--cyan);margin-bottom:4px">$9</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase">Per Report</div><div style="font-size:10px;color:var(--muted);margin-top:8px">County records, septic maps, well depth, corner coords</div></div><div style="border:1px solid rgba(212,181,74,.3);background:rgba(212,181,74,.04);padding:16px;border-radius:3px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--gold);margin-bottom:4px">$49</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase">Per Month</div><div style="font-size:10px;color:var(--muted);margin-top:8px">Unlimited reports + regional ad placement</div></div></div><div style="font-size:10px;color:var(--muted);margin-bottom:16px">Premium data sourced from county assessor records, FEMA flood maps, and septic permit databases.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Not Now</button><button class="msub-btn" onclick="toast('Payment integration coming — contact ops@rwabidask.com');closeModal()">Unlock Premium →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'partner') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Annie Group LLC — Partnership</div><div class="msub">Strategic partnerships, institutional access, data licensing, spatial advertising, and acquisition interest.</div><div class="mfield"><label>Organization</label><input type="text" placeholder="Company or institution"></div><div class="mfield"><label>Contact Name</label><input type="text" placeholder="Full name"></div><div class="mfield"><label>Email</label><input type="email" placeholder="partner@company.com"></div><div class="mfield"><label>Partnership Type</label><select><option>Airspace / Spatial Advertising</option><option>Data Licensing</option><option>Institutional Investment</option><option>Technology Integration</option><option>Broker Network</option><option>Lender Partnership</option><option>Acquisition / M&amp;A</option></select></div><div class="mfield"><label>Message</label><textarea placeholder="Describe the opportunity…"></textarea></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="closeModal();toast('Inquiry sent to Annie Group LLC — response within 24h')">Send Inquiry →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'tos') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Terms of Service</div><div class="msub">Annie Group LLC · RWABidAsk</div><div class="legal-note">RWABidAsk is a registered trade name of Annie Group LLC. This platform facilitates connections between buyers, sellers, brokers, and lenders of real-world assets. It is not a licensed real estate broker, securities dealer, or investment advisor.<br><br>All listings are informational only. Bids and offers submitted via this platform are letters of intent only and are not legally binding until both parties execute a formal purchase agreement under applicable law.<br><br>KYC and proof of funds verification is required for all transactional actions. Annie Group LLC reserves the right to remove any listing at its discretion.<br><br>Tokenization services are subject to applicable securities and property law in each jurisdiction. Annie Group LLC does not provide legal, tax, or investment advice.<br><br>© 2026 Annie Group LLC. All Rights Reserved.</div><div class="mfooter"><button class="msub-btn" onclick="closeModal()">Close</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'privacy') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Privacy Policy</div><div class="msub">Annie Group LLC · RWABidAsk</div><div class="legal-note">Data collected: name, email, country, KYC documents, bid/offer history, and search behavior on this platform.<br><br>All data is encrypted in transit (TLS 1.3) and at rest. KYC documents are processed by licensed third-party providers (Jumio or equivalent) and are not retained by Annie Group LLC beyond verification.<br><br>We do not sell, share, or monetize personal data. GDPR and CCPA compliant.<br><br>To request deletion of your data: <a href="mailto:privacy@rwabidask.com" style="color:var(--cyan)">privacy@rwabidask.com</a><br><br>© 2026 Annie Group LLC.</div><div class="mfooter"><button class="msub-btn" onclick="closeModal()">Close</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'claim') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Claim for Tokenization</div><div class="msub">${a ? a.address + '<br>' : ''}Tokenize your real-world asset. Fractional ownership. Global liquidity.</div><div class="mfield"><label>Your Role</label><select><option>Owner</option><option>Authorized Agent</option><option>Broker</option></select></div><div class="mfield"><label>Ownership Document URL</label><input type="text" placeholder="Public registry link or document upload"></div><div class="mfield"><label>Desired Token Supply</label><input type="number" placeholder="e.g. 1000000"></div><div class="mfield"><label>Email</label><input type="email" placeholder="you@example.com"></div><div class="legal-note">Tokenization subject to legal review in your jurisdiction. Annie Group LLC does not provide legal advice.</div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="closeModal();toast('Tokenization inquiry submitted — legal team will contact you')">Submit Claim →</button></div>`; document.getElementById('modal').classList.add('open'); } else if (type === 'sponsor') { box.innerHTML = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">Sponsor This Listing</div><div class="msub">${a ? a.address + '<br>' : ''}Appear as featured sponsor on this property. Seen by every buyer who views it.</div><div class="mfield"><label>Company / Brand</label><input type="text" placeholder="Your company"></div><div class="mfield"><label>Ad Message (60 chars max)</label><input type="text" maxlength="60" placeholder="e.g. Fast Bridge Loans — Close in 10 Days"></div><div class="mfield"><label>Duration</label><select><option>30 days — $299</option><option>90 days — $699</option><option>1 year — $1,999</option></select></div><div class="mfield"><label>Contact Email</label><input type="email" placeholder="sponsor@company.com"></div><div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Cancel</button><button class="msub-btn" onclick="closeModal();toast('Sponsorship reserved — team will contact you within 24h')">Reserve →</button></div>`; document.getElementById('modal').classList.add('open'); } }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
