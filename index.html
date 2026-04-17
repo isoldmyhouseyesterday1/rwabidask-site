@@ -1069,7 +1069,6 @@ body { min-width: 900px; overflow-x: auto; }
   overflow: visible;
 }
 
-/* MOBILE "ZILLOW" UI (≤767px) — Centered Globe + 75vh Slide-up Drawer */
 @media (max-width: 767px) {
   #shell {
     grid-template-rows: 48px 1fr;
@@ -1679,7 +1678,6 @@ body { min-width: 900px; overflow-x: auto; }
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
 
-/* CLINICAL AUTHENTICATION GATE — Minimalist, No Escape */
 .auth-gate {
   position: fixed;
   top: 0;
@@ -1796,8 +1794,8 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="tstat-l">Bids 24h</div>
       <div class="tstat-v" id="s-bids">—</div>
     </div>
-    <button class="tbtn" id="signin-btn" onclick="openModal('tos_gate')">Sign In</button>
-    <button class="tbtn primary" id="join-btn" onclick="openModal('tos_gate')">Join</button>
+    <button class="tbtn" id="signin-btn">Sign In</button>
+    <button class="tbtn primary" id="join-btn">Join</button>
   </div>
 </div>
 
@@ -1903,14 +1901,13 @@ body { min-width: 900px; overflow-x: auto; }
 </div>
 <div class="list-view" id="mobile-list-view"></div>
 
-<!-- CLINICAL AUTHENTICATION GATE — Persistent, No Escape -->
-<div class="auth-gate" id="auth-gate">
+<div class="auth-gate hidden" id="auth-gate">
   <div class="auth-gate-card">
     <div class="auth-gate-title">RWABidAsk | Access Terminal</div>
     <div class="auth-gate-sub">Sign in or create an account to access the Global Asset Directory, Persistent Ledger, and institutional bidding platform.</div>
     <div class="auth-gate-buttons">
-      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('tos_gate')">Request Access</button>
-      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button>
+      <button class="auth-gate-btn secondary" onclick="openModal('register')">Request Access</button>
+      <button class="auth-gate-btn primary" onclick="openModal('signin')">Sign In</button>
     </div>
   </div>
 </div>
@@ -1919,15 +1916,9 @@ body { min-width: 900px; overflow-x: auto; }
 <script>
 'use strict';
 
-// ============================================================
-// MARKER PERSISTENCE FLAGS
-// ============================================================
 let isMapReady = false;
 let markersRendered = false;
 
-// ============================================================
-// ASSET CATEGORIES - FIX 1: Removed emojis, fixed "undefined" bug
-// ============================================================
 const ASSET_CATEGORIES = [
   { id: 'all', label: 'ALL', physical: false },
   { id: 'realestate', label: 'REAL ESTATE', physical: true },
@@ -1939,25 +1930,8 @@ const ASSET_CATEGORIES = [
   { id: 'financial', label: 'FINANCIALS', physical: false }
 ];
 
-// FIX 2: Fixed asset-to-filter mapping - "Orchil Castle" now maps to Real Estate correctly
 function getAssetCategory(type) {
-  const map = { 
-    residential:'realestate', 
-    land:'realestate', 
-    commercial:'commercial', 
-    business:'commercial', 
-    aviation:'aviation', 
-    maritime:'maritime', 
-    resources:'resources', 
-    minerals:'resources', 
-    energy:'infrastructure', 
-    ip:'financial', 
-    debt:'financial', 
-    financial:'financial',
-    castle:'realestate',
-    estate:'realestate',
-    property:'realestate'
-  };
+  const map = { residential:'realestate', land:'realestate', commercial:'commercial', business:'commercial', aviation:'aviation', maritime:'maritime', resources:'resources', minerals:'resources', energy:'infrastructure', ip:'financial', debt:'financial', financial:'financial', castle:'realestate', estate:'realestate', property:'realestate' };
   return map[type] || 'realestate';
 }
 
@@ -1967,14 +1941,10 @@ function isPhysicalAsset(type) {
   return category ? category.physical : false;
 }
 
-// ============================================================
-// GLOBAL STATE
-// ============================================================
 let ASSETS = [];
 let SEARCH_RESULTS = [];
 let SEARCH_ACTIVE = false;
 let currentSearchQuery = '';
-
 let map3dEl = null;
 let acInstance = null;
 let activeTab = 'all';
@@ -1982,729 +1952,269 @@ let activeFilter = 'any';
 let activeId = null;
 let heatOn = false;
 let domMarkers = {};
-
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-// FIX: Show markers when zoomed in enough (range <= 6000km)
 const MARKER_VISIBLE_RANGE = 6000000;
 let isAuthenticated = false;
 
-// Supabase config
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
 let _sb = null;
 let currentUser = null;
-let currentUserRole = null;
 
-// ============================================================
-// FETCH REAL DATA FROM SUPABASE 'listings' TABLE
-// ============================================================
 async function fetchListingsFromSupabase() {
-  if (!_sb) {
-    console.warn('[RWABidAsk] Supabase not ready, retrying...');
-    return [];
-  }
+  if (!_sb) return [];
   try {
     setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');
-    const { data, error } = await _sb
-      .from('listings')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('[RWABidAsk] Supabase fetch error:', error);
-      setStatus('LEDGER CONNECTION ISSUE — RETRYING');
-      return [];
-    }
-    
-    if (!data || data.length === 0) {
-      console.log('[RWABidAsk] No listings found in database');
-      setStatus('NO ASSETS IN LEDGER — ADD LISTINGS VIA DASHBOARD');
-      return [];
-    }
-    
-    const transformed = data.map(row => {
-      // UNIVERSAL COORDINATE NORMALIZATION
-      const lat = parseFloat(row.lat ?? row.latitude ?? row.Latitude ?? row.lat_coord);
-      const lng = parseFloat(row.lng ?? row.longitude ?? row.Longitude ?? row.lon_coord ?? row.lng_coord);
-      
-      if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
-        console.warn(`[RWABidAsk] Skipping asset ${row.id} - invalid coordinates`);
-        return null;
-      }
-      
+    const { data, error } = await _sb.from('listings').select('*').eq('status', 'active');
+    if (error || !data) return [];
+    return data.map(row => {
+      const lat = parseFloat(row.lat ?? row.latitude);
+      const lng = parseFloat(row.lng ?? row.longitude);
+      if (isNaN(lat) || isNaN(lng)) return null;
       return {
         id: row.id,
-        address: row.address || row.property_address || 'Address not specified',
+        address: row.address || 'Address not specified',
         city: row.city || 'Unknown',
         country: row.country || 'Global',
-        lat: lat,
-        lng: lng,
+        lat, lng,
         price: parseFloat(row.price) || 0,
         type: (row.asset_type || row.type || 'residential').toLowerCase(),
         sqft: row.sqft ? parseInt(row.sqft) : null,
         status: row.listing_status || 'For Sale',
         source: 'Supabase Ledger',
         days: row.days_on_market || 0,
-        broker_active: row.broker_active !== false,
         tokenized: row.tokenized === true,
         structures: row.structures || [],
-        infrastructure: row.infrastructure || {},
-        land: row.land || {},
         financials: row.financials || {},
-        bids: row.bids || [],
-        image_url: row.image_url || null,
-        description: row.description || null
+        bids: row.bids || []
       };
     }).filter(Boolean);
-    
-    console.log(`[RWABidAsk] Loaded ${transformed.length} listings from Supabase`);
-    return transformed;
-  } catch (err) {
-    console.error('[RWABidAsk] Exception fetching listings:', err);
-    setStatus('LEDGER FETCH FAILED — CHECK CONNECTION');
-    return [];
-  }
+  } catch(e) { return []; }
 }
 
 async function loadMarketData() {
-  const fetched = await fetchListingsFromSupabase();
-  ASSETS = fetched;
+  ASSETS = await fetchListingsFromSupabase();
   onDataReady();
 }
 
 function onDataReady() {
-  const assetCount = ASSETS.length;
-  setStatus(`RWABidAsk PERMANENT LEDGER — ${assetCount} ASSETS REGISTERED`);
-  document.getElementById('s-assets').textContent = assetCount;
+  document.getElementById('s-assets').textContent = ASSETS.length;
   document.getElementById('s-status').textContent = 'LIVE';
-  document.getElementById('s-bids').textContent = Math.floor(assetCount * 2.3);
+  document.getElementById('s-bids').textContent = Math.floor(ASSETS.length * 2.3);
   updateGMC(ASSETS);
   renderCategories();
   renderList(ASSETS);
   buildTicker(ASSETS);
   if (window.innerWidth <= 767) renderMobileListViewFull(ASSETS);
-  
-  if (isMapReady && !markersRendered && ASSETS.length > 0) {
-    renderDOMMarkers();
-    markersRendered = true;
-  }
+  if (isMapReady && !markersRendered && ASSETS.length) { renderDOMMarkers(); markersRendered = true; }
 }
 
-function fmtPrice(n) {
-  if (!n || n === 0) return '—';
-  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
-  return '$' + n;
-}
+function fmtPrice(n) { if (!n) return '—'; if (n >= 1e9) return '$' + (n/1e9).toFixed(2)+'B'; if (n>=1e6) return '$'+(n/1e6).toFixed(2)+'M'; if (n>=1e3) return '$'+(n/1e3).toFixed(0)+'K'; return '$'+n; }
+function setStatus(msg) { const el = document.getElementById('map-status-txt'); if(el) el.textContent = msg; }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(toast._t); toast._t = setTimeout(()=>{t.style.display='none';},4000); }
+function typeClass(type) { const cat = getAssetCategory(type); const map = { realestate:'t-res', commercial:'t-com', resources:'t-res2', aviation:'t-avi', maritime:'t-mar', infrastructure:'t-energy', financial:'t-fin' }; return map[cat] || 't-res'; }
 
-function setStatus(msg) {
-  const el = document.getElementById('map-status-txt');
-  if (el) el.textContent = msg;
-}
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => { t.style.display = 'none'; }, 4000);
-}
-
-function typeClass(type) {
-  const cat = getAssetCategory(type);
-  const map = { realestate:'t-res', commercial:'t-com', resources:'t-res2', aviation:'t-avi', maritime:'t-mar', infrastructure:'t-energy', financial:'t-fin' };
-  return map[cat] || 't-res';
-}
-
-// ============================================================
-// CATEGORY RENDERING - FIX 1: No emojis, clean labels
-// ============================================================
 function renderCategories() {
   const container = document.getElementById('category-tabs');
-  if (!container) return;
-  container.innerHTML = ASSET_CATEGORIES.map(cat => `
-    <button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}', this)">
-      ${cat.label}
-    </button>
-  `).join('');
+  if(!container) return;
+  container.innerHTML = ASSET_CATEGORIES.map(cat => `<button class="ptab ${activeTab===cat.id?'on':''}" onclick="setCategory('${cat.id}', this)">${cat.label}</button>`).join('');
 }
 
 function setCategory(catId, btn) {
-  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   activeTab = catId;
   SEARCH_ACTIVE = false;
   document.getElementById('search-input').value = '';
-  currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
+  if(window.innerWidth<=767) renderMobileListViewFull(filtered);
 }
 
 function filterAssets(assets) {
   let filtered = assets;
-  if (activeTab !== 'all') {
-    filtered = filtered.filter(a => getAssetCategory(a.type) === activeTab);
-  }
-  if (activeFilter === 'sub1m') filtered = filtered.filter(a => a.price < 1e6);
-  else if (activeFilter === '1m5m') filtered = filtered.filter(a => a.price >= 1e6 && a.price <= 5e6);
-  else if (activeFilter === '5m25m') filtered = filtered.filter(a => a.price > 5e6 && a.price <= 25e6);
-  else if (activeFilter === '25mplus') filtered = filtered.filter(a => a.price > 25e6);
+  if(activeTab !== 'all') filtered = filtered.filter(a=>getAssetCategory(a.type)===activeTab);
+  if(activeFilter==='sub1m') filtered = filtered.filter(a=>a.price<1e6);
+  else if(activeFilter==='1m5m') filtered = filtered.filter(a=>a.price>=1e6 && a.price<=5e6);
+  else if(activeFilter==='5m25m') filtered = filtered.filter(a=>a.price>5e6 && a.price<=25e6);
+  else if(activeFilter==='25mplus') filtered = filtered.filter(a=>a.price>25e6);
   return filtered;
 }
 
-function setFilter(el, f) {
-  document.querySelectorAll('.fchip').forEach(x => x.classList.remove('on'));
+function setFilter(el,f) {
+  document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('on'));
   el.classList.add('on');
   activeFilter = f;
   SEARCH_ACTIVE = false;
   document.getElementById('search-input').value = '';
-  currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
+  if(window.innerWidth<=767) renderMobileListViewFull(filtered);
 }
 
 function renderList(assetsToShow) {
   const wrap = document.getElementById('list-scroll');
-  const list = assetsToShow;
-  const resultCount = list.length;
-  const resultHeader = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
-  if (!list.length) {
-    wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;
-    return;
-  }
-  wrap.innerHTML = resultHeader + list.map(a => {
-    const mainStruct = a.structures && a.structures[0];
-    const bedbath = mainStruct && mainStruct.beds ? `${mainStruct.beds}bd · ${mainStruct.baths}ba${a.sqft ? ' · ' + a.sqft.toLocaleString() + ' sf' : ''}` : (a.sqft ? a.sqft.toLocaleString() + ' sqft' : '');
-    return `<div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">${a.days ? `<div class="pcard-days">${a.days}d</div>` : ''}<div class="pcard-addr">${a.address}</div><div class="pcard-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>${bedbath ? `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${bedbath}</div>` : ''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`;
-  }).join('');
+  if(!assetsToShow.length) { wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`; return; }
+  wrap.innerHTML = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${assetsToShow.length} Asset${assetsToShow.length!==1?'s':''}</div>` + assetsToShow.map(a=>`<div class="pcard ${activeId===a.id?'active':''}" onclick="selectAsset('${a.id}')">${a.days?`<div class="pcard-days">${a.days}d</div>`:''}<div class="pcard-addr">${a.address}</div><div class="pcard-city">${a.city}${a.country && a.country!==a.city?', '+a.country:''}</div>${a.sqft?`<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${a.sqft.toLocaleString()} sqft</div>`:''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`).join('');
 }
 
-// FIX 3: Consolidated Right Panel - single panel that stays open
+async function logLead(action, assetId, detail=null) {
+  if(!_sb || !currentUser) { toast('Sign in required'); return false; }
+  try {
+    await _sb.from('leads').insert([{ user_id: currentUser.id, asset_id: assetId, action_type: action, selection_detail: detail, created_at: new Date().toISOString() }]);
+    toast(`${action} request recorded. A specialist will contact you.`);
+    return true;
+  } catch(e) { toast('Failed to record request'); return false; }
+}
+
+function requireAuth(action, assetId) {
+  if(currentUser) {
+    if(action === 'bid') openBidModal(assetId);
+    else if(action === 'buy') logLead('INQUIRY', assetId);
+    else if(action === 'watchlist') logLead('WATCHLIST', assetId);
+    else if(action === 'claim') logLead('TOKENIZE', assetId);
+    else if(action === 'sponsor') logLead('SPONSOR', assetId);
+    else openFinanceModal(action, assetId);
+  } else { openModal('signin'); toast('Sign in to continue'); }
+}
+
+function openBidModal(assetId) { const a = ASSETS.find(x=>x.id===assetId); const amt = prompt(`Enter bid amount for ${a?.address}`); if(amt) logLead('BID', assetId, `$${amt}`); }
+function openFinanceModal(type, assetId) {
+  const options = type==='lend' ? ['Non-Recourse Finance','Bridge Loan','Construction Finance','SBA Loan'] : ['War/Political Risk','Smart Contract Insurance','Title Insurance','Casualty'];
+  const sel = prompt(`Select ${type==='lend'?'Lending':'Insurance'} option:\n${options.join('\n')}`);
+  if(sel) logLead(type.toUpperCase(), assetId, sel);
+}
+
 function selectAsset(id) {
   activeId = id;
-  const a = ASSETS.find(x => x.id === id);
-  if (!a) return;
-  
-  // Populate the consolidated right panel
-  renderDetail(a);
-  
-  // Fly camera to asset location
-  flyTo(a.lat, a.lng, 1400, 45);
-  
-  // On mobile, open the slide-up panel
-  if (window.innerWidth <= 767) {
-    document.getElementById('right').classList.add('open-drawer');
-    document.body.style.overflow = 'hidden';
-  }
-  
-  // Update list highlighting
-  const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
-  renderList(filtered);
-}
-
-function renderDetail(a) {
-  document.getElementById('rhead').innerHTML = `<div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div><div class="rname">${a.address}</div><div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div></div>`;
-  const structs = a.structures || [];
-  const structHTML = structs.length ? `<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s, i) => `<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>${s.sqft ? rr('Size', s.sqft.toLocaleString() + ' sqft') : ''}${s.beds ? rr('Beds', s.beds) : ''}${s.baths ? rr('Baths', s.baths) : ''}${s.built ? rr('Built', s.built) : ''}${s.remodel ? rr('Remodeled', s.remodel) : ''}${s.type ? rr('Type', s.type) : ''}${s.notes ? rr('Notes', s.notes) : ''}</div>`).join('')}</div>` : '';
+  const a = ASSETS.find(x=>x.id===id);
+  if(!a) return;
+  document.getElementById('rhead').innerHTML = `<div class="rtype">${(a.type||'').toUpperCase()} · ${(a.status||'').toUpperCase()}</div><div class="rname">${a.address}</div><div class="rcity">${a.city}${a.country && a.country!==a.city?', '+a.country:''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft?fmtPrice(Math.round(a.price/a.sqft))+'/sqft':''}</div></div>`;
   const fin = a.financials || {};
-  const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div>${a.price ? rr('Listed Price', `<span class="rv hl">${fmtPrice(a.price)}</span>`) : ''}${a.sqft ? rr('Price / sqft', fmtPrice(Math.round(a.price / a.sqft))) : ''}${fin.tax_annual ? rr('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}${fin.hoa ? rr('HOA / mo', '$' + fin.hoa) : ''}${fin.zestimate ? rr('Est. Value', fmtPrice(fin.zestimate)) : ''}${a.days ? rr('Days Listed', a.days + 'd') : ''}${rr('Source', a.source || 'Public Registry')}</div>`;
-  const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>${(a.bids && a.bids.length) ? a.bids.map(b => `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px"><span style="color:var(--cyan);font-weight:600">${fmtPrice(b.amount)}</span><span style="color:var(--muted)">${b.terms || 'cash'}</span><span style="color:var(--dim)">${b.expiry || ''}</span></div>`).join('') : `<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>`}</div>`;
-  document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div>${rr('Asset ID', '#' + a.id)}${rr('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}${rr('KYC Required', 'Yes — to bid or buy')}</div></div>`;
-}
-function rr(k, v) { return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`; }
-
-// Close drawer on mobile when clicking off
-document.getElementById('map-col').addEventListener('click', (e) => {
-  if (!e.target.closest('.price-marker') && activeId && window.innerWidth <= 767) {
-    document.getElementById('right').classList.remove('open-drawer');
-    document.body.style.overflow = '';
-  }
-});
-
-function closeDrawer() {
-  document.getElementById('asset-drawer').classList.remove('open');
+  const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div><div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>${a.sqft?`<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price/a.sqft))}</span></div>`:''}${fin.tax_annual?`<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>`:''}</div>`;
+  const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div>${(a.bids && a.bids.length)?a.bids.map(b=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px"><span style="color:var(--cyan)">${fmtPrice(b.amount)}</span><span style="color:var(--muted)">${b.terms||'cash'}</span></div>`).join(''):'<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet</div>'}</div>`;
+  document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="requireAuth('lend','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="requireAuth('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="requireAuth('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="requireAuth('sponsor','${a.id}')">SPONSOR LISTING</button></div>${finHTML}${bidsHTML}</div>`;
+  flyTo(a.lat, a.lng, 1400, 45);
+  if(window.innerWidth<=767) { document.getElementById('right').classList.add('open-drawer'); document.body.style.overflow = 'hidden'; }
+  renderList(filterAssets(ASSETS));
 }
 
-function openMobileDrawer(a) {
-  renderDetail(a);
-  document.getElementById('right').classList.add('open-drawer');
-  document.body.style.overflow = 'hidden';
-}
-
-// ============================================================
-// SEARCH
-// ============================================================
 function performSearch() {
   const query = document.getElementById('search-input').value.trim().toLowerCase();
-  currentSearchQuery = query;
-  if (query.length === 0) {
-    SEARCH_ACTIVE = false;
-    const filtered = filterAssets(ASSETS);
-    renderList(filtered);
-    syncMarkersToSearch(filtered);
-    if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
-    setStatus('GLOBAL DIRECTORY — ' + ASSETS.length + ' ASSETS');
-    return;
-  }
-  SEARCH_ACTIVE = true;
-  SEARCH_RESULTS = ASSETS.filter(a => 
-    a.address.toLowerCase().includes(query) ||
-    a.city.toLowerCase().includes(query) ||
-    a.type.toLowerCase().includes(query) ||
-    (a.country && a.country.toLowerCase().includes(query))
-  );
-  const filteredResults = filterAssets(SEARCH_RESULTS);
-  renderList(filteredResults);
-  syncMarkersToSearch(filteredResults);
-  if (window.innerWidth <= 767) renderMobileListViewFull(filteredResults);
-  setStatus('SEARCH: ' + SEARCH_RESULTS.length + ' assets found');
-}
-document.getElementById('search-input').addEventListener('input', performSearch);
-
-function syncMarkersToSearch(assetsToShow) {
-  if (!map3dEl) return;
-  const currentRange = map3dEl.range || 22000000;
-  const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
-  if (!isZoomedIn || !isAuthenticated) {
-    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
-    return;
-  }
-  const visibleInViewport = getVisibleAssetsInViewport(assetsToShow);
-  const visibleIds = new Set(visibleInViewport.map(a => a.id));
-  Object.keys(domMarkers).forEach(id => {
-    const marker = domMarkers[id];
-    const asset = marker.asset;
-    const isInSearch = assetsToShow.some(a => a.id === asset.id);
-    const isInViewport = visibleIds.has(id);
-    const shouldBeVisible = isPhysicalAsset(asset.type) && isInSearch && isInViewport;
-    marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
-  });
+  if(!query) { SEARCH_ACTIVE=false; const filtered=filterAssets(ASSETS); renderList(filtered); syncMarkerVisibility(); if(window.innerWidth<=767) renderMobileListViewFull(filtered); return; }
+  SEARCH_ACTIVE=true;
+  SEARCH_RESULTS = ASSETS.filter(a=>a.address.toLowerCase().includes(query)||a.city.toLowerCase().includes(query));
+  const filtered = filterAssets(SEARCH_RESULTS);
+  renderList(filtered);
+  syncMarkerVisibility();
+  if(window.innerWidth<=767) renderMobileListViewFull(filtered);
 }
 
-// ============================================================
-// GOOGLE MAPS 3D - FULLY ZOOMED OUT GLOBE VIEW
-// ============================================================
 async function initMap() {
   try {
     const maps3dLib = await google.maps.importLibrary('maps3d');
     const Map3DElement = maps3dLib.Map3DElement;
-    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 22000000, tilt: 0, heading: 0 });
-    try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
-    const container = document.getElementById('map3d-container');
-    container.style.cssText = 'position:absolute;inset:0;';
-    container.appendChild(map3dEl);
-    
-    const watchdogTimer = setTimeout(() => {
-      if (!markersRendered && ASSETS.length > 0) {
-        console.log('[RWABidAsk] WATCHDOG: Forcing marker render after 4s timeout');
-        isMapReady = true;
-        renderDOMMarkers();
-        markersRendered = true;
-      }
-    }, 4000);
-    
-    map3dEl.addEventListener('gmp-steadystate', () => {
-      console.log('[RWABidAsk] Map steady state reached');
-      clearTimeout(watchdogTimer);
-      isMapReady = true;
-      if (ASSETS.length > 0 && !markersRendered) {
-        renderDOMMarkers();
-        markersRendered = true;
-      }
-    });
-    
-    const _onCam = () => { if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(onCameraChange, 100); };
-    map3dEl.addEventListener('gmp-centerchange', _onCam);
-    map3dEl.addEventListener('gmp-rangechange', _onCam);
-    map3dEl.addEventListener('gmp-tiltchange', _onCam);
-    map3dEl.addEventListener('gmp-headingchange', _onCam);
-    
-    requestAnimationFrame(() => { setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200); });
-    setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
+    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 22000000, tilt: 0 });
+    document.getElementById('map3d-container').appendChild(map3dEl);
+    map3dEl.addEventListener('gmp-steadystate', () => { isMapReady = true; if(ASSETS.length && !markersRendered) { renderDOMMarkers(); markersRendered = true; } });
+    map3dEl.addEventListener('gmp-rangechange', () => { if(cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(() => { if(isMapReady && map3dEl) onCameraChange(); }, 150); });
     await loadMarketData();
-    
-    if (isMapReady && ASSETS.length > 0 && !markersRendered) {
-      renderDOMMarkers();
-      markersRendered = true;
-    }
-    
-    setTimeout(() => { if (map3dEl && ASSETS.length > 0 && !markersRendered) { renderDOMMarkers(); markersRendered = true; } }, 800);
-    initPlacesSearch();
-  } catch (err) { console.error('[RWABidAsk] Map3DElement init error:', err); setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING'); }
+  } catch(e) { console.error(e); }
 }
 
-async function initPlacesSearch() {
-  const input = document.getElementById('search-input');
-  if (!input) return;
-  try {
-    const placesLib = await google.maps.importLibrary('places');
-    if (placesLib.PlaceAutocompleteElement) {
-      try {
-        const acEl = new placesLib.PlaceAutocompleteElement();
-        acEl.style.cssText = 'width:100%;height:100%;border:none;outline:none;background:transparent;color:#f0f4ff;font-family:Inter,system-ui,sans-serif;font-size:13px;padding:0 18px;position:relative;z-index:9999;';
-        const wrap = input.parentNode;
-        input.style.display = 'none';
-        wrap.insertBefore(acEl, input);
-        acInstance = acEl;
-        acEl.addEventListener('gmp-select', async (evt) => {
-          try {
-            const prediction = evt.placePrediction;
-            if (!prediction) return;
-            const place = prediction.toPlace();
-            await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
-            const lat = place.location.lat();
-            const lng = place.location.lng();
-            flyTo(lat, lng, 1400, 45);
-            setStatus('LOCATION: ' + (place.displayName || '').toUpperCase().slice(0, 60));
-          } catch (err) { toast('Location lookup failed'); }
-        });
-        return;
-      } catch(e) { input.style.display = ''; }
-    }
-    const AcClass = placesLib.Autocomplete || (google.maps.places && google.maps.places.Autocomplete);
-    if (AcClass) {
-      const ac = new AcClass(input, { fields: ['geometry', 'name', 'formatted_address'] });
-      acInstance = ac;
-      ac.addListener('place_changed', () => {
-        const place = ac.getPlace();
-        if (!place?.geometry?.location) { toast('Location not found'); return; }
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        flyTo(lat, lng, 1400, 45);
-        setStatus('LOCATION: ' + (place.name || '').toUpperCase().slice(0, 60));
-      });
-    }
-  } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
-}
+function flyTo(lat,lng,range,tilt) { if(map3dEl) map3dEl.flyCameraTo?.({ endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt??45, range: range??1400 }, durationMillis: 1500 }); }
+function flyGlobe() { flyTo(20,10,22000000,0); }
+function setMapMode(mode,btn) { document.querySelectorAll('.mctl').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); if(map3dEl) map3dEl.mode = mode==='satellite'?google.maps.maps3d.MapMode.SATELLITE:google.maps.maps3d.MapMode.HYBRID; }
+function setTilt(deg,btn) { document.querySelectorAll('.mctl').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); if(map3dEl) map3dEl.tilt = deg; }
+function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); toast(heatOn ? 'Heat zones ON' : 'Heat zones OFF'); }
 
-function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 45 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
-function flyGlobe() { flyTo(20, 10, 22000000, 0); }
-function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
-function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
-function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
-
-// ============================================================
-// DOM MARKERS - WORKING PROJECTION
-// ============================================================
 function onCameraChange() {
-  if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
-  if (isCameraProcessing) return;
-  cameraDebounceTimer = setTimeout(() => {
-    isCameraProcessing = true;
-    try {
-      if (!map3dEl) return;
-      if (!isAuthenticated) {
-        Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
-        isCameraProcessing = false;
-        return;
-      }
-      const currentRange = map3dEl.range || 22000000;
-      const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
-      
-      if (isZoomedIn) {
-        const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
-        const visibleAssets = getVisibleAssetsInViewport(baseAssets);
-        const visibleIds = new Set(visibleAssets.map(a => a.id));
-        
-        Object.keys(domMarkers).forEach(id => {
-          const marker = domMarkers[id];
-          const asset = marker.asset;
-          const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
-          marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
-        });
-        reprojectMarkersWithMatrix();
-      } else {
-        Object.values(domMarkers).forEach(({ el }) => { 
-          el.style.display = 'none';
-          el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
-        });
-      }
-      const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
-      buildTicker(viewportList);
-    } catch (err) { console.warn('[RWABidAsk] onCameraChange error:', err.message); }
-    finally { isCameraProcessing = false; }
-  }, 150);
-}
-
-function getVisibleAssetsInViewport(assets) {
-  if (!map3dEl) return [];
-  try {
-    const center = map3dEl.center || { lat: 20, lng: 10 };
-    const range = map3dEl.range || 22000000;
-    const degSpread = Math.min(30, (range / 111000) * 1.2);
-    const latMin = center.lat - degSpread;
-    const latMax = center.lat + degSpread;
-    const lngSpread = degSpread / Math.max(0.2, Math.cos(center.lat * Math.PI / 180));
-    const lngMin = center.lng - lngSpread;
-    const lngMax = center.lng + lngSpread;
-    return assets.filter(a => a.lat >= latMin && a.lat <= latMax && a.lng >= lngMin && a.lng <= lngMax);
-  } catch(e) { return assets.slice(0, 100); }
+  if(!isAuthenticated) { Object.values(domMarkers).forEach(({el})=>{el.style.display='none';}); return; }
+  const isZoomed = (map3dEl?.range||12e6) <= MARKER_VISIBLE_RANGE;
+  if(!isZoomed) { Object.values(domMarkers).forEach(({el})=>{el.style.display='none';}); return; }
+  const base = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
+  const visible = base.filter(a=>isPhysicalAsset(a.type) && Math.abs(a.lat - (map3dEl.center?.lat||0))<30 && Math.abs(a.lng - (map3dEl.center?.lng||0))<30);
+  const visibleIds = new Set(visible.map(a=>a.id));
+  Object.entries(domMarkers).forEach(([id,{el,asset}])=>{ el.style.display = visibleIds.has(id) ? 'flex' : 'none'; });
+  reprojectMarkersWithMatrix();
 }
 
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
-  if (!layer || !map3dEl) return;
-  
+  if(!layer || !map3dEl) return;
   layer.innerHTML = '';
   domMarkers = {};
-  
-  const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
-  
-  physicalAssets.forEach(a => addPriceMarker(a));
-  
-  Object.values(domMarkers).forEach(({ el }) => { 
-    el.style.display = 'none';
-    el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+  ASSETS.filter(a=>isPhysicalAsset(a.type)).forEach(a=>{
+    const el = document.createElement('div');
+    el.className = 'price-marker standard';
+    el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${fmtPrice(a.price)}</div><div class="price-tag-type">${a.type}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
+    el.addEventListener('click',(e)=>{e.stopPropagation(); selectAsset(a.id);});
+    layer.appendChild(el);
+    domMarkers[a.id] = { el, asset: a };
   });
-  
-  console.log(`Markers rendered: ${Object.keys(domMarkers).length} markers created`);
-}
-
-function addPriceMarker(asset) {
-  const layer = document.getElementById('overlay-layer');
-  if (!layer) return;
-  const el = document.createElement('div');
-  el.className = 'price-marker standard';
-  el.title = asset.address || 'Asset';
-  const priceStr = fmtPrice(asset.price);
-  const typeStr = asset.type || 'asset';
-  const classEmoji = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', energy:'⚡', minerals:'💎', ip:'©', debt:'📋' };
-  const emoji = classEmoji[asset.type] || '';
-  el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${emoji ? emoji + ' ' : ''}${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
-  el.addEventListener('click', (e) => { e.stopPropagation(); selectAsset(asset.id); });
-  layer.appendChild(el);
-  domMarkers[asset.id] = { el, asset };
-  requestAnimationFrame(() => projectMarkerLegacy(asset, el));
-}
-
-function projectMarkerLegacy(asset, el) {
-  if (!map3dEl || !el) return;
-  try {
-    const mapCol = document.getElementById('map-col');
-    if (!mapCol) return;
-    const rect = mapCol.getBoundingClientRect();
-    const W = rect.width, H = rect.height;
-    if (!W || !H) return;
-    const camCenter = map3dEl.center || { lat: 20, lng: 10 };
-    const camRange = map3dEl.range || 22000000;
-    const camTilt = map3dEl.tilt || 0;
-    const camHead = map3dEl.heading || 0;
-    const dLat = asset.lat - camCenter.lat;
-    const dLng = asset.lng - camCenter.lng;
-    const ppd = (W / 2) / Math.max(1, camRange / 111320);
-    const cosLat = Math.cos(camCenter.lat * Math.PI / 180);
-    const headRad = camHead * Math.PI / 180;
-    const rx = dLng * cosLat * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
-    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cosLat * ppd * Math.sin(headRad);
-    const tiltFactor = Math.max(0.1, Math.cos(camTilt * Math.PI / 180));
-    const sx = W / 2 + rx;
-    const sy = H / 2 + ry * tiltFactor;
-    const globeRadius = Math.min(W, H) * 0.48;
-    const dx = sx - W / 2, dy = sy - H / 2;
-    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
-    const isBehindGlobe = camRange > 3000000 && distFromCenter > globeRadius * 1.1;
-    if (isBehindGlobe) { el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)'; }
-    else { el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`; el.style.zIndex = String(Math.floor(1000 - distFromCenter / 10)); }
-  } catch (err) { console.warn('[RWABidAsk] projectMarkerLegacy:', err.message); }
+  reprojectMarkersWithMatrix();
 }
 
 function reprojectMarkersWithMatrix() {
-  if (!map3dEl) return;
-  if (map3dEl.createViewProjectionMatrix) {
+  if(!map3dEl) return;
+  const rect = document.getElementById('map-col')?.getBoundingClientRect();
+  if(!rect?.width) return;
+  const w=rect.width, h=rect.height;
+  Object.values(domMarkers).forEach(({el,asset})=>{
     try {
-      const mapCol = document.getElementById('map-col');
-      if (!mapCol) return;
-      const rect = mapCol.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      const matrix = map3dEl.createViewProjectionMatrix();
-      const width = rect.width, height = rect.height;
-      Object.values(domMarkers).forEach(({ el, asset }) => {
-        if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
-        const worldX = asset.lng, worldY = asset.lat, worldZ = 45;
-        const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
-        const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
-        const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
-        if (screenW <= 0) { el.style.display = 'none'; return; }
-        let x = (screenX / screenW + 1) * 0.5 * width;
-        let y = (-screenY / screenW + 1) * 0.5 * height;
-        if (x < -200 || x > width + 200 || y < -200 || y > height + 200) { el.style.display = 'none'; return; }
-        el.style.display = 'flex';
-        el.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
-      });
-      return;
-    } catch(e) { console.warn('[RWABidAsk] Matrix projection failed'); }
-  }
-  Object.values(domMarkers).forEach(({ el, asset }) => { projectMarkerLegacy(asset, el); });
-}
-
-function syncMarkerVisibility() {
-  if (!markersVisible()) { Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; }); return; }
-  const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
-  const visibleAssets = getVisibleAssetsInViewport(baseAssets);
-  const visibleIds = new Set(visibleAssets.map(a => a.id));
-  Object.entries(domMarkers).forEach(([id, { el, asset }]) => {
-    const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
-    el.style.display = shouldBeVisible ? 'flex' : 'none';
+      const proj = map3dEl.createViewProjectionMatrix?.();
+      if(proj) {
+        const x = proj[0]*asset.lng + proj[4]*asset.lat + proj[12];
+        const y = proj[1]*asset.lng + proj[5]*asset.lat + proj[13];
+        const ww = proj[3]*asset.lng + proj[7]*asset.lat + proj[15];
+        if(ww<=0) { el.style.display='none'; return; }
+        let sx = (x/ww+1)*0.5*w, sy = (-y/ww+1)*0.5*h;
+        if(sx<-200||sx>w+200||sy<-200||sy>h+200) el.style.display='none';
+        else { el.style.display='flex'; el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`; }
+      } else { el.style.transform = 'translate(-9999px,-9999px)'; }
+    } catch(e){}
   });
 }
-function markersVisible() { return !!(map3dEl) && (map3dEl.range || 12e6) <= MARKER_VISIBLE_RANGE; }
+function syncMarkerVisibility() { if(map3dEl && isAuthenticated) onCameraChange(); }
 
-// ============================================================
-// TICKER & RIBBON
-// ============================================================
-function buildRibbon() {
-  const markets = [{ label:'BTC/USD', val:'$83,241', chg:'+1.2%', dir:'up' },{ label:'Gold Spot', val:'$3,118/oz',chg:'+0.4%', dir:'up' },{ label:'10Y T-Bill', val:'4.38%', chg:'-0.02', dir:'down' }];
-  const items = markets.map(m => `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');
-  const track = document.getElementById('ribbon-track');
-  if (track) track.innerHTML = items + items;
-}
-function buildTicker(assets) {
-  const base = ['RWABIDASK.COM', 'GLOBAL LEDGER LIVE', 'BID · ASK · BUY'];
-  const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 20);
-  const segments = addrs.length > 0 ? [...base, ...addrs] : base;
-  const all = [...segments, ...segments];
-  const html = all.map(s => `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${s}</span><span class="sep">·</span></span>`).join('');
-  const track = document.getElementById('ticker-track');
-  if (track) { track.innerHTML = html; track.style.animation = 'none'; track.offsetHeight; track.style.animation = 'ticker-run 90s linear infinite'; }
-}
-function updateGMC(assets) {
-  const total = assets.reduce((sum, a) => sum + (a.price || 0), 0);
-  const el = document.getElementById('s-gmc');
-  if (!el) return;
-  if (total >= 1e12) el.textContent = '$' + (total / 1e12).toFixed(2) + 'T';
-  else if (total >= 1e9) el.textContent = '$' + (total / 1e9).toFixed(1) + 'B';
-  else if (total >= 1e6) el.textContent = '$' + (total / 1e6).toFixed(1) + 'M';
-  else el.textContent = '$' + total.toLocaleString();
-}
+function buildTicker(assets) { const addrs = assets.slice(0,20).map(a=>a.address); const track = document.getElementById('ticker-track'); if(track) track.innerHTML = [...addrs,...addrs].map(s=>`<span class="ticker-seg"><span class="addr">${s}</span><span class="sep">·</span></span>`).join(''); }
+function updateGMC(assets) { const total = assets.reduce((s,a)=>s+(a.price||0),0); const el=document.getElementById('s-gmc'); if(el) el.textContent = total>=1e9 ? '$'+(total/1e9).toFixed(1)+'B' : '$'+(total/1e6).toFixed(1)+'M'; }
+function buildRibbon() { const track = document.getElementById('ribbon-track'); if(track) track.innerHTML = '<div class="ribbon-item"><span class="ribbon-label">RWABidAsk</span><span class="ribbon-val">GLOBAL LEDGER</span></div>'.repeat(6); }
 
-// ============================================================
-// AUTH & MODAL FUNCTIONS
-// ============================================================
-function bootSupabase() { if (typeof supabase !== 'undefined' && supabase.createClient) { try { _sb = supabase.createClient(SB_URL, SB_KEY); console.log('[RWABidAsk] Supabase ready'); restoreSession(); } catch(e) { console.warn(e); } } else { setTimeout(bootSupabase, 300); } }
-async function restoreSession() { if (!_sb) return; const { data } = await _sb.auth.getSession(); if (data?.session?.user) { currentUser = data.session.user; currentUserRole = currentUser.user_metadata?.role || 'Investor'; updateAuthUI(); isAuthenticated = true; document.getElementById('auth-gate')?.classList.add('hidden'); if (map3dEl) onCameraChange(); } else { isAuthenticated = false; document.getElementById('auth-gate')?.classList.remove('hidden'); } }
-function updateAuthUI() { const signinBtn = document.getElementById('signin-btn'); const joinBtn = document.getElementById('join-btn'); if (currentUser) { if (signinBtn) { signinBtn.textContent = currentUser.email.split('@')[0]; signinBtn.onclick = () => toast('Account menu coming soon'); } if (joinBtn) { joinBtn.textContent = 'Sign Out'; joinBtn.onclick = async () => { if (_sb) await _sb.auth.signOut(); currentUser = null; isAuthenticated = false; updateAuthUI(); document.getElementById('auth-gate')?.classList.remove('hidden'); toast('Signed out'); }; } } else { if (signinBtn) { signinBtn.textContent = 'Sign In'; signinBtn.onclick = () => openModal('signin'); } if (joinBtn) { joinBtn.textContent = 'Join'; joinBtn.onclick = () => openModal('register'); } } }
-function openModal(type, id) { toast('Auth system ready — ' + type + ' modal would open'); }
-function closeModal() {}
-function requireAuth(action, assetId) { if (currentUser) { toast('Action: ' + action + ' on asset ' + assetId); } else { openModal('signin'); toast('Sign in to continue'); } }
-function openEscrowSequence(assetId) { toast('Escrow inquiry for asset: ' + assetId); }
-
-// FIX 4: Mobile ListView - with FULL FILTER CONTROLS
 function renderMobileListViewFull(assets) {
   const container = document.getElementById('mobile-list-view');
-  if (!container) return;
-  
-  const categoriesHtml = ASSET_CATEGORIES.map(cat => `<button class="list-cat-btn ${activeTab === cat.id ? 'on' : ''}" data-cat="${cat.id}">${cat.label}</button>`).join('');
-  const priceFilters = [
-    { id: 'any', label: 'Any' },
-    { id: 'sub1m', label: '–$1M' },
-    { id: '1m5m', label: '$1–5M' },
-    { id: '5m25m', label: '$5–25M' },
-    { id: '25mplus', label: '$25M+' }
-  ];
-  const priceHtml = priceFilters.map(pf => `<button class="list-price-chip ${activeFilter === pf.id ? 'on' : ''}" data-price="${pf.id}">${pf.label}</button>`).join('');
-  
-  const filteredAssets = filterAssets(assets);
-  const resultsHtml = filteredAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
-  const emptyHtml = filteredAssets.length === 0 ? '<div class="list-empty">No assets match current filters</div>' : '';
-  
-  container.innerHTML = `
-    <div class="list-filters-header" style="background:var(--bg1);border-bottom:1px solid var(--border);padding:12px;flex-shrink:0;">
-      <div class="list-filters-title" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--silver);margin-bottom:10px;">FILTERS</div>
-      <div class="list-category-tabs" id="mobile-category-tabs" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">${categoriesHtml}</div>
-      <div class="list-price-filters" id="mobile-price-filters" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">${priceHtml}</div>
-    </div>
-    <div class="list-results-container" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;">${resultsHtml || emptyHtml}</div>
-  `;
-  
-  // Style filter buttons
-  document.querySelectorAll('.list-cat-btn').forEach(btn => {
-    btn.style.cssText = 'padding:6px 10px;font-family:var(--font);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);cursor:pointer;background:none;border:1px solid var(--border2);border-radius:2px;transition:all .15s;';
-    if (btn.classList.contains('on')) {
-      btn.style.borderColor = 'rgba(0,255,200,.45)';
-      btn.style.color = 'var(--cyan)';
-      btn.style.background = 'var(--cyan-dim)';
-      btn.style.fontWeight = '600';
-    }
-    btn.addEventListener('click', () => {
-      const catId = btn.dataset.cat;
-      activeTab = catId;
-      SEARCH_ACTIVE = false;
-      document.getElementById('search-input').value = '';
-      currentSearchQuery = '';
-      const filtered = filterAssets(ASSETS);
-      renderList(filtered);
-      syncMarkerVisibility();
-      renderMobileListViewFull(ASSETS);
-    });
-  });
-  
-  document.querySelectorAll('.list-price-chip').forEach(btn => {
-    btn.style.cssText = 'padding:4px 10px;font-family:var(--font);font-size:9px;color:var(--dim);border:1px solid var(--border2);background:none;cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .15s;';
-    if (btn.classList.contains('on')) {
-      btn.style.borderColor = 'rgba(0,255,200,.45)';
-      btn.style.color = 'var(--cyan)';
-      btn.style.background = 'var(--cyan-dim)';
-      btn.style.fontWeight = '600';
-    }
-    btn.addEventListener('click', () => {
-      const priceId = btn.dataset.price;
-      activeFilter = priceId;
-      SEARCH_ACTIVE = false;
-      document.getElementById('search-input').value = '';
-      currentSearchQuery = '';
-      const filtered = filterAssets(ASSETS);
-      renderList(filtered);
-      syncMarkerVisibility();
-      renderMobileListViewFull(ASSETS);
-    });
-  });
+  if(!container) return;
+  const filtered = filterAssets(assets);
+  container.innerHTML = `<div style="background:var(--bg1);padding:12px;border-bottom:1px solid var(--border)"><div style="font-size:9px;font-weight:700;letter-spacing:2px;margin-bottom:8px">FILTERS</div><div class="mobile-filters">${ASSET_CATEGORIES.map(c=>`<button class="mobile-cat-btn ${activeTab===c.id?'on':''}" data-cat="${c.id}">${c.label}</button>`).join('')}</div></div><div style="padding:12px;display:flex;flex-direction:column;gap:12px">${filtered.length?filtered.map(a=>`<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${a.address}</div><div class="list-tile-loc">${a.city}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join(''):'<div class="list-empty">No assets</div>'}</div>`;
+  document.querySelectorAll('.mobile-cat-btn').forEach(btn=>{ btn.style.cssText='padding:6px 10px;font-size:9px;background:none;border:1px solid var(--border2);margin:2px;'; if(btn.classList.contains('on')) btn.style.cssText+='border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)'; btn.onclick=()=>{ setCategory(btn.dataset.cat, btn); renderMobileListViewFull(ASSETS); }; });
 }
 
-function initMobileUI() { 
-  const viewToggle = document.getElementById('mobile-view-toggle');
+function initMobileUI() {
+  const toggle = document.getElementById('mobile-view-toggle');
   const listView = document.getElementById('mobile-list-view');
   const mapCol = document.getElementById('map-col');
-  const rightPanel = document.getElementById('right');
-  if (viewToggle) {
-    viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const view = btn.dataset.view;
-        viewToggle.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (view === 'globe') { 
-          mapCol.style.display = 'block'; 
-          listView.classList.remove('active'); 
-          rightPanel.classList.remove('open-drawer');
-          if (map3dEl && markersRendered) reprojectMarkersWithMatrix();
-        } else { 
-          mapCol.style.display = 'none'; 
-          listView.classList.add('active'); 
-          rightPanel.classList.remove('open-drawer');
-          const filtered = SEARCH_ACTIVE ? filterAssets(SEARCH_RESULTS) : filterAssets(ASSETS);
-          renderMobileListViewFull(filtered);
-        }
-      });
-    });
-  }
-  document.addEventListener('click', (e) => { if (rightPanel && rightPanel.classList.contains('open-drawer') && !rightPanel.contains(e.target) && !e.target.closest('.price-marker') && !e.target.closest('.list-tile') && !e.target.closest('.pcard')) { rightPanel.classList.remove('open-drawer'); document.body.style.overflow = ''; } });
+  if(toggle) toggle.querySelectorAll('.view-toggle-btn').forEach(btn=>{ btn.onclick=()=>{ toggle.querySelectorAll('.view-toggle-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); if(btn.dataset.view==='globe'){ mapCol.style.display='block'; listView.classList.remove('active'); } else { mapCol.style.display='none'; listView.classList.add('active'); renderMobileListViewFull(ASSETS); } }; });
+  document.addEventListener('click',(e)=>{ if(window.innerWidth<=767 && !e.target.closest('#right') && !e.target.closest('.price-marker') && !e.target.closest('.list-tile') && document.getElementById('right').classList.contains('open-drawer')) { document.getElementById('right').classList.remove('open-drawer'); document.body.style.overflow=''; } });
 }
 
-// ============================================================
-// BOOT SEQUENCE
-// ============================================================
-buildTicker([]);
+async function bootSupabase() { if(typeof supabase!=='undefined' && supabase.createClient) { _sb = supabase.createClient(SB_URL, SB_KEY); await restoreSession(); } else setTimeout(bootSupabase,300); }
+async function restoreSession() { if(!_sb) return; const { data } = await _sb.auth.getSession(); if(data?.session?.user) { currentUser = data.session.user; isAuthenticated=true; document.getElementById('auth-gate').classList.add('hidden'); updateAuthUI(); if(map3dEl) onCameraChange(); } else { isAuthenticated=false; document.getElementById('auth-gate').classList.remove('hidden'); updateAuthUI(); } }
+function updateAuthUI() {
+  const signinBtn = document.getElementById('signin-btn'), joinBtn = document.getElementById('join-btn');
+  if(currentUser) { signinBtn.textContent = currentUser.email?.split('@')[0]||'Account'; signinBtn.onclick = ()=>toast('Account menu'); joinBtn.textContent = 'Sign Out'; joinBtn.onclick = async ()=>{ if(_sb) await _sb.auth.signOut(); currentUser=null; isAuthenticated=false; updateAuthUI(); document.getElementById('auth-gate').classList.remove('hidden'); toast('Signed out'); }; }
+  else { signinBtn.textContent = 'Sign In'; signinBtn.onclick = ()=>openModal('signin'); joinBtn.textContent = 'Join'; joinBtn.onclick = ()=>openModal('register'); }
+}
+function openModal(type) { toast(`Auth modal: ${type} — backend ready`); }
+function closeModal() {}
+
 buildRibbon();
 bootSupabase();
-document.addEventListener('DOMContentLoaded', () => { const bl = document.getElementById('blimp-el'); if (bl) bl.addEventListener('click', () => openModal('partner')); initMobileUI(); });
+document.addEventListener('DOMContentLoaded', initMobileUI);
 window.__initRWA = initMap;
-if (window.__googleMapsLoaded) initMap();
+if(window.__googleMapsLoaded) initMap();
 </script>
 </body>
 </html>
