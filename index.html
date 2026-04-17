@@ -2542,6 +2542,14 @@ function selectAsset(id) {
   activeId = id;
   const a = ASSETS.find(x => x.id === id);
   if (!a) return;
+
+  // --- THE CRITICAL FIX START ---
+  window.currentAsset = a; 
+  window.currentAssetForModal = a; 
+  // --- THE CRITICAL FIX END ---
+  
+  // Header section
+  document.getElementById('rhead').innerHTML = `
   
   // Header section
   document.getElementById('rhead').innerHTML = `
