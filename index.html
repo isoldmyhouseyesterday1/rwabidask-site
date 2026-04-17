@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <script>
 (function(){
@@ -34,22 +34,22 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #0a0e17;
-  --bg1:      #0f1420;
-  --bg2:      #151c2c;
-  --bg3:      #1a2236;
-  --bg4:      #1f2a40;
-  --border:   rgba(0, 245, 255, 0.12);
-  --border2:  rgba(0, 245, 255, 0.24);
-  --border3:  rgba(0, 245, 255, 0.38);
-  --text:     #eef2ff;
-  --muted:    #7c8db0;
-  --dim:      #b8c4e0;
-  --cyan:     #00f5ff;
-  --cyan-dim: rgba(0, 245, 255, 0.08);
-  --cyan-glow:rgba(0, 245, 255, 0.35);
-  --silver:   #d4dcf0;
-  --gold:     #e8c86a;
+  --bg:       #1c2540;
+  --bg1:      #232d4e;
+  --bg2:      #2a3560;
+  --bg3:      #303d6e;
+  --bg4:      #38477c;
+  --border:   rgba(255,255,255,.14);
+  --border2:  rgba(255,255,255,.24);
+  --border3:  rgba(255,255,255,.38);
+  --text:     #f0f4ff;
+  --muted:    #8fa0c8;
+  --dim:      #c8d4f0;
+  --cyan:     #00ffc8;
+  --cyan-dim: rgba(0,255,200,.14);
+  --cyan-glow:rgba(0,255,200,.4);
+  --silver:   #dde4f5;
+  --gold:     #e2c55a;
   --red:      #ff6b6b;
   --blue:     #6ba8ff;
   --green:    #3ee688;
@@ -74,7 +74,7 @@ html, body {
 }
 #main-row {
   display: grid;
-  grid-template-columns: 288px 1fr 340px;
+  grid-template-columns: 288px 1fr 320px;
   min-height: 0;
   overflow: hidden;
   min-width: 0;
@@ -104,12 +104,12 @@ body { min-width: 900px; overflow-x: auto; }
   width: 8px; height: 8px;
   background: var(--cyan);
   border-radius: 50%;
-  box-shadow: 0 0 10px var(--cyan), 0 0 22px rgba(0,245,255,.4);
+  box-shadow: 0 0 10px var(--cyan), 0 0 22px rgba(0,255,200,.4);
   animation: pulse-logo 3s ease-in-out infinite;
 }
 @keyframes pulse-logo {
-  0%, 100% { box-shadow: 0 0 10px var(--cyan), 0 0 22px rgba(0,245,255,.4); }
-  50%       { box-shadow: 0 0 16px var(--cyan), 0 0 36px rgba(0,245,255,.6); }
+  0%, 100% { box-shadow: 0 0 10px var(--cyan), 0 0 22px rgba(0,255,200,.4); }
+  50%       { box-shadow: 0 0 16px var(--cyan), 0 0 36px rgba(0,255,200,.6); }
 }
 .logo-text {
   font-size: 15px;
@@ -209,7 +209,7 @@ body { min-width: 900px; overflow-x: auto; }
   font-weight: 700;
   border-left-color: var(--cyan);
 }
-.tbtn.primary:hover { background: #00e0ea; }
+.tbtn.primary:hover { background: #00e6b4; }
 
 #left {
   background: var(--bg1);
@@ -278,7 +278,7 @@ body { min-width: 900px; overflow-x: auto; }
   letter-spacing: .3px;
 }
 .fchip.on {
-  border-color: rgba(0,245,255,.45);
+  border-color: rgba(0,255,200,.45);
   color: var(--cyan);
   background: var(--cyan-dim);
   font-weight: 600;
@@ -345,8 +345,8 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .pcard:hover { background: rgba(255,255,255,.02); }
 .pcard.active {
-  background: rgba(0,245,255,.04);
-  border-left: 1px solid rgba(0,245,255,.4);
+  background: rgba(0,255,200,.04);
+  border-left: 1px solid rgba(0,255,200,.4);
 }
 .pcard-addr {
   font-size: 12px;
@@ -381,7 +381,7 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .t-res  { background: rgba(59,125,248,.12); color: #6ba3fb; }
 .t-com  { background: rgba(201,168,76,.12);  color: var(--gold); }
-.t-land { background: rgba(0,245,255,.1);    color: var(--cyan); }
+.t-land { background: rgba(0,255,200,.1);    color: var(--cyan); }
 .t-biz  { background: rgba(139,92,246,.12);  color: #a78bfa; }
 .t-avi  { background: rgba(91,150,255,.12); color: var(--blue); }
 .t-mar  { background: rgba(34,150,200,.12); color: #22c8e8; }
@@ -398,7 +398,7 @@ body { min-width: 900px; overflow-x: auto; }
 
 #map-col {
   position: relative;
-  background: #0a0e17;
+  background: #111928;
   overflow: hidden;
 }
 #map3d-container {
@@ -415,7 +415,7 @@ body { min-width: 900px; overflow-x: auto; }
   gap: 4px;
 }
 .mctl-group {
-  background: rgba(15,20,32,.96);
+  background: rgba(26,34,60,.94);
   border: 1px solid var(--border2);
   backdrop-filter: blur(12px);
   padding: 5px;
@@ -444,7 +444,7 @@ body { min-width: 900px; overflow-x: auto; }
   bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(15,20,32,.96);
+  background: rgba(26,34,60,.92);
   border: 1px solid var(--border2);
   padding: 7px 18px;
   font-family: var(--font);
@@ -481,12 +481,12 @@ body { min-width: 900px; overflow-x: auto; }
   cursor: pointer;
 }
 .price-marker:hover { 
-  filter: drop-shadow(0 6px 24px rgba(0,245,255,.5)); 
+  filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); 
   transform: scale(1.06); 
 }
 .price-tag {
-  background: rgba(10,14,23,.98);
-  border: 1px solid rgba(0,245,255,.55);
+  background: rgba(14,22,46,.97);
+  border: 1px solid rgba(0,255,200,.55);
   border-radius: 5px;
   padding: 5px 10px;
   white-space: nowrap;
@@ -510,7 +510,7 @@ body { min-width: 900px; overflow-x: auto; }
 .price-stem {
   width: 1px;
   height: 20px;
-  background: linear-gradient(to bottom, rgba(0,245,255,.6), rgba(0,245,255,0));
+  background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0));
   margin: 0 auto;
 }
 .price-dot {
@@ -518,18 +518,122 @@ body { min-width: 900px; overflow-x: auto; }
   height: 6px;
   border-radius: 50%;
   background: var(--cyan);
-  box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,245,255,.5);
+  box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5);
   margin: 0 auto;
   margin-top: -1px;
 }
-.price-marker.heat-warm .price-tag { border-color: rgba(232,200,106,.6); }
-.price-marker.heat-warm .price-tag-val { color: #e8c86a; }
-.price-marker.heat-warm .price-stem { background: linear-gradient(to bottom, rgba(232,200,106,.6), transparent); }
-.price-marker.heat-warm .price-dot  { background: #e8c86a; box-shadow: 0 0 6px #e8c86a; }
-.price-marker.heat-hot  .price-tag { border-color: rgba(255,107,107,.6); }
-.price-marker.heat-hot  .price-tag-val { color: #ff6b6b; }
-.price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,107,107,.6), transparent); }
-.price-marker.heat-hot  .price-dot  { background: #ff6b6b; box-shadow: 0 0 6px #ff6b6b; }
+.price-marker.heat-warm .price-tag { border-color: rgba(255,180,0,.6); }
+.price-marker.heat-warm .price-tag-val { color: #ffb400; }
+.price-marker.heat-warm .price-stem { background: linear-gradient(to bottom, rgba(255,180,0,.6), transparent); }
+.price-marker.heat-warm .price-dot  { background: #ffb400; box-shadow: 0 0 6px #ffb400; }
+.price-marker.heat-hot  .price-tag { border-color: rgba(255,80,80,.6); }
+.price-marker.heat-hot  .price-tag-val { color: #ff5a5a; }
+.price-marker.heat-hot  .price-stem { background: linear-gradient(to bottom, rgba(255,80,80,.6), transparent); }
+.price-marker.heat-hot  .price-dot  { background: #ff5a5a; box-shadow: 0 0 6px #ff5a5a; }
+.price-marker.standard .price-tag     { border-color: rgba(0,255,200,.55); }
+.price-marker.standard .price-tag-val { color: var(--cyan); }
+.price-marker.standard .price-stem    { background: linear-gradient(to bottom, rgba(0,255,200,.6), rgba(0,255,200,0)); }
+.price-marker.standard .price-dot     { background: var(--cyan); box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0,255,200,.5); }
+
+@keyframes anchor-glow {
+  0%,100% { filter: drop-shadow(0 0 5px rgba(226,197,90,.8)) drop-shadow(0 4px 16px rgba(0,0,0,.7)); }
+  50%      { filter: drop-shadow(0 0 18px rgba(226,197,90,1)) drop-shadow(0 0 32px rgba(226,197,90,.55)) drop-shadow(0 4px 20px rgba(0,0,0,.8)); }
+}
+@keyframes anchor-ring {
+  0%   { transform: translate(-50%,-50%) scale(.5); opacity: .9; }
+  100% { transform: translate(-50%,-50%) scale(2.6); opacity: 0; }
+}
+.price-marker.anchor {
+  animation: anchor-glow 2.4s ease-in-out infinite;
+  z-index: 50 !important;
+}
+.price-marker.anchor .price-tag {
+  border-color: rgba(226,197,90,.9);
+  background: rgba(8,14,32,.98);
+  box-shadow: 0 0 0 1px rgba(226,197,90,.18), 0 4px 22px rgba(0,0,0,.75);
+}
+.price-marker.anchor .price-tag::before {
+  content: '★ FEATURED';
+  display: block;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  color: var(--gold);
+  margin-bottom: 2px;
+  opacity: .9;
+}
+.price-marker.anchor .price-tag-val  { color: var(--gold); }
+.price-marker.anchor .price-tag-type { color: rgba(226,197,90,.55); }
+.price-marker.anchor .price-stem {
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(226,197,90,.8), rgba(226,197,90,0));
+}
+.price-marker.anchor .price-dot {
+  width: 9px; height: 9px;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold), 0 0 22px rgba(226,197,90,.7);
+  position: relative;
+}
+.price-marker.anchor .price-dot::before,
+.price-marker.anchor .price-dot::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 1px solid rgba(226,197,90,.65);
+  animation: anchor-ring 2.4s ease-out infinite;
+}
+.price-marker.anchor .price-dot::after { animation-delay: 1.2s; }
+
+.map-cluster {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: all;
+  cursor: pointer;
+  z-index: 30;
+}
+.cluster-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,255,200,.25);
+  animation: cluster-breathe 3s ease-in-out infinite;
+}
+@keyframes cluster-breathe {
+  0%,100% { opacity: .4; transform: scale(1); }
+  50%      { opacity: .8; transform: scale(1.08); }
+}
+.cluster-inner {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(14,22,46,.95);
+  border: 1.5px solid rgba(0,255,200,.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(0,255,200,.2), 0 4px 20px rgba(0,0,0,.7);
+  transition: border-color .15s, box-shadow .15s;
+}
+.map-cluster:hover .cluster-inner {
+  border-color: var(--cyan);
+  box-shadow: 0 0 24px rgba(0,255,200,.4), 0 4px 20px rgba(0,0,0,.8);
+}
+.cluster-count {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--cyan);
+  line-height: 1;
+}
+.cluster-val {
+  font-size: 8px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
 
 #right {
   background: var(--bg1);
@@ -620,7 +724,7 @@ body { min-width: 900px; overflow-x: auto; }
   letter-spacing: 1.8px;
   color: var(--cyan);
   margin-bottom: 9px;
-  border-bottom: 1px solid rgba(0,245,255,.2);
+  border-bottom: 1px solid rgba(0,255,200,.2);
   padding-bottom: 5px;
   opacity: .9;
 }
@@ -663,7 +767,7 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .abtn:hover { opacity: .85; transform: translateY(-1px); }
 .a-buy  { background: var(--cyan); color: #000; }
-.a-bid  { background: none; border: 1px solid rgba(0,245,255,.3) !important; color: var(--cyan); }
+.a-bid  { background: none; border: 1px solid rgba(0,255,200,.3) !important; color: var(--cyan); }
 .a-lend { background: none; border: 1px solid rgba(59,125,248,.3) !important; color: #6ba3fb; }
 .a-save { background: none; border: 1px solid var(--border) !important; color: var(--muted); }
 .a-claim {
@@ -675,71 +779,14 @@ body { min-width: 900px; overflow-x: auto; }
 .a-sponsor {
   grid-column: 1 / -1;
   background: none;
-  border: 1px solid rgba(232,200,106,.25) !important;
+  border: 1px solid rgba(201,168,76,.25) !important;
   color: var(--gold);
   font-size: 9px;
 }
 
-/* ============================================================
-   DROPDOWN MENU STYLING - Clinical SEC 10-K Aesthetic
-   ============================================================ */
-.styled-select {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 11px;
-  font-weight: 500;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2300f5ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-}
-.styled-select:hover {
-  border-color: var(--cyan);
-  box-shadow: 0 0 0 1px rgba(0,245,255,0.2);
-}
-.styled-select:focus {
-  outline: none;
-  border-color: var(--cyan);
-  box-shadow: 0 0 0 2px rgba(0,245,255,0.15);
-}
-.styled-select option {
-  background: var(--bg2);
-  color: var(--text);
-  padding: 10px;
-  font-family: var(--font);
-  font-size: 11px;
-}
-.styled-select optgroup {
-  background: var(--bg1);
-  color: var(--cyan);
-  font-weight: 700;
-  font-size: 9px;
-  letter-spacing: 1px;
-}
-.modal-select-group {
-  margin-bottom: 16px;
-}
-.modal-select-group label {
-  display: block;
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--cyan);
-  margin-bottom: 8px;
-}
-
 #market-ribbon {
-  background: #080c14;
-  border-bottom: 1px solid rgba(0,245,255,.1);
+  background: #0d1526;
+  border-bottom: 1px solid rgba(0,255,200,.1);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -807,7 +854,7 @@ body { min-width: 900px; overflow-x: auto; }
 }
 
 #footer {
-  background: #0c1020;
+  background: #161e38;
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -833,7 +880,7 @@ body { min-width: 900px; overflow-x: auto; }
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.85);
+  background: rgba(0,0,0,.8);
   z-index: 9000;
   align-items: center;
   justify-content: center;
@@ -843,7 +890,7 @@ body { min-width: 900px; overflow-x: auto; }
 .mbox {
   background: var(--bg2);
   border: 1px solid var(--border2);
-  width: 500px;
+  width: 460px;
   max-width: 95vw;
   max-height: 90vh;
   overflow-y: auto;
@@ -853,17 +900,17 @@ body { min-width: 900px; overflow-x: auto; }
 .mbox::-webkit-scrollbar { width: 2px; }
 .mbox::-webkit-scrollbar-thumb { background: var(--border2); }
 .mtitle {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 4px;
-  letter-spacing: -.3px;
+  letter-spacing: -.4px;
 }
 .msub {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--dim);
   margin-bottom: 24px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 .mfield { margin-bottom: 14px; }
 .mfield label {
@@ -872,7 +919,7 @@ body { min-width: 900px; overflow-x: auto; }
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: var(--cyan);
+  color: var(--dim);
   margin-bottom: 5px;
 }
 .mfield input,
@@ -891,11 +938,10 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .mfield input:focus,
 .mfield select:focus,
-.mfield textarea:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0,245,255,.1); }
+.mfield textarea:focus { border-color: rgba(0,255,200,.5); box-shadow: 0 0 0 2px rgba(0,255,200,.08); }
 .mfield input::placeholder,
 .mfield textarea::placeholder { color: var(--muted); }
-.mfield select option { background: var(--bg2); color: var(--text); }
-.mfield select optgroup { background: var(--bg1); color: var(--cyan); font-weight: 700; }
+.mfield select option { background: var(--bg2); }
 .mfield textarea { resize: vertical; min-height: 80px; }
 .mrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .mfooter { display: flex; gap: 8px; margin-top: 24px; }
@@ -913,7 +959,7 @@ body { min-width: 900px; overflow-x: auto; }
   border-radius: 2px;
   transition: background .15s;
 }
-.msub-btn:hover { background: #00e0ea; }
+.msub-btn:hover { background: #00e6b4; }
 .mcan-btn {
   padding: 11px 18px;
   background: none;
@@ -926,6 +972,35 @@ body { min-width: 900px; overflow-x: auto; }
   transition: all .15s;
 }
 .mcan-btn:hover { color: var(--text); border-color: var(--border2); }
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.role-card {
+  border: 1px solid var(--border);
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+}
+.role-card:hover, .role-card.sel {
+  border-color: rgba(0,255,200,.35);
+  background: var(--cyan-dim);
+}
+.role-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+.role-desc {
+  font-size: 9px;
+  color: var(--dim);
+  margin-top: 4px;
+  line-height: 1.5;
+}
 .mclose-btn {
   position: absolute;
   top: 14px;
@@ -952,7 +1027,7 @@ body { min-width: 900px; overflow-x: auto; }
   right: 18px;
   z-index: 99999;
   background: var(--bg2);
-  border: 1px solid rgba(0,245,255,.4);
+  border: 1px solid rgba(0,255,200,.3);
   padding: 12px 18px;
   font-family: var(--font);
   font-size: 11px;
@@ -969,6 +1044,23 @@ body { min-width: 900px; overflow-x: auto; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+#asset-drawer {
+  position: fixed;
+  top: 78px;
+  right: 0;
+  bottom: 30px;
+  width: min(480px, 38vw);
+  background: var(--bg1);
+  border-left: 1px solid rgba(0,255,200,.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 700;
+  transform: translateX(105%);
+  transition: transform .32s cubic-bezier(.4,0,.2,1);
+  box-shadow: -20px 0 60px rgba(0,0,0,.6);
+  will-change: transform;
+}
+#asset-drawer.open { transform: translateX(0); }
 #overlay-layer {
   position: absolute;
   inset: 0;
@@ -977,7 +1069,7 @@ body { min-width: 900px; overflow-x: auto; }
   overflow: visible;
 }
 
-/* MOBILE UI */
+/* MOBILE "ZILLOW" UI (≤767px) — Centered Globe + 75vh Slide-up Drawer */
 @media (max-width: 767px) {
   #shell {
     grid-template-rows: 48px 1fr;
@@ -996,16 +1088,17 @@ body { min-width: 900px; overflow-x: auto; }
     right: 0 !important;
     top: auto !important;
     width: 100% !important;
-    height: 70vh !important;
-    max-height: 70vh !important;
+    height: 75vh !important;
+    max-height: 75vh !important;
     border-left: none !important;
-    border-top: 2px solid rgba(0,245,255,.3) !important;
+    border-top: 2px solid rgba(0,255,200,.3) !important;
     border-radius: 16px 16px 0 0 !important;
     transform: translateY(100%) !important;
     transition: transform .3s cubic-bezier(.4,0,.2,1) !important;
     z-index: 2000 !important;
     background: var(--bg1) !important;
     overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
     display: block !important;
   }
   #right.open-drawer {
@@ -1025,11 +1118,16 @@ body { min-width: 900px; overflow-x: auto; }
   }
   .rbody {
     overflow-y: auto !important;
-    max-height: calc(70vh - 180px);
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(75vh - 180px);
   }
   #topbar {
     height: 48px;
     padding: 0 8px;
+    background: var(--bg1);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 100;
   }
   .tstat, .logo-tag { display: none; }
   .tbtn {
@@ -1044,21 +1142,47 @@ body { min-width: 900px; overflow-x: auto; }
     color: #000;
     border-radius: 2px;
     padding: 0 10px;
+    margin-left: 4px;
   }
   .logo { padding: 0 12px; border-right: none; }
   .logo-text { font-size: 14px; }
   .search-wrap { margin-left: 8px; flex: 1; }
+  #search-input { font-size: 12px; }
+  body, #main-row {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+  }
   #main-row {
     grid-template-columns: 1fr !important;
+    width: 100vw !important;
+    position: relative;
+    overflow: hidden;
   }
   #map-col {
     position: relative !important;
+    left: 0 !important;
     width: 100vw !important;
     height: 100% !important;
+    overflow: hidden;
   }
-  .map-ctl-panel { top: 8px; right: 8px; }
+  #map3d-container {
+    position: absolute;
+    inset: 0;
+  }
+  .map-ctl-panel {
+    top: 8px;
+    right: 8px;
+    z-index: 200;
+  }
+  .mctl-group { padding: 3px; gap: 0; }
   .mctl { padding: 4px 8px; font-size: 8px; }
-  .map-status { bottom: 60px; font-size: 8px; padding: 4px 12px; }
+  .map-status {
+    bottom: 60px;
+    font-size: 8px;
+    padding: 4px 12px;
+    white-space: nowrap;
+    background: rgba(0,0,0,.7);
+  }
   .view-toggle {
     position: absolute;
     bottom: 16px;
@@ -1066,9 +1190,9 @@ body { min-width: 900px; overflow-x: auto; }
     transform: translateX(-50%);
     display: flex;
     gap: 4px;
-    background: rgba(15,20,32,.96);
+    background: rgba(14,22,46,.95);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(0,245,255,.25);
+    border: 1px solid rgba(0,255,200,.25);
     border-radius: 40px;
     padding: 4px;
     z-index: 400;
@@ -1085,6 +1209,7 @@ body { min-width: 900px; overflow-x: auto; }
     border-radius: 32px;
     color: var(--muted);
     cursor: pointer;
+    transition: all .15s;
   }
   .view-toggle-btn.active {
     background: var(--cyan);
@@ -1098,16 +1223,21 @@ body { min-width: 900px; overflow-x: auto; }
     overflow-y: auto;
     display: none;
     flex-direction: column;
+    padding: 12px;
+    gap: 12px;
   }
-  .list-view.active { display: flex; }
+  .list-view.active {
+    display: flex;
+  }
   .list-tile {
     background: var(--bg1);
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 14px;
-    margin-bottom: 10px;
     cursor: pointer;
+    transition: all .15s;
   }
+  .list-tile:active { background: var(--bg2); }
   .list-tile-type {
     font-size: 9px;
     font-weight: 600;
@@ -1120,36 +1250,453 @@ body { min-width: 900px; overflow-x: auto; }
     font-size: 13px;
     font-weight: 600;
     color: var(--text);
+    line-height: 1.35;
+    margin-bottom: 4px;
   }
   .list-tile-loc {
     font-size: 10px;
     color: var(--dim);
-    margin: 4px 0;
+    margin-bottom: 8px;
   }
   .list-tile-price {
     font-size: 16px;
     font-weight: 700;
     color: var(--cyan);
   }
+  #asset-drawer { display: none; }
   .price-marker { z-index: 500 !important; }
-  .price-tag { padding: 4px 8px; }
-  .price-tag-val { font-size: 10px; }
+  .price-tag { padding: 5px 9px; }
+  .price-tag-val { font-size: 11px; }
+  .price-tag-type { font-size: 7px; }
+}
+@media (max-width: 767px) and (orientation: landscape) {
+  .view-toggle { bottom: 8px; }
+  .view-toggle-btn { padding: 6px 16px; font-size: 10px; }
+  #right { height: 80vh !important; max-height: 80vh !important; }
 }
 
+.drawer-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 10;
+  line-height: 1;
+  transition: color .15s;
+  padding: 4px;
+}
+.drawer-close:hover { color: var(--text); }
+.drawer-hero {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  background: var(--bg3);
+}
+.drawer-hero-placeholder {
+  width: 100%;
+  height: 160px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--border2);
+  font-size: 36px;
+  letter-spacing: 4px;
+}
+.drawer-head {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.drawer-type-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.drawer-type {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--cyan);
+  opacity: .8;
+}
+.drawer-status {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: rgba(46,212,122,.12);
+  color: var(--green);
+  border: 1px solid rgba(46,212,122,.25);
+}
+.drawer-status.inactive {
+  background: rgba(255,90,90,.08);
+  color: var(--red);
+  border-color: rgba(255,90,90,.2);
+}
+.drawer-address {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 2px;
+}
+.drawer-city {
+  font-size: 11px;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+.drawer-price-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.drawer-price {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: -.5px;
+  line-height: 1;
+}
+.drawer-psf {
+  font-size: 11px;
+  color: var(--muted);
+  padding-bottom: 3px;
+}
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  max-height: calc(90vh - 280px);
+  -webkit-overflow-scrolling: touch;
+}
+.drawer-body::-webkit-scrollbar { width: 3px; }
+.drawer-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.drawer-specs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.drawer-spec {
+  padding: 12px 14px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.drawer-spec:last-child { border-right: none; }
+.drawer-spec-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.drawer-spec-lbl {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.drawer-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.drawer-section-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--cyan);
+  margin-bottom: 10px;
+  opacity: .85;
+}
+.drawer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 12px;
+}
+.drawer-row:last-child { border-bottom: none; }
+.drawer-k { font-size: 11px; color: var(--dim); flex-shrink: 0; }
+.drawer-v { font-size: 11px; font-weight: 500; color: var(--silver); text-align: right; word-break: break-word; }
+.drawer-v.hl { color: var(--cyan); font-weight: 700; }
+.compliance-block {
+  background: rgba(0,255,200,.04);
+  border: 1px solid rgba(0,255,200,.12);
+  border-radius: 3px;
+  padding: 10px 12px;
+  margin-bottom: 0;
+}
+.compliance-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 10px;
+  gap: 8px;
+}
+.compliance-k { color: var(--muted); font-size: 10px; }
+.compliance-v { color: var(--silver); font-weight: 600; font-size: 10px; text-align: right; }
+.struct-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 9px 11px;
+  margin-bottom: 7px;
+}
+.struct-card:last-child { margin-bottom: 0; }
+.struct-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.drawer-actions {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+.drawer-btn-primary {
+  width: 100%;
+  min-height: 48px;
+  padding: 13px;
+  background: linear-gradient(135deg, #00c49a 0%, #00ffc8 100%);
+  color: #041a12;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: opacity .15s, transform .1s;
+}
+.drawer-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.drawer-btn-secondary {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .15s;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+}
+.drawer-btn-secondary:hover { border-color: var(--border3); color: var(--text); }
+.drawer-legal {
+  padding: 10px 16px 12px;
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.7;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.bid-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 8px;
+  font-size: 10px;
+}
+.bid-row:last-child { border-bottom: none; }
+.bid-amount { color: var(--cyan); font-weight: 700; font-size: 12px; }
+.bid-terms  { color: var(--dim); }
+.bid-expiry { color: var(--muted); font-size: 9px; text-align: right; }
+
+@keyframes mint-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.mint-ring {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,255,200,.2);
+  border-top-color: var(--cyan);
+  animation: mint-spin .9s linear infinite;
+  margin: 0 auto 12px;
+}
+.mint-hash {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1.8;
+  font-family: 'Courier New', monospace;
+  background: rgba(0,0,0,.3);
+  padding: 8px 10px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+.mint-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border: 1px solid rgba(46,212,122,.4);
+  border-radius: 20px;
+  background: rgba(46,212,122,.06);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: .5px;
+  margin-bottom: 12px;
+}
+.mint-qr {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 8px;
+  color: #000;
+  position: relative;
+  overflow: hidden;
+}
+.mint-qr::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background-image:
+    repeating-linear-gradient(0deg, #000 0, #000 2px, transparent 2px, transparent 5px),
+    repeating-linear-gradient(90deg, #000 0, #000 2px, transparent 2px, transparent 5px);
+  opacity: .7;
+}
+.savings-block {
+  background: linear-gradient(135deg, rgba(0,12,4,.9) 0%, rgba(0,20,10,.9) 100%);
+  border: 1px solid rgba(46,212,122,.25);
+  border-radius: 4px;
+  padding: 12px 14px;
+  margin: 0;
+}
+.savings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 8px;
+}
+.savings-row:last-child { border-bottom: none; }
+.savings-k { color: var(--dim); font-size: 11px; }
+.savings-v { font-size: 11px; font-weight: 600; color: var(--silver); }
+.savings-v.strike { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+.savings-v.fee    { color: var(--cyan); }
+.savings-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+}
+.savings-total-k { color: var(--dim); }
+.savings-total-v { color: var(--green); font-size: 16px; letter-spacing: -.3px; }
+.savings-saas {
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-style: italic;
+}
+.ledger-card {
+  background: rgba(0,255,200,.03);
+  border: 1px solid rgba(0,255,200,.15);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+.ledger-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ledger-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 0 2px rgba(148,160,190,.2);
+  flex-shrink: 0;
+}
+.ledger-dot.minted {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green), 0 0 0 2px rgba(46,212,122,.25);
+}
+.ledger-label { font-size: 11px; color: var(--dim); }
+.ledger-hash-preview {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+.digitize-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  background: none;
+  border: 1px solid rgba(0,255,200,.3);
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .15s;
+}
+.digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
+.digitize-btn:disabled { opacity: .4; cursor: default; }
+
+/* CLINICAL AUTHENTICATION GATE — Minimalist, No Escape */
 .auth-gate {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(10,14,23,0.98);
+  background: rgba(10, 14, 23, 0.98);
   backdrop-filter: blur(8px);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font);
 }
-.auth-gate.hidden { display: none; }
+.auth-gate.hidden {
+  display: none;
+}
 .auth-gate-card {
   background: var(--bg1);
   border: 1px solid var(--border2);
@@ -1157,6 +1704,7 @@ body { min-width: 900px; overflow-x: auto; }
   max-width: 440px;
   width: 90%;
   text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 .auth-gate-title {
   font-size: 14px;
@@ -1192,7 +1740,9 @@ body { min-width: 900px; overflow-x: auto; }
   background: var(--cyan);
   color: #000;
 }
-.auth-gate-btn.primary:hover { background: #00e0ea; }
+.auth-gate-btn.primary:hover {
+  background: #00e6b4;
+}
 .auth-gate-btn.secondary {
   background: transparent;
   border: 1px solid var(--border2);
@@ -1208,30 +1758,51 @@ body { min-width: 900px; overflow-x: auto; }
 <body>
 
 <div id="shell">
-<div id="market-ribbon"><div class="ribbon-track" id="ribbon-track"></div></div>
+
+<div id="market-ribbon">
+  <div class="ribbon-track" id="ribbon-track"></div>
+</div>
 
 <div id="topbar">
   <div class="logo">
     <div class="logo-mark"></div>
-    <div><div class="logo-text">RWABidAsk</div><div class="logo-tag">GLOBAL ASSET MARKET</div></div>
+    <div>
+      <div class="logo-text">RWABidAsk</div>
+      <div class="logo-tag">GLOBAL ASSET MARKET</div>
+    </div>
   </div>
   <div class="search-wrap">
     <input id="search-input" type="text" placeholder="Global Asset Navigation — search any address, city, or region…" autocomplete="off">
-    <button class="search-icon" onclick="performSearch()" title="Global Asset Navigation">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <button class="search-icon" onclick="performSearch()" title="Global Asset Navigation" aria-label="Search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
     </button>
   </div>
   <div class="topbar-right">
-    <div class="tstat"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div></div>
-    <div class="tstat"><div class="tstat-l">Assets</div><div class="tstat-v live" id="s-assets">—</div></div>
-    <div class="tstat"><div class="tstat-l">Status</div><div class="tstat-v live" id="s-status">SYNC</div></div>
-    <div class="tstat"><div class="tstat-l">Bids 24h</div><div class="tstat-v" id="s-bids">—</div></div>
+    <div class="tstat" title="Total value of all assets registered on RWABidAsk Permanent Ledger">
+      <div class="tstat-l">GMC</div>
+      <div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Assets</div>
+      <div class="tstat-v live" id="s-assets">—</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Status</div>
+      <div class="tstat-v live" id="s-status">SYNC</div>
+    </div>
+    <div class="tstat">
+      <div class="tstat-l">Bids 24h</div>
+      <div class="tstat-v" id="s-bids">—</div>
+    </div>
     <button class="tbtn" id="signin-btn">Sign In</button>
     <button class="tbtn primary" id="join-btn">Join</button>
   </div>
 </div>
 
 <div id="main-row">
+
   <div id="left">
     <div class="left-head">
       <div class="left-title">Global Directory</div>
@@ -1244,30 +1815,85 @@ body { min-width: 900px; overflow-x: auto; }
         <button class="fchip" onclick="setFilter(this,'25mplus')">$25M+</button>
       </div>
     </div>
-    <div class="list-scroll" id="list-scroll"><div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">SYNCHRONIZING GLOBAL DIRECTORY…</div></div></div>
+    <div class="list-scroll" id="list-scroll">
+      <div class="sync-state" id="sync-state">
+        <div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div>
+        <div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div>
+      </div>
+    </div>
   </div>
 
   <div id="map-col">
     <div id="map3d-container"></div>
     <div id="overlay-layer"></div>
     <div class="map-ctl-panel">
-      <div class="mctl-group"><button class="mctl on" onclick="setMapMode('satellite',this)">Satellite</button><button class="mctl" onclick="setMapMode('hybrid',this)">Hybrid</button></div>
-      <div class="mctl-group"><button class="mctl" onclick="setTilt(45,this)">Tilt 45°</button><button class="mctl" onclick="setTilt(0,this)">Top Down</button></div>
-      <div class="mctl-group"><button class="mctl" onclick="toggleHeat(this)">Heat Zone</button><button class="mctl" onclick="flyGlobe()">Global View</button></div>
+      <div class="mctl-group">
+        <button class="mctl on" onclick="setMapMode('satellite',this)">Satellite</button>
+        <button class="mctl" onclick="setMapMode('hybrid',this)">Hybrid</button>
+      </div>
+      <div class="mctl-group">
+        <button class="mctl" onclick="setTilt(45,this)">Tilt 45°</button>
+        <button class="mctl" onclick="setTilt(0,this)">Top Down</button>
+      </div>
+      <div class="mctl-group">
+        <button class="mctl" onclick="toggleHeat(this)">Heat Zone</button>
+        <button class="mctl" onclick="flyGlobe()">Global View</button>
+      </div>
     </div>
     <div class="map-status"><span class="live-dot"></span><span id="map-status-txt">ESTABLISHING SECURE CONNECTION…</span></div>
+    <div class="blimp-layer">
+      <div class="blimp" id="blimp-el" title="Partnership — Annie Group LLC">
+        <div class="blimp-body">
+          <div class="blimp-hull"><div><div class="blimp-text">ANNIE GROUP LLC</div><div class="blimp-sub">PARTNERSHIP INQUIRY</div></div></div>
+          <div class="blimp-tail"></div>
+        </div>
+        <div class="blimp-string"></div>
+        <div class="blimp-flag">AIRSPACE</div>
+      </div>
+    </div>
   </div>
 
   <div id="right">
-    <div class="rhead" id="rhead"><div class="rtype">Select an Asset</div><div class="rname" style="opacity:.25">Click any marker or listing</div><div class="rcity">—</div></div>
-    <div class="rbody" id="rbody"><div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND</div></div></div>
+    <div class="rhead" id="rhead">
+      <div class="rtype">Select an Asset</div>
+      <div class="rname" style="opacity:.25">Click any marker or listing</div>
+      <div class="rcity">—</div>
+    </div>
+    <div class="rbody" id="rbody">
+      <div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="asset-drawer">
+  <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  <div id="drawer-inner"></div>
+</div>
+
+<div id="ticker-bar">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<div id="footer">
+  <div class="footer-copy">
+    <strong>© 2026 ANNIE GROUP LLC. All Rights Reserved.</strong>
+    &nbsp;·&nbsp;
+    RWABidAsk is a Registered Trade Name of Annie Group LLC
+    &nbsp;·&nbsp;
+    Non-Custodial Asset Digitization Platform — Not a Broker, Dealer, or Investment Advisor
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openModal('tos');return false">Terms</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openModal('privacy');return false">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/cdn-cgi/l/email-protection#0f607f7c4f7d786e6d666b6e7c64216c6062"><span class="__cf_email__" data-cfemail="3f504f4c7f4d485e5d565b5e4c54115c5052">[email&#160;protected]</span></a>
   </div>
 </div>
 
-<div id="ticker-bar"><div class="ticker-track" id="ticker-track"></div></div>
-<div id="footer"><div class="footer-copy"><strong>© 2026 ANNIE GROUP LLC. All Rights Reserved.</strong> &nbsp;·&nbsp; RWABidAsk is a Registered Trade Name of Annie Group LLC &nbsp;·&nbsp; <a href="#" onclick="openModal('tos');return false">Terms</a> &nbsp;·&nbsp; <a href="#" onclick="openModal('privacy');return false">Privacy</a></div></div>
 </div>
 
+<div id="info-win" class="info-win" style="display:none;position:fixed;z-index:9999;"></div>
 <div id="modal"><div class="mbox" id="mbox"><button class="mclose-btn" onclick="closeModal()">✕</button></div></div>
 <div id="toast"></div>
 
@@ -1277,16 +1903,19 @@ body { min-width: 900px; overflow-x: auto; }
 </div>
 <div class="list-view" id="mobile-list-view"></div>
 
+<!-- CLINICAL AUTHENTICATION GATE — Persistent, No Escape -->
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-card">
     <div class="auth-gate-title">RWABidAsk | Access Terminal</div>
     <div class="auth-gate-sub">Sign in or create an account to access the Global Asset Directory, Persistent Ledger, and institutional bidding platform.</div>
     <div class="auth-gate-buttons">
-      <button class="auth-gate-btn secondary" onclick="openModal('register')">Request Access</button>
-      <button class="auth-gate-btn primary" onclick="openModal('signin')">Sign In</button>
+      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('register')">Request Access</button>
+      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button>
     </div>
   </div>
 </div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 
   <script>
 'use strict';
@@ -1298,7 +1927,7 @@ let isMapReady = false;
 let markersRendered = false;
 
 // ============================================================
-// ASSET CATEGORIES - No emojis, Castle/Estates mapped to Real Estate
+// ASSET CATEGORIES - No emojis, clean labels
 // ============================================================
 const ASSET_CATEGORIES = [
   { id: 'all', label: 'ALL', physical: false },
@@ -1311,24 +1940,24 @@ const ASSET_CATEGORIES = [
   { id: 'financial', label: 'FINANCIALS', physical: false }
 ];
 
-// Castle/Estates mapped to Real Estate filter
+// Castle mapping to Real Estate filter
 function getAssetCategory(type) {
   const map = { 
-    residential: 'realestate', 
-    land: 'realestate', 
-    castle: 'realestate',
-    estate: 'realestate',
-    property: 'realestate',
-    commercial: 'commercial', 
-    business: 'commercial', 
-    aviation: 'aviation', 
-    maritime: 'maritime', 
-    resources: 'resources', 
-    minerals: 'resources', 
-    energy: 'infrastructure', 
-    ip: 'financial', 
-    debt: 'financial', 
-    financial: 'financial'
+    residential:'realestate', 
+    land:'realestate', 
+    castle:'realestate',
+    estate:'realestate',
+    property:'realestate',
+    commercial:'commercial', 
+    business:'commercial', 
+    aviation:'aviation', 
+    maritime:'maritime', 
+    resources:'resources', 
+    minerals:'resources', 
+    energy:'infrastructure', 
+    ip:'financial', 
+    debt:'financial', 
+    financial:'financial'
   };
   return map[type] || 'realestate';
 }
@@ -1360,27 +1989,12 @@ let isCameraProcessing = false;
 const MARKER_VISIBLE_RANGE = 6000000;
 let isAuthenticated = false;
 
-// Supabase configuration
+// Supabase config
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
 let _sb = null;
 let currentUser = null;
 let currentUserRole = null;
-
-// ============================================================
-// LEAD GENERATION LISTS - Exhaustive options for dropdowns
-// ============================================================
-const LENDING_PRODUCTS = [
-  { category: 'DEBT FINANCE', options: ['Non-Recourse Finance', 'Recourse Lending', 'Bridge Loan', 'Construction Finance', 'SBA Loan', 'USDA Loan', 'CMBS', 'Private Credit', 'Mezzanine Debt', 'Preferred Equity'] },
-  { category: 'STRUCTURED PRODUCTS', options: ['Collateralized Debt Obligation (CDO)', 'Mortgage-Backed Security (MBS)', 'Whole Loan Sale', 'Participation Certificate'] }
-];
-
-const INSURANCE_PRODUCTS = [
-  { category: 'POLITICAL & CONFLICT', options: ['War / Political Risk Insurance', 'Terrorism Insurance', 'Expropriation Coverage', 'Currency Inconvertibility'] },
-  { category: 'TECHNICAL & CYBER', options: ['Smart Contract / Protocol Insurance', 'Cyber Risk & Data Breach', 'Validator Risk Coverage'] },
-  { category: 'PROPERTY & CASUALTY', options: ['Title Insurance', 'Casualty & Property', 'Liability Insurance', 'Natural Disaster Coverage', 'Flood Insurance', 'Earthquake Coverage'] },
-  { category: 'FINANCIAL & CREDIT', options: ['Trade Credit Insurance', 'Surety Bond', 'Political Violence'] }
-];
 
 // ============================================================
 // FETCH REAL DATA FROM SUPABASE 'listings' TABLE
@@ -1500,22 +2114,12 @@ function toast(msg) {
 
 function typeClass(type) {
   const cat = getAssetCategory(type);
-  const map = { realestate: 't-res', commercial: 't-com', resources: 't-res2', aviation: 't-avi', maritime: 't-mar', infrastructure: 't-energy', financial: 't-fin' };
+  const map = { realestate:'t-res', commercial:'t-com', resources:'t-res2', aviation:'t-avi', maritime:'t-mar', infrastructure:'t-energy', financial:'t-fin' };
   return map[cat] || 't-res';
 }
 
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/[&<>]/g, function(m) {
-    if (m === '&') return '&amp;';
-    if (m === '<') return '&lt;';
-    if (m === '>') return '&gt;';
-    return m;
-  });
-}
-
 // ============================================================
-// CATEGORY RENDERING
+// CATEGORY RENDERING - No emojis, clean labels
 // ============================================================
 function renderCategories() {
   const container = document.getElementById('category-tabs');
@@ -1581,10 +2185,20 @@ function renderList(assetsToShow) {
   }).join('');
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
 // ============================================================
-// LEAD GENERATION ENGINE - Database Transactions
+// LEAD GENERATION - Database transactions
 // ============================================================
-async function logLead(actionType, assetId, selectionDetail = null) {
+async function logLead(action, assetId, detail = null) {
   if (!_sb || !currentUser) {
     toast('Please sign in to continue');
     openModal('signin');
@@ -1595,20 +2209,12 @@ async function logLead(actionType, assetId, selectionDetail = null) {
       user_id: currentUser.id,
       user_email: currentUser.email,
       asset_id: assetId,
-      action_type: actionType,
-      selection_detail: selectionDetail,
-      status: 'pending',
-      priority: (actionType === 'TOKENIZE' || actionType === 'SPONSOR') ? 'HIGH' : 'NORMAL',
+      action_type: action,
+      selection_detail: detail,
       created_at: new Date().toISOString()
     }]);
     if (error) throw error;
-    
-    // Professional confirmation message
-    if (selectionDetail) {
-      toast(`✓ ${selectionDetail} confirmed. A specialist will be in contact shortly.`);
-    } else {
-      toast(`✓ ${actionType} request recorded. A specialist will be in contact shortly.`);
-    }
+    toast(`${action} request recorded. A specialist will contact you within 24 hours.`);
     return true;
   } catch (e) {
     console.error('Lead log error:', e);
@@ -1617,182 +2223,60 @@ async function logLead(actionType, assetId, selectionDetail = null) {
   }
 }
 
-// ============================================================
-// MODAL DROPDOWN HANDLERS - Styled selection menus
-// ============================================================
-function openLendingModal(assetId) {
-  const asset = ASSETS.find(a => a.id === assetId);
-  if (!asset) return;
-  
-  let optionsHtml = '';
-  for (const group of LENDING_PRODUCTS) {
-    optionsHtml += `<optgroup label="${group.category}">`;
-    for (const opt of group.options) {
-      optionsHtml += `<option value="${opt}">${opt}</option>`;
-    }
-    optionsHtml += `</optgroup>`;
+function requireAuth(action, assetId) {
+  if (currentUser) {
+    if (action === 'bid') openBidModal(assetId);
+    else if (action === 'buy') logLead('INQUIRY', assetId);
+    else if (action === 'watchlist') logLead('WATCHLIST', assetId);
+    else if (action === 'claim') logLead('TOKENIZE', assetId);
+    else if (action === 'sponsor') logLead('SPONSOR', assetId);
+    else if (action === 'lend') openLendingModal(assetId);
+    else if (action === 'insurance') openInsuranceModal(assetId);
+    else logLead(action.toUpperCase(), assetId);
+  } else {
+    openModal('signin');
+    toast('Please sign in to continue');
   }
-  
-  const modalHtml = `
-    <button class="mclose-btn" onclick="closeModal()">✕</button>
-    <div class="mtitle">Find Lender — ${escapeHtml(asset.address)}</div>
-    <div class="msub">Select a lending product to submit an institutional inquiry</div>
-    <div class="modal-select-group">
-      <label>LENDING PRODUCT</label>
-      <select id="lending-select" class="styled-select">
-        <option value="" disabled selected>— Select a product —</option>
-        ${optionsHtml}
-      </select>
-    </div>
-    <div class="mfooter">
-      <button class="msub-btn" onclick="submitLendingRequest('${assetId}')">Submit Inquiry</button>
-      <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-    </div>
-  `;
-  
-  document.getElementById('mbox').innerHTML = modalHtml;
-  document.getElementById('modal').classList.add('open');
-}
-
-function openInsuranceModal(assetId) {
-  const asset = ASSETS.find(a => a.id === assetId);
-  if (!asset) return;
-  
-  let optionsHtml = '';
-  for (const group of INSURANCE_PRODUCTS) {
-    optionsHtml += `<optgroup label="${group.category}">`;
-    for (const opt of group.options) {
-      optionsHtml += `<option value="${opt}">${opt}</option>`;
-    }
-    optionsHtml += `</optgroup>`;
-  }
-  
-  const modalHtml = `
-    <button class="mclose-btn" onclick="closeModal()">✕</button>
-    <div class="mtitle">Get Insurance — ${escapeHtml(asset.address)}</div>
-    <div class="msub">Select an insurance product to request a binding quote</div>
-    <div class="modal-select-group">
-      <label>INSURANCE PRODUCT</label>
-      <select id="insurance-select" class="styled-select">
-        <option value="" disabled selected>— Select a product —</option>
-        ${optionsHtml}
-      </select>
-    </div>
-    <div class="mfooter">
-      <button class="msub-btn" onclick="submitInsuranceRequest('${assetId}')">Request Quote</button>
-      <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-    </div>
-  `;
-  
-  document.getElementById('mbox').innerHTML = modalHtml;
-  document.getElementById('modal').classList.add('open');
 }
 
 function openBidModal(assetId) {
   const asset = ASSETS.find(a => a.id === assetId);
-  if (!asset) return;
-  
-  const modalHtml = `
-    <button class="mclose-btn" onclick="closeModal()">✕</button>
-    <div class="mtitle">Place Bid — ${escapeHtml(asset.address)}</div>
-    <div class="msub">Current listed price: ${fmtPrice(asset.price)}</div>
-    <div class="mfield">
-      <label>BID AMOUNT (USD)</label>
-      <input type="number" id="bid-amount" placeholder="Enter your bid amount" step="1000" class="styled-select" style="width:100%;padding:10px;">
-    </div>
-    <div class="mfield">
-      <label>BID TERMS (OPTIONAL)</label>
-      <select id="bid-terms" class="styled-select">
-        <option value="All Cash">All Cash</option>
-        <option value="Financed">Financed</option>
-        <option value="Exchange">1031 Exchange Eligible</option>
-        <option value="Crypto/USDC">Crypto / USDC</option>
-      </select>
-    </div>
-    <div class="mfooter">
-      <button class="msub-btn" onclick="submitBid('${assetId}')">Submit Bid</button>
-      <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-    </div>
-  `;
-  
-  document.getElementById('mbox').innerHTML = modalHtml;
-  document.getElementById('modal').classList.add('open');
+  const amount = prompt(`Enter your bid amount for ${asset?.address || 'this asset'}:\n(Minimum: ${fmtPrice(asset?.price * 0.5 || 10000)})`);
+  if (amount && parseFloat(amount) > 0) {
+    logLead('BID', assetId, `$${parseFloat(amount).toLocaleString()}`);
+  }
 }
 
-function submitLendingRequest(assetId) {
-  const select = document.getElementById('lending-select');
-  const selection = select?.value;
-  if (!selection || selection === '') {
-    toast('Please select a lending product');
-    return;
-  }
-  closeModal();
-  logLead('LEND', assetId, selection);
+function openLendingModal(assetId) {
+  const options = [
+    'Non-Recourse Finance',
+    'Recourse Lending',
+    'Bridge Loan',
+    'Construction Finance',
+    'SBA Loan',
+    'Private Credit',
+    'Mezzanine Debt'
+  ];
+  const selection = prompt(`Select Lending Product:\n${options.map((o, i) => `${i+1}. ${o}`).join('\n')}\n\nEnter number or product name:`);
+  if (selection) logLead('LEND', assetId, selection);
 }
 
-function submitInsuranceRequest(assetId) {
-  const select = document.getElementById('insurance-select');
-  const selection = select?.value;
-  if (!selection || selection === '') {
-    toast('Please select an insurance product');
-    return;
-  }
-  closeModal();
-  logLead('INSURANCE', assetId, selection);
-}
-
-function submitBid(assetId) {
-  const amount = document.getElementById('bid-amount')?.value;
-  const terms = document.getElementById('bid-terms')?.value || 'All Cash';
-  if (!amount || parseFloat(amount) <= 0) {
-    toast('Please enter a valid bid amount');
-    return;
-  }
-  closeModal();
-  logLead('BID', assetId, `$${parseFloat(amount).toLocaleString()} | Terms: ${terms}`);
+function openInsuranceModal(assetId) {
+  const options = [
+    'War / Political Risk Insurance',
+    'Smart Contract / Protocol Insurance',
+    'Title Insurance',
+    'Casualty & Property',
+    'Liability Insurance',
+    'Cyber Risk',
+    'Natural Disaster Coverage'
+  ];
+  const selection = prompt(`Select Insurance Product:\n${options.map((o, i) => `${i+1}. ${o}`).join('\n')}\n\nEnter number or product name:`);
+  if (selection) logLead('INSURANCE', assetId, selection);
 }
 
 // ============================================================
-// RIGHT PANEL ACTION HANDLERS
-// ============================================================
-function handleInquiry(assetId) {
-  if (currentUser) {
-    logLead('INQUIRY', assetId);
-  } else {
-    openModal('signin');
-    toast('Please sign in to inquire about this asset');
-  }
-}
-
-function handleWatchlist(assetId) {
-  if (currentUser) {
-    logLead('WATCHLIST', assetId);
-  } else {
-    openModal('signin');
-    toast('Please sign in to add to watchlist');
-  }
-}
-
-function handleTokenize(assetId) {
-  if (currentUser) {
-    logLead('TOKENIZE', assetId, 'High-Priority Ownership Claim');
-  } else {
-    openModal('signin');
-    toast('Please sign in to claim/tokenize this asset');
-  }
-}
-
-function handleSponsor(assetId) {
-  if (currentUser) {
-    logLead('SPONSOR', assetId, 'High-Priority Agent/Listing Inquiry');
-  } else {
-    openModal('signin');
-    toast('Please sign in to sponsor a listing');
-  }
-}
-
-    // ============================================================
-// SELECT ASSET - Unified Right Panel with Working Buttons
+// SELECT ASSET - Unified Right Panel
 // ============================================================
 function selectAsset(id) {
   activeId = id;
@@ -1817,101 +2301,25 @@ function selectAsset(id) {
 }
 
 function renderDetail(a) {
-  // Header section
-  document.getElementById('rhead').innerHTML = `
-    <div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div>
-    <div class="rname">${escapeHtml(a.address)}</div>
-    <div class="rcity">${escapeHtml(a.city)}${a.country && a.country !== a.city ? ', ' + escapeHtml(a.country) : ''}</div>
-    <div class="rprice-row">
-      <div class="rprice">${fmtPrice(a.price)}</div>
-      <div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div>
-    </div>
-  `;
+  document.getElementById('rhead').innerHTML = `<div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div><div class="rname">${escapeHtml(a.address)}</div><div class="rcity">${escapeHtml(a.city)}${a.country && a.country !== a.city ? ', ' + escapeHtml(a.country) : ''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div></div>`;
   
-  // Structures section
   const structs = a.structures || [];
-  const structHTML = structs.length ? `
-    <div class="rsect">
-      <div class="rsect-title">Structure Manifest</div>
-      ${structs.map((s, i) => `
-        <div style="background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px">
-          <div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>
-          ${s.sqft ? `<div class="rrow"><span class="rk">Size</span><span class="rv">${s.sqft.toLocaleString()} sqft</span></div>` : ''}
-          ${s.beds ? `<div class="rrow"><span class="rk">Beds</span><span class="rv">${s.beds}</span></div>` : ''}
-          ${s.baths ? `<div class="rrow"><span class="rk">Baths</span><span class="rv">${s.baths}</span></div>` : ''}
-          ${s.built ? `<div class="rrow"><span class="rk">Built</span><span class="rv">${s.built}</span></div>` : ''}
-        </div>
-      `).join('')}
-    </div>
-  ` : '';
+  const structHTML = structs.length ? `<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s, i) => `<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>${s.sqft ? `<div class="rrow"><span class="rk">Size</span><span class="rv">${s.sqft.toLocaleString()} sqft</span></div>` : ''}${s.beds ? `<div class="rrow"><span class="rk">Beds</span><span class="rv">${s.beds}</span></div>` : ''}${s.baths ? `<div class="rrow"><span class="rk">Baths</span><span class="rv">${s.baths}</span></div>` : ''}</div>`).join('')}</div>` : '';
   
-  // Financial section
   const fin = a.financials || {};
-  const finHTML = `
-    <div class="rsect">
-      <div class="rsect-title">Financial Data</div>
-      <div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>
-      ${a.sqft ? `<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price / a.sqft))}</span></div>` : ''}
-      ${fin.tax_annual ? `<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>` : ''}
-      ${fin.hoa ? `<div class="rrow"><span class="rk">HOA / mo</span><span class="rv">$${fin.hoa}</span></div>` : ''}
-      ${fin.zestimate ? `<div class="rrow"><span class="rk">Est. Value</span><span class="rv">${fmtPrice(fin.zestimate)}</span></div>` : ''}
-      ${a.days ? `<div class="rrow"><span class="rk">Days Listed</span><span class="rv">${a.days}d</span></div>` : ''}
-      <div class="rrow"><span class="rk">Source</span><span class="rv">${a.source || 'Public Registry'}</span></div>
-    </div>
-  `;
+  const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div><div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>${a.sqft ? `<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price / a.sqft))}</span></div>` : ''}${fin.tax_annual ? `<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>` : ''}${fin.hoa ? `<div class="rrow"><span class="rk">HOA / mo</span><span class="rv">$${fin.hoa}</span></div>` : ''}${a.days ? `<div class="rrow"><span class="rk">Days Listed</span><span class="rv">${a.days}d</span></div>` : ''}<div class="rrow"><span class="rk">Source</span><span class="rv">${a.source || 'Public Registry'}</span></div></div>`;
   
-  // Bids section
-  const bidsHTML = `
-    <div class="rsect">
-      <div class="rsect-title">Bid Order Book</div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>
-      ${(a.bids && a.bids.length) ? a.bids.map(b => `
-        <div class="bid-row">
-          <span class="bid-amount">${fmtPrice(b.amount)}</span>
-          <span class="bid-terms">${b.terms || 'cash'}</span>
-          <span class="bid-expiry">${b.expiry || ''}</span>
-        </div>
-      `).join('') : '<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>'}
-    </div>
-  `;
+  const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>${(a.bids && a.bids.length) ? a.bids.map(b => `<div class="bid-row"><span class="bid-amount">${fmtPrice(b.amount)}</span><span class="bid-terms">${b.terms || 'cash'}</span><span class="bid-expiry">${b.expiry || ''}</span></div>`).join('') : `<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>`}</div>`;
   
-  // Right Panel Buttons - All connected to lead generation
-  const buttonsHTML = `
-    <div class="act-grid">
-      <button class="abtn a-buy" onclick="handleInquiry('${a.id}')">BUY / INQUIRE</button>
-      <button class="abtn a-bid" onclick="openBidModal('${a.id}')">PLACE BID</button>
-      <button class="abtn a-lend" onclick="openLendingModal('${a.id}')">FIND LENDER</button>
-      <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openInsuranceModal('${a.id}')">INSURANCE</button>
-      <button class="abtn a-save" onclick="handleWatchlist('${a.id}')">WATCHLIST</button>
-      <button class="abtn a-claim" onclick="handleTokenize('${a.id}')">CLAIM / TOKENIZE</button>
-      <button class="abtn a-sponsor" onclick="handleSponsor('${a.id}')">SPONSOR LISTING</button>
-    </div>
-  `;
-  
-  // Market Status section
-  const marketHTML = `
-    <div class="rsect">
-      <div class="rsect-title">Market Status</div>
-      <div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div>
-      <div class="rrow"><span class="rk">Token Status</span><span class="rv">${a.tokenized ? '⬡ On-Chain' : 'Unclaimed'}</span></div>
-      <div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div>
-      <div class="rrow"><span class="rk">Broker Active</span><span class="rv">${a.broker_active !== false ? 'Yes' : 'No'}</span></div>
-    </div>
-  `;
-  
-  document.getElementById('rbody').innerHTML = `
-    <div class="rinner">
-      ${buttonsHTML}
-      ${structHTML}
-      ${finHTML}
-      ${bidsHTML}
-      ${marketHTML}
-    </div>
-  `;
+  document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="requireAuth('lend','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="requireAuth('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="requireAuth('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="requireAuth('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div><div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div><div class="rrow"><span class="rk">Token Status</span><span class="rv">${a.tokenized ? '⬡ On-Chain' : 'Unclaimed'}</span></div><div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div></div></div>`;
+}
+
+function closeDrawer() {
+  document.getElementById('asset-drawer').classList.remove('open');
 }
 
 // ============================================================
-// SEARCH FUNCTIONALITY
+// SEARCH
 // ============================================================
 function performSearch() {
   const query = document.getElementById('search-input').value.trim().toLowerCase();
@@ -1938,7 +2346,6 @@ function performSearch() {
   if (window.innerWidth <= 767) renderMobileListViewFull(filteredResults);
   setStatus('SEARCH: ' + SEARCH_RESULTS.length + ' assets found');
 }
-
 document.getElementById('search-input').addEventListener('input', performSearch);
 
 function syncMarkersToSearch(assetsToShow) {
@@ -1962,23 +2369,14 @@ function syncMarkersToSearch(assetsToShow) {
 }
 
 // ============================================================
-// GOOGLE MAPS 3D - GLOBE VIEW
+// GOOGLE MAPS 3D - FULLY ZOOMED OUT GLOBE VIEW
 // ============================================================
 async function initMap() {
   try {
     const maps3dLib = await google.maps.importLibrary('maps3d');
     const Map3DElement = maps3dLib.Map3DElement;
-    map3dEl = new Map3DElement({ 
-      center: { lat: 20, lng: 10, altitude: 0 }, 
-      range: 22000000, 
-      tilt: 0, 
-      heading: 0 
-    });
-    try { 
-      const { MapMode } = maps3dLib; 
-      if (MapMode) map3dEl.mode = MapMode.SATELLITE; 
-    } catch(e) {}
-    
+    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 22000000, tilt: 0, heading: 0 });
+    try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
     const container = document.getElementById('map3d-container');
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
@@ -2002,21 +2400,13 @@ async function initMap() {
       }
     });
     
-    const _onCam = () => { 
-      if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); 
-      cameraDebounceTimer = setTimeout(onCameraChange, 100); 
-    };
+    const _onCam = () => { if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(onCameraChange, 100); };
     map3dEl.addEventListener('gmp-centerchange', _onCam);
     map3dEl.addEventListener('gmp-rangechange', _onCam);
     map3dEl.addEventListener('gmp-tiltchange', _onCam);
     map3dEl.addEventListener('gmp-headingchange', _onCam);
     
-    requestAnimationFrame(() => { 
-      setTimeout(() => { 
-        try { map3dEl.tilt = 15; } catch(e){} 
-      }, 1200); 
-    });
-    
+    requestAnimationFrame(() => { setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200); });
     setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
     await loadMarketData();
     
@@ -2025,18 +2415,9 @@ async function initMap() {
       markersRendered = true;
     }
     
-    setTimeout(() => { 
-      if (map3dEl && ASSETS.length > 0 && !markersRendered) { 
-        renderDOMMarkers(); 
-        markersRendered = true; 
-      } 
-    }, 800);
-    
+    setTimeout(() => { if (map3dEl && ASSETS.length > 0 && !markersRendered) { renderDOMMarkers(); markersRendered = true; } }, 800);
     initPlacesSearch();
-  } catch (err) { 
-    console.error('[RWABidAsk] Map3DElement init error:', err); 
-    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING'); 
-  }
+  } catch (err) { console.error('[RWABidAsk] Map3DElement init error:', err); setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING'); }
 }
 
 async function initPlacesSearch() {
@@ -2047,7 +2428,7 @@ async function initPlacesSearch() {
     if (placesLib.PlaceAutocompleteElement) {
       try {
         const acEl = new placesLib.PlaceAutocompleteElement();
-        acEl.style.cssText = 'width:100%;height:100%;border:none;outline:none;background:transparent;color:#eef2ff;font-family:Inter,system-ui,sans-serif;font-size:13px;padding:0 18px;position:relative;z-index:9999;';
+        acEl.style.cssText = 'width:100%;height:100%;border:none;outline:none;background:transparent;color:#f0f4ff;font-family:Inter,system-ui,sans-serif;font-size:13px;padding:0 18px;position:relative;z-index:9999;';
         const wrap = input.parentNode;
         input.style.display = 'none';
         wrap.insertBefore(acEl, input);
@@ -2083,61 +2464,14 @@ async function initPlacesSearch() {
   } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
 }
 
-function flyTo(lat, lng, range, tilt) { 
-  if (!map3dEl) return; 
-  try { 
-    map3dEl.flyCameraTo({ 
-      endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, 
-      durationMillis: 1800 
-    }); 
-  } catch(e) { 
-    map3dEl.center = { lat, lng, altitude: 45 }; 
-    map3dEl.range = range ?? 1400; 
-    map3dEl.tilt = tilt ?? 45; 
-  } 
-}
-
-function flyGlobe() { 
-  flyTo(20, 10, 22000000, 0); 
-}
-
-function setMapMode(mode, btn) { 
-  document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); 
-  btn.classList.add('on'); 
-  if (map3dEl) { 
-    try { 
-      map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; 
-    } catch(e) { 
-      map3dEl.setAttribute('mode', mode); 
-    } 
-  } 
-}
-
-function setTilt(deg, btn) { 
-  document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); 
-  btn.classList.add('on'); 
-  if (map3dEl) map3dEl.tilt = deg; 
-}
-
-function toggleHeat(btn) { 
-  heatOn = !heatOn; 
-  btn.classList.toggle('on', heatOn); 
-  const prices = ASSETS.map(a => a.price).filter(Boolean); 
-  const max = Math.max(...prices, 1); 
-  const p33 = max * 0.33; 
-  const p66 = max * 0.66; 
-  Object.values(domMarkers).forEach(({ el, asset }) => { 
-    el.classList.remove('heat-warm', 'heat-hot'); 
-    if (heatOn && asset.price) { 
-      if (asset.price > p66) el.classList.add('heat-hot'); 
-      else if (asset.price > p33) el.classList.add('heat-warm'); 
-    } 
-  }); 
-  toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); 
-}
+function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 45 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
+function flyGlobe() { flyTo(20, 10, 22000000, 0); }
+function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
+function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
+function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
 
     // ============================================================
-// CAMERA CHANGE HANDLER - Viewport Culling
+// DOM MARKERS - WORKING PROJECTION
 // ============================================================
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
@@ -2194,9 +2528,6 @@ function getVisibleAssetsInViewport(assets) {
   } catch(e) { return assets.slice(0, 100); }
 }
 
-// ============================================================
-// DOM MARKERS - 3D Projection System
-// ============================================================
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
@@ -2213,7 +2544,7 @@ function renderDOMMarkers() {
     el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
   });
   
-  console.log(`[RWABidAsk] Markers rendered: ${Object.keys(domMarkers).length} markers created`);
+  console.log(`Markers rendered: ${Object.keys(domMarkers).length} markers created`);
 }
 
 function addPriceMarker(asset) {
@@ -2257,12 +2588,8 @@ function projectMarkerLegacy(asset, el) {
     const dx = sx - W / 2, dy = sy - H / 2;
     const distFromCenter = Math.sqrt(dx * dx + dy * dy);
     const isBehindGlobe = camRange > 3000000 && distFromCenter > globeRadius * 1.1;
-    if (isBehindGlobe) { 
-      el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)'; 
-    } else { 
-      el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`; 
-      el.style.zIndex = String(Math.floor(1000 - distFromCenter / 10)); 
-    }
+    if (isBehindGlobe) { el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)'; }
+    else { el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`; el.style.zIndex = String(Math.floor(1000 - distFromCenter / 10)); }
   } catch (err) { console.warn('[RWABidAsk] projectMarkerLegacy:', err.message); }
 }
 
@@ -2285,26 +2612,18 @@ function reprojectMarkersWithMatrix() {
         if (screenW <= 0) { el.style.display = 'none'; return; }
         let x = (screenX / screenW + 1) * 0.5 * width;
         let y = (-screenY / screenW + 1) * 0.5 * height;
-        if (x < -200 || x > width + 200 || y < -200 || y > height + 200) { 
-          el.style.display = 'none'; 
-          return; 
-        }
+        if (x < -200 || x > width + 200 || y < -200 || y > height + 200) { el.style.display = 'none'; return; }
         el.style.display = 'flex';
         el.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
       });
       return;
-    } catch(e) { console.warn('[RWABidAsk] Matrix projection failed, using legacy'); }
+    } catch(e) { console.warn('[RWABidAsk] Matrix projection failed'); }
   }
-  Object.values(domMarkers).forEach(({ el, asset }) => { 
-    projectMarkerLegacy(asset, el); 
-  });
+  Object.values(domMarkers).forEach(({ el, asset }) => { projectMarkerLegacy(asset, el); });
 }
 
 function syncMarkerVisibility() {
-  if (!markersVisible()) { 
-    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; }); 
-    return; 
-  }
+  if (!markersVisible()) { Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; }); return; }
   const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
   const visibleAssets = getVisibleAssetsInViewport(baseAssets);
   const visibleIds = new Set(visibleAssets.map(a => a.id));
@@ -2313,44 +2632,26 @@ function syncMarkerVisibility() {
     el.style.display = shouldBeVisible ? 'flex' : 'none';
   });
 }
-
-function markersVisible() { 
-  return !!(map3dEl) && (map3dEl.range || 12e6) <= MARKER_VISIBLE_RANGE; 
-}
+function markersVisible() { return !!(map3dEl) && (map3dEl.range || 12e6) <= MARKER_VISIBLE_RANGE; }
 
 // ============================================================
-// TICKER & RIBBON - Market Data Display
+// TICKER & RIBBON
 // ============================================================
 function buildRibbon() {
-  const markets = [
-    { label: 'BTC/USD', val: '$83,241', chg: '+1.2%', dir: 'up' },
-    { label: 'ETH/USD', val: '$3,218', chg: '+0.8%', dir: 'up' },
-    { label: 'Gold Spot', val: '$3,118/oz', chg: '+0.4%', dir: 'up' },
-    { label: '10Y T-Bill', val: '4.38%', chg: '-0.02', dir: 'down' },
-    { label: 'S&P 500', val: '5,234', chg: '+0.7%', dir: 'up' },
-    { label: 'RWABidAsk Index', val: '1,284', chg: '+2.1%', dir: 'up' },
-    { label: 'Private Credit', val: '9.2%', chg: '+0.3%', dir: 'up' }
-  ];
+  const markets = [{ label:'BTC/USD', val:'$83,241', chg:'+1.2%', dir:'up' },{ label:'Gold Spot', val:'$3,118/oz',chg:'+0.4%', dir:'up' },{ label:'10Y T-Bill', val:'4.38%', chg:'-0.02', dir:'down' },{ label:'S&P 500', val:'5,234', chg:'+0.7%', dir:'up' },{ label:'RWABidAsk Index', val:'1,284', chg:'+2.1%', dir:'up' }];
   const items = markets.map(m => `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');
   const track = document.getElementById('ribbon-track');
   if (track) track.innerHTML = items + items;
 }
-
 function buildTicker(assets) {
-  const base = ['RWABIDASK.COM', 'GLOBAL LEDGER LIVE', 'BID · ASK · BUY', 'INSTITUTIONAL DIGITIZATION'];
+  const base = ['RWABIDASK.COM', 'GLOBAL LEDGER LIVE', 'BID · ASK · BUY'];
   const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 20);
   const segments = addrs.length > 0 ? [...base, ...addrs] : base;
   const all = [...segments, ...segments];
   const html = all.map(s => `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${escapeHtml(s)}</span><span class="sep">·</span></span>`).join('');
   const track = document.getElementById('ticker-track');
-  if (track) { 
-    track.innerHTML = html; 
-    track.style.animation = 'none'; 
-    track.offsetHeight; 
-    track.style.animation = 'ticker-run 90s linear infinite'; 
-  }
+  if (track) { track.innerHTML = html; track.style.animation = 'none'; track.offsetHeight; track.style.animation = 'ticker-run 90s linear infinite'; }
 }
-
 function updateGMC(assets) {
   const total = assets.reduce((sum, a) => sum + (a.price || 0), 0);
   const el = document.getElementById('s-gmc');
@@ -2362,7 +2663,7 @@ function updateGMC(assets) {
 }
 
 // ============================================================
-// AUTHENTICATION SYSTEM - Supabase Auth
+// AUTH & MODAL FUNCTIONS - FULL SUPABASE AUTH
 // ============================================================
 function bootSupabase() { 
   if (typeof supabase !== 'undefined' && supabase.createClient) { 
@@ -2466,9 +2767,6 @@ function updateAuthUI() {
   } 
 }
 
-    // ============================================================
-// MODAL HANDLERS - Sign In, Register, Access Requests
-// ============================================================
 function openModal(type, assetId) {
   const mbox = document.getElementById('mbox');
   if (!mbox) return;
@@ -2479,35 +2777,31 @@ function openModal(type, assetId) {
       <button class="mclose-btn" onclick="closeModal()">✕</button>
       <div class="mtitle">Sign In</div>
       <div class="msub">Access the Global Asset Directory and Permanent Ledger</div>
-      <div class="mfield"><label>Email</label><input type="email" id="login-email" placeholder="investor@example.com" class="styled-select" style="width:100%"></div>
-      <div class="mfield"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" class="styled-select" style="width:100%"></div>
+      <div class="mfield"><label>Email</label><input type="email" id="login-email" placeholder="investor@example.com"></div>
+      <div class="mfield"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
       <div class="mfooter"><button class="msub-btn" onclick="handleSignIn()">Sign In</button><button class="mcan-btn" onclick="closeModal()">Cancel</button></div>
-      <div class="legal-note">Don't have an account? <a href="#" onclick="openModal('register');return false" style="color:var(--cyan)">Join now</a></div>
+      <div class="legal-note">Don't have an account? <a href="#" onclick="openModal('register');return false">Join now</a></div>
     `;
   } else if (type === 'register') {
     html = `
       <button class="mclose-btn" onclick="closeModal()">✕</button>
       <div class="mtitle">Join RWABidAsk</div>
       <div class="msub">Create your institutional access account</div>
-      <div class="mfield"><label>Full Name</label><input type="text" id="reg-name" placeholder="John Smith" class="styled-select" style="width:100%"></div>
-      <div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="investor@example.com" class="styled-select" style="width:100%"></div>
-      <div class="mfield"><label>Password</label><input type="password" id="reg-password" placeholder="•••••••• (min 6 characters)" class="styled-select" style="width:100%"></div>
-      <div class="mfield"><label>Investor Type</label><select id="reg-role" class="styled-select" style="width:100%"><option value="Individual">Individual Investor</option><option value="Institutional">Institutional Investor</option><option value="Family Office">Family Office</option><option value="Broker/Agent">Broker/Agent</option></select></div>
+      <div class="mfield"><label>Full Name</label><input type="text" id="reg-name" placeholder="John Smith"></div>
+      <div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="investor@example.com"></div>
+      <div class="mfield"><label>Password</label><input type="password" id="reg-password" placeholder="•••••••• (min 6 characters)"></div>
       <div class="mfooter"><button class="msub-btn" onclick="handleSignUp()">Create Account</button><button class="mcan-btn" onclick="closeModal()">Cancel</button></div>
-      <div class="legal-note">Already have an account? <a href="#" onclick="openModal('signin');return false" style="color:var(--cyan)">Sign in</a></div>
+      <div class="legal-note">Already have an account? <a href="#" onclick="openModal('signin');return false">Sign in</a></div>
     `;
-  } else if (type === 'tos' || type === 'privacy') {
+  } else if (type === 'tos_gate') {
     html = `
       <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">${type === 'tos' ? 'Terms of Service' : 'Privacy Policy'}</div>
-      <div class="msub">RWABidAsk — Institutional Asset Digitization Platform</div>
-      <div class="legal-note" style="margin-top:16px;line-height:1.8">
-        ${type === 'tos' ? 
-          'RWABidAsk is a non-custodial platform for asset digitization and tokenization. All transactions are recorded on the Persistent Ledger. Users must complete KYC/AML verification prior to bidding or purchasing. Annie Group LLC acts as a technology provider, not a broker-dealer or investment advisor.' :
-          'We collect only essential data for compliance and platform functionality. User data is encrypted and never sold to third parties. Smart contract interactions are transparent and auditable on-chain.'
-        }
-      </div>
-      <div class="mfooter"><button class="msub-btn" onclick="closeModal()">Acknowledge</button></div>
+      <div class="mtitle">Access Request</div>
+      <div class="msub">Institutional accreditation required for full platform access.</div>
+      <div class="mfield"><label>Full Name</label><input type="text" id="access-name" placeholder="Legal name"></div>
+      <div class="mfield"><label>Institution / Entity</label><input type="text" id="access-entity" placeholder="Company name"></div>
+      <div class="mfield"><label>Email</label><input type="email" id="access-email" placeholder="corporate@domain.com"></div>
+      <div class="mfooter"><button class="msub-btn" onclick="requestAccess()">Request Access</button><button class="mcan-btn" onclick="closeModal()">Cancel</button></div>
     `;
   } else {
     html = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">RWABidAsk</div><div class="msub">Platform access requires authentication.</div><div class="mfooter"><button class="msub-btn" onclick="openModal('signin')">Sign In</button><button class="mcan-btn" onclick="closeModal()">Close</button></div>`;
@@ -2532,23 +2826,36 @@ async function handleSignUp() {
   const name = document.getElementById('reg-name')?.value;
   const email = document.getElementById('reg-email')?.value;
   const password = document.getElementById('reg-password')?.value;
-  const role = document.getElementById('reg-role')?.value || 'Individual';
   if (!name || !email || !password) { toast('All fields required'); return; }
   if (password.length < 6) { toast('Password must be at least 6 characters'); return; }
   await signUp(email, password, name);
 }
 
+async function requestAccess() {
+  const name = document.getElementById('access-name')?.value;
+  const entity = document.getElementById('access-entity')?.value;
+  const email = document.getElementById('access-email')?.value;
+  if (!name || !entity || !email) { toast('All fields required'); return; }
+  if (_sb) {
+    try {
+      await _sb.from('access_requests').insert([{ name, entity, email, status: 'pending' }]);
+      toast('Access request submitted. You will be notified when approved.');
+      closeModal();
+    } catch(e) { toast('Request failed. Please try again.'); }
+  } else {
+    toast('Request recorded. Our team will contact you.');
+    closeModal();
+  }
+}
+
 // ============================================================
-// MOBILE LISTVIEW - Full Filter Controls Synchronized
+// MOBILE LISTVIEW - FULL FILTER CONTROLS
 // ============================================================
 function renderMobileListViewFull(assets) {
   const container = document.getElementById('mobile-list-view');
   if (!container) return;
   
-  const categoriesHtml = ASSET_CATEGORIES.map(cat => 
-    `<button class="list-cat-btn ${activeTab === cat.id ? 'on' : ''}" data-cat="${cat.id}" style="padding:6px 10px;font-family:var(--font);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);cursor:pointer;background:none;border:1px solid var(--border2);border-radius:2px;margin:2px;${activeTab === cat.id ? 'border-color:rgba(0,245,255,.45);color:var(--cyan);background:var(--cyan-dim);font-weight:600' : ''}">${cat.label}</button>`
-  ).join('');
-  
+  const categoriesHtml = ASSET_CATEGORIES.map(cat => `<button class="list-cat-btn ${activeTab === cat.id ? 'on' : ''}" data-cat="${cat.id}">${cat.label}</button>`).join('');
   const priceFilters = [
     { id: 'any', label: 'Any' },
     { id: 'sub1m', label: '–$1M' },
@@ -2556,21 +2863,10 @@ function renderMobileListViewFull(assets) {
     { id: '5m25m', label: '$5–25M' },
     { id: '25mplus', label: '$25M+' }
   ];
-  
-  const priceHtml = priceFilters.map(pf => 
-    `<button class="list-price-chip ${activeFilter === pf.id ? 'on' : ''}" data-price="${pf.id}" style="padding:4px 10px;font-family:var(--font);font-size:9px;color:var(--dim);border:1px solid var(--border2);background:none;cursor:pointer;border-radius:2px;white-space:nowrap;margin:2px;${activeFilter === pf.id ? 'border-color:rgba(0,245,255,.45);color:var(--cyan);background:var(--cyan-dim);font-weight:600' : ''}">${pf.label}</button>`
-  ).join('');
+  const priceHtml = priceFilters.map(pf => `<button class="list-price-chip ${activeFilter === pf.id ? 'on' : ''}" data-price="${pf.id}">${pf.label}</button>`).join('');
   
   const filteredAssets = filterAssets(assets);
-  const resultsHtml = filteredAssets.map(a => `
-    <div class="list-tile" onclick="selectAsset('${a.id}')" style="background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px;cursor:pointer">
-      <div class="list-tile-type" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:6px">${a.type.toUpperCase()}</div>
-      <div class="list-tile-addr" style="font-size:13px;font-weight:600;color:var(--text)">${escapeHtml(a.address)}</div>
-      <div class="list-tile-loc" style="font-size:10px;color:var(--dim);margin:4px 0">${escapeHtml(a.city)}${a.country ? ', ' + escapeHtml(a.country) : ''}</div>
-      <div class="list-tile-price" style="font-size:16px;font-weight:700;color:var(--cyan)">${fmtPrice(a.price)}</div>
-    </div>
-  `).join('');
-  
+  const resultsHtml = filteredAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${escapeHtml(a.address)}</div><div class="list-tile-loc">${escapeHtml(a.city)}${a.country ? ', ' + escapeHtml(a.country) : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
   const emptyHtml = filteredAssets.length === 0 ? '<div class="list-empty" style="text-align:center;padding:40px;color:var(--muted)">No assets match current filters</div>' : '';
   
   container.innerHTML = `
@@ -2582,10 +2878,16 @@ function renderMobileListViewFull(assets) {
     <div class="list-results-container" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;">${resultsHtml || emptyHtml}</div>
   `;
   
-  // Attach event listeners for category buttons
+  // Style filter buttons
   document.querySelectorAll('.list-cat-btn').forEach(btn => {
-    btn.removeEventListener('click', btn._listener);
-    btn._listener = () => {
+    btn.style.cssText = 'padding:6px 10px;font-family:var(--font);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);cursor:pointer;background:none;border:1px solid var(--border2);border-radius:2px;transition:all .15s;';
+    if (btn.classList.contains('on')) {
+      btn.style.borderColor = 'rgba(0,255,200,.45)';
+      btn.style.color = 'var(--cyan)';
+      btn.style.background = 'var(--cyan-dim)';
+      btn.style.fontWeight = '600';
+    }
+    btn.addEventListener('click', () => {
       const catId = btn.dataset.cat;
       activeTab = catId;
       SEARCH_ACTIVE = false;
@@ -2595,14 +2897,18 @@ function renderMobileListViewFull(assets) {
       renderList(filtered);
       syncMarkerVisibility();
       renderMobileListViewFull(ASSETS);
-    };
-    btn.addEventListener('click', btn._listener);
+    });
   });
   
-  // Attach event listeners for price filter buttons
   document.querySelectorAll('.list-price-chip').forEach(btn => {
-    btn.removeEventListener('click', btn._listener);
-    btn._listener = () => {
+    btn.style.cssText = 'padding:4px 10px;font-family:var(--font);font-size:9px;color:var(--dim);border:1px solid var(--border2);background:none;cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .15s;';
+    if (btn.classList.contains('on')) {
+      btn.style.borderColor = 'rgba(0,255,200,.45)';
+      btn.style.color = 'var(--cyan)';
+      btn.style.background = 'var(--cyan-dim)';
+      btn.style.fontWeight = '600';
+    }
+    btn.addEventListener('click', () => {
       const priceId = btn.dataset.price;
       activeFilter = priceId;
       SEARCH_ACTIVE = false;
@@ -2612,20 +2918,15 @@ function renderMobileListViewFull(assets) {
       renderList(filtered);
       syncMarkerVisibility();
       renderMobileListViewFull(ASSETS);
-    };
-    btn.addEventListener('click', btn._listener);
+    });
   });
 }
 
-// ============================================================
-// MOBILE UI INITIALIZATION - Globe/List Toggle
-// ============================================================
 function initMobileUI() { 
   const viewToggle = document.getElementById('mobile-view-toggle');
   const listView = document.getElementById('mobile-list-view');
   const mapCol = document.getElementById('map-col');
   const rightPanel = document.getElementById('right');
-  
   if (viewToggle) {
     viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -2647,18 +2948,7 @@ function initMobileUI() {
       });
     });
   }
-  
-  // Close drawer when tapping outside on mobile
-  document.addEventListener('click', (e) => { 
-    if (rightPanel && rightPanel.classList.contains('open-drawer') && 
-        !rightPanel.contains(e.target) && 
-        !e.target.closest('.price-marker') && 
-        !e.target.closest('.list-tile') && 
-        !e.target.closest('.pcard')) { 
-      rightPanel.classList.remove('open-drawer'); 
-      document.body.style.overflow = ''; 
-    } 
-  });
+  document.addEventListener('click', (e) => { if (rightPanel && rightPanel.classList.contains('open-drawer') && !rightPanel.contains(e.target) && !e.target.closest('.price-marker') && !e.target.closest('.list-tile') && !e.target.closest('.pcard')) { rightPanel.classList.remove('open-drawer'); document.body.style.overflow = ''; } });
 }
 
 // Close drawer on mobile when clicking off map
@@ -2669,23 +2959,15 @@ document.getElementById('map-col')?.addEventListener('click', (e) => {
   }
 });
 
-// ============================================================
-// TICKER & RIBBON INITIALIZATION
-// ============================================================
-buildRibbon();
-buildTicker([]);
-
     // ============================================================
-// BOOT SEQUENCE - Initialize Everything
+// BOOT SEQUENCE
 // ============================================================
-
-// Initialize Supabase and restore session
+buildTicker([]);
+buildRibbon();
 bootSupabase();
-
-// DOM Content Loaded event
 document.addEventListener('DOMContentLoaded', () => { 
-  const blimp = document.getElementById('blimp-el'); 
-  if (blimp) blimp.addEventListener('click', () => openModal('partner')); 
+  const bl = document.getElementById('blimp-el'); 
+  if (bl) bl.addEventListener('click', () => openModal('partner')); 
   initMobileUI(); 
   
   // Close modal when clicking outside
@@ -2695,7 +2977,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Expose all necessary functions globally for inline onclick handlers
+// Expose functions globally for inline onclick handlers
 window.setCategory = setCategory;
 window.setFilter = setFilter;
 window.selectAsset = selectAsset;
@@ -2706,61 +2988,29 @@ window.setTilt = setTilt;
 window.toggleHeat = toggleHeat;
 window.openModal = openModal;
 window.closeModal = closeModal;
+window.requireAuth = requireAuth;
 window.closeDrawer = closeDrawer;
 window.handleSignIn = handleSignIn;
 window.handleSignUp = handleSignUp;
+window.requestAccess = requestAccess;
 window.signOut = signOut;
 
-// Right Panel Action Handlers
-window.handleInquiry = handleInquiry;
-window.handleWatchlist = handleWatchlist;
-window.handleTokenize = handleTokenize;
-window.handleSponsor = handleSponsor;
-
-// Modal action handlers
+// Asset action functions
+window.logLead = logLead;
+window.openBidModal = openBidModal;
 window.openLendingModal = openLendingModal;
 window.openInsuranceModal = openInsuranceModal;
-window.openBidModal = openBidModal;
-window.submitLendingRequest = submitLendingRequest;
-window.submitInsuranceRequest = submitInsuranceRequest;
-window.submitBid = submitBid;
-
-// Lead logging
-window.logLead = logLead;
-
-// Utility functions
-window.fmtPrice = fmtPrice;
-window.escapeHtml = escapeHtml;
 
 // Map initialization
 window.__initRWA = initMap;
-if (window.__googleMapsLoaded) {
-  initMap();
-}
+if (window.__googleMapsLoaded) initMap();
 
-// Log successful platform boot
-console.log('[RWABidAsk] Platform fully loaded. Authentication ready. Lead generation engine active.');
+// Also expose fmtPrice for any inline usage
+window.fmtPrice = fmtPrice;
+window.escapeHtml = escapeHtml;
 
-// ============================================================
-// ADDITIONAL SAFETY - Handle uncaught errors gracefully
-// ============================================================
-window.addEventListener('error', function(e) {
-  console.warn('[RWABidAsk] Uncaught error:', e.message);
-  // Don't show to user for minor issues, but log for debugging
-});
-
-// Handle mobile orientation changes
-window.addEventListener('resize', function() {
-  if (window.innerWidth <= 767 && map3dEl && markersRendered) {
-    setTimeout(() => {
-      reprojectMarkersWithMatrix();
-    }, 100);
-  }
-});
-
-// ============================================================
-// END OF SCRIPT
-// ============================================================
+console.log('[RWABidAsk] Platform fully loaded. Authentication ready.');
 </script>
 </body>
 </html>
+
