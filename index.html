@@ -2290,28 +2290,47 @@ function renderList(assetsToShow) {
 // ============================================================
 // LEAD GENERATION - Insert into partner_leads table
 // ============================================================
-async function logPartnerLead(leadType, assetId, selectionData) {
+async function logPartnerLead(leadType, selectionData) {
+  // 1. Check if user is logged in
   if (!_sb || !currentUser) {
-    toast('Please sign in to continue');
+    console.warn('[RWABidAsk] Lead blocked: User not signed in');
+    alert('Please sign in to log your inquiry.');
     openModal('signin');
     return false;
   }
+
+  // 2. The Safety Siphon: Get the asset ID even if not passed directly
+  // This fixes the "null is not an object (evaluating 'currentAssetForModal.id')" error
+  const activeAssetId = (typeof currentAsset !== 'undefined' && currentAsset) ? currentAsset.id : null;
+
+  if (!activeAssetId) {
+    console.error('[RWABidAsk] Lead blocked: No active asset found in memory');
+    alert('Please select an asset on the map first.');
+    return false;
+  }
+
   try {
     const { error } = await _sb.from('partner_leads').insert([{
       user_id: currentUser.id,
-      user_email: currentUser.email,
-      asset_id: assetId,
+      asset_id: activeAssetId,
       lead_type: leadType,
-      selection_data: selectionData,
+      selection_data: { choice: selectionData, source: 'action_panel' },
       status: 'pending',
       created_at: new Date().toISOString()
     }]);
+
     if (error) throw error;
-    toast(`✓ ${leadType} inquiry recorded. A specialist will contact you shortly.`);
+
+    console.log(`[RWABidAsk] ${leadType} lead recorded for asset ${activeAssetId}`);
+    alert(`✓ Inquiry recorded. A specialist will contact you shortly.`);
+    
+    // Close any open overlays
+    if (window.closeModalOverlay) window.closeModalOverlay();
     return true;
+
   } catch (e) {
-    console.error('Partner lead error:', e);
-    toast('Failed to record request. Please try again.');
+    console.error('[RWABidAsk] Partner lead error:', e);
+    alert('Failed to record request. Please check your connection.');
     return false;
   }
 }
