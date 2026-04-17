@@ -3081,17 +3081,43 @@ function updateGMC(assets) {
 // ============================================================
 // AUTHENTICATION SYSTEM - Supabase Auth with Google OAuth
 // ============================================================
+
+    // 1. IMPROVED BOOTSTRAP LOGIC
 function bootSupabase() { 
   if (typeof supabase !== 'undefined' && supabase.createClient) { 
     try { 
       _sb = supabase.createClient(SB_URL, SB_KEY); 
       console.log('[RWABidAsk] Supabase ready'); 
       restoreSession(); 
-    } catch(e) { console.warn(e); } 
+    } catch(e) { 
+      console.warn('[RWABidAsk] Supabase init error:', e); 
+    } 
   } else { 
-    setTimeout(bootSupabase, 300); 
+    // Only retry for 5 seconds total to prevent infinite loops
+    if (!window._bootAttempts) window._bootAttempts = 0;
+    if (window._bootAttempts < 20) {
+      window._bootAttempts++;
+      setTimeout(bootSupabase, 300); 
+    } else {
+      console.error('[RWABidAsk] Supabase failed to load after 20 attempts.');
+    }
   } 
 }
+
+// 2. DEFINE THE MISSING DRAWER FUNCTION (Fixes the ReferenceError)
+function closeDrawer() {
+  const drawer = document.getElementById('right-drawer');
+  if (drawer) {
+    drawer.classList.remove('open');
+    console.log('[RWABidAsk] Drawer closed');
+  } else {
+    console.warn('[RWABidAsk] Drawer element not found');
+  }
+}
+
+// 3. ATTACH TO WINDOW (Crucial for onclick handlers)
+window.closeDrawer = closeDrawer;
+window.bootSupabase = bootSupabase;
 
 async function restoreSession() { 
   if (!_sb) return; 
