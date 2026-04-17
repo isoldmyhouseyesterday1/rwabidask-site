@@ -2289,7 +2289,11 @@ function renderList(assetsToShow) {
 // LEAD GENERATION - Insert into partner_leads table
 // ============================================================
 async function logPartnerLead(leadType, selectionData) {
-  // 1. Check if user is logged in
+  // 1. SMART CHECK: Look in both possible variable names
+  const activeAsset = (typeof currentAssetForModal !== 'undefined' && currentAssetForModal) 
+                      || (typeof currentAsset !== 'undefined' && currentAsset);
+
+  // 2. AUTH CHECK: Ensure we know who is sending the lead
   if (!_sb || !currentUser) {
     console.warn('[RWABidAsk] Lead blocked: User not signed in');
     alert('Please sign in to log your inquiry.');
@@ -2297,20 +2301,18 @@ async function logPartnerLead(leadType, selectionData) {
     return false;
   }
 
-  // 2. The Safety Siphon: Get the asset ID even if not passed directly
-  // This fixes the "null is not an object (evaluating 'currentAssetForModal.id')" error
-  const activeAssetId = (typeof currentAsset !== 'undefined' && currentAsset) ? currentAsset.id : null;
-
-  if (!activeAssetId) {
-    console.error('[RWABidAsk] Lead blocked: No active asset found in memory');
+  // 3. SELECTION CHECK: Ensure an asset is actually targeted
+  if (!activeAsset || !activeAsset.id) {
+    console.error('[RWABidAsk] Lead blocked: No asset in memory');
     alert('Please select an asset on the map first.');
     return false;
   }
 
   try {
+    // 4. THE INSERT: Recording the $500-value intent
     const { error } = await _sb.from('partner_leads').insert([{
       user_id: currentUser.id,
-      asset_id: activeAssetId,
+      asset_id: activeAsset.id,
       lead_type: leadType,
       selection_data: { choice: selectionData, source: 'action_panel' },
       status: 'pending',
@@ -2319,10 +2321,9 @@ async function logPartnerLead(leadType, selectionData) {
 
     if (error) throw error;
 
-    console.log(`[RWABidAsk] ${leadType} lead recorded for asset ${activeAssetId}`);
+    console.log(`[RWABidAsk] ${leadType} lead recorded for asset ${activeAsset.id}`);
     alert(`✓ Inquiry recorded. A specialist will contact you shortly.`);
     
-    // Close any open overlays
     if (window.closeModalOverlay) window.closeModalOverlay();
     return true;
 
