@@ -2544,15 +2544,11 @@ function selectAsset(id) {
   const a = ASSETS.find(x => x.id === id);
   if (!a) return;
 
-  // --- THE CRITICAL FIX START ---
+  // Sync Global State for Lead Engine
   window.currentAsset = a; 
   window.currentAssetForModal = a; 
-  // --- THE CRITICAL FIX END ---
   
-  // Header section
-  document.getElementById('rhead').innerHTML = `
-  
-  // Header section
+  // 1. Render Header
   document.getElementById('rhead').innerHTML = `
     <div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div>
     <div class="rname">${escapeHtml(a.address)}</div>
@@ -2563,7 +2559,7 @@ function selectAsset(id) {
     </div>
   `;
   
-  // Structures section
+  // 2. Structures section
   const structs = a.structures || [];
   const structHTML = structs.length ? `
     <div class="rsect">
@@ -2580,7 +2576,7 @@ function selectAsset(id) {
     </div>
   ` : '';
   
-  // Financial section
+  // 3. Financial section
   const fin = a.financials || {};
   const finHTML = `
     <div class="rsect">
@@ -2594,42 +2590,36 @@ function selectAsset(id) {
     </div>
   `;
   
-  // Bids section
+  // 4. Bids section
   const bidsHTML = `
     <div class="rsect">
       <div class="rsect-title">Bid Order Book</div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent.</div>
       ${(a.bids && a.bids.length) ? a.bids.map(b => `
         <div class="bid-row">
           <span class="bid-amount">${fmtPrice(b.amount)}</span>
           <span class="bid-terms">${b.terms || 'cash'}</span>
-          <span class="bid-expiry">${b.expiry || ''}</span>
         </div>
-      `).join('') : '<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>'}
+      `).join('') : '<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet.</div>'}
     </div>
   `;
   
-  // Right Panel Buttons - All connected to lead generation with proper handlers
+  // 5. Action Buttons
   const buttonsHTML = `
     <div class="act-grid">
-      <button class="abtn a-buy" onclick="handleInquiry(ASSETS.find(x => x.id === '${a.id}'))">BUY / INQUIRE</button>
-      <button class="abtn a-bid" onclick="showBidModal(ASSETS.find(x => x.id === '${a.id}'))">PLACE BID</button>
-      <button class="abtn a-lend" onclick="showLendingModal(ASSETS.find(x => x.id === '${a.id}'))">FIND LENDER</button>
-      <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="showInsuranceModal(ASSETS.find(x => x.id === '${a.id}'))">INSURANCE</button>
-      <button class="abtn a-save" onclick="handleWatchlist(ASSETS.find(x => x.id === '${a.id}'))">WATCHLIST</button>
-      <button class="abtn a-claim" onclick="handleTokenize(ASSETS.find(x => x.id === '${a.id}'))">CLAIM / TOKENIZE</button>
-      <button class="abtn a-sponsor" onclick="handleSponsor(ASSETS.find(x => x.id === '${a.id}'))">SPONSOR LISTING</button>
+      <button class="abtn a-buy" onclick="handleInquiry(window.currentAsset)">BUY / INQUIRE</button>
+      <button class="abtn a-bid" onclick="showBidModal(window.currentAsset)">PLACE BID</button>
+      <button class="abtn a-lend" onclick="showLendingModal(window.currentAsset)">FIND LENDER</button>
+      <button class="abtn a-save" onclick="handleWatchlist(window.currentAsset)">WATCHLIST</button>
     </div>
   `;
   
-  // Market Status section
+  // 6. Market Status
   const marketHTML = `
     <div class="rsect">
       <div class="rsect-title">Market Status</div>
       <div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div>
       <div class="rrow"><span class="rk">Token Status</span><span class="rv">${a.tokenized ? '⬡ On-Chain' : 'Unclaimed'}</span></div>
-      <div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div>
-      <div class="rrow"><span class="rk">Broker Active</span><span class="rv">${a.broker_active !== false ? 'Yes' : 'No'}</span></div>
     </div>
   `;
   
@@ -2643,16 +2633,12 @@ function selectAsset(id) {
     </div>
   `;
   
-  // Fly camera to asset location
   flyTo(a.lat, a.lng, 1400, 45);
   
-  // On mobile, open the slide-up panel
   if (window.innerWidth <= 767) {
     document.getElementById('right').classList.add('open-drawer');
-    document.body.style.overflow = 'hidden';
   }
-  
-  // Update list highlighting
+
   const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
   renderList(filtered);
 }
