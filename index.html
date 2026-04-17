@@ -480,9 +480,9 @@ body { min-width: 900px; overflow-x: auto; }
   will-change: transform;
   cursor: pointer;
 }
-.price-marker:hover {
-  filter: drop-shadow(0 6px 24px rgba(0,255,200,.5));
-  transform: scale(1.06);
+.price-marker:hover { 
+  filter: drop-shadow(0 6px 24px rgba(0,255,200,.5)); 
+  transform: scale(1.06); 
 }
 .price-tag {
   background: rgba(14,22,46,.97);
@@ -876,9 +876,6 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .footer-copy a:hover { color: var(--dim); }
 
-/* ============================================================ */
-/* MODAL                                                         */
-/* ============================================================ */
 #modal {
   display: none;
   position: fixed;
@@ -1072,87 +1069,212 @@ body { min-width: 900px; overflow-x: auto; }
   overflow: visible;
 }
 
-/* ============================================================ */
-/* BLIMP                                                         */
-/* ============================================================ */
-.blimp-layer {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  z-index: 450;
-  pointer-events: none;
+/* MOBILE "ZILLOW" UI (≤767px) — Centered Globe + 75vh Slide-up Drawer */
+@media (max-width: 767px) {
+  #shell {
+    grid-template-rows: 48px 1fr;
+    height: 100dvh;
+    min-width: unset;
+    width: 100vw;
+    overflow-x: hidden !important;
+  }
+  #market-ribbon, #ticker-bar, #footer, #left {
+    display: none !important;
+  }
+  #right {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 75vh !important;
+    max-height: 75vh !important;
+    border-left: none !important;
+    border-top: 2px solid rgba(0,255,200,.3) !important;
+    border-radius: 16px 16px 0 0 !important;
+    transform: translateY(100%) !important;
+    transition: transform .3s cubic-bezier(.4,0,.2,1) !important;
+    z-index: 2000 !important;
+    background: var(--bg1) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+  }
+  #right.open-drawer {
+    transform: translateY(0) !important;
+  }
+  #right::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,.2);
+    border-radius: 2px;
+    margin: 10px auto 6px;
+  }
+  .rhead, .rinner {
+    padding: 12px 16px;
+  }
+  .rbody {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(75vh - 180px);
+  }
+  #topbar {
+    height: 48px;
+    padding: 0 8px;
+    background: var(--bg1);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 100;
+  }
+  .tstat, .logo-tag { display: none; }
+  .tbtn {
+    display: inline-block !important;
+    padding: 0 8px;
+    font-size: 10px;
+    border-left: none;
+    margin-left: 4px;
+  }
+  .tbtn.primary {
+    background: var(--cyan);
+    color: #000;
+    border-radius: 2px;
+    padding: 0 10px;
+    margin-left: 4px;
+  }
+  .logo { padding: 0 12px; border-right: none; }
+  .logo-text { font-size: 14px; }
+  .search-wrap { margin-left: 8px; flex: 1; }
+  #search-input { font-size: 12px; }
+  body, #main-row {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+  }
+  #main-row {
+    grid-template-columns: 1fr !important;
+    width: 100vw !important;
+    position: relative;
+    overflow: hidden;
+  }
+  #map-col {
+    position: relative !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100% !important;
+    overflow: hidden;
+  }
+  #map3d-container {
+    position: absolute;
+    inset: 0;
+  }
+  .map-ctl-panel {
+    top: 8px;
+    right: 8px;
+    z-index: 200;
+  }
+  .mctl-group { padding: 3px; gap: 0; }
+  .mctl { padding: 4px 8px; font-size: 8px; }
+  .map-status {
+    bottom: 60px;
+    font-size: 8px;
+    padding: 4px 12px;
+    white-space: nowrap;
+    background: rgba(0,0,0,.7);
+  }
+  .view-toggle {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    background: rgba(14,22,46,.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,255,200,.25);
+    border-radius: 40px;
+    padding: 4px;
+    z-index: 400;
+  }
+  .view-toggle-btn {
+    padding: 8px 20px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    border-radius: 32px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .view-toggle-btn.active {
+    background: var(--cyan);
+    color: #000;
+  }
+  .list-view {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    z-index: 300;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+    padding: 12px;
+    gap: 12px;
+  }
+  .list-view.active {
+    display: flex;
+  }
+  .list-tile {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .list-tile:active { background: var(--bg2); }
+  .list-tile-type {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--cyan);
+    margin-bottom: 6px;
+  }
+  .list-tile-addr {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+  .list-tile-loc {
+    font-size: 10px;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  .list-tile-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+  #asset-drawer { display: none; }
+  .price-marker { z-index: 500 !important; }
+  .price-tag { padding: 5px 9px; }
+  .price-tag-val { font-size: 11px; }
+  .price-tag-type { font-size: 7px; }
 }
-.blimp {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  pointer-events: all;
-  animation: blimp-drift 14s ease-in-out infinite;
-  transform-origin: bottom center;
-}
-@keyframes blimp-drift {
-  0%,100% { transform: translateX(0) rotate(-1deg); }
-  50%      { transform: translateX(10px) rotate(1deg); }
-}
-.blimp-body {
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-.blimp-hull {
-  background: linear-gradient(135deg, #0d1a2e 0%, #1a2f4e 50%, #0d1a2e 100%);
-  border: 1px solid rgba(226,197,90,.5);
-  border-radius: 40px 60px 60px 40px;
-  padding: 8px 22px 8px 16px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 0 18px rgba(226,197,90,.25), 0 4px 18px rgba(0,0,0,.6);
-  min-width: 160px;
-}
-.blimp-text {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--gold);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  line-height: 1.1;
-  white-space: nowrap;
-}
-.blimp-sub {
-  font-size: 7px;
-  color: rgba(226,197,90,.6);
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  margin-top: 2px;
-  white-space: nowrap;
-}
-.blimp-tail {
-  width: 0;
-  height: 0;
-  border-top: 9px solid transparent;
-  border-bottom: 9px solid transparent;
-  border-left: 18px solid rgba(226,197,90,.5);
-  margin-left: -1px;
-}
-.blimp-string {
-  width: 1px;
-  height: 28px;
-  background: linear-gradient(to bottom, rgba(226,197,90,.5), transparent);
-  margin: 0 auto;
-}
-.blimp-flag {
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: rgba(226,197,90,.5);
-  text-transform: uppercase;
-  margin-top: -4px;
+@media (max-width: 767px) and (orientation: landscape) {
+  .view-toggle { bottom: 8px; }
+  .view-toggle-btn { padding: 6px 16px; font-size: 10px; }
+  #right { height: 80vh !important; max-height: 80vh !important; }
 }
 
-/* ============================================================ */
-/* DRAWER DETAIL PANEL                                           */
-/* ============================================================ */
 .drawer-close {
   position: absolute;
   top: 12px;
@@ -1557,12 +1679,13 @@ body { min-width: 900px; overflow-x: auto; }
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
 
-/* ============================================================ */
-/* AUTH GATE                                                      */
-/* ============================================================ */
+/* CLINICAL AUTHENTICATION GATE — Minimalist, No Escape */
 .auth-gate {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(10, 14, 23, 0.98);
   backdrop-filter: blur(8px);
   z-index: 10000;
@@ -1571,7 +1694,9 @@ body { min-width: 900px; overflow-x: auto; }
   justify-content: center;
   font-family: var(--font);
 }
-.auth-gate.hidden { display: none; }
+.auth-gate.hidden {
+  display: none;
+}
 .auth-gate-card {
   background: var(--bg1);
   border: 1px solid var(--border2);
@@ -1611,254 +1736,23 @@ body { min-width: 900px; overflow-x: auto; }
   border: none;
   transition: all 0.2s;
 }
-.auth-gate-btn.primary { background: var(--cyan); color: #000; }
-.auth-gate-btn.primary:hover { background: #00e6b4; }
-.auth-gate-btn.secondary { background: transparent; border: 1px solid var(--border2); color: var(--silver); }
-.auth-gate-btn.secondary:hover { border-color: var(--border3); color: var(--text); background: rgba(255,255,255,.03); }
-
-/* ============================================================ */
-/* MOBILE UI (≤767px)                                            */
-/* ============================================================ */
-@media (max-width: 767px) {
-  #shell {
-    grid-template-rows: 48px 1fr;
-    height: 100dvh;
-    min-width: unset;
-    width: 100vw;
-    overflow-x: hidden !important;
-  }
-  #market-ribbon, #ticker-bar, #footer, #left {
-    display: none !important;
-  }
-  #right {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    top: auto !important;
-    width: 100% !important;
-    height: 75vh !important;
-    max-height: 75vh !important;
-    border-left: none !important;
-    border-top: 2px solid rgba(0,255,200,.3) !important;
-    border-radius: 16px 16px 0 0 !important;
-    transform: translateY(100%) !important;
-    transition: transform .3s cubic-bezier(.4,0,.2,1) !important;
-    z-index: 2000 !important;
-    background: var(--bg1) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    display: block !important;
-  }
-  #right.open-drawer {
-    transform: translateY(0) !important;
-  }
-  #right::before {
-    content: '';
-    display: block;
-    width: 40px;
-    height: 4px;
-    background: rgba(255,255,255,.2);
-    border-radius: 2px;
-    margin: 10px auto 6px;
-  }
-  .rhead, .rinner {
-    padding: 12px 16px;
-  }
-  .rbody {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    max-height: calc(75vh - 180px);
-  }
-  #topbar {
-    height: 48px;
-    padding: 0 8px;
-    background: var(--bg1);
-    border-bottom: 1px solid var(--border);
-    position: relative;
-    z-index: 100;
-  }
-  .tstat, .logo-tag { display: none; }
-  .tbtn {
-    display: inline-block !important;
-    padding: 0 8px;
-    font-size: 10px;
-    border-left: none;
-    margin-left: 4px;
-  }
-  .tbtn.primary {
-    background: var(--cyan);
-    color: #000;
-    border-radius: 2px;
-    padding: 0 10px;
-    margin-left: 4px;
-  }
-  .logo { padding: 0 12px; border-right: none; }
-  .logo-text { font-size: 14px; }
-  .search-wrap { margin-left: 8px; flex: 1; }
-  #search-input { font-size: 12px; }
-  body, #main-row {
-    overflow-x: hidden !important;
-    width: 100vw !important;
-  }
-  #main-row {
-    grid-template-columns: 1fr !important;
-    width: 100vw !important;
-    position: relative;
-    overflow: hidden;
-  }
-  /* CRITICAL: map-col is always visible — never display:none on mobile */
-  #map-col {
-    position: relative !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100% !important;
-    overflow: hidden;
-    display: block !important;
-  }
-  #map3d-container {
-    position: absolute;
-    inset: 0;
-  }
-  .map-ctl-panel {
-    top: 8px;
-    right: 8px;
-    z-index: 200;
-  }
-  .mctl-group { padding: 3px; gap: 0; }
-  .mctl { padding: 4px 8px; font-size: 8px; }
-  .map-status {
-    bottom: 60px;
-    font-size: 8px;
-    padding: 4px 12px;
-    white-space: nowrap;
-    background: rgba(0,0,0,.7);
-  }
-  .view-toggle {
-    position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 4px;
-    background: rgba(14,22,46,.95);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(0,255,200,.25);
-    border-radius: 40px;
-    padding: 4px;
-    z-index: 400;
-  }
-  .view-toggle-btn {
-    padding: 8px 20px;
-    font-family: var(--font);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .8px;
-    text-transform: uppercase;
-    background: none;
-    border: none;
-    border-radius: 32px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .15s;
-  }
-  .view-toggle-btn.active {
-    background: var(--cyan);
-    color: #000;
-  }
-  /* List view sits OVER the map but map stays rendered in background */
-  .list-view {
-    position: absolute;
-    inset: 0;
-    background: var(--bg);
-    z-index: 300;
-    overflow-y: auto;
-    display: none;
-    flex-direction: column;
-    padding: 0;
-    gap: 0;
-  }
-  .list-view.active {
-    display: flex;
-  }
-  .list-tile {
-    background: var(--bg1);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 14px;
-    cursor: pointer;
-    transition: all .15s;
-    margin: 0 12px;
-  }
-  .list-tile:first-child { margin-top: 12px; }
-  .list-tile:last-child { margin-bottom: 12px; }
-  .list-tile:active { background: var(--bg2); }
-  .list-tile-type {
-    font-size: 9px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--cyan);
-    margin-bottom: 6px;
-  }
-  .list-tile-addr {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1.35;
-    margin-bottom: 4px;
-  }
-  .list-tile-loc {
-    font-size: 10px;
-    color: var(--dim);
-    margin-bottom: 8px;
-  }
-  .list-tile-price {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--cyan);
-  }
-  #asset-drawer { display: none; }
-  .price-marker { z-index: 500 !important; }
-  .price-tag { padding: 5px 9px; }
-  .price-tag-val { font-size: 11px; }
-  .price-tag-type { font-size: 7px; }
-  .blimp-layer { display: none; }
+.auth-gate-btn.primary {
+  background: var(--cyan);
+  color: #000;
 }
-@media (max-width: 767px) and (orientation: landscape) {
-  .view-toggle { bottom: 8px; }
-  .view-toggle-btn { padding: 6px 16px; font-size: 10px; }
-  #right { height: 80vh !important; max-height: 80vh !important; }
+.auth-gate-btn.primary:hover {
+  background: #00e6b4;
 }
-
-/* ============================================================ */
-/* MODAL OVERLAY FOR FINANCE / INSURANCE / LENDING               */
-/* ============================================================ */
-.modal-menu-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
+.auth-gate-btn.secondary {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--silver);
 }
-.modal-menu-item {
-  padding: 10px 14px;
+.auth-gate-btn.secondary:hover {
+  border-color: var(--border3);
+  color: var(--text);
   background: rgba(255,255,255,.03);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--dim);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all .15s;
 }
-.modal-menu-item:hover { border-color: var(--border2); color: var(--text); background: rgba(255,255,255,.05); }
-.modal-menu-item .item-label { font-weight: 600; }
-.modal-menu-item .item-arrow { color: var(--muted); font-size: 14px; }
-.modal-menu-item.selected { border-color: rgba(0,255,200,.45); background: var(--cyan-dim); color: var(--cyan); }
 </style>
 </head>
 <body>
@@ -1902,7 +1796,6 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="tstat-l">Bids 24h</div>
       <div class="tstat-v" id="s-bids">—</div>
     </div>
-    <!-- AUTH BUTTONS — managed dynamically by updateAuthUI() -->
     <button class="tbtn" id="signin-btn">Sign In</button>
     <button class="tbtn primary" id="join-btn">Join</button>
   </div>
@@ -1960,7 +1853,6 @@ body { min-width: 900px; overflow-x: auto; }
     </div>
   </div>
 
-  <!-- UNIFIED RIGHT PANEL: Asset Details + Financials consolidated -->
   <div id="right">
     <div class="rhead" id="rhead">
       <div class="rtype">Select an Asset</div>
@@ -1968,10 +1860,7 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="rcity">—</div>
     </div>
     <div class="rbody" id="rbody">
-      <div class="r-empty">
-        <div class="r-empty-glyph">◎</div>
-        <div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div>
-      </div>
+      <div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>
     </div>
   </div>
 
@@ -1998,37 +1887,37 @@ body { min-width: 900px; overflow-x: auto; }
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="mailto:info@rwabidask.com">info@rwabidask.com</a>
+    <a href="/cdn-cgi/l/email-protection#0f607f7c4f7d786e6d666b6e7c64216c6062"><span class="__cf_email__" data-cfemail="3f504f4c7f4d485e5d565b5e4c54115c5052">[email&#160;protected]</span></a>
   </div>
 </div>
 
-</div><!-- /#shell -->
+</div>
 
 <div id="info-win" class="info-win" style="display:none;position:fixed;z-index:9999;"></div>
 <div id="modal"><div class="mbox" id="mbox"><button class="mclose-btn" onclick="closeModal()">✕</button></div></div>
 <div id="toast"></div>
 
-<!-- Mobile view toggle — outside #shell so it floats above map -->
 <div class="view-toggle" id="mobile-view-toggle">
   <button class="view-toggle-btn active" data-view="globe">GLOBE</button>
   <button class="view-toggle-btn" data-view="list">LIST</button>
 </div>
-<!-- Mobile list view — sits over map but map keeps rendering -->
 <div class="list-view" id="mobile-list-view"></div>
 
-<!-- AUTH GATE — clinical, persistent until signed in -->
+<!-- CLINICAL AUTHENTICATION GATE — Persistent, No Escape -->
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-card">
     <div class="auth-gate-title">RWABidAsk | Access Terminal</div>
     <div class="auth-gate-sub">Sign in or create an account to access the Global Asset Directory, Persistent Ledger, and institutional bidding platform.</div>
     <div class="auth-gate-buttons">
-      <button class="auth-gate-btn secondary" onclick="openModal('register')">Request Access</button>
-      <button class="auth-gate-btn primary" onclick="openModal('signin')">Sign In</button>
+      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('register')">Request Access</button>
+      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button>
     </div>
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+
+  <script>
 'use strict';
 
 // ============================================================
@@ -2038,51 +1927,39 @@ let isMapReady = false;
 let markersRendered = false;
 
 // ============================================================
-// ASSET CATEGORIES — No emojis, no "undefined" tab
+// ASSET CATEGORIES - No emojis, clean labels
 // ============================================================
 const ASSET_CATEGORIES = [
-  { id: 'all',            label: 'ALL',               physical: false },
-  { id: 'realestate',     label: 'REAL ESTATE',       physical: true  },
-  { id: 'commercial',     label: 'COMMERCIAL',        physical: true  },
-  { id: 'aviation',       label: 'AVIATION',          physical: true  },
-  { id: 'maritime',       label: 'MARITIME',          physical: true  },
-  { id: 'resources',      label: 'NATURAL RESOURCES', physical: true  },
-  { id: 'infrastructure', label: 'INFRASTRUCTURE',    physical: true  },
-  { id: 'financial',      label: 'FINANCIALS',        physical: false }
+  { id: 'all', label: 'ALL', physical: false },
+  { id: 'realestate', label: 'REAL ESTATE', physical: true },
+  { id: 'commercial', label: 'COMMERCIAL', physical: true },
+  { id: 'aviation', label: 'AVIATION', physical: true },
+  { id: 'maritime', label: 'MARITIME', physical: true },
+  { id: 'resources', label: 'NATURAL RESOURCES', physical: true },
+  { id: 'infrastructure', label: 'INFRASTRUCTURE', physical: true },
+  { id: 'financial', label: 'FINANCIALS', physical: false }
 ];
 
-// FIX: Castle/Estate/Property all correctly map to realestate
+// Castle mapping to Real Estate filter
 function getAssetCategory(type) {
-  if (!type) return 'realestate';
-  const t = type.toLowerCase().trim();
-  const map = {
-    residential: 'realestate',
-    land:        'realestate',
-    castle:      'realestate',
-    estate:      'realestate',
-    property:    'realestate',
-    commercial:  'commercial',
-    business:    'commercial',
-    retail:      'commercial',
-    office:      'commercial',
-    aviation:    'aviation',
-    aircraft:    'aviation',
-    maritime:    'maritime',
-    vessel:      'maritime',
-    ship:        'maritime',
-    resources:   'resources',
-    minerals:    'resources',
-    mining:      'resources',
-    energy:      'infrastructure',
-    infrastructure: 'infrastructure',
-    ip:          'financial',
-    debt:        'financial',
-    financial:   'financial',
-    fund:        'financial',
-    bond:        'financial',
-    equity:      'financial'
+  const map = { 
+    residential:'realestate', 
+    land:'realestate', 
+    castle:'realestate',
+    estate:'realestate',
+    property:'realestate',
+    commercial:'commercial', 
+    business:'commercial', 
+    aviation:'aviation', 
+    maritime:'maritime', 
+    resources:'resources', 
+    minerals:'resources', 
+    energy:'infrastructure', 
+    ip:'financial', 
+    debt:'financial', 
+    financial:'financial'
   };
-  return map[t] || 'realestate';
+  return map[type] || 'realestate';
 }
 
 function isPhysicalAsset(type) {
@@ -2120,432 +1997,13 @@ let currentUser = null;
 let currentUserRole = null;
 
 // ============================================================
-// SUPABASE BOOT & AUTH
-// ============================================================
-function bootSupabase() {
-  if (typeof supabase !== 'undefined' && supabase.createClient) {
-    try {
-      _sb = supabase.createClient(SB_URL, SB_KEY);
-      console.log('[RWABidAsk] Supabase ready');
-      // Listen for auth state changes
-      _sb.auth.onAuthStateChange((event, session) => {
-        if (session && session.user) {
-          currentUser = session.user;
-          currentUserRole = currentUser.user_metadata?.role || 'Investor';
-          isAuthenticated = true;
-          updateAuthUI();
-          document.getElementById('auth-gate')?.classList.add('hidden');
-          if (map3dEl) onCameraChange();
-        } else {
-          currentUser = null;
-          currentUserRole = null;
-          isAuthenticated = false;
-          updateAuthUI();
-        }
-      });
-      restoreSession();
-    } catch(e) { console.warn('[RWABidAsk] Supabase init error:', e); }
-  } else {
-    setTimeout(bootSupabase, 300);
-  }
-}
-
-async function restoreSession() {
-  if (!_sb) return;
-  try {
-    const { data } = await _sb.auth.getSession();
-    if (data?.session?.user) {
-      currentUser = data.session.user;
-      currentUserRole = currentUser.user_metadata?.role || 'Investor';
-      isAuthenticated = true;
-      updateAuthUI();
-      document.getElementById('auth-gate')?.classList.add('hidden');
-      if (map3dEl) onCameraChange();
-    } else {
-      isAuthenticated = false;
-      updateAuthUI();
-    }
-  } catch(e) { console.warn('[RWABidAsk] restoreSession error:', e); }
-}
-
-// ============================================================
-// AUTH UI STATE MANAGEMENT
-// ============================================================
-function updateAuthUI() {
-  const signinBtn = document.getElementById('signin-btn');
-  const joinBtn   = document.getElementById('join-btn');
-  if (!signinBtn || !joinBtn) return;
-
-  if (currentUser) {
-    // Show truncated email/ID in header
-    const displayName = currentUser.email
-      ? currentUser.email.split('@')[0]
-      : (currentUser.id ? currentUser.id.slice(0, 8) : 'User');
-    signinBtn.textContent = displayName.toUpperCase();
-    signinBtn.title = currentUser.email || currentUser.id;
-    signinBtn.onclick = () => openModal('account');
-
-    joinBtn.textContent = 'Sign Out';
-    joinBtn.classList.remove('primary');
-    joinBtn.style.borderLeft = '1px solid var(--border)';
-    joinBtn.onclick = async () => {
-      if (_sb) {
-        await _sb.auth.signOut();
-      }
-      currentUser = null;
-      isAuthenticated = false;
-      updateAuthUI();
-      document.getElementById('auth-gate')?.classList.remove('hidden');
-      toast('Signed out successfully.');
-    };
-  } else {
-    signinBtn.textContent = 'Sign In';
-    signinBtn.title = '';
-    signinBtn.onclick = () => openModal('signin');
-
-    joinBtn.textContent = 'Join';
-    joinBtn.classList.add('primary');
-    joinBtn.onclick = () => openModal('register');
-  }
-}
-
-// ============================================================
-// MODAL SYSTEM — Sign In / Register / Finance / Insurance
-// ============================================================
-function openModal(type, assetId) {
-  const modal = document.getElementById('modal');
-  const mbox  = document.getElementById('mbox');
-  if (!modal || !mbox) return;
-
-  modal.classList.add('open');
-  let html = '';
-
-  if (type === 'signin') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Sign In</div>
-      <div class="msub">Access the RWABidAsk Permanent Ledger.</div>
-      <div class="mfield"><label>Email</label><input type="email" id="m-email" placeholder="your@institution.com" autocomplete="email"></div>
-      <div class="mfield"><label>Password</label><input type="password" id="m-pass" placeholder="••••••••" autocomplete="current-password"></div>
-      <div class="mfooter">
-        <button class="msub-btn" onclick="doSignIn()">Sign In</button>
-        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      </div>
-      <div class="legal-note" style="margin-top:16px;text-align:center">
-        No account? <span style="color:var(--cyan);cursor:pointer" onclick="openModal('register')">Create one →</span>
-      </div>`;
-  } else if (type === 'register') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Create Account</div>
-      <div class="msub">Join the institutional digitization platform.</div>
-      <div class="role-grid">
-        <div class="role-card sel" id="role-investor" onclick="selectRole('Investor')">
-          <div class="role-name">Investor</div><div class="role-desc">Bid, buy &amp; watchlist assets</div>
-        </div>
-        <div class="role-card" id="role-owner" onclick="selectRole('Owner')">
-          <div class="role-name">Asset Owner</div><div class="role-desc">List &amp; tokenize your assets</div>
-        </div>
-        <div class="role-card" id="role-lender" onclick="selectRole('Lender')">
-          <div class="role-name">Lender</div><div class="role-desc">Fund deals via the ledger</div>
-        </div>
-        <div class="role-card" id="role-broker" onclick="selectRole('Broker')">
-          <div class="role-name">Broker / Advisor</div><div class="role-desc">Represent institutional clients</div>
-        </div>
-      </div>
-      <div class="mfield"><label>Full Name</label><input type="text" id="m-name" placeholder="First Last" autocomplete="name"></div>
-      <div class="mfield"><label>Email</label><input type="email" id="m-email" placeholder="your@institution.com" autocomplete="email"></div>
-      <div class="mfield"><label>Password</label><input type="password" id="m-pass" placeholder="Min 8 characters" autocomplete="new-password"></div>
-      <input type="hidden" id="m-role" value="Investor">
-      <div class="mfooter">
-        <button class="msub-btn" onclick="doRegister()">Create Account</button>
-        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      </div>
-      <div class="legal-note">By registering you agree to our Terms of Service. RWABidAsk is not a broker-dealer or registered investment advisor.</div>`;
-  } else if (type === 'account') {
-    const u = currentUser;
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Account</div>
-      <div class="msub">${u ? u.email : ''}</div>
-      <div class="rrow"><span class="rk">Role</span><span class="rv">${currentUserRole || 'Investor'}</span></div>
-      <div class="rrow"><span class="rk">User ID</span><span class="rv" style="font-family:monospace;font-size:9px">${u ? u.id.slice(0,20) + '…' : '—'}</span></div>
-      <div class="mfooter" style="margin-top:20px">
-        <button class="msub-btn" style="background:none;border:1px solid var(--red);color:var(--red)" onclick="document.getElementById('join-btn').onclick(); closeModal()">Sign Out</button>
-        <button class="mcan-btn" onclick="closeModal()">Close</button>
-      </div>`;
-  } else if (type === 'finance') {
-    const lendingProducts = [
-      { label: 'CMBS — Commercial Mortgage-Backed Security',    tag: 'CMBS' },
-      { label: 'Construction Financing',                         tag: 'CONSTRUCTION' },
-      { label: 'Mezzanine Debt',                                tag: 'MEZZANINE' },
-      { label: 'Bridge Loan',                                   tag: 'BRIDGE' },
-      { label: 'Asset-Based Lending (ABL)',                     tag: 'ABL' },
-      { label: 'Non-Recourse Project Finance',                  tag: 'NON-RECOURSE' },
-      { label: 'Venture Debt',                                  tag: 'VENTURE DEBT' },
-      { label: 'Trade Finance',                                 tag: 'TRADE FINANCE' },
-      { label: 'Tokenized Debt Instrument',                     tag: 'TOKENIZED DEBT' }
-    ];
-    const items = lendingProducts.map(p =>
-      `<li class="modal-menu-item" onclick="submitLead('${assetId || ''}','lending','${p.tag}',this)"><span class="item-label">${p.label}</span><span class="item-arrow">›</span></li>`
-    ).join('');
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Find a Lender</div>
-      <div class="msub">Select a financing product. Our institutional lending network will be in contact.</div>
-      <ul class="modal-menu-list">${items}</ul>
-      <div class="legal-note" style="margin-top:14px">Lending inquiries are non-binding. RWABidAsk does not originate loans.</div>`;
-  } else if (type === 'insurance') {
-    const insuranceProducts = [
-      { label: 'All-Risk Property Insurance',                   tag: 'ALL-RISK' },
-      { label: 'War / Terrorism / Political Risk',              tag: 'WAR-TERRORISM' },
-      { label: 'Aviation Hull Insurance',                       tag: 'AVIATION HULL' },
-      { label: 'Maritime Hull Insurance',                       tag: 'MARITIME HULL' },
-      { label: 'Parametric Climate Insurance',                  tag: 'PARAMETRIC CLIMATE' },
-      { label: 'Title Insurance — Digital & Physical',          tag: 'TITLE' },
-      { label: 'Smart Contract Audit Insurance',               tag: 'SMART CONTRACT' }
-    ];
-    const items = insuranceProducts.map(p =>
-      `<li class="modal-menu-item" onclick="submitLead('${assetId || ''}','insurance','${p.tag}',this)"><span class="item-label">${p.label}</span><span class="item-arrow">›</span></li>`
-    ).join('');
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Asset Insurance</div>
-      <div class="msub">Select a coverage type. Our institutional underwriting partners will be in contact.</div>
-      <ul class="modal-menu-list">${items}</ul>
-      <div class="legal-note" style="margin-top:14px">Coverage availability subject to underwriter review. Not all products are available in all jurisdictions.</div>`;
-  } else if (type === 'claim') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Claim &amp; Tokenize</div>
-      <div class="msub">Assert ownership and mint your asset onto the Persistent Ledger.</div>
-      <div class="mfield"><label>Owner Name / Entity</label><input type="text" id="m-owner" placeholder="LLC, Trust, or Individual"></div>
-      <div class="mfield"><label>Contact Email</label><input type="email" id="m-cemail" placeholder="owner@entity.com"></div>
-      <div class="mfield"><label>Jurisdiction</label><input type="text" id="m-jur" placeholder="e.g. Delaware USA, British Columbia CA"></div>
-      <div class="mfooter">
-        <button class="msub-btn" onclick="submitLead('${assetId || ''}','claim','TOKENIZE',null)">Submit Claim</button>
-        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      </div>
-      <div class="legal-note">Claiming an asset initiates a verification process. Annie Group LLC reserves the right to request supporting documentation.</div>`;
-  } else if (type === 'sponsor') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Sponsor This Listing</div>
-      <div class="msub">Elevate this asset to a featured position on the Global Directory and 3D Map. Includes the gold anchor marker and priority placement.</div>
-      <div class="mfield"><label>Your Name / Entity</label><input type="text" id="m-sp-name" placeholder="Entity or Individual Name"></div>
-      <div class="mfield"><label>Contact Email</label><input type="email" id="m-sp-email" placeholder="sponsor@entity.com"></div>
-      <div class="mfooter">
-        <button class="msub-btn" onclick="submitLead('${assetId || ''}','sponsor','FEATURED',null)">Request Sponsorship</button>
-        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      </div>`;
-  } else if (type === 'partner') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Annie Group LLC</div>
-      <div class="msub">Partnership, licensing, and white-label inquiries for the RWABidAsk Persistent Ledger platform.</div>
-      <div class="mfield"><label>Organization</label><input type="text" id="m-org" placeholder="Your company or institution"></div>
-      <div class="mfield"><label>Contact Email</label><input type="email" id="m-pemail" placeholder="partner@org.com"></div>
-      <div class="mfield"><label>Inquiry Type</label>
-        <select id="m-ptype">
-          <option>White-Label Platform</option>
-          <option>API Integration</option>
-          <option>Data Licensing</option>
-          <option>Strategic Partnership</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="mfooter">
-        <button class="msub-btn" onclick="submitLead('','partnership','PARTNER',null)">Send Inquiry</button>
-        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      </div>`;
-  } else if (type === 'bid') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Place a Bid</div>
-      <div class="msub">Bids are permanent on the Persistent Ledger. Enter your offer details.</div>
-      <div class="mfield"><label>Bid Amount (USD)</label><input type="number" id="m-bid-amt" placeholder="e.g. 2500000" min="1000"></div>
-      <div class="mfield"><label>Terms</label>
-        <select id="m-bid-terms">
-          <option>All Cash</option>
-          <option>Conventional Financing</option>
-          <option>Seller Financing</option>
-          <option>Assumable Mortgage</option>
-          <option>Subject-To</option>
-          <option>Tokenized Settlement</option>
-        </select>
-      </div>
-      <div class="mfield"><label>Expiry (Days)</label><input type="number" id="m-bid-exp" value="30" min="1" max="365"></div>
-      <div class="mfooter">
-        <button class="msub-btn" onclick="submitLead('${assetId || ''}','bid','BID-OFFER',null)">Submit Bid</button>
-        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      </div>
-      <div class="legal-note">Bids are non-binding inquiries. Binding purchase agreements require separate execution through escrow.</div>`;
-  } else if (type === 'buy') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Buy Inquiry</div>
-      <div class="msub">Express intent to purchase. A transaction coordinator will be in contact within 1 business day.</div>
-      <div class="mfield"><label>Your Name / Entity</label><input type="text" id="m-buy-name" placeholder="Name or LLC"></div>
-      <div class="mfield"><label>Contact Email</label><input type="email" id="m-buy-email" placeholder="buyer@entity.com"></div>
-      <div class="mfield"><label>Financing Method</label>
-        <select id="m-buy-fin">
-          <option>All Cash</option>
-          <option>Conventional Loan</option>
-          <option>Seller Financing</option>
-          <option>Hard Money</option>
-          <option>Bridge / Mezzanine</option>
-          <option>Tokenized Settlement</option>
-        </select>
-      </div>
-      <div class="mfooter">
-        <button class="msub-btn" onclick="submitLead('${assetId || ''}','buy','PURCHASE-INQUIRY',null)">Submit Inquiry</button>
-        <button class="mcan-btn" onclick="closeModal()">Cancel</button>
-      </div>`;
-  } else {
-    // Generic / unknown modal type
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">RWABidAsk</div>
-      <div class="msub">This feature is coming soon.</div>
-      <div class="mfooter"><button class="mcan-btn" onclick="closeModal()">Close</button></div>`;
-  }
-
-  mbox.innerHTML = html;
-}
-
-function closeModal() {
-  document.getElementById('modal')?.classList.remove('open');
-}
-
-// Select role card in register modal
-function selectRole(role) {
-  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('sel'));
-  const el = document.getElementById('role-' + role.toLowerCase());
-  if (el) el.classList.add('sel');
-  const inp = document.getElementById('m-role');
-  if (inp) inp.value = role;
-}
-
-// ============================================================
-// AUTH ACTIONS — SIGN IN / REGISTER
-// ============================================================
-async function doSignIn() {
-  const email = document.getElementById('m-email')?.value?.trim();
-  const pass  = document.getElementById('m-pass')?.value;
-  if (!email || !pass) { toast('Please enter your email and password.'); return; }
-  if (!_sb) { toast('Auth service unavailable — try again shortly.'); return; }
-
-  const btn = document.querySelector('#mbox .msub-btn');
-  if (btn) { btn.textContent = 'Signing in…'; btn.disabled = true; }
-
-  try {
-    const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
-    if (error) throw error;
-    currentUser = data.user;
-    currentUserRole = currentUser.user_metadata?.role || 'Investor';
-    isAuthenticated = true;
-    updateAuthUI();
-    closeModal();
-    document.getElementById('auth-gate')?.classList.add('hidden');
-    toast('Welcome back, ' + currentUser.email.split('@')[0] + '.');
-    if (map3dEl) onCameraChange();
-  } catch(err) {
-    toast('Sign-in failed: ' + (err.message || 'Check credentials.'));
-    if (btn) { btn.textContent = 'Sign In'; btn.disabled = false; }
-  }
-}
-
-async function doRegister() {
-  const name  = document.getElementById('m-name')?.value?.trim();
-  const email = document.getElementById('m-email')?.value?.trim();
-  const pass  = document.getElementById('m-pass')?.value;
-  const role  = document.getElementById('m-role')?.value || 'Investor';
-  if (!email || !pass || pass.length < 8) { toast('Please complete all fields (password min 8 chars).'); return; }
-  if (!_sb) { toast('Auth service unavailable — try again shortly.'); return; }
-
-  const btn = document.querySelector('#mbox .msub-btn');
-  if (btn) { btn.textContent = 'Creating account…'; btn.disabled = true; }
-
-  try {
-    const { data, error } = await _sb.auth.signUp({
-      email,
-      password: pass,
-      options: { data: { full_name: name, role } }
-    });
-    if (error) throw error;
-    closeModal();
-    toast('Account created! Check your email to confirm, then sign in.');
-  } catch(err) {
-    toast('Registration failed: ' + (err.message || 'Try again.'));
-    if (btn) { btn.textContent = 'Create Account'; btn.disabled = false; }
-  }
-}
-
-// ============================================================
-// AUTH GATE — require auth before transactional actions
-// ============================================================
-function requireAuth(action, assetId) {
-  if (!currentUser) {
-    toast('Please sign in to continue.');
-    openModal('signin');
-    return;
-  }
-  if (action === 'buy')       openModal('buy', assetId);
-  else if (action === 'bid')  openModal('bid', assetId);
-  else if (action === 'watchlist') {
-    submitLead(assetId, 'watchlist', 'SAVED', null);
-  } else {
-    toast('Action: ' + action + ' — contact us at info@rwabidask.com');
-  }
-}
-
-// ============================================================
-// LEAD ENGINE — Supabase insert to `leads` table
-// ============================================================
-async function submitLead(assetId, leadType, selectionDetail, clickedEl) {
-  // Mark selected in menu if applicable
-  if (clickedEl) {
-    document.querySelectorAll('.modal-menu-item').forEach(el => el.classList.remove('selected'));
-    clickedEl.classList.add('selected');
-  }
-
-  const payload = {
-    user_id:          currentUser ? currentUser.id : null,
-    user_email:       currentUser ? currentUser.email : null,
-    asset_id:         assetId || null,
-    lead_type:        leadType,
-    selection_detail: selectionDetail,
-    created_at:       new Date().toISOString()
-  };
-
-  const confirmMsg = `${selectionDetail} confirmed. We will be in contact shortly.`;
-
-  // Fire-and-forget insert; don't block UX on failure
-  if (_sb) {
-    _sb.from('leads').insert(payload)
-      .then(({ error }) => {
-        if (error) console.warn('[RWABidAsk] Lead insert error:', error.message);
-        else console.log('[RWABidAsk] Lead captured:', selectionDetail);
-      });
-  }
-
-  // Delay close slightly so user sees the selection highlight
-  setTimeout(() => {
-    closeModal();
-    toast(confirmMsg);
-  }, 380);
-}
-
-function openEscrowSequence(assetId) {
-  if (!currentUser) { openModal('signin'); return; }
-  submitLead(assetId, 'escrow', 'ESCROW-INQUIRY', null);
-}
-
-// ============================================================
 // FETCH REAL DATA FROM SUPABASE 'listings' TABLE
 // ============================================================
 async function fetchListingsFromSupabase() {
-  if (!_sb) { console.warn('[RWABidAsk] Supabase not ready, retrying...'); return []; }
+  if (!_sb) {
+    console.warn('[RWABidAsk] Supabase not ready, retrying...');
+    return [];
+  }
   try {
     setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');
     const { data, error } = await _sb
@@ -2553,41 +2011,53 @@ async function fetchListingsFromSupabase() {
       .select('*')
       .eq('status', 'active')
       .order('created_at', { ascending: false });
-
-    if (error) { console.error('[RWABidAsk] Supabase fetch error:', error); setStatus('LEDGER CONNECTION ISSUE — RETRYING'); return []; }
-    if (!data || data.length === 0) { setStatus('NO ASSETS IN LEDGER — ADD LISTINGS VIA DASHBOARD'); return []; }
-
+    
+    if (error) {
+      console.error('[RWABidAsk] Supabase fetch error:', error);
+      setStatus('LEDGER CONNECTION ISSUE — RETRYING');
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      console.log('[RWABidAsk] No listings found in database');
+      setStatus('NO ASSETS IN LEDGER — ADD LISTINGS VIA DASHBOARD');
+      return [];
+    }
+    
     const transformed = data.map(row => {
-      const lat = parseFloat(row.lat ?? row.latitude ?? row.Latitude ?? row.lat_coord);
-      const lng = parseFloat(row.lng ?? row.longitude ?? row.Longitude ?? row.lon_coord ?? row.lng_coord);
+      const lat = parseFloat(row.lat ?? row.latitude ?? row.Latitude);
+      const lng = parseFloat(row.lng ?? row.longitude ?? row.Longitude);
+      
       if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
-        console.warn(`[RWABidAsk] Skipping ${row.id} — invalid coordinates`);
+        console.warn(`[RWABidAsk] Skipping asset ${row.id} - invalid coordinates`);
         return null;
       }
+      
       return {
-        id:          row.id,
-        address:     row.address || row.property_address || 'Address not specified',
-        city:        row.city || 'Unknown',
-        country:     row.country || 'Global',
-        lat, lng,
-        price:       parseFloat(row.price) || 0,
-        type:        (row.asset_type || row.type || 'residential').toLowerCase(),
-        sqft:        row.sqft ? parseInt(row.sqft) : null,
-        status:      row.listing_status || 'For Sale',
-        source:      'Supabase Ledger',
-        days:        row.days_on_market || 0,
+        id: row.id,
+        address: row.address || row.property_address || 'Address not specified',
+        city: row.city || 'Unknown',
+        country: row.country || 'Global',
+        lat: lat,
+        lng: lng,
+        price: parseFloat(row.price) || 0,
+        type: (row.asset_type || row.type || 'residential').toLowerCase(),
+        sqft: row.sqft ? parseInt(row.sqft) : null,
+        status: row.listing_status || 'For Sale',
+        source: 'Supabase Ledger',
+        days: row.days_on_market || 0,
         broker_active: row.broker_active !== false,
-        tokenized:   row.tokenized === true,
-        structures:  row.structures || [],
+        tokenized: row.tokenized === true,
+        structures: row.structures || [],
         infrastructure: row.infrastructure || {},
-        land:        row.land || {},
-        financials:  row.financials || {},
-        bids:        row.bids || [],
-        image_url:   row.image_url || null,
+        land: row.land || {},
+        financials: row.financials || {},
+        bids: row.bids || [],
+        image_url: row.image_url || null,
         description: row.description || null
       };
     }).filter(Boolean);
-
+    
     console.log(`[RWABidAsk] Loaded ${transformed.length} listings from Supabase`);
     return transformed;
   } catch (err) {
@@ -2604,27 +2074,23 @@ async function loadMarketData() {
 }
 
 function onDataReady() {
-  const n = ASSETS.length;
-  setStatus(`RWABidAsk PERMANENT LEDGER — ${n} ASSETS REGISTERED`);
-  document.getElementById('s-assets').textContent = n;
+  const assetCount = ASSETS.length;
+  setStatus(`RWABidAsk PERMANENT LEDGER — ${assetCount} ASSETS REGISTERED`);
+  document.getElementById('s-assets').textContent = assetCount;
   document.getElementById('s-status').textContent = 'LIVE';
-  document.getElementById('s-bids').textContent = Math.floor(n * 2.3);
+  document.getElementById('s-bids').textContent = Math.floor(assetCount * 2.3);
   updateGMC(ASSETS);
   renderCategories();
   renderList(ASSETS);
   buildTicker(ASSETS);
-  // Sync mobile list view if on mobile
   if (window.innerWidth <= 767) renderMobileListViewFull(ASSETS);
-  // Render map markers
+  
   if (isMapReady && !markersRendered && ASSETS.length > 0) {
     renderDOMMarkers();
     markersRendered = true;
   }
 }
 
-// ============================================================
-// UTILITIES
-// ============================================================
 function fmtPrice(n) {
   if (!n || n === 0) return '—';
   if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
@@ -2640,11 +2106,10 @@ function setStatus(msg) {
 
 function toast(msg) {
   const t = document.getElementById('toast');
-  if (!t) return;
   t.textContent = msg;
   t.style.display = 'block';
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => { t.style.display = 'none'; }, 4800);
+  toast._t = setTimeout(() => { t.style.display = 'none'; }, 4000);
 }
 
 function typeClass(type) {
@@ -2654,14 +2119,16 @@ function typeClass(type) {
 }
 
 // ============================================================
-// CATEGORY RENDERING — clean labels, no emojis
+// CATEGORY RENDERING - No emojis, clean labels
 // ============================================================
 function renderCategories() {
   const container = document.getElementById('category-tabs');
   if (!container) return;
-  container.innerHTML = ASSET_CATEGORIES.map(cat =>
-    `<button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}', this)">${cat.label}</button>`
-  ).join('');
+  container.innerHTML = ASSET_CATEGORIES.map(cat => `
+    <button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}', this)">
+      ${cat.label}
+    </button>
+  `).join('');
 }
 
 function setCategory(catId, btn) {
@@ -2674,7 +2141,7 @@ function setCategory(catId, btn) {
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListViewFull(ASSETS);
+  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
 }
 
 function filterAssets(assets) {
@@ -2682,9 +2149,9 @@ function filterAssets(assets) {
   if (activeTab !== 'all') {
     filtered = filtered.filter(a => getAssetCategory(a.type) === activeTab);
   }
-  if (activeFilter === 'sub1m')   filtered = filtered.filter(a => a.price < 1e6);
-  else if (activeFilter === '1m5m')   filtered = filtered.filter(a => a.price >= 1e6 && a.price <= 5e6);
-  else if (activeFilter === '5m25m')  filtered = filtered.filter(a => a.price > 5e6 && a.price <= 25e6);
+  if (activeFilter === 'sub1m') filtered = filtered.filter(a => a.price < 1e6);
+  else if (activeFilter === '1m5m') filtered = filtered.filter(a => a.price >= 1e6 && a.price <= 5e6);
+  else if (activeFilter === '5m25m') filtered = filtered.filter(a => a.price > 5e6 && a.price <= 25e6);
   else if (activeFilter === '25mplus') filtered = filtered.filter(a => a.price > 25e6);
   return filtered;
 }
@@ -2699,281 +2166,156 @@ function setFilter(el, f) {
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListViewFull(ASSETS);
+  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
 }
 
 function renderList(assetsToShow) {
   const wrap = document.getElementById('list-scroll');
-  if (!wrap) return;
   const list = assetsToShow;
-  const n = list.length;
-  const header = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${n} Asset${n !== 1 ? 's' : ''}</div>`;
+  const resultCount = list.length;
+  const resultHeader = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
   if (!list.length) {
-    wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS MATCH<br>CURRENT FILTERS</div></div>`;
+    wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;
     return;
   }
-  wrap.innerHTML = header + list.map(a => {
+  wrap.innerHTML = resultHeader + list.map(a => {
     const mainStruct = a.structures && a.structures[0];
-    const bedbath = mainStruct && mainStruct.beds
-      ? `${mainStruct.beds}bd · ${mainStruct.baths}ba${a.sqft ? ' · ' + a.sqft.toLocaleString() + ' sf' : ''}`
-      : (a.sqft ? a.sqft.toLocaleString() + ' sqft' : '');
-    return `<div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">${a.days ? `<div class="pcard-days">${a.days}d</div>` : ''}<div class="pcard-addr">${a.address}</div><div class="pcard-city">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>${bedbath ? `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${bedbath}</div>` : ''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`;
+    const bedbath = mainStruct && mainStruct.beds ? `${mainStruct.beds}bd · ${mainStruct.baths}ba${a.sqft ? ' · ' + a.sqft.toLocaleString() + ' sf' : ''}` : (a.sqft ? a.sqft.toLocaleString() + ' sqft' : '');
+    return `<div class="pcard ${activeId === a.id ? 'active' : ''}" onclick="selectAsset('${a.id}')">${a.days ? `<div class="pcard-days">${a.days}d</div>` : ''}<div class="pcard-addr">${escapeHtml(a.address)}</div><div class="pcard-city">${escapeHtml(a.city)}${a.country && a.country !== a.city ? ', ' + escapeHtml(a.country) : ''}</div>${bedbath ? `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">${bedbath}</div>` : ''}<div class="pcard-bottom"><div class="pcard-price">${fmtPrice(a.price)}</div><span class="pcard-type ${typeClass(a.type)}">${a.type}</span></div></div>`;
   }).join('');
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
 // ============================================================
-// UNIFIED RIGHT PANEL — selectAsset + renderDetail (no tab split)
+// LEAD GENERATION - Database transactions
+// ============================================================
+async function logLead(action, assetId, detail = null) {
+  if (!_sb || !currentUser) {
+    toast('Please sign in to continue');
+    openModal('signin');
+    return false;
+  }
+  try {
+    const { error } = await _sb.from('leads').insert([{
+      user_id: currentUser.id,
+      user_email: currentUser.email,
+      asset_id: assetId,
+      action_type: action,
+      selection_detail: detail,
+      created_at: new Date().toISOString()
+    }]);
+    if (error) throw error;
+    toast(`${action} request recorded. A specialist will contact you within 24 hours.`);
+    return true;
+  } catch (e) {
+    console.error('Lead log error:', e);
+    toast('Failed to record request. Please try again.');
+    return false;
+  }
+}
+
+function requireAuth(action, assetId) {
+  if (currentUser) {
+    if (action === 'bid') openBidModal(assetId);
+    else if (action === 'buy') logLead('INQUIRY', assetId);
+    else if (action === 'watchlist') logLead('WATCHLIST', assetId);
+    else if (action === 'claim') logLead('TOKENIZE', assetId);
+    else if (action === 'sponsor') logLead('SPONSOR', assetId);
+    else if (action === 'lend') openLendingModal(assetId);
+    else if (action === 'insurance') openInsuranceModal(assetId);
+    else logLead(action.toUpperCase(), assetId);
+  } else {
+    openModal('signin');
+    toast('Please sign in to continue');
+  }
+}
+
+function openBidModal(assetId) {
+  const asset = ASSETS.find(a => a.id === assetId);
+  const amount = prompt(`Enter your bid amount for ${asset?.address || 'this asset'}:\n(Minimum: ${fmtPrice(asset?.price * 0.5 || 10000)})`);
+  if (amount && parseFloat(amount) > 0) {
+    logLead('BID', assetId, `$${parseFloat(amount).toLocaleString()}`);
+  }
+}
+
+function openLendingModal(assetId) {
+  const options = [
+    'Non-Recourse Finance',
+    'Recourse Lending',
+    'Bridge Loan',
+    'Construction Finance',
+    'SBA Loan',
+    'Private Credit',
+    'Mezzanine Debt'
+  ];
+  const selection = prompt(`Select Lending Product:\n${options.map((o, i) => `${i+1}. ${o}`).join('\n')}\n\nEnter number or product name:`);
+  if (selection) logLead('LEND', assetId, selection);
+}
+
+function openInsuranceModal(assetId) {
+  const options = [
+    'War / Political Risk Insurance',
+    'Smart Contract / Protocol Insurance',
+    'Title Insurance',
+    'Casualty & Property',
+    'Liability Insurance',
+    'Cyber Risk',
+    'Natural Disaster Coverage'
+  ];
+  const selection = prompt(`Select Insurance Product:\n${options.map((o, i) => `${i+1}. ${o}`).join('\n')}\n\nEnter number or product name:`);
+  if (selection) logLead('INSURANCE', assetId, selection);
+}
+
+// ============================================================
+// SELECT ASSET - Unified Right Panel
 // ============================================================
 function selectAsset(id) {
   activeId = id;
   const a = ASSETS.find(x => x.id === id);
   if (!a) return;
-
-  // Populate unified right panel (details + financials in one scroll)
+  
+  // Populate the consolidated right panel
   renderDetail(a);
-
-  // Fly to asset
+  
+  // Fly camera to asset location
   flyTo(a.lat, a.lng, 1400, 45);
-
-  // On mobile: open slide-up panel
+  
+  // On mobile, open the slide-up panel
   if (window.innerWidth <= 767) {
-    const right = document.getElementById('right');
-    if (right) {
-      right.classList.add('open-drawer');
-      document.body.style.overflow = 'hidden';
-    }
-    // Close list view and return to globe
-    const lv = document.getElementById('mobile-list-view');
-    if (lv) lv.classList.remove('active');
-    const btns = document.querySelectorAll('.view-toggle-btn');
-    btns.forEach(b => { b.classList.toggle('active', b.dataset.view === 'globe'); });
+    document.getElementById('right').classList.add('open-drawer');
+    document.body.style.overflow = 'hidden';
   }
-
-  // Update active highlight in list
+  
+  // Update list highlighting
   const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
   renderList(filtered);
 }
 
 function renderDetail(a) {
-  // Header
-  document.getElementById('rhead').innerHTML = `
-    <div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div>
-    <div class="rname">${a.address}</div>
-    <div class="rcity">${a.city}${a.country && a.country !== a.city ? ', ' + a.country : ''}</div>
-    <div class="rprice-row">
-      <div class="rprice">${fmtPrice(a.price)}</div>
-      <div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div>
-    </div>`;
-
-  // --- Structure manifest ---
+  document.getElementById('rhead').innerHTML = `<div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div><div class="rname">${escapeHtml(a.address)}</div><div class="rcity">${escapeHtml(a.city)}${a.country && a.country !== a.city ? ', ' + escapeHtml(a.country) : ''}</div><div class="rprice-row"><div class="rprice">${fmtPrice(a.price)}</div><div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div></div>`;
+  
   const structs = a.structures || [];
-  const structHTML = structs.length
-    ? `<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s, i) =>
-        `<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px">
-          <div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>
-          ${s.sqft  ? rr('Size', s.sqft.toLocaleString() + ' sqft') : ''}
-          ${s.beds  ? rr('Beds', s.beds) : ''}
-          ${s.baths ? rr('Baths', s.baths) : ''}
-          ${s.built ? rr('Built', s.built) : ''}
-          ${s.remodel ? rr('Remodeled', s.remodel) : ''}
-          ${s.type  ? rr('Type', s.type) : ''}
-          ${s.notes ? rr('Notes', s.notes) : ''}
-        </div>`).join('')}
-      </div>`
-    : '';
-
-  // --- Financials ---
+  const structHTML = structs.length ? `<div class="rsect"><div class="rsect-title">Structure Manifest</div>${structs.map((s, i) => `<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px"><div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>${s.sqft ? `<div class="rrow"><span class="rk">Size</span><span class="rv">${s.sqft.toLocaleString()} sqft</span></div>` : ''}${s.beds ? `<div class="rrow"><span class="rk">Beds</span><span class="rv">${s.beds}</span></div>` : ''}${s.baths ? `<div class="rrow"><span class="rk">Baths</span><span class="rv">${s.baths}</span></div>` : ''}</div>`).join('')}</div>` : '';
+  
   const fin = a.financials || {};
-  const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div>
-    ${a.price     ? rr('Listed Price', `<span class="rv hl">${fmtPrice(a.price)}</span>`) : ''}
-    ${a.sqft      ? rr('Price / sqft', fmtPrice(Math.round(a.price / a.sqft))) : ''}
-    ${fin.tax_annual ? rr('Annual Tax', '$' + Number(fin.tax_annual).toLocaleString()) : ''}
-    ${fin.hoa     ? rr('HOA / mo', '$' + fin.hoa) : ''}
-    ${fin.zestimate ? rr('Est. Value', fmtPrice(fin.zestimate)) : ''}
-    ${a.days      ? rr('Days Listed', a.days + 'd') : ''}
-    ${rr('Source', a.source || 'Public Registry')}
-  </div>`;
-
-  // --- Bid order book ---
-  const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div>
-    <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>
-    ${(a.bids && a.bids.length)
-      ? a.bids.map(b => `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px"><span style="color:var(--cyan);font-weight:600">${fmtPrice(b.amount)}</span><span style="color:var(--muted)">${b.terms || 'cash'}</span><span style="color:var(--dim)">${b.expiry || ''}</span></div>`).join('')
-      : `<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>`}
-  </div>`;
-
-  // --- Market status ---
-  const statusHTML = `<div class="rsect"><div class="rsect-title">Market Status</div>
-    ${rr('Asset ID', '#' + a.id)}
-    ${rr('Token Status', a.tokenized ? '⬡ On-Chain' : 'Unclaimed')}
-    ${rr('KYC Required', 'Yes — to bid or buy')}
-  </div>`;
-
-  // --- Description ---
-  const descHTML = a.description
-    ? `<div class="rsect"><div class="rsect-title">Description</div><div style="font-size:11px;color:var(--dim);line-height:1.7">${a.description}</div></div>`
-    : '';
-
-  // --- Action buttons ---
-  const actGrid = `<div class="act-grid">
-    <button class="abtn a-buy"  onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button>
-    <button class="abtn a-bid"  onclick="requireAuth('bid','${a.id}')">PLACE BID</button>
-    <button class="abtn a-lend" onclick="openModal('finance','${a.id}')">FIND LENDER</button>
-    <button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="openModal('insurance','${a.id}')">INSURANCE</button>
-    <button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button>
-    <button class="abtn a-claim" onclick="openModal('claim','${a.id}')">CLAIM / TOKENIZE</button>
-    <button class="abtn a-sponsor" onclick="openModal('sponsor','${a.id}')">SPONSOR LISTING</button>
-  </div>`;
-
-  document.getElementById('rbody').innerHTML = `<div class="rinner">${actGrid}${descHTML}${structHTML}${finHTML}${bidsHTML}${statusHTML}</div>`;
+  const finHTML = `<div class="rsect"><div class="rsect-title">Financial Data</div><div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>${a.sqft ? `<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price / a.sqft))}</span></div>` : ''}${fin.tax_annual ? `<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>` : ''}${fin.hoa ? `<div class="rrow"><span class="rk">HOA / mo</span><span class="rv">$${fin.hoa}</span></div>` : ''}${a.days ? `<div class="rrow"><span class="rk">Days Listed</span><span class="rv">${a.days}d</span></div>` : ''}<div class="rrow"><span class="rk">Source</span><span class="rv">${a.source || 'Public Registry'}</span></div></div>`;
+  
+  const bidsHTML = `<div class="rsect"><div class="rsect-title">Bid Order Book</div><div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent. No broker can remove them.</div>${(a.bids && a.bids.length) ? a.bids.map(b => `<div class="bid-row"><span class="bid-amount">${fmtPrice(b.amount)}</span><span class="bid-terms">${b.terms || 'cash'}</span><span class="bid-expiry">${b.expiry || ''}</span></div>`).join('') : `<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet — be the first.</div>`}</div>`;
+  
+  document.getElementById('rbody').innerHTML = `<div class="rinner"><div class="act-grid"><button class="abtn a-buy" onclick="requireAuth('buy','${a.id}')">BUY / INQUIRE</button><button class="abtn a-bid" onclick="requireAuth('bid','${a.id}')">PLACE BID</button><button class="abtn a-lend" onclick="requireAuth('lend','${a.id}')">FIND LENDER</button><button class="abtn" style="background:none;border:1px solid rgba(34,197,94,.3)!important;color:var(--green)" onclick="requireAuth('insurance','${a.id}')">INSURANCE</button><button class="abtn a-save" onclick="requireAuth('watchlist','${a.id}')">WATCHLIST</button><button class="abtn a-claim" onclick="requireAuth('claim','${a.id}')">CLAIM / TOKENIZE</button><button class="abtn a-sponsor" onclick="requireAuth('sponsor','${a.id}')">SPONSOR LISTING</button></div>${structHTML}${finHTML}${bidsHTML}<div class="rsect"><div class="rsect-title">Market Status</div><div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div><div class="rrow"><span class="rk">Token Status</span><span class="rv">${a.tokenized ? '⬡ On-Chain' : 'Unclaimed'}</span></div><div class="rrow"><span class="rk">KYC Required</span><span class="rv">Yes — to bid or buy</span></div></div></div>`;
 }
-
-function rr(k, v) {
-  return `<div class="rrow"><span class="rk">${k}</span><span class="rv">${v || '—'}</span></div>`;
-}
-
-// Click off the map on mobile closes the slide-up panel (but doesn't break desktop)
-document.getElementById('map-col').addEventListener('click', (e) => {
-  if (!e.target.closest('.price-marker') && activeId && window.innerWidth <= 767) {
-    document.getElementById('right').classList.remove('open-drawer');
-    document.body.style.overflow = '';
-  }
-});
 
 function closeDrawer() {
   document.getElementById('asset-drawer').classList.remove('open');
-}
-
-// ============================================================
-// MOBILE LISTVIEW — full filter + asset tiles, map kept alive
-// ============================================================
-function renderMobileListViewFull(assets) {
-  const container = document.getElementById('mobile-list-view');
-  if (!container) return;
-
-  const catHtml = ASSET_CATEGORIES.map(cat =>
-    `<button class="list-cat-btn${activeTab === cat.id ? ' on' : ''}" data-cat="${cat.id}"
-      style="padding:6px 10px;font-family:var(--font);font-size:9px;text-transform:uppercase;letter-spacing:.8px;
-      color:${activeTab === cat.id ? 'var(--cyan)' : 'var(--dim)'};cursor:pointer;
-      background:${activeTab === cat.id ? 'var(--cyan-dim)' : 'none'};
-      border:1px solid ${activeTab === cat.id ? 'rgba(0,255,200,.45)' : 'var(--border2)'};
-      border-radius:2px;transition:all .15s;
-      font-weight:${activeTab === cat.id ? '600' : '400'};">${cat.label}</button>`
-  ).join('');
-
-  const priceFilters = [
-    { id: 'any', label: 'Any' },
-    { id: 'sub1m', label: '–$1M' },
-    { id: '1m5m', label: '$1–5M' },
-    { id: '5m25m', label: '$5–25M' },
-    { id: '25mplus', label: '$25M+' }
-  ];
-  const priceHtml = priceFilters.map(pf =>
-    `<button class="list-price-chip${activeFilter === pf.id ? ' on' : ''}" data-price="${pf.id}"
-      style="padding:4px 10px;font-family:var(--font);font-size:9px;
-      color:${activeFilter === pf.id ? 'var(--cyan)' : 'var(--dim)'};
-      border:1px solid ${activeFilter === pf.id ? 'rgba(0,255,200,.45)' : 'var(--border2)'};
-      background:${activeFilter === pf.id ? 'var(--cyan-dim)' : 'none'};
-      cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .15s;
-      font-weight:${activeFilter === pf.id ? '600' : '400'};">${pf.label}</button>`
-  ).join('');
-
-  const filteredAssets = filterAssets(assets);
-  const tilesHtml = filteredAssets.map(a =>
-    `<div class="list-tile" onclick="selectAsset('${a.id}')">
-      <div class="list-tile-type">${a.type.toUpperCase()}</div>
-      <div class="list-tile-addr">${a.address}</div>
-      <div class="list-tile-loc">${a.city}${a.country ? ', ' + a.country : ''}</div>
-      <div class="list-tile-price">${fmtPrice(a.price)}</div>
-    </div>`
-  ).join('');
-
-  const emptyHtml = filteredAssets.length === 0
-    ? '<div style="padding:24px;text-align:center;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">No assets match current filters</div>'
-    : '';
-
-  container.innerHTML = `
-    <div style="background:var(--bg1);border-bottom:1px solid var(--border);padding:12px;flex-shrink:0;position:sticky;top:0;z-index:10;">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--silver);margin-bottom:10px;">FILTER DIRECTORY</div>
-      <div id="mob-cat-tabs" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">${catHtml}</div>
-      <div id="mob-price-chips" style="display:flex;flex-wrap:wrap;gap:6px;">${priceHtml}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:8px;padding:12px;">
-      <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">${filteredAssets.length} Asset${filteredAssets.length !== 1 ? 's' : ''}</div>
-      ${tilesHtml || emptyHtml}
-    </div>`;
-
-  // Bind category filter buttons
-  container.querySelectorAll('.list-cat-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      activeTab = btn.dataset.cat;
-      SEARCH_ACTIVE = false;
-      const si = document.getElementById('search-input');
-      if (si) si.value = '';
-      currentSearchQuery = '';
-      renderList(filterAssets(ASSETS));
-      syncMarkerVisibility();
-      renderMobileListViewFull(ASSETS);
-    });
-  });
-
-  // Bind price filter chips
-  container.querySelectorAll('.list-price-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      activeFilter = btn.dataset.price;
-      SEARCH_ACTIVE = false;
-      const si = document.getElementById('search-input');
-      if (si) si.value = '';
-      currentSearchQuery = '';
-      renderList(filterAssets(ASSETS));
-      syncMarkerVisibility();
-      renderMobileListViewFull(ASSETS);
-    });
-  });
-}
-
-function initMobileUI() {
-  const viewToggle = document.getElementById('mobile-view-toggle');
-  const listView   = document.getElementById('mobile-list-view');
-  const rightPanel = document.getElementById('right');
-
-  if (viewToggle) {
-    viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const view = btn.dataset.view;
-        viewToggle.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        if (view === 'globe') {
-          // Show globe view — list view slides away, map-col stays visible (never display:none)
-          listView.classList.remove('active');
-          rightPanel.classList.remove('open-drawer');
-          document.body.style.overflow = '';
-          // Reproject markers
-          if (map3dEl && markersRendered) reprojectMarkersWithMatrix();
-        } else {
-          // Show list view — overlays map but map-col stays display:block so 3D engine keeps ticking
-          listView.classList.add('active');
-          rightPanel.classList.remove('open-drawer');
-          document.body.style.overflow = '';
-          const filtered = SEARCH_ACTIVE ? filterAssets(SEARCH_RESULTS) : filterAssets(ASSETS);
-          renderMobileListViewFull(filtered.length ? filtered : ASSETS);
-        }
-      });
-    });
-  }
-
-  // Dismiss slide-up asset panel on backdrop tap
-  document.addEventListener('click', (e) => {
-    if (rightPanel && rightPanel.classList.contains('open-drawer')
-        && !rightPanel.contains(e.target)
-        && !e.target.closest('.price-marker')
-        && !e.target.closest('.list-tile')
-        && !e.target.closest('.pcard')) {
-      rightPanel.classList.remove('open-drawer');
-      document.body.style.overflow = '';
-    }
-  });
 }
 
 // ============================================================
@@ -2987,12 +2329,12 @@ function performSearch() {
     const filtered = filterAssets(ASSETS);
     renderList(filtered);
     syncMarkersToSearch(filtered);
-    if (window.innerWidth <= 767) renderMobileListViewFull(ASSETS);
+    if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
     setStatus('GLOBAL DIRECTORY — ' + ASSETS.length + ' ASSETS');
     return;
   }
   SEARCH_ACTIVE = true;
-  SEARCH_RESULTS = ASSETS.filter(a =>
+  SEARCH_RESULTS = ASSETS.filter(a => 
     a.address.toLowerCase().includes(query) ||
     a.city.toLowerCase().includes(query) ||
     a.type.toLowerCase().includes(query) ||
@@ -3027,34 +2369,27 @@ function syncMarkersToSearch(assetsToShow) {
 }
 
 // ============================================================
-// GOOGLE MAPS 3D — GLOBE + 4s SAFETY VALVE
+// GOOGLE MAPS 3D - FULLY ZOOMED OUT GLOBE VIEW
 // ============================================================
 async function initMap() {
   try {
     const maps3dLib = await google.maps.importLibrary('maps3d');
     const Map3DElement = maps3dLib.Map3DElement;
-    map3dEl = new Map3DElement({
-      center: { lat: 20, lng: 10, altitude: 0 },
-      range: 22000000,
-      tilt: 0,
-      heading: 0
-    });
+    map3dEl = new Map3DElement({ center: { lat: 20, lng: 10, altitude: 0 }, range: 22000000, tilt: 0, heading: 0 });
     try { const { MapMode } = maps3dLib; if (MapMode) map3dEl.mode = MapMode.SATELLITE; } catch(e) {}
     const container = document.getElementById('map3d-container');
     container.style.cssText = 'position:absolute;inset:0;';
     container.appendChild(map3dEl);
-
-    // 4-second Safety Valve — guarantees markers render even if gmp-steadystate fires late or not at all
+    
     const watchdogTimer = setTimeout(() => {
       if (!markersRendered && ASSETS.length > 0) {
-        console.log('[RWABidAsk] SAFETY VALVE: Forcing marker render after 4s timeout');
+        console.log('[RWABidAsk] WATCHDOG: Forcing marker render after 4s timeout');
         isMapReady = true;
         renderDOMMarkers();
         markersRendered = true;
       }
     }, 4000);
-
-    // Primary marker trigger
+    
     map3dEl.addEventListener('gmp-steadystate', () => {
       console.log('[RWABidAsk] Map steady state reached');
       clearTimeout(watchdogTimer);
@@ -3064,38 +2399,25 @@ async function initMap() {
         markersRendered = true;
       }
     });
-
-    // Camera change listeners
-    const _onCam = () => {
-      if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
-      cameraDebounceTimer = setTimeout(onCameraChange, 100);
-    };
-    map3dEl.addEventListener('gmp-centerchange',  _onCam);
-    map3dEl.addEventListener('gmp-rangechange',   _onCam);
-    map3dEl.addEventListener('gmp-tiltchange',    _onCam);
+    
+    const _onCam = () => { if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer); cameraDebounceTimer = setTimeout(onCameraChange, 100); };
+    map3dEl.addEventListener('gmp-centerchange', _onCam);
+    map3dEl.addEventListener('gmp-rangechange', _onCam);
+    map3dEl.addEventListener('gmp-tiltchange', _onCam);
     map3dEl.addEventListener('gmp-headingchange', _onCam);
-
+    
     requestAnimationFrame(() => { setTimeout(() => { try { map3dEl.tilt = 15; } catch(e){} }, 1200); });
     setStatus('GLOBE LOADED — FETCHING DIRECTORY…');
     await loadMarketData();
-
+    
     if (isMapReady && ASSETS.length > 0 && !markersRendered) {
       renderDOMMarkers();
       markersRendered = true;
     }
-    // Fallback render at 800ms
-    setTimeout(() => {
-      if (map3dEl && ASSETS.length > 0 && !markersRendered) {
-        renderDOMMarkers();
-        markersRendered = true;
-      }
-    }, 800);
-
+    
+    setTimeout(() => { if (map3dEl && ASSETS.length > 0 && !markersRendered) { renderDOMMarkers(); markersRendered = true; } }, 800);
     initPlacesSearch();
-  } catch (err) {
-    console.error('[RWABidAsk] Map3DElement init error:', err);
-    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING');
-  }
+  } catch (err) { console.error('[RWABidAsk] Map3DElement init error:', err); setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING'); }
 }
 
 async function initPlacesSearch() {
@@ -3142,55 +2464,14 @@ async function initPlacesSearch() {
   } catch(e) { console.warn('[RWABidAsk] Places search init error:', e); }
 }
 
-function flyTo(lat, lng, range, tilt) {
-  if (!map3dEl) return;
-  try {
-    map3dEl.flyCameraTo({
-      endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 },
-      durationMillis: 1800
-    });
-  } catch(e) {
-    map3dEl.center = { lat, lng, altitude: 45 };
-    map3dEl.range = range ?? 1400;
-    map3dEl.tilt = tilt ?? 45;
-  }
-}
+function flyTo(lat, lng, range, tilt) { if (!map3dEl) return; try { map3dEl.flyCameraTo({ endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, durationMillis: 1800 }); } catch(e) { map3dEl.center = { lat, lng, altitude: 45 }; map3dEl.range = range ?? 1400; map3dEl.tilt = tilt ?? 45; } }
 function flyGlobe() { flyTo(20, 10, 22000000, 0); }
+function setMapMode(mode, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) { try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; } catch(e) { map3dEl.setAttribute('mode', mode); } } }
+function setTilt(deg, btn) { document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on')); btn.classList.add('on'); if (map3dEl) map3dEl.tilt = deg; }
+function toggleHeat(btn) { heatOn = !heatOn; btn.classList.toggle('on', heatOn); const prices = ASSETS.map(a => a.price).filter(Boolean); const max = Math.max(...prices, 1); const p33 = max * 0.33; const p66 = max * 0.66; Object.values(domMarkers).forEach(({ el, asset }) => { el.classList.remove('heat-warm', 'heat-hot'); if (heatOn && asset.price) { if (asset.price > p66) el.classList.add('heat-hot'); else if (asset.price > p33) el.classList.add('heat-warm'); } }); toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); }
 
-function setMapMode(mode, btn) {
-  document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  if (map3dEl) {
-    try { map3dEl.mode = mode === 'satellite' ? google.maps.maps3d.MapMode.SATELLITE : google.maps.maps3d.MapMode.HYBRID; }
-    catch(e) { map3dEl.setAttribute('mode', mode); }
-  }
-}
-
-function setTilt(deg, btn) {
-  document.querySelectorAll('.mctl').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  if (map3dEl) map3dEl.tilt = deg;
-}
-
-function toggleHeat(btn) {
-  heatOn = !heatOn;
-  btn.classList.toggle('on', heatOn);
-  const prices = ASSETS.map(a => a.price).filter(Boolean);
-  const max = Math.max(...prices, 1);
-  const p33 = max * 0.33;
-  const p66 = max * 0.66;
-  Object.values(domMarkers).forEach(({ el, asset }) => {
-    el.classList.remove('heat-warm', 'heat-hot');
-    if (heatOn && asset.price) {
-      if (asset.price > p66) el.classList.add('heat-hot');
-      else if (asset.price > p33) el.classList.add('heat-warm');
-    }
-  });
-  toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF');
-}
-
-// ============================================================
-// DOM MARKERS — PROJECTION ENGINE
+    // ============================================================
+// DOM MARKERS - WORKING PROJECTION
 // ============================================================
 function onCameraChange() {
   if (cameraDebounceTimer) clearTimeout(cameraDebounceTimer);
@@ -3206,11 +2487,12 @@ function onCameraChange() {
       }
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
-
+      
       if (isZoomedIn) {
         const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
         const visibleAssets = getVisibleAssetsInViewport(baseAssets);
         const visibleIds = new Set(visibleAssets.map(a => a.id));
+        
         Object.keys(domMarkers).forEach(id => {
           const marker = domMarkers[id];
           const asset = marker.asset;
@@ -3219,7 +2501,7 @@ function onCameraChange() {
         });
         reprojectMarkersWithMatrix();
       } else {
-        Object.values(domMarkers).forEach(({ el }) => {
+        Object.values(domMarkers).forEach(({ el }) => { 
           el.style.display = 'none';
           el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
         });
@@ -3235,7 +2517,7 @@ function getVisibleAssetsInViewport(assets) {
   if (!map3dEl) return [];
   try {
     const center = map3dEl.center || { lat: 20, lng: 10 };
-    const range  = map3dEl.range  || 22000000;
+    const range = map3dEl.range || 22000000;
     const degSpread = Math.min(30, (range / 111000) * 1.2);
     const latMin = center.lat - degSpread;
     const latMax = center.lat + degSpread;
@@ -3249,15 +2531,20 @@ function getVisibleAssetsInViewport(assets) {
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
+  
   layer.innerHTML = '';
   domMarkers = {};
+  
   const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
+  
   physicalAssets.forEach(a => addPriceMarker(a));
-  Object.values(domMarkers).forEach(({ el }) => {
+  
+  Object.values(domMarkers).forEach(({ el }) => { 
     el.style.display = 'none';
     el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
   });
-  console.log(`[RWABidAsk] Markers rendered: ${Object.keys(domMarkers).length}`);
+  
+  console.log(`Markers rendered: ${Object.keys(domMarkers).length} markers created`);
 }
 
 function addPriceMarker(asset) {
@@ -3267,10 +2554,8 @@ function addPriceMarker(asset) {
   el.className = 'price-marker standard';
   el.title = asset.address || 'Asset';
   const priceStr = fmtPrice(asset.price);
-  const typeStr  = asset.type || 'asset';
-  const classIcon = { aviation:'✈', maritime:'⚓', resources:'⛏', financial:'$', energy:'⚡', minerals:'◆', ip:'©', debt:'▣' };
-  const icon = classIcon[asset.type] || '';
-  el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${icon ? icon + ' ' : ''}${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
+  const typeStr = asset.type || 'asset';
+  el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
   el.addEventListener('click', (e) => { e.stopPropagation(); selectAsset(asset.id); });
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
@@ -3286,9 +2571,9 @@ function projectMarkerLegacy(asset, el) {
     const W = rect.width, H = rect.height;
     if (!W || !H) return;
     const camCenter = map3dEl.center || { lat: 20, lng: 10 };
-    const camRange  = map3dEl.range  || 22000000;
-    const camTilt   = map3dEl.tilt   || 0;
-    const camHead   = map3dEl.heading || 0;
+    const camRange = map3dEl.range || 22000000;
+    const camTilt = map3dEl.tilt || 0;
+    const camHead = map3dEl.heading || 0;
     const dLat = asset.lat - camCenter.lat;
     const dLng = asset.lng - camCenter.lng;
     const ppd = (W / 2) / Math.max(1, camRange / 111320);
@@ -3321,9 +2606,9 @@ function reprojectMarkersWithMatrix() {
       Object.values(domMarkers).forEach(({ el, asset }) => {
         if (!isPhysicalAsset(asset.type)) { el.style.display = 'none'; return; }
         const worldX = asset.lng, worldY = asset.lat, worldZ = 45;
-        const screenX = matrix[0]  * worldX + matrix[4]  * worldY + matrix[8]  * worldZ + matrix[12];
-        const screenY = matrix[1]  * worldX + matrix[5]  * worldY + matrix[9]  * worldZ + matrix[13];
-        const screenW = matrix[3]  * worldX + matrix[7]  * worldY + matrix[11] * worldZ + matrix[15];
+        const screenX = matrix[0] * worldX + matrix[4] * worldY + matrix[8] * worldZ + matrix[12];
+        const screenY = matrix[1] * worldX + matrix[5] * worldY + matrix[9] * worldZ + matrix[13];
+        const screenW = matrix[3] * worldX + matrix[7] * worldY + matrix[11] * worldZ + matrix[15];
         if (screenW <= 0) { el.style.display = 'none'; return; }
         let x = (screenX / screenW + 1) * 0.5 * width;
         let y = (-screenY / screenW + 1) * 0.5 * height;
@@ -3353,30 +2638,20 @@ function markersVisible() { return !!(map3dEl) && (map3dEl.range || 12e6) <= MAR
 // TICKER & RIBBON
 // ============================================================
 function buildRibbon() {
-  const markets = [
-    { label:'BTC/USD',    val:'$83,241',   chg:'+1.2%',  dir:'up'   },
-    { label:'Gold Spot',  val:'$3,118/oz', chg:'+0.4%',  dir:'up'   },
-    { label:'10Y T-Bill', val:'4.38%',     chg:'-0.02',  dir:'down' }
-  ];
-  const items = markets.map(m =>
-    `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`
-  ).join('');
+  const markets = [{ label:'BTC/USD', val:'$83,241', chg:'+1.2%', dir:'up' },{ label:'Gold Spot', val:'$3,118/oz',chg:'+0.4%', dir:'up' },{ label:'10Y T-Bill', val:'4.38%', chg:'-0.02', dir:'down' },{ label:'S&P 500', val:'5,234', chg:'+0.7%', dir:'up' },{ label:'RWABidAsk Index', val:'1,284', chg:'+2.1%', dir:'up' }];
+  const items = markets.map(m => `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');
   const track = document.getElementById('ribbon-track');
   if (track) track.innerHTML = items + items;
 }
-
 function buildTicker(assets) {
   const base = ['RWABIDASK.COM', 'GLOBAL LEDGER LIVE', 'BID · ASK · BUY'];
   const addrs = assets.map(a => a.address).filter(Boolean).slice(0, 20);
   const segments = addrs.length > 0 ? [...base, ...addrs] : base;
   const all = [...segments, ...segments];
-  const html = all.map(s =>
-    `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${s}</span><span class="sep">·</span></span>`
-  ).join('');
+  const html = all.map(s => `<span class="ticker-seg"><span class="${addrs.includes(s) ? 'addr' : ''}">${escapeHtml(s)}</span><span class="sep">·</span></span>`).join('');
   const track = document.getElementById('ticker-track');
   if (track) { track.innerHTML = html; track.style.animation = 'none'; track.offsetHeight; track.style.animation = 'ticker-run 90s linear infinite'; }
 }
-
 function updateGMC(assets) {
   const total = assets.reduce((sum, a) => sum + (a.price || 0), 0);
   const el = document.getElementById('s-gmc');
@@ -3388,20 +2663,354 @@ function updateGMC(assets) {
 }
 
 // ============================================================
+// AUTH & MODAL FUNCTIONS - FULL SUPABASE AUTH
+// ============================================================
+function bootSupabase() { 
+  if (typeof supabase !== 'undefined' && supabase.createClient) { 
+    try { 
+      _sb = supabase.createClient(SB_URL, SB_KEY); 
+      console.log('[RWABidAsk] Supabase ready'); 
+      restoreSession(); 
+    } catch(e) { console.warn(e); } 
+  } else { 
+    setTimeout(bootSupabase, 300); 
+  } 
+}
+
+async function restoreSession() { 
+  if (!_sb) return; 
+  const { data } = await _sb.auth.getSession(); 
+  if (data?.session?.user) { 
+    currentUser = data.session.user; 
+    currentUserRole = currentUser.user_metadata?.role || 'Investor'; 
+    updateAuthUI(); 
+    isAuthenticated = true; 
+    document.getElementById('auth-gate')?.classList.add('hidden'); 
+    if (map3dEl) onCameraChange(); 
+  } else { 
+    isAuthenticated = false; 
+    document.getElementById('auth-gate')?.classList.remove('hidden'); 
+  } 
+}
+
+async function signIn(email, password) {
+  if (!_sb) { toast('Supabase not ready'); return false; }
+  try {
+    const { data, error } = await _sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    currentUser = data.user;
+    isAuthenticated = true;
+    updateAuthUI();
+    document.getElementById('auth-gate').classList.add('hidden');
+    closeModal();
+    toast(`Welcome back, ${currentUser.email?.split('@')[0] || 'Investor'}!`);
+    if (map3dEl) onCameraChange();
+    return true;
+  } catch (e) {
+    toast('Sign in failed: ' + e.message);
+    return false;
+  }
+}
+
+async function signUp(email, password, fullName) {
+  if (!_sb) { toast('Supabase not ready'); return false; }
+  try {
+    const { data, error } = await _sb.auth.signUp({ 
+      email, 
+      password,
+      options: { data: { full_name: fullName, role: 'Investor' } }
+    });
+    if (error) throw error;
+    if (data.user) {
+      toast('Account created! Please verify your email.');
+      closeModal();
+      return true;
+    }
+    return false;
+  } catch (e) {
+    toast('Sign up failed: ' + e.message);
+    return false;
+  }
+}
+
+async function signOut() {
+  if (_sb) await _sb.auth.signOut();
+  currentUser = null;
+  isAuthenticated = false;
+  updateAuthUI();
+  document.getElementById('auth-gate').classList.remove('hidden');
+  toast('Signed out successfully');
+  if (map3dEl) onCameraChange();
+}
+
+function updateAuthUI() { 
+  const signinBtn = document.getElementById('signin-btn'); 
+  const joinBtn = document.getElementById('join-btn'); 
+  if (currentUser) { 
+    if (signinBtn) { 
+      signinBtn.textContent = (currentUser.email?.split('@')[0] || 'Account').slice(0, 12); 
+      signinBtn.onclick = () => toast(`Logged in as ${currentUser.email}`); 
+    } 
+    if (joinBtn) { 
+      joinBtn.textContent = 'Sign Out'; 
+      joinBtn.onclick = () => signOut(); 
+    } 
+  } else { 
+    if (signinBtn) { 
+      signinBtn.textContent = 'Sign In'; 
+      signinBtn.onclick = () => openModal('signin'); 
+    } 
+    if (joinBtn) { 
+      joinBtn.textContent = 'Join'; 
+      joinBtn.onclick = () => openModal('register'); 
+    } 
+  } 
+}
+
+function openModal(type, assetId) {
+  const mbox = document.getElementById('mbox');
+  if (!mbox) return;
+  
+  let html = '';
+  if (type === 'signin') {
+    html = `
+      <button class="mclose-btn" onclick="closeModal()">✕</button>
+      <div class="mtitle">Sign In</div>
+      <div class="msub">Access the Global Asset Directory and Permanent Ledger</div>
+      <div class="mfield"><label>Email</label><input type="email" id="login-email" placeholder="investor@example.com"></div>
+      <div class="mfield"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+      <div class="mfooter"><button class="msub-btn" onclick="handleSignIn()">Sign In</button><button class="mcan-btn" onclick="closeModal()">Cancel</button></div>
+      <div class="legal-note">Don't have an account? <a href="#" onclick="openModal('register');return false">Join now</a></div>
+    `;
+  } else if (type === 'register') {
+    html = `
+      <button class="mclose-btn" onclick="closeModal()">✕</button>
+      <div class="mtitle">Join RWABidAsk</div>
+      <div class="msub">Create your institutional access account</div>
+      <div class="mfield"><label>Full Name</label><input type="text" id="reg-name" placeholder="John Smith"></div>
+      <div class="mfield"><label>Email</label><input type="email" id="reg-email" placeholder="investor@example.com"></div>
+      <div class="mfield"><label>Password</label><input type="password" id="reg-password" placeholder="•••••••• (min 6 characters)"></div>
+      <div class="mfooter"><button class="msub-btn" onclick="handleSignUp()">Create Account</button><button class="mcan-btn" onclick="closeModal()">Cancel</button></div>
+      <div class="legal-note">Already have an account? <a href="#" onclick="openModal('signin');return false">Sign in</a></div>
+    `;
+  } else if (type === 'tos_gate') {
+    html = `
+      <button class="mclose-btn" onclick="closeModal()">✕</button>
+      <div class="mtitle">Access Request</div>
+      <div class="msub">Institutional accreditation required for full platform access.</div>
+      <div class="mfield"><label>Full Name</label><input type="text" id="access-name" placeholder="Legal name"></div>
+      <div class="mfield"><label>Institution / Entity</label><input type="text" id="access-entity" placeholder="Company name"></div>
+      <div class="mfield"><label>Email</label><input type="email" id="access-email" placeholder="corporate@domain.com"></div>
+      <div class="mfooter"><button class="msub-btn" onclick="requestAccess()">Request Access</button><button class="mcan-btn" onclick="closeModal()">Cancel</button></div>
+    `;
+  } else {
+    html = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">RWABidAsk</div><div class="msub">Platform access requires authentication.</div><div class="mfooter"><button class="msub-btn" onclick="openModal('signin')">Sign In</button><button class="mcan-btn" onclick="closeModal()">Close</button></div>`;
+  }
+  
+  mbox.innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+async function handleSignIn() {
+  const email = document.getElementById('login-email')?.value;
+  const password = document.getElementById('login-password')?.value;
+  if (!email || !password) { toast('Enter email and password'); return; }
+  await signIn(email, password);
+}
+
+async function handleSignUp() {
+  const name = document.getElementById('reg-name')?.value;
+  const email = document.getElementById('reg-email')?.value;
+  const password = document.getElementById('reg-password')?.value;
+  if (!name || !email || !password) { toast('All fields required'); return; }
+  if (password.length < 6) { toast('Password must be at least 6 characters'); return; }
+  await signUp(email, password, name);
+}
+
+async function requestAccess() {
+  const name = document.getElementById('access-name')?.value;
+  const entity = document.getElementById('access-entity')?.value;
+  const email = document.getElementById('access-email')?.value;
+  if (!name || !entity || !email) { toast('All fields required'); return; }
+  if (_sb) {
+    try {
+      await _sb.from('access_requests').insert([{ name, entity, email, status: 'pending' }]);
+      toast('Access request submitted. You will be notified when approved.');
+      closeModal();
+    } catch(e) { toast('Request failed. Please try again.'); }
+  } else {
+    toast('Request recorded. Our team will contact you.');
+    closeModal();
+  }
+}
+
+// ============================================================
+// MOBILE LISTVIEW - FULL FILTER CONTROLS
+// ============================================================
+function renderMobileListViewFull(assets) {
+  const container = document.getElementById('mobile-list-view');
+  if (!container) return;
+  
+  const categoriesHtml = ASSET_CATEGORIES.map(cat => `<button class="list-cat-btn ${activeTab === cat.id ? 'on' : ''}" data-cat="${cat.id}">${cat.label}</button>`).join('');
+  const priceFilters = [
+    { id: 'any', label: 'Any' },
+    { id: 'sub1m', label: '–$1M' },
+    { id: '1m5m', label: '$1–5M' },
+    { id: '5m25m', label: '$5–25M' },
+    { id: '25mplus', label: '$25M+' }
+  ];
+  const priceHtml = priceFilters.map(pf => `<button class="list-price-chip ${activeFilter === pf.id ? 'on' : ''}" data-price="${pf.id}">${pf.label}</button>`).join('');
+  
+  const filteredAssets = filterAssets(assets);
+  const resultsHtml = filteredAssets.map(a => `<div class="list-tile" onclick="selectAsset('${a.id}')"><div class="list-tile-type">${a.type.toUpperCase()}</div><div class="list-tile-addr">${escapeHtml(a.address)}</div><div class="list-tile-loc">${escapeHtml(a.city)}${a.country ? ', ' + escapeHtml(a.country) : ''}</div><div class="list-tile-price">${fmtPrice(a.price)}</div></div>`).join('');
+  const emptyHtml = filteredAssets.length === 0 ? '<div class="list-empty" style="text-align:center;padding:40px;color:var(--muted)">No assets match current filters</div>' : '';
+  
+  container.innerHTML = `
+    <div class="list-filters-header" style="background:var(--bg1);border-bottom:1px solid var(--border);padding:12px;flex-shrink:0;">
+      <div class="list-filters-title" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--silver);margin-bottom:10px;">FILTERS</div>
+      <div class="list-category-tabs" id="mobile-category-tabs" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">${categoriesHtml}</div>
+      <div class="list-price-filters" id="mobile-price-filters" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">${priceHtml}</div>
+    </div>
+    <div class="list-results-container" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;">${resultsHtml || emptyHtml}</div>
+  `;
+  
+  // Style filter buttons
+  document.querySelectorAll('.list-cat-btn').forEach(btn => {
+    btn.style.cssText = 'padding:6px 10px;font-family:var(--font);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);cursor:pointer;background:none;border:1px solid var(--border2);border-radius:2px;transition:all .15s;';
+    if (btn.classList.contains('on')) {
+      btn.style.borderColor = 'rgba(0,255,200,.45)';
+      btn.style.color = 'var(--cyan)';
+      btn.style.background = 'var(--cyan-dim)';
+      btn.style.fontWeight = '600';
+    }
+    btn.addEventListener('click', () => {
+      const catId = btn.dataset.cat;
+      activeTab = catId;
+      SEARCH_ACTIVE = false;
+      document.getElementById('search-input').value = '';
+      currentSearchQuery = '';
+      const filtered = filterAssets(ASSETS);
+      renderList(filtered);
+      syncMarkerVisibility();
+      renderMobileListViewFull(ASSETS);
+    });
+  });
+  
+  document.querySelectorAll('.list-price-chip').forEach(btn => {
+    btn.style.cssText = 'padding:4px 10px;font-family:var(--font);font-size:9px;color:var(--dim);border:1px solid var(--border2);background:none;cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .15s;';
+    if (btn.classList.contains('on')) {
+      btn.style.borderColor = 'rgba(0,255,200,.45)';
+      btn.style.color = 'var(--cyan)';
+      btn.style.background = 'var(--cyan-dim)';
+      btn.style.fontWeight = '600';
+    }
+    btn.addEventListener('click', () => {
+      const priceId = btn.dataset.price;
+      activeFilter = priceId;
+      SEARCH_ACTIVE = false;
+      document.getElementById('search-input').value = '';
+      currentSearchQuery = '';
+      const filtered = filterAssets(ASSETS);
+      renderList(filtered);
+      syncMarkerVisibility();
+      renderMobileListViewFull(ASSETS);
+    });
+  });
+}
+
+function initMobileUI() { 
+  const viewToggle = document.getElementById('mobile-view-toggle');
+  const listView = document.getElementById('mobile-list-view');
+  const mapCol = document.getElementById('map-col');
+  const rightPanel = document.getElementById('right');
+  if (viewToggle) {
+    viewToggle.querySelectorAll('.view-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        viewToggle.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (view === 'globe') { 
+          mapCol.style.display = 'block'; 
+          listView.classList.remove('active'); 
+          rightPanel.classList.remove('open-drawer');
+          if (map3dEl && markersRendered) reprojectMarkersWithMatrix();
+        } else { 
+          mapCol.style.display = 'none'; 
+          listView.classList.add('active'); 
+          rightPanel.classList.remove('open-drawer');
+          const filtered = SEARCH_ACTIVE ? filterAssets(SEARCH_RESULTS) : filterAssets(ASSETS);
+          renderMobileListViewFull(filtered);
+        }
+      });
+    });
+  }
+  document.addEventListener('click', (e) => { if (rightPanel && rightPanel.classList.contains('open-drawer') && !rightPanel.contains(e.target) && !e.target.closest('.price-marker') && !e.target.closest('.list-tile') && !e.target.closest('.pcard')) { rightPanel.classList.remove('open-drawer'); document.body.style.overflow = ''; } });
+}
+
+// Close drawer on mobile when clicking off map
+document.getElementById('map-col')?.addEventListener('click', (e) => {
+  if (!e.target.closest('.price-marker') && activeId && window.innerWidth <= 767) {
+    document.getElementById('right').classList.remove('open-drawer');
+    document.body.style.overflow = '';
+  }
+});
+
+    // ============================================================
 // BOOT SEQUENCE
 // ============================================================
 buildTicker([]);
 buildRibbon();
 bootSupabase();
-document.addEventListener('DOMContentLoaded', () => {
-  const bl = document.getElementById('blimp-el');
-  if (bl) bl.addEventListener('click', () => openModal('partner'));
-  initMobileUI();
-  // Wire up auth buttons initially (pre-session restore)
-  updateAuthUI();
+document.addEventListener('DOMContentLoaded', () => { 
+  const bl = document.getElementById('blimp-el'); 
+  if (bl) bl.addEventListener('click', () => openModal('partner')); 
+  initMobileUI(); 
+  
+  // Close modal when clicking outside
+  const modal = document.getElementById('modal');
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
 });
+
+// Expose functions globally for inline onclick handlers
+window.setCategory = setCategory;
+window.setFilter = setFilter;
+window.selectAsset = selectAsset;
+window.performSearch = performSearch;
+window.flyGlobe = flyGlobe;
+window.setMapMode = setMapMode;
+window.setTilt = setTilt;
+window.toggleHeat = toggleHeat;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.requireAuth = requireAuth;
+window.closeDrawer = closeDrawer;
+window.handleSignIn = handleSignIn;
+window.handleSignUp = handleSignUp;
+window.requestAccess = requestAccess;
+window.signOut = signOut;
+
+// Asset action functions
+window.logLead = logLead;
+window.openBidModal = openBidModal;
+window.openLendingModal = openLendingModal;
+window.openInsuranceModal = openInsuranceModal;
+
+// Map initialization
 window.__initRWA = initMap;
 if (window.__googleMapsLoaded) initMap();
+
+// Also expose fmtPrice for any inline usage
+window.fmtPrice = fmtPrice;
+window.escapeHtml = escapeHtml;
+
+console.log('[RWABidAsk] Platform fully loaded. Authentication ready.');
 </script>
 </body>
 </html>
+
