@@ -2088,9 +2088,12 @@ let isAuthenticated = false;
 // Supabase config
 const SB_URL = 'https://iyejqvdjbvokrswlsoda.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZWpxdmRqYnZva3Jzd2xzb2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA0NzMsImV4cCI6MjA5MTM5NjQ3M30.Zj6-6NKQh2cOXrI2lRYCiLehoKsselKFjhlVWTLGMqc';
+
 let _sb = null;
 let currentUser = null;
 let currentUserRole = null;
+let currentAsset = null; // This is the ONLY anchor for the active asset.
+    
 
 // ============================================================
 // CONTEXTUAL OPTIONS - Based on Asset Type
@@ -2346,6 +2349,12 @@ function renderList(assetsToShow) {
 // ============================================================
 // LEAD GENERATION - Insert into partner_leads table
 // ============================================================
+/* --- RWABidAsk: INSTITUTIONAL DATA & LEDGER ENGINE --- */
+
+/**
+ * 1. logPartnerLead: Handles external intent (Bids, Lending, Insurance).
+ * Writes a permanent record to the 'partner_leads' table.
+ */
 async function logPartnerLead(type, data) {
     const asset = window.currentAsset;
     
@@ -2375,22 +2384,10 @@ async function logPartnerLead(type, data) {
 
         if (error) throw error;
 
-        // 1. VISUAL FEEDBACK: Change button state immediately
-        if (type === 'watchlist') {
-            const btn = document.getElementById('watch-btn');
-            if (btn) {
-                btn.innerHTML = "✓ SAVED TO LIST";
-                btn.style.borderColor = "var(--green)";
-                btn.style.color = "var(--green)";
-                btn.style.background = "rgba(0, 255, 102, 0.05)";
-            }
-        }
-
-        // 2. MESSAGING: Institutional terminology for UI
+        // Messaging logic for institutional feedback
         const msg = type === 'sponsor'   ? "LEDGER: SPONSORSHIP REQUESTED" :
                     type === 'insurance' ? "INQUIRY: QUOTE PIPELINE" :
                     type === 'bid'       ? "MANIFEST: OFFER RECORDED" : 
-                    type === 'watchlist' ? "MANIFEST: ASSET PINNED" :
                     "SYSTEM: DATA ENTRY VERIFIED";
 
         showToast(msg);
@@ -2401,10 +2398,64 @@ async function logPartnerLead(type, data) {
     }
 }
 
-// Helper to trigger the UI notification (The "Toast")
+/**
+ * 2. toggleWatchlist: The "Forever" Memory.
+ * Syncs the user's dream assets with the 'user_watchlist' table.
+ */
+async function toggleWatchlist() {
+    const asset = window.currentAsset;
+    const btn = document.getElementById('watch-btn');
+    
+    if (!asset) return;
+    
+    if (!currentUser) {
+        showToast("SIGN IN TO SYNC WATCHLIST");
+        setTimeout(() => openModal('signin'), 1000);
+        return;
+    }
+
+    try {
+        // Check the Permanent Ledger (Supabase)
+        const { data: existing } = await _sb
+            .from('user_watchlist')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('asset_id', asset.id.toString())
+            .maybeSingle();
+
+        if (existing) {
+            // REMOVE FROM DATABASE
+            await _sb.from('user_watchlist').delete().eq('id', existing.id);
+            
+            btn.innerHTML = "WATCHLIST";
+            btn.style.color = "#fff";
+            btn.style.borderColor = "var(--border)";
+            btn.style.background = "none";
+            showToast("LEDGER: ASSET REMOVED");
+        } else {
+            // SAVE TO DATABASE
+            await _sb.from('user_watchlist').insert([{
+                user_id: currentUser.id,
+                asset_id: asset.id.toString()
+            }]);
+
+            btn.innerHTML = "✓ PINNED";
+            btn.style.color = "var(--cyan)";
+            btn.style.borderColor = "var(--cyan)";
+            btn.style.background = "rgba(0, 255, 200, 0.05)";
+            showToast("MANIFEST: SAVED TO CLOUD");
+        }
+    } catch (e) {
+        console.error("[RWABidAsk] Watchlist Error:", e);
+        showToast("SYNC ERROR: CHECK CONNECTION");
+    }
+}
+
+/**
+ * 3. showToast: The System Feedback Mechanism.
+ */
 function showToast(msg) {
     const x = document.getElementById("toast");
-    // If the HTML isn't there yet, it uses an alert so the app doesn't crash
     if (!x) {
         alert(msg);
         return;
@@ -2414,183 +2465,165 @@ function showToast(msg) {
     setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
 }
 
-// ============================================================
-// BID LOGGING - Insert into bids table
-// ============================================================
-async function logBid(assetId, bidData) {
-  if (!_sb || !currentUser) {
-    toast('Please sign in to continue');
-    openModal('signin');
-    return false;
-  }
-  try {
-    const { error } = await _sb.from('bids').insert([{
-      user_id: currentUser.id,
-      user_email: currentUser.email,
-      asset_id: assetId,
-      bid_amount: bidData.amount,
-      bid_terms: bidData.terms,
-      interest_rate: bidData.interestRate,
-      loan_term: bidData.loanTerm,
-      down_payment: bidData.downPayment,
-      status: 'pending',
-      created_at: new Date().toISOString()
-    }]);
-    if (error) throw error;
-    toast(`✓ Bid of $${parseFloat(bidData.amount).toLocaleString()} submitted. Seller will be notified.`);
-    return true;
-  } catch (e) {
-    console.error('Bid error:', e);
-    toast('Failed to submit bid. Please try again.');
-    return false;
-  }
-}
+/* --- END LEDGER ENGINE --- */
 
 // ============================================================
 // MODAL HANDLERS - Styled dropdown modals
 // ============================================================
-function showLendingModal(asset) {
-  currentAssetForModal = asset;
-  const options = getLendingOptions(asset.type);
-  let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-  
-  const modalHtml = `
-    <div class="rwa-modal-overlay" id="rwa-modal">
-      <div class="rwa-modal-card">
-        <div class="title">FIND LENDER</div>
-        <div class="sub">${escapeHtml(asset.address)} | Type: ${asset.type.toUpperCase()}</div>
-        <select id="lending-select" class="rwa-select">
-          <option value="" disabled selected>— Select a lending product —</option>
-          ${optionsHtml}
-        </select>
-        <input type="number" id="loan-amount" placeholder="Desired loan amount (USD)" class="rwa-input">
-        <div class="row">
-          <button onclick="submitLending()">Submit Inquiry</button>
-          <button class="secondary" onclick="closeModalOverlay()">Cancel</button>
+/* --- INSTITUTIONAL CAPITAL & RISK MODALS --- */
+
+/**
+ * 1. showLendingModal: Opens the debt capital terminal
+ */
+function showLendingModal() {
+    const asset = window.currentAsset;
+    if (!asset) { showToast("ERROR: SELECT ASSET FIRST"); return; }
+
+    const options = getLendingOptions(asset.type);
+    let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+
+    const modalBody = document.getElementById('modal-body');
+    const modalTitle = document.getElementById('modal-title');
+    
+    modalTitle.textContent = "DEBT CAPITAL / LENDING PROTOCOL";
+    modalBody.innerHTML = `
+        <div class="mfield">
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">ASSET ORIGINATION</label>
+            <div style="font-size:11px; color:#fff; margin-bottom:15px; font-family:monospace;">${asset.address}</div>
+            
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">PRODUCT TYPE</label>
+            <select id="lending-select" class="rwa-select" style="width:100%; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
+                <option value="" disabled selected>— SELECT CAPITAL STRATEGY —</option>
+                ${optionsHtml}
+            </select>
+            
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">DESIRED LOAN AMOUNT (USD)</label>
+            <input type="number" id="loan-amount" placeholder="5,000,000" style="width:100%; margin-bottom:20px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
+            
+            <button class="msub-btn" style="width:100%; background:var(--cyan); color:#000; font-weight:bold; border:none; padding:12px; cursor:pointer;" onclick="submitLending()">SUBMIT CAPITAL INQUIRY</button>
         </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
+    `;
+    openModal('lending');
 }
 
+/**
+ * 2. showInsuranceModal: Opens the risk mitigation terminal
+ */
 function showInsuranceModal() {
-  // Use the global anchor we set during the map click
-  const asset = window.currentAsset;
-  if (!asset) {
-    console.error("[RWABidAsk] Insurance Error: No asset in memory.");
-    return;
-  }
+    const asset = window.currentAsset;
+    if (!asset) { showToast("ERROR: SELECT ASSET FIRST"); return; }
 
-  // Ensure the old modal is removed if it exists
-  closeModalOverlay();
+    const options = getInsuranceOptions(asset.type);
+    let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
 
-  const options = getInsuranceOptions(asset.type);
-  let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-  
-  const modalHtml = `
-    <div class="rwa-modal-overlay" id="rwa-modal">
-      <div class="rwa-modal-card">
-        <div class="title" style="color:var(--green); font-weight:bold; letter-spacing:1px;">GET INSURANCE</div>
-        <div class="sub" style="font-size:12px; color:var(--muted); margin-bottom:15px;">
-          ${escapeHtml(asset.address)} | TYPE: ${asset.type.toUpperCase()}
+    const modalBody = document.getElementById('modal-body');
+    const modalTitle = document.getElementById('modal-title');
+    
+    modalTitle.textContent = "INSURANCE & RISK MITIGATION";
+    modalBody.innerHTML = `
+        <div class="mfield">
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">ASSET IDENTIFIER</label>
+            <div style="font-size:11px; color:#fff; margin-bottom:15px; font-family:monospace;">${asset.address}</div>
+            
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">COVERAGE PROTOCOL</label>
+            <select id="insurance-select" class="rwa-select" style="width:100%; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
+                <option value="" disabled selected>— SELECT COVERAGE TYPE —</option>
+                ${optionsHtml}
+            </select>
+            
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">TARGET VALUATION (USD)</label>
+            <input type="number" id="coverage-amount" placeholder="VALUATION AMT" style="width:100%; margin-bottom:20px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
+            
+            <button class="msub-btn" style="width:100%; background:var(--cyan); color:#000; font-weight:bold; border:none; padding:12px; cursor:pointer;" onclick="submitInsurance()">REQUEST QUOTE</button>
         </div>
-        
-        <select id="insurance-select" class="rwa-select" style="width:100%; background:#000; color:var(--green); border:1px solid var(--border); padding:10px; margin-bottom:10px; font-family:monospace;">
-          <option value="" disabled selected>— Select Coverage Protocol —</option>
-          ${optionsHtml}
-        </select>
-        
-        <input type="number" id="coverage-amount" placeholder="Target Valuation (USD)" class="rwa-input" style="width:100%; background:#000; color:#fff; border:1px solid var(--border); padding:10px; margin-bottom:20px;">
-        
-        <div class="row" style="display:flex; gap:10px;">
-          <button onclick="submitInsurance()" style="flex:1; background:var(--green); color:#000; font-weight:bold; border:none; padding:12px; cursor:pointer;">REQUEST QUOTE</button>
-          <button class="secondary" onclick="closeModalOverlay()" style="flex:1; background:rgba(255,255,255,0.05); color:#fff; border:1px solid var(--border); padding:12px; cursor:pointer;">CANCEL</button>
+    `;
+    openModal('insurance');
+}
+
+/**
+ * 3. Submission Handlers: Syncing with the Lead Engine
+ */
+async function submitLending() {
+    const product = document.getElementById('lending-select').value;
+    const amount = document.getElementById('loan-amount').value;
+    if(!product || !amount) { showToast("REQUIRED: COMPLETE ALL FIELDS"); return; }
+    await logPartnerLead('lending', { product, amount });
+    closeModal();
+}
+
+async function submitInsurance() {
+    const protocol = document.getElementById('insurance-select').value;
+    const amount = document.getElementById('coverage-amount').value;
+    if(!protocol || !amount) { showToast("REQUIRED: COMPLETE ALL FIELDS"); return; }
+    await logPartnerLead('insurance', { protocol, amount });
+    closeModal();
+}
+
+/**
+ * 4. showBidModal: Opens the offer/bid terminal
+ */
+function showBidModal() {
+    const asset = window.currentAsset;
+    if (!asset) { showToast("ERROR: SELECT ASSET FIRST"); return; }
+
+    const modalBody = document.getElementById('modal-body');
+    const modalTitle = document.getElementById('modal-title');
+    
+    modalTitle.textContent = "MANIFEST: PLACE BINDING OFFER";
+    modalBody.innerHTML = `
+        <div class="mfield">
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">OFFER TARGET</label>
+            <div style="font-size:11px; color:#fff; margin-bottom:15px; font-family:monospace;">${asset.address} | LIST: ${fmtPrice(asset.price)}</div>
+            
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">BID AMOUNT (USD)</label>
+            <input type="number" id="bid-amount" placeholder="Enter offer amount" style="width:100%; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div style="flex:1;">
+                    <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">INT. RATE (%)</label>
+                    <input type="number" id="bid-rate" placeholder="5.5" style="width:100%; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">TERM (YRS)</label>
+                    <input type="number" id="bid-term" placeholder="30" style="width:100%; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
+                </div>
+            </div>
+
+            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">EXECUTION TERMS</label>
+            <select id="bid-terms" style="width:100%; margin-bottom:20px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
+                <option value="All Cash">ALL CASH</option>
+                <option value="Financed">FINANCED</option>
+                <option value="1031 Exchange">1031 EXCHANGE</option>
+                <option value="Crypto/USDC">CRYPTO / USDC</option>
+            </select>
+            
+            <button class="msub-btn" style="width:100%; background:var(--cyan); color:#000; font-weight:bold; border:none; padding:12px; cursor:pointer;" onclick="submitBid()">TRANSMIT BINDING OFFER</button>
         </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
+    `;
+    openModal('bid');
 }
 
-function showBidModal(asset) {
-  currentAssetForModal = asset;
-  const modalHtml = `
-    <div class="rwa-modal-overlay" id="rwa-modal">
-      <div class="rwa-modal-card">
-        <div class="title">PLACE BID</div>
-        <div class="sub">${escapeHtml(asset.address)} | Listed: ${fmtPrice(asset.price)}</div>
-        <input type="number" id="bid-amount" placeholder="Bid amount (USD)" class="rwa-input">
-        <div class="row">
-          <div><input type="number" id="bid-rate" placeholder="Interest rate (%)" class="rwa-input"></div>
-          <div><input type="number" id="bid-term" placeholder="Term (years)" class="rwa-input"></div>
-        </div>
-        <input type="number" id="bid-down" placeholder="Down payment (%)" class="rwa-input">
-        <select id="bid-terms" class="rwa-select">
-          <option value="All Cash">All Cash</option>
-          <option value="Financed">Financed</option>
-          <option value="1031 Exchange">1031 Exchange</option>
-          <option value="Crypto/USDC">Crypto / USDC</option>
-        </select>
-        <div class="row">
-          <button onclick="submitBid()">Submit Bid</button>
-          <button class="secondary" onclick="closeModalOverlay()">Cancel</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
+/**
+ * 5. submitBid: Transmits offer data to the Unified Ledger
+ */
+async function submitBid() {
+    const amount = document.getElementById('bid-amount').value;
+    const terms = document.getElementById('bid-terms').value;
+    const rate = document.getElementById('bid-rate').value;
+    const term = document.getElementById('bid-term').value;
 
-function closeModalOverlay() {
-  const modal = document.getElementById('rwa-modal');
-  if (modal) modal.remove();
-  currentAssetForModal = null;
-}
+    if(!amount || amount <= 0) { showToast("REQUIRED: VALID BID AMOUNT"); return; }
 
-function submitLending() {
-  const select = document.getElementById('lending-select');
-  const selection = select?.value;
-  const amount = document.getElementById('loan-amount')?.value;
-  if (!selection || selection === '') {
-    toast('Please select a lending product');
-    return;
-  }
-  const selectionData = { product: selection, amount: amount || null };
-  closeModalOverlay();
-  logPartnerLead('LENDING', currentAssetForModal.id, selectionData);
+    await logPartnerLead('bid', { 
+        amount, 
+        terms, 
+        interest_rate: rate, 
+        loan_term: term,
+        status: 'binding_offer_transmitted'
+    });
+    
+    closeModal();
 }
-
-function submitInsurance() {
-  const select = document.getElementById('insurance-select');
-  const selection = select?.value;
-  const coverage = document.getElementById('coverage-amount')?.value;
-  if (!selection || selection === '') {
-    toast('Please select an insurance product');
-    return;
-  }
-  const selectionData = { product: selection, coverage: coverage || null };
-  closeModalOverlay();
-  logPartnerLead('INSURANCE', currentAssetForModal.id, selectionData);
-}
-
-function submitBid() {
-  const amount = document.getElementById('bid-amount')?.value;
-  if (!amount || parseFloat(amount) <= 0) {
-    toast('Please enter a valid bid amount');
-    return;
-  }
-  const bidData = {
-    amount: parseFloat(amount),
-    terms: document.getElementById('bid-terms')?.value || 'All Cash',
-    interestRate: document.getElementById('bid-rate')?.value || null,
-    loanTerm: document.getElementById('bid-term')?.value || null,
-    downPayment: document.getElementById('bid-down')?.value || null
-  };
-  closeModalOverlay();
-  logBid(currentAssetForModal.id, bidData);
-}
-
 // ============================================================
 // RIGHT PANEL ACTION HANDLERS
 // ============================================================
