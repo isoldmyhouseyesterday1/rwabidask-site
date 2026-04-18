@@ -2627,153 +2627,167 @@ async function submitBid() {
 // ============================================================
 // RIGHT PANEL ACTION HANDLERS
 // ============================================================
-function handleInquiry(asset) {
-  if (currentUser) {
-    logPartnerLead('INQUIRY', asset.id, { inquiry_type: 'general' });
-  } else {
-    openModal('signin');
-    toast('Please sign in to inquire about this asset');
-  }
+
+// 1. General Inquiry
+function handleInquiry() {
+    logPartnerLead('inquiry', 'General interest in asset acquisition');
 }
 
-function handleWatchlist(asset) {
-  if (currentUser) {
-    logPartnerLead('WATCHLIST', asset.id, { action: 'add_to_watchlist' });
-  } else {
-    openModal('signin');
-    toast('Please sign in to add to watchlist');
-  }
+// 2. Sponsorship / Listing Agent Inquiry
+function handleSponsor() {
+    logPartnerLead('sponsor', 'Agent/Institutional listing sponsorship inquiry');
 }
 
-function handleTokenize(asset) {
-  if (currentUser) {
-    logPartnerLead('TOKENIZE', asset.id, { priority: 'HIGH', action: 'ownership_claim' });
-  } else {
-    openModal('signin');
-    toast('Please sign in to claim/tokenize this asset');
-  }
+// 3. Tokenization / RWA Claim
+function handleTokenize() {
+    logPartnerLead('tokenize', 'Priority request for ownership tokenization');
 }
 
-function handleSponsor(asset) {
-  if (currentUser) {
-    logPartnerLead('SPONSOR', asset.id, { priority: 'HIGH', action: 'agent_listing_inquiry' });
-  } else {
-    openModal('signin');
-    toast('Please sign in to sponsor a listing');
-  }
-}
+// 4. Watchlist is handled by toggleWatchlist() which we already added!
 
     // ============================================================
 // SELECT ASSET - Render Right Panel with Working Buttons
 // ============================================================
+/* --- ASSET INTELLIGENCE: SIDEBAR ENGINE --- */
+
 function selectAsset(id) {
-  // 1. Force-sync the ID to a number or string to match the database
-  const targetId = id;
-  activeId = id;
+    // 1. Sync with the Global Ledger
+    const a = (window.ASSETS || []).find(x => x.id == id);
 
-  // 2. Look in the Global Ledger we synced in loadMarketData
-  const a = (window.ASSETS || []).find(x => x.id == targetId);
+    if (!a) {
+        console.error(`[RWABidAsk] ERROR: Asset #${id} NOT FOUND.`);
+        return;
+    }
 
-  if (!a) {
-    console.error(`[RWABidAsk] CRITICAL: Asset #${id} not found in Global Ledger.`);
-    return;
-  }
+    // 2. Set the Global Anchor (The Machine's current target)
+    window.currentAsset = a; 
+    
+    // 3. Render Header (The Identity Panel)
+    document.getElementById('rhead').innerHTML = `
+        <div class="rtype">${(a.type || 'ASSET').toUpperCase()} // ${(a.status || 'ACTIVE').toUpperCase()}</div>
+        <div class="rname">${escapeHtml(a.address)}</div>
+        <div class="rcity">${escapeHtml(a.city)}, ${escapeHtml(a.state || 'USA')}</div>
+    `;
+    
+    // 4. Action Grid (The Command Center)
+    const buttonsHTML = `
+        <div class="act-grid">
+            <button class="abtn a-primary" style="grid-column: span 2;" onclick="handleInquiry()">
+                ACQUIRE / INQUIRE
+            </button>
+            
+            <button class="abtn" onclick="showBidModal()">PLACE BID</button>
+            <button class="abtn" onclick="showLendingModal()">DEBT CAPITAL</button>
+            
+            <button class="abtn" onclick="showInsuranceModal()">INSURANCE</button>
+            <button class="abtn" id="watch-btn" onclick="toggleWatchlist()">WATCHLIST</button>
+            
+            <button class="abtn a-sponsor" style="grid-column: span 2;" onclick="handleSponsor()">
+                SPONSOR LISTING / CLAIM ASSET
+            </button>
+        </div>
+    `;
+    
+    // 5. Render Data Sectors
+    document.getElementById('rbody').innerHTML = `
+        <div class="rinner">
+            ${buttonsHTML}
+            <div class="rsect">
+                <div class="rsect-title">INSTITUTIONAL DATA LEDGER</div>
+                <div class="rrow"><span class="rk">MARKET VALUATION</span><span class="rv">${window.fmtPrice(a.price)}</span></div>
+                <div class="rrow"><span class="rk">UNIQUE IDENTIFIER</span><span class="rv">#${a.id}</span></div>
+                <div class="rrow"><span class="rk">GEOSPATIAL COORDS</span><span class="rv">${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}</span></div>
+            </div>
+        </div>
+    `;
+    
+    // 6. Map Execution & Mobile UI
+    if (typeof flyTo === 'function') flyTo(a.lat, a.lng, 1400, 45);
+    if (window.innerWidth <= 767) document.getElementById('right').classList.add('open-drawer');
 
-  // 3. Set the global anchor for the Lead Engine
-  window.currentAsset = a; 
-  
-  console.log(`[RWABidAsk] Asset Verified: ${a.address}`);
-
-  // 4. Panel Header
-  document.getElementById('rhead').innerHTML = `
-    <div class="rtype">${(a.type || 'ASSET').toUpperCase()} · ${(a.status || 'ACTIVE').toUpperCase()}</div>
-    <div class="rname" style="font-size:18px; margin: 4px 0;">${escapeHtml(a.address)}</div>
-    <div class="rcity" style="color:var(--muted); font-size:12px;">${escapeHtml(a.city)}, ${escapeHtml(a.state || 'USA')}</div>
-  `;
-  
-  // 5. Action Grid
-  const buttonsHTML = `
-    <div class="act-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:20px; padding: 10px;">
-      <button class="abtn a-buy" style="grid-column: span 2; background:var(--green); color:#000; font-weight:bold; height:42px; border:none; cursor:pointer;" onclick="window.logPartnerLead('inquiry', 'buy_interest')">BUY / INQUIRE</button>
-      
-      <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="showBidModal()">PLACE BID</button>
-      <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="showLendingModal()">FIND LENDER</button>
-      
-      <button class="abtn" style="height:38px; border:1px solid var(--green); color:var(--green); background:none; cursor:pointer;" onclick="showInsuranceModal()">INSURANCE</button>
-      
-      <button class="abtn a-save" id="watch-btn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="window.logPartnerLead('watchlist', 'saved_to_list')">WATCHLIST</button>
-      
-      <button class="abtn a-sponsor" style="grid-column: span 2; border:1px solid var(--gold)!important; color:var(--gold); background:none; height:38px; margin-top:5px; cursor:pointer; font-weight:bold;" onclick="window.logPartnerLead('sponsor', 'claim_request')">SPONSOR LISTING</button>
-    </div>
-  `;
-  
-  // 6. Render the Body
-  document.getElementById('rbody').innerHTML = `
-    <div class="rinner">
-      ${buttonsHTML}
-      <div class="rsect" style="border-top: 1px solid rgba(255,255,255,0.05); padding:15px;">
-        <div class="rsect-title" style="color:var(--green); font-size:10px; text-transform:uppercase; margin-bottom:10px;">Financial Ledger</div>
-        <div class="rrow"><span class="rk">Valuation</span><span class="rv">${window.fmtPrice(a.price)}</span></div>
-        <div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div>
-      </div>
-    </div>
-  `;
-  
-  if (typeof flyTo === 'function') flyTo(a.lat, a.lng, 1400, 45);
-  if (window.innerWidth <= 767) document.getElementById('right').classList.add('open-drawer');
+    // 7. Check if already on Watchlist (Visual Sync)
+    syncWatchlistButton(a.id);
 }
     
 
-// ============================================================
-// SEARCH FUNCTIONALITY
-// ============================================================
+/* --- SEARCH & GEOSPATIAL FILTERING ENGINE (AUTH-LOCKED) --- */
+
 function performSearch() {
-  const query = document.getElementById('search-input').value.trim().toLowerCase();
-  currentSearchQuery = query;
-  if (query.length === 0) {
-    SEARCH_ACTIVE = false;
-    const filtered = filterAssets(ASSETS);
-    renderList(filtered);
-    syncMarkersToSearch(filtered);
-    if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
-    setStatus('GLOBAL DIRECTORY — ' + ASSETS.length + ' ASSETS');
-    return;
-  }
-  SEARCH_ACTIVE = true;
-  SEARCH_RESULTS = ASSETS.filter(a => 
-    a.address.toLowerCase().includes(query) ||
-    a.city.toLowerCase().includes(query) ||
-    a.type.toLowerCase().includes(query) ||
-    (a.country && a.country.toLowerCase().includes(query))
-  );
-  const filteredResults = filterAssets(SEARCH_RESULTS);
-  renderList(filteredResults);
-  syncMarkersToSearch(filteredResults);
-  if (window.innerWidth <= 767) renderMobileListViewFull(filteredResults);
-  setStatus('SEARCH: ' + SEARCH_RESULTS.length + ' assets found');
+    const query = document.getElementById('search-input')?.value.trim().toLowerCase();
+    
+    // 1. Handle Empty Search (Reset to Global view)
+    if (!query) {
+        SEARCH_ACTIVE = false;
+        const filtered = typeof filterAssets === 'function' ? filterAssets(window.ASSETS) : window.ASSETS;
+        updateSearchUI(filtered, `GLOBAL DIRECTORY — ${window.ASSETS.length} ASSETS`);
+        return;
+    }
+
+    // 2. Execute Deep Search
+    SEARCH_ACTIVE = true;
+    SEARCH_RESULTS = window.ASSETS.filter(a => 
+        (a.address?.toLowerCase().includes(query)) ||
+        (a.city?.toLowerCase().includes(query)) ||
+        (a.type?.toLowerCase().includes(query)) ||
+        (a.country?.toLowerCase().includes(query)) ||
+        (a.id?.toString() === query) 
+    );
+
+    const filteredResults = typeof filterAssets === 'function' ? filterAssets(SEARCH_RESULTS) : SEARCH_RESULTS;
+    updateSearchUI(filteredResults, `SEARCH: ${SEARCH_RESULTS.length} ASSETS IDENTIFIED`);
 }
 
-document.getElementById('search-input').addEventListener('input', performSearch);
+/**
+ * Update UI: Consolidates rendering for List, Map, and Mobile
+ */
+function updateSearchUI(assets, statusMsg) {
+    if (typeof renderList === 'function') renderList(assets);
+    if (typeof syncMarkersToSearch === 'function') syncMarkersToSearch(assets);
+    
+    const statusEl = document.getElementById('status-bar');
+    if (statusEl) statusEl.innerText = statusMsg;
+    
+    if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') {
+        renderMobileListViewFull(assets);
+    }
+}
 
+/**
+ * syncMarkersToSearch: The Security Gate
+ * Markers only appear if:
+ * 1. User is Signed In
+ * 2. Map is Zoomed In
+ * 3. Asset is in the current Search/Filter result
+ */
 function syncMarkersToSearch(assetsToShow) {
-  if (!map3dEl) return;
-  const currentRange = map3dEl.range || 22000000;
-  const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
-  if (!isZoomedIn || !isAuthenticated) {
-    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
-    return;
-  }
-  const visibleInViewport = getVisibleAssetsInViewport(assetsToShow);
-  const visibleIds = new Set(visibleInViewport.map(a => a.id));
-  Object.keys(domMarkers).forEach(id => {
-    const marker = domMarkers[id];
-    const asset = marker.asset;
-    const isInSearch = assetsToShow.some(a => a.id === asset.id);
-    const isInViewport = visibleIds.has(id);
-    const shouldBeVisible = isPhysicalAsset(asset.type) && isInSearch && isInViewport;
-    marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
-  });
+    if (!map3dEl) return;
+    
+    const currentRange = map3dEl.range || 22000000;
+    const isZoomedIn = currentRange <= (window.MARKER_VISIBLE_RANGE || 50000);
+    
+    // AUTH GATE: If no user, kill all markers and exit
+    if (!currentUser) {
+        Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
+        return;
+    }
+
+    const visibleIds = new Set(assetsToShow.map(a => a.id));
+
+    Object.keys(domMarkers).forEach(id => {
+        const marker = domMarkers[id];
+        const asset = marker.asset;
+        
+        const isInSearch = visibleIds.has(asset.id);
+        const shouldBeVisible = isInSearch && isZoomedIn;
+        
+        marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
+    });
 }
+
+// Attach Event Listener
+document.getElementById('search-input')?.addEventListener('input', performSearch);
+    }
+    
 
 // ============================================================
 // GOOGLE MAPS 3D FUNCTIONS
