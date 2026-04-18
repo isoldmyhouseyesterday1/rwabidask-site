@@ -2002,7 +2002,16 @@ body { min-width: 900px; overflow-x: auto; }
 </div>
 
 <div id="info-win" class="info-win" style="display:none;position:fixed;z-index:9999;"></div>
-<div id="modal"><div class="mbox" id="mbox"><button class="mclose-btn" onclick="closeModal()">✕</button></div></div>
+<div id="modal" class="modal-overlay">
+  <div class="mbox" id="mbox">
+    <button class="mclose-btn" onclick="closeModal()">✕</button>
+    
+    <div id="modal-title" class="mtitle">SYSTEM NOTICE</div>
+    <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+    <div id="modal-body">
+       </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <div class="view-toggle" id="mobile-view-toggle">
