@@ -2590,67 +2590,47 @@ function selectAsset(id) {
   const a = ASSETS.find(x => x.id === id);
   if (!a) return;
 
-  // Sync Global State for Lead Engine
+  // CRITICAL: Set the global window variable so logPartnerLead can see it
   window.currentAsset = a; 
-  window.currentAssetForModal = a; 
   
-  // 1. Institutional Image Stage
-  const imageHTML = `
-    <div class="r-image-stage" style="width:100%; height:180px; background:#000; border-radius:4px; margin-bottom:15px; overflow:hidden; border:1px solid rgba(0,255,200,0.15); position:relative;">
-      <img src="${a.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'}" 
-           style="width:100%; height:100%; object-fit:cover; opacity:0.9;">
-      <div style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.7); padding:4px 8px; border-radius:2px; font-size:9px; color:var(--green); border:1px solid var(--green); font-weight:bold; letter-spacing:1px;">VERIFIED RWA</div>
-    </div>
-  `;
-
-  // 2. Render Header (Address & Identity)
+  // 1. Panel Header
   document.getElementById('rhead').innerHTML = `
     <div class="rtype">${(a.type || 'ASSET').toUpperCase()} · ${(a.status || 'ACTIVE').toUpperCase()}</div>
     <div class="rname" style="font-size:18px; margin: 4px 0;">${escapeHtml(a.address)}</div>
     <div class="rcity" style="color:var(--muted); font-size:12px;">${escapeHtml(a.city)}, ${escapeHtml(a.state || 'USA')}</div>
-    <div class="rprice-row" style="margin-top:12px; display:flex; justify-content:space-between; align-items:baseline;">
-      <div class="rprice" style="font-size:22px; font-weight:bold; color:var(--green);">${fmtPrice(a.price)}</div>
-      <div class="rprice-psf" style="font-size:11px; color:var(--muted);">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div>
-    </div>
   `;
   
-  // 3. Action Grid (Now includes Sponsor)
+  // 2. Action Grid - Hard-wired to the new "Brain"
   const buttonsHTML = `
-    <div class="act-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:20px;">
-      <button class="abtn a-buy" style="grid-column: span 2; background:var(--green); color:#000; font-weight:bold;" onclick="logPartnerLead('inquiry', 'buy_interest')">BUY / INQUIRE</button>
-      <button class="abtn a-bid" onclick="showBidModal()">PLACE BID</button>
-      <button class="abtn a-lend" onclick="showLendingModal()">FIND LENDER</button>
-      <button class="abtn a-save" onclick="handleWatchlist()">WATCHLIST</button>
-      <button class="abtn a-sponsor" style="border:1px solid var(--gold)!important; color:var(--gold)" onclick="logPartnerLead('sponsor', 'claim_request')">SPONSOR LISTING</button>
+    <div class="act-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:20px; padding: 10px;">
+      <button class="abtn a-buy" style="grid-column: span 2; background:var(--green); color:#000; font-weight:bold; height:42px; border:none; cursor:pointer;" onclick="logPartnerLead('inquiry', 'buy_interest')">BUY / INQUIRE</button>
+      
+      <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="showBidModal()">PLACE BID</button>
+      
+      <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="showLendingModal()">FIND LENDER</button>
+      
+      <button class="abtn" style="height:38px; border:1px solid var(--green); color:var(--green); background:none; cursor:pointer;" onclick="logPartnerLead('insurance', 'quote_requested')">INSURANCE</button>
+      
+      <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="logPartnerLead('watchlist', 'saved_to_list')">WATCHLIST</button>
+      
+      <button class="abtn a-sponsor" style="grid-column: span 2; border:1px solid var(--gold)!important; color:var(--gold); background:none; height:38px; margin-top:5px; cursor:pointer; font-weight:bold;" onclick="logPartnerLead('sponsor', 'claim_request')">SPONSOR LISTING</button>
     </div>
   `;
   
-  // 4. Detailed Manifest
-  const fin = a.financials || {};
-  const finHTML = `
-    <div class="rsect" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top:15px;">
-      <div class="rsect-title" style="color:var(--green); font-size:10px; text-transform:uppercase; margin-bottom:10px;">Financial Intelligence</div>
-      <div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual || 0).toLocaleString()}</span></div>
-      <div class="rrow"><span class="rk">HOA Dues</span><span class="rv">$${fin.hoa || 0}/mo</span></div>
-      <div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div>
-      <div class="rrow"><span class="rk">On-Chain Status</span><span class="rv">${a.tokenized ? '⬡ SECURED' : 'PENDING'}</span></div>
-    </div>
-  `;
-
-  // 5. Build Final Panel
+  // 3. Render the Body
   document.getElementById('rbody').innerHTML = `
-    <div class="rinner" style="padding:15px;">
-      ${imageHTML}
+    <div class="rinner">
       ${buttonsHTML}
-      ${finHTML}
+      <div class="rsect" style="border-top: 1px solid rgba(255,255,255,0.05); padding:15px;">
+        <div class="rsect-title" style="color:var(--green); font-size:10px; text-transform:uppercase; margin-bottom:10px;">Financial Ledger</div>
+        <div class="rrow"><span class="rk">Valuation</span><span class="rv">${fmtPrice(a.price)}</span></div>
+        <div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div>
+      </div>
     </div>
   `;
   
   flyTo(a.lat, a.lng, 1400, 45);
   if (window.innerWidth <= 767) document.getElementById('right').classList.add('open-drawer');
-
-  const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
-  renderList(filtered);
 }
     
 
