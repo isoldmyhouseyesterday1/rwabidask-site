@@ -1961,16 +1961,29 @@ body { min-width: 900px; overflow-x: auto; }
     </div>
   </div>
 
-  <div id="right">
+  <div id="portfolio-drawer" class="drawer-left">
+    <div class="drawer-header">
+        <div class="drawer-title">TERMINAL // ACTIVE POSITIONS</div>
+        <button class="close-btn" onclick="togglePortfolio()">[ CLOSE ]</button>
+    </div>
+    <div id="portfolio-content" class="drawer-body">
+        <div class="system-loader">INITIALIZING LEDGER...</div>
+    </div>
+</div>
+
+<div id="right">
     <div class="rhead" id="rhead">
       <div class="rtype">Select an Asset</div>
       <div class="rname" style="opacity:.25">Click any marker or listing</div>
       <div class="rcity">—</div>
     </div>
     <div class="rbody" id="rbody">
-      <div class="r-empty"><div class="r-empty-glyph">◎</div><div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div></div>
+      <div class="r-empty">
+          <div class="r-empty-glyph">◎</div>
+          <div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div>
+      </div>
     </div>
-  </div>
+</div>
 
 </div>
 
@@ -2223,14 +2236,24 @@ async function fetchListingsFromSupabase() {
 }
 
 async function loadMarketData() {
-  const fetched = await fetchListingsFromSupabase();
-  
-  // FORCE GLOBAL SYNC: This ensures the data is available to every function instantly
-  window.ASSETS = fetched; 
-  ASSETS = fetched; 
-  
-  console.log(`[RWABidAsk] Global Ledger Sync: ${ASSETS.length} assets mapped.`);
-  onDataReady();
+  try {
+    // 1. Ask the 'Specialist' function to get and clean the data
+    const fetched = await fetchListingsFromSupabase();
+
+    // 2. Save it globally so the Globe and Dashboard can see it
+    window.ASSETS = fetched; 
+    ASSETS = fetched; 
+      
+    console.log(`[RWABidAsk] Global Ledger Sync: ${ASSETS.length} assets mapped.`);
+    
+    // 3. Turn on the UI (Markers, Ticker, List)
+    onDataReady();
+
+  } catch (err) {
+    console.error('[RWABidAsk] Sync Error:', err);
+    setStatus('OFFLINE — DATABASE CONNECTION TIMEOUT');
+    showToast("CRITICAL: DATABASE SYNC FAILED");
+  }
 }
 
 function onDataReady() {
@@ -2238,16 +2261,21 @@ function onDataReady() {
   
   // Update Status UI
   setStatus(`RWABidAsk PERMANENT LEDGER — ${assetCount} ASSETS REGISTERED`);
-  document.getElementById('s-assets').textContent = assetCount;
-  document.getElementById('s-status').textContent = 'LIVE';
   
-  // UI Rendering
-  updateGMC(ASSETS);
-  renderCategories();
-  renderList(ASSETS);
-  buildTicker(ASSETS);
+  const sAssets = document.getElementById('s-assets');
+  const sStatus = document.getElementById('s-status');
+  if (sAssets) sAssets.textContent = assetCount;
+  if (sStatus) sStatus.textContent = 'LIVE';
   
-  if (window.innerWidth <= 767) renderMobileListViewFull(ASSETS);
+  // UI Rendering - Keep all your original dashboard elements
+  if (typeof updateGMC === "function") updateGMC(ASSETS);
+  if (typeof renderCategories === "function") renderCategories();
+  if (typeof renderList === "function") renderList(ASSETS);
+  if (typeof buildTicker === "function") buildTicker(ASSETS);
+  
+  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === "function") {
+      renderMobileListViewFull(ASSETS);
+  }
   
   // THE MAP HANDSHAKE: This ensures markers appear on the first load
   if (isMapReady && ASSETS.length > 0) {
@@ -2356,19 +2384,32 @@ function renderList(assetsToShow) {
 }
 
 // ============================================================
-// LEAD GENERATION - Insert into partner_leads table
+// LEAD GENERATION - RWABidAsk: INSTITUTIONAL DATA & LEDGER ENGINE
 // ============================================================
-/* --- RWABidAsk: INSTITUTIONAL DATA & LEDGER ENGINE --- */
 
 /**
- * 1. logPartnerLead: Handles external intent (Bids, Lending, Insurance).
- * Writes a permanent record to the 'partner_leads' table.
+ * 1. togglePortfolio: Controls the Slide-Out Blotter
  */
-/* --- THE CENTRAL LEAD ENGINE (PRO VERSION) --- */
+function togglePortfolio() {
+    const drawer = document.getElementById('portfolio-drawer');
+    if (!drawer) return;
+    
+    drawer.classList.toggle('open');
+    
+    if (drawer.classList.contains('open')) {
+        // Ensure this function exists in your script to fetch data
+        if (typeof renderPortfolio === "function") {
+            renderPortfolio(); 
+        }
+    }
+}
+
+/**
+ * 2. logPartnerLead: Handles Bids, Lending, Insurance
+ */
 async function logPartnerLead(type, data) {
     const asset = window.currentAsset;
     
-    // 1. Validation
     if (!asset) {
         showToast("CRITICAL: NO ASSET SELECTED");
         return;
@@ -2381,7 +2422,6 @@ async function logPartnerLead(type, data) {
     }
 
     try {
-        // 2. Transmit to Supabase Ledger
         const { error } = await _sb.from('partner_leads').insert({
             user_id: currentUser.id,
             asset_id: asset.id.toString(),
@@ -2396,7 +2436,6 @@ async function logPartnerLead(type, data) {
 
         if (error) throw error;
 
-        // 3. Dynamic Institutional Feedback
         const msg = type === 'sponsor'   ? "LEDGER: SPONSORSHIP REQUESTED" :
                     type === 'insurance' ? "INQUIRY: QUOTE PIPELINE" :
                     type === 'bid'       ? "MANIFEST: OFFER RECORDED" : 
@@ -2406,14 +2445,12 @@ async function logPartnerLead(type, data) {
         
     } catch (e) {
         console.error("[RWABidAsk] Lead Error:", e);
-        // If the database fails, this is the only "Red" message the user sees
         showToast("DATABASE ERROR: RETRY SIGNAL");
     }
 }
 
 /**
- * 2. toggleWatchlist: The "Forever" Memory.
- * Syncs the user's dream assets with the 'user_watchlist' table.
+ * 3. toggleWatchlist: The "Forever" Memory
  */
 async function toggleWatchlist() {
     const asset = window.currentAsset;
@@ -2428,7 +2465,6 @@ async function toggleWatchlist() {
     }
 
     try {
-        // Check the Permanent Ledger (Supabase)
         const { data: existing } = await _sb
             .from('user_watchlist')
             .select('id')
@@ -2437,16 +2473,13 @@ async function toggleWatchlist() {
             .maybeSingle();
 
         if (existing) {
-            // REMOVE FROM DATABASE
             await _sb.from('user_watchlist').delete().eq('id', existing.id);
-            
             btn.innerHTML = "WATCHLIST";
             btn.style.color = "#fff";
-            btn.style.borderColor = "var(--border)";
             btn.style.background = "none";
+            btn.style.borderColor = "var(--border)";
             showToast("LEDGER: ASSET REMOVED");
         } else {
-            // SAVE TO DATABASE
             await _sb.from('user_watchlist').insert([{
                 user_id: currentUser.id,
                 asset_id: asset.id.toString()
@@ -2454,8 +2487,8 @@ async function toggleWatchlist() {
 
             btn.innerHTML = "✓ PINNED";
             btn.style.color = "var(--cyan)";
-            btn.style.borderColor = "var(--cyan)";
             btn.style.background = "rgba(0, 255, 200, 0.05)";
+            btn.style.borderColor = "var(--cyan)";
             showToast("MANIFEST: SAVED TO CLOUD");
         }
     } catch (e) {
@@ -2465,17 +2498,78 @@ async function toggleWatchlist() {
 }
 
 /**
- * 3. showToast: The System Feedback Mechanism.
+ * 4. showToast: THE PRO NOTIFICATION ENGINE
  */
-function showToast(msg) {
-    const x = document.getElementById("toast");
-    if (!x) {
-        alert(msg);
+function showToast(message) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<span style="color:var(--cyan); opacity:0.6;">[ SYSTEM ]</span> ${message}`;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+    /**
+ * 5. renderPortfolio: Fetches user data and builds the UI cards.
+ */
+async function renderPortfolio() {
+    const container = document.getElementById('portfolio-content');
+    if (!container) return;
+
+    if (!currentUser) {
+        container.innerHTML = `
+            <div style="padding:40px; text-align:center; font-size:11px; color:var(--muted); font-family:monospace;">
+                [ AUTHENTICATION REQUIRED ]<br><br>
+                SIGN IN TO ACCESS YOUR GLOBAL LEDGER
+            </div>`;
         return;
     }
-    x.innerHTML = msg;
-    x.className = "show";
-    setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
+
+    // Pull Bids and Watchlist from Supabase
+    const [bidsRes, watchRes] = await Promise.all([
+        _sb.from('partner_leads').select('*, assets(address, city)').eq('user_id', currentUser.id).eq('lead_type', 'bid'),
+        _sb.from('user_watchlist').select('*, assets(*)').eq('user_id', currentUser.id)
+    ]);
+
+    let html = '';
+
+    // Render Bids Section
+    html += `<div class="portfolio-sect"><div class="sect-label">ACTIVE BINDING OFFERS</div>`;
+    if (bidsRes.data?.length) {
+        bidsRes.data.forEach(b => {
+            html += `
+                <div class="pos-card" onclick="selectAsset(${b.asset_id}); togglePortfolio();">
+                    <div class="pos-addr">${b.assets.address.toUpperCase()}</div>
+                    <div class="pos-meta">VAL: $${parseFloat(b.selection_data.amount).toLocaleString()} // STATUS: ${b.status.toUpperCase()}</div>
+                </div>`;
+        });
+    } else { html += `<div style="font-size:9px; color:#444; padding: 10px 0;">NO ACTIVE BIDS</div>`; }
+    html += `</div>`;
+
+    // Render Watchlist Section
+    html += `<div class="portfolio-sect"><div class="sect-label">MONITORED ASSETS</div>`;
+    if (watchRes.data?.length) {
+        watchRes.data.forEach(w => {
+            html += `
+                <div class="pos-card" onclick="selectAsset(${w.assets.id}); togglePortfolio();">
+                    <div class="pos-addr">${w.assets.address.toUpperCase()}</div>
+                    <div class="pos-meta">LOC: ${w.assets.city.toUpperCase()} // PRICE: $${w.assets.price.toLocaleString()}</div>
+                </div>`;
+        });
+    } else { html += `<div style="font-size:9px; color:#444; padding: 10px 0;">WATCHLIST EMPTY</div>`; }
+    html += `</div>`;
+
+    container.innerHTML = html;
 }
 
 /* --- END LEDGER ENGINE --- */
