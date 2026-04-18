@@ -3337,55 +3337,62 @@ function updateAuthUI() {
   } 
 }
 
-function openModal(type, assetId) {
+/* --- UNIFIED MODAL TERMINAL ENGINE --- */
+
+function openModal(type) {
+  const modal = document.getElementById('modal');
   const mbox = document.getElementById('mbox');
-  if (!mbox) return;
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+
+  if (!modal || !modalBody) return;
+
+  // 1. Reset Content area
+  modalBody.innerHTML = '';
   
-  let html = '';
+  // 2. Routing Logic: What are we showing?
   if (type === 'signin') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Sign In</div>
-      <div class="msub">Access the Global Asset Directory and Permanent Ledger</div>
-      <div class="mfield"><label>Email</label><input type="email" id="login-email" class="styled-input" placeholder="investor@example.com"></div>
-      <div class="mfield"><label>Password</label><input type="password" id="login-password" class="styled-input" placeholder="••••••••"></div>
-      <div class="mfooter"><button class="msub-btn" onclick="handleSignIn()">Sign In</button><button class="mcan-btn" onclick="closeModal()">Cancel</button></div>
-      <div class="legal-note" style="text-align:center;margin-top:16px;"><button class="msub-btn" onclick="signInWithGoogle()" style="background:transparent;border:1px solid var(--cyan);color:var(--cyan)">Sign in with Google</button></div>
-      <div class="legal-note">Don't have an account? <a href="#" onclick="openModal('register');return false" style="color:var(--cyan)">Join now</a></div>
-    `;
-  } else if (type === 'register') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">Join RWABidAsk</div>
-      <div class="msub">Create your institutional access account</div>
-      <div class="mfield"><label>Full Name</label><input type="text" id="reg-name" class="styled-input" placeholder="John Smith"></div>
-      <div class="mfield"><label>Email</label><input type="email" id="reg-email" class="styled-input" placeholder="investor@example.com"></div>
-      <div class="mfield"><label>Password</label><input type="password" id="reg-password" class="styled-input" placeholder="•••••••• (min 6 characters)"></div>
-      <div class="mfooter"><button class="msub-btn" onclick="handleSignUp()">Create Account</button><button class="mcan-btn" onclick="closeModal()">Cancel</button></div>
-      <div class="legal-note" style="text-align:center;margin-top:16px;"><button class="msub-btn" onclick="signInWithGoogle()" style="background:transparent;border:1px solid var(--cyan);color:var(--cyan)">Sign up with Google</button></div>
-      <div class="legal-note">Already have an account? <a href="#" onclick="openModal('signin');return false" style="color:var(--cyan)">Sign in</a></div>
-    `;
-  } else if (type === 'tos' || type === 'privacy') {
-    html = `
-      <button class="mclose-btn" onclick="closeModal()">✕</button>
-      <div class="mtitle">${type === 'tos' ? 'Terms of Service' : 'Privacy Policy'}</div>
-      <div class="legal-note" style="margin-top:16px;line-height:1.8">
-        ${type === 'tos' ? 
-          'RWABidAsk is a non-custodial platform for asset digitization and tokenization. All transactions are recorded on the Persistent Ledger. Users must complete KYC/AML verification prior to bidding or purchasing.' : 
-          'We collect only essential data for compliance and platform functionality. User data is encrypted and never sold to third parties.'}
+    if(modalTitle) modalTitle.textContent = "AUTHENTICATION: SECURE LOGIN";
+    modalBody.innerHTML = `
+      <div class="msub" style="margin-bottom:15px; color:var(--muted); font-size:11px;">Access the Global Asset Directory and Permanent Ledger</div>
+      <div class="mfield"><label>EMAIL</label><input type="email" id="login-email" class="styled-input" placeholder="investor@domain.com"></div>
+      <div class="mfield"><label>PASSWORD</label><input type="password" id="login-password" class="styled-input" placeholder="••••••••"></div>
+      <div class="mfooter" style="margin-top:20px; display:flex; gap:10px;">
+        <button class="msub-btn" style="flex:2;" onclick="handleSignIn()">ACCESS TERMINAL</button>
+        <button class="mcan-btn" style="flex:1;" onclick="closeModal()">CANCEL</button>
       </div>
-      <div class="mfooter"><button class="msub-btn" onclick="closeModal()">Acknowledge</button></div>
+      <div class="legal-note" style="text-align:center; margin-top:15px;">
+        <button onclick="signInWithGoogle()" style="background:none; border:1px solid var(--cyan); color:var(--cyan); padding:8px; width:100%; cursor:pointer;">SIGN IN WITH GOOGLE</button>
+      </div>
+      <div class="legal-note" style="margin-top:10px; font-size:10px;">New User? <a href="#" onclick="openModal('register');return false" style="color:var(--cyan)">Create Account</a></div>
     `;
-  } else {
-    html = `<button class="mclose-btn" onclick="closeModal()">✕</button><div class="mtitle">RWABidAsk</div><div class="msub">Platform access requires authentication.</div><div class="mfooter"><button class="msub-btn" onclick="openModal('signin')">Sign In</button><button class="mcan-btn" onclick="closeModal()">Close</button></div>`;
-  }
+  } 
   
-  mbox.innerHTML = html;
-  document.getElementById('modal').classList.add('open');
+  else if (type === 'register') {
+    if(modalTitle) modalTitle.textContent = "REGISTRY: CREATE ACCOUNT";
+    modalBody.innerHTML = `
+      <div class="mfield"><label>FULL NAME</label><input type="text" id="reg-name" class="styled-input" placeholder="John Smith"></div>
+      <div class="mfield"><label>EMAIL</label><input type="email" id="reg-email" class="styled-input" placeholder="investor@domain.com"></div>
+      <div class="mfield"><label>PASSWORD</label><input type="password" id="reg-password" class="styled-input" placeholder="••••••••"></div>
+      <div class="mfooter" style="margin-top:20px; display:flex; gap:10px;">
+        <button class="msub-btn" style="flex:2;" onclick="handleSignUp()">INITIALIZE ACCOUNT</button>
+        <button class="mcan-btn" style="flex:1;" onclick="closeModal()">CANCEL</button>
+      </div>
+      <div class="legal-note" style="margin-top:10px; font-size:10px;">Already Registered? <a href="#" onclick="openModal('signin');return false" style="color:var(--cyan)">Sign In</a></div>
+    `;
+  }
+
+  // 3. Physical Execution: Open the window
+  modal.style.display = 'flex'; // Use this if your CSS uses display:none
+  modal.classList.add('open');  // Keep this if your CSS uses classes for animation
 }
 
 function closeModal() {
-  document.getElementById('modal').classList.remove('open');
+  const modal = document.getElementById('modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+  }
 }
 
 async function handleSignIn() {
