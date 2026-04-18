@@ -2591,50 +2591,55 @@ function handleSponsor(asset) {
 // SELECT ASSET - Render Right Panel with Working Buttons
 // ============================================================
 function selectAsset(id) {
+  // 1. Force-sync the ID to a number or string to match the database
+  const targetId = id;
   activeId = id;
-  const a = ASSETS.find(x => x.id === id);
-  if (!a) return;
 
-  // CRITICAL: Set the global window variable so logPartnerLead can see it
+  // 2. Look in the Global Ledger we synced in loadMarketData
+  const a = (window.ASSETS || []).find(x => x.id == targetId);
+
+  if (!a) {
+    console.error(`[RWABidAsk] CRITICAL: Asset #${id} not found in Global Ledger.`);
+    return;
+  }
+
+  // 3. Set the global anchor for the Lead Engine
   window.currentAsset = a; 
   
-  // 1. Panel Header
+  console.log(`[RWABidAsk] Asset Verified: ${a.address}`);
+
+  // 4. Panel Header
   document.getElementById('rhead').innerHTML = `
     <div class="rtype">${(a.type || 'ASSET').toUpperCase()} · ${(a.status || 'ACTIVE').toUpperCase()}</div>
     <div class="rname" style="font-size:18px; margin: 4px 0;">${escapeHtml(a.address)}</div>
     <div class="rcity" style="color:var(--muted); font-size:12px;">${escapeHtml(a.city)}, ${escapeHtml(a.state || 'USA')}</div>
   `;
   
-  // 2. Action Grid - Hard-wired to the new "Brain"
+  // 5. Action Grid
   const buttonsHTML = `
     <div class="act-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:20px; padding: 10px;">
-      <button class="abtn a-buy" style="grid-column: span 2; background:var(--green); color:#000; font-weight:bold; height:42px; border:none; cursor:pointer;" onclick="logPartnerLead('inquiry', 'buy_interest')">BUY / INQUIRE</button>
-      
+      <button class="abtn a-buy" style="grid-column: span 2; background:var(--green); color:#000; font-weight:bold; height:42px; border:none; cursor:pointer;" onclick="window.logPartnerLead('inquiry', 'buy_interest')">BUY / INQUIRE</button>
       <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="showBidModal()">PLACE BID</button>
-      
       <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="showLendingModal()">FIND LENDER</button>
-      
-      <button class="abtn" style="height:38px; border:1px solid var(--green); color:var(--green); background:none; cursor:pointer;" onclick="logPartnerLead('insurance', 'quote_requested')">INSURANCE</button>
-      
-      <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="logPartnerLead('watchlist', 'saved_to_list')">WATCHLIST</button>
-      
-      <button class="abtn a-sponsor" style="grid-column: span 2; border:1px solid var(--gold)!important; color:var(--gold); background:none; height:38px; margin-top:5px; cursor:pointer; font-weight:bold;" onclick="logPartnerLead('sponsor', 'claim_request')">SPONSOR LISTING</button>
+      <button class="abtn" style="height:38px; border:1px solid var(--green); color:var(--green); background:none; cursor:pointer;" onclick="window.logPartnerLead('insurance', 'quote_requested')">INSURANCE</button>
+      <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="window.logPartnerLead('watchlist', 'saved_to_list')">WATCHLIST</button>
+      <button class="abtn a-sponsor" style="grid-column: span 2; border:1px solid var(--gold)!important; color:var(--gold); background:none; height:38px; margin-top:5px; cursor:pointer; font-weight:bold;" onclick="window.logPartnerLead('sponsor', 'claim_request')">SPONSOR LISTING</button>
     </div>
   `;
   
-  // 3. Render the Body
+  // 6. Render the Body
   document.getElementById('rbody').innerHTML = `
     <div class="rinner">
       ${buttonsHTML}
       <div class="rsect" style="border-top: 1px solid rgba(255,255,255,0.05); padding:15px;">
         <div class="rsect-title" style="color:var(--green); font-size:10px; text-transform:uppercase; margin-bottom:10px;">Financial Ledger</div>
-        <div class="rrow"><span class="rk">Valuation</span><span class="rv">${fmtPrice(a.price)}</span></div>
+        <div class="rrow"><span class="rk">Valuation</span><span class="rv">${window.fmtPrice(a.price)}</span></div>
         <div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div>
       </div>
     </div>
   `;
   
-  flyTo(a.lat, a.lng, 1400, 45);
+  if (typeof flyTo === 'function') flyTo(a.lat, a.lng, 1400, 45);
   if (window.innerWidth <= 767) document.getElementById('right').classList.add('open-drawer');
 }
     
