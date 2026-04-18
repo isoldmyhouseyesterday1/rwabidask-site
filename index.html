@@ -2548,100 +2548,65 @@ function selectAsset(id) {
   window.currentAsset = a; 
   window.currentAssetForModal = a; 
   
-  // 1. Render Header
+  // 1. Institutional Image Stage
+  const imageHTML = `
+    <div class="r-image-stage" style="width:100%; height:180px; background:#000; border-radius:4px; margin-bottom:15px; overflow:hidden; border:1px solid rgba(0,255,200,0.15); position:relative;">
+      <img src="${a.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'}" 
+           style="width:100%; height:100%; object-fit:cover; opacity:0.9;">
+      <div style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.7); padding:4px 8px; border-radius:2px; font-size:9px; color:var(--green); border:1px solid var(--green); font-weight:bold; letter-spacing:1px;">VERIFIED RWA</div>
+    </div>
+  `;
+
+  // 2. Render Header (Address & Identity)
   document.getElementById('rhead').innerHTML = `
-    <div class="rtype">${(a.type || '').toUpperCase()} · ${(a.status || '').toUpperCase()}</div>
-    <div class="rname">${escapeHtml(a.address)}</div>
-    <div class="rcity">${escapeHtml(a.city)}${a.country && a.country !== a.city ? ', ' + escapeHtml(a.country) : ''}</div>
-    <div class="rprice-row">
-      <div class="rprice">${fmtPrice(a.price)}</div>
-      <div class="rprice-psf">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div>
+    <div class="rtype">${(a.type || 'ASSET').toUpperCase()} · ${(a.status || 'ACTIVE').toUpperCase()}</div>
+    <div class="rname" style="font-size:18px; margin: 4px 0;">${escapeHtml(a.address)}</div>
+    <div class="rcity" style="color:var(--muted); font-size:12px;">${escapeHtml(a.city)}, ${escapeHtml(a.state || 'USA')}</div>
+    <div class="rprice-row" style="margin-top:12px; display:flex; justify-content:space-between; align-items:baseline;">
+      <div class="rprice" style="font-size:22px; font-weight:bold; color:var(--green);">${fmtPrice(a.price)}</div>
+      <div class="rprice-psf" style="font-size:11px; color:var(--muted);">${a.sqft ? fmtPrice(Math.round(a.price / a.sqft)) + '/sqft' : ''}</div>
     </div>
   `;
   
-  // 2. Structures section
-  const structs = a.structures || [];
-  const structHTML = structs.length ? `
-    <div class="rsect">
-      <div class="rsect-title">Structure Manifest</div>
-      ${structs.map((s, i) => `
-        <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);padding:9px 11px;margin-bottom:8px;border-radius:2px">
-          <div style="font-size:10px;font-weight:600;color:var(--dim);margin-bottom:6px">${s.label || ('Structure ' + (i+1))}</div>
-          ${s.sqft ? `<div class="rrow"><span class="rk">Size</span><span class="rv">${s.sqft.toLocaleString()} sqft</span></div>` : ''}
-          ${s.beds ? `<div class="rrow"><span class="rk">Beds</span><span class="rv">${s.beds}</span></div>` : ''}
-          ${s.baths ? `<div class="rrow"><span class="rk">Baths</span><span class="rv">${s.baths}</span></div>` : ''}
-          ${s.built ? `<div class="rrow"><span class="rk">Built</span><span class="rv">${s.built}</span></div>` : ''}
-        </div>
-      `).join('')}
+  // 3. Action Grid (Now includes Sponsor)
+  const buttonsHTML = `
+    <div class="act-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:20px;">
+      <button class="abtn a-buy" style="grid-column: span 2; background:var(--green); color:#000; font-weight:bold;" onclick="logPartnerLead('inquiry', 'buy_interest')">BUY / INQUIRE</button>
+      <button class="abtn a-bid" onclick="showBidModal()">PLACE BID</button>
+      <button class="abtn a-lend" onclick="showLendingModal()">FIND LENDER</button>
+      <button class="abtn a-save" onclick="handleWatchlist()">WATCHLIST</button>
+      <button class="abtn a-sponsor" style="border:1px solid var(--gold)!important; color:var(--gold)" onclick="logPartnerLead('sponsor', 'claim_request')">SPONSOR LISTING</button>
     </div>
-  ` : '';
+  `;
   
-  // 3. Financial section
+  // 4. Detailed Manifest
   const fin = a.financials || {};
   const finHTML = `
-    <div class="rsect">
-      <div class="rsect-title">Financial Data</div>
-      <div class="rrow"><span class="rk">Listed Price</span><span class="rv hl">${fmtPrice(a.price)}</span></div>
-      ${a.sqft ? `<div class="rrow"><span class="rk">Price / sqft</span><span class="rv">${fmtPrice(Math.round(a.price / a.sqft))}</span></div>` : ''}
-      ${fin.tax_annual ? `<div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual).toLocaleString()}</span></div>` : ''}
-      ${fin.hoa ? `<div class="rrow"><span class="rk">HOA / mo</span><span class="rv">$${fin.hoa}</span></div>` : ''}
-      ${a.days ? `<div class="rrow"><span class="rk">Days Listed</span><span class="rv">${a.days}d</span></div>` : ''}
-      <div class="rrow"><span class="rk">Source</span><span class="rv">${a.source || 'Public Registry'}</span></div>
-    </div>
-  `;
-  
-  // 4. Bids section
-  const bidsHTML = `
-    <div class="rsect">
-      <div class="rsect-title">Bid Order Book</div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.7">All bids are permanent.</div>
-      ${(a.bids && a.bids.length) ? a.bids.map(b => `
-        <div class="bid-row">
-          <span class="bid-amount">${fmtPrice(b.amount)}</span>
-          <span class="bid-terms">${b.terms || 'cash'}</span>
-        </div>
-      `).join('') : '<div style="font-size:9px;color:var(--muted);padding:4px 0">No bids yet.</div>'}
-    </div>
-  `;
-  
-  // 5. Action Buttons
-  const buttonsHTML = `
-    <div class="act-grid">
-      <button class="abtn a-buy" onclick="handleInquiry(window.currentAsset)">BUY / INQUIRE</button>
-      <button class="abtn a-bid" onclick="showBidModal(window.currentAsset)">PLACE BID</button>
-      <button class="abtn a-lend" onclick="showLendingModal(window.currentAsset)">FIND LENDER</button>
-      <button class="abtn a-save" onclick="handleWatchlist(window.currentAsset)">WATCHLIST</button>
-    </div>
-  `;
-  
-  // 6. Market Status
-  const marketHTML = `
-    <div class="rsect">
-      <div class="rsect-title">Market Status</div>
+    <div class="rsect" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top:15px;">
+      <div class="rsect-title" style="color:var(--green); font-size:10px; text-transform:uppercase; margin-bottom:10px;">Financial Intelligence</div>
+      <div class="rrow"><span class="rk">Annual Tax</span><span class="rv">$${Number(fin.tax_annual || 0).toLocaleString()}</span></div>
+      <div class="rrow"><span class="rk">HOA Dues</span><span class="rv">$${fin.hoa || 0}/mo</span></div>
       <div class="rrow"><span class="rk">Asset ID</span><span class="rv">#${a.id}</span></div>
-      <div class="rrow"><span class="rk">Token Status</span><span class="rv">${a.tokenized ? '⬡ On-Chain' : 'Unclaimed'}</span></div>
+      <div class="rrow"><span class="rk">On-Chain Status</span><span class="rv">${a.tokenized ? '⬡ SECURED' : 'PENDING'}</span></div>
     </div>
   `;
-  
+
+  // 5. Build Final Panel
   document.getElementById('rbody').innerHTML = `
-    <div class="rinner">
+    <div class="rinner" style="padding:15px;">
+      ${imageHTML}
       ${buttonsHTML}
-      ${structHTML}
       ${finHTML}
-      ${bidsHTML}
-      ${marketHTML}
     </div>
   `;
   
   flyTo(a.lat, a.lng, 1400, 45);
-  
-  if (window.innerWidth <= 767) {
-    document.getElementById('right').classList.add('open-drawer');
-  }
+  if (window.innerWidth <= 767) document.getElementById('right').classList.add('open-drawer');
 
   const filtered = SEARCH_ACTIVE ? SEARCH_RESULTS : filterAssets(ASSETS);
   renderList(filtered);
 }
+    
 
 // ============================================================
 // SEARCH FUNCTIONALITY
