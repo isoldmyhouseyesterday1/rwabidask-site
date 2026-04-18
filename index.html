@@ -1826,10 +1826,45 @@ body { min-width: 900px; overflow-x: auto; }
   border: 1px solid var(--border2);
   color: var(--silver);
 }
+  /* --- Add to your CSS section --- */
+#toast {
+    visibility: hidden;
+    min-width: 280px;
+    background-color: #050505;
+    color: #00ffc8;
+    text-align: center;
+    border: 1px solid rgba(0, 255, 200, 0.4);
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 10000;
+    left: 50%;
+    bottom: 40px;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 0 20px rgba(0, 255, 200, 0.1);
+}
+
+#toast.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 40px; opacity: 1;} }
+}
+@keyframes fadeout { from {bottom: 40px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+}
+  
 </style>
 </head>
 <body>
 
+<div id="toast">SYSTEM: INITIALIZING...</div>
+ }
+  
 <div id="shell">
 
 <div id="market-ribbon">
@@ -2288,50 +2323,61 @@ function renderList(assetsToShow) {
 // ============================================================
 // LEAD GENERATION - Insert into partner_leads table
 // ============================================================
-async function logPartnerLead(leadType, selectionData) {
-  // 1. SMART CHECK: Look in both possible variable names
-  const activeAsset = (typeof currentAssetForModal !== 'undefined' && currentAssetForModal) 
-                      || (typeof currentAsset !== 'undefined' && currentAsset);
-
-  // 2. AUTH CHECK: Ensure we know who is sending the lead
-  if (!_sb || !currentUser) {
-    console.warn('[RWABidAsk] Lead blocked: User not signed in');
-    alert('Please sign in to log your inquiry.');
-    openModal('signin');
-    return false;
-  }
-
-  // 3. SELECTION CHECK: Ensure an asset is actually targeted
-  if (!activeAsset || !activeAsset.id) {
-    console.error('[RWABidAsk] Lead blocked: No asset in memory');
-    alert('Please select an asset on the map first.');
-    return false;
-  }
-
-  try {
-    // 4. THE INSERT: Recording the $500-value intent
-    const { error } = await _sb.from('partner_leads').insert([{
-      user_id: currentUser.id,
-      asset_id: activeAsset.id,
-      lead_type: leadType,
-      selection_data: { choice: selectionData, source: 'action_panel' },
-      status: 'pending',
-      created_at: new Date().toISOString()
-    }]);
-
-    if (error) throw error;
-
-    console.log(`[RWABidAsk] ${leadType} lead recorded for asset ${activeAsset.id}`);
-    alert(`✓ Inquiry recorded. A specialist will contact you shortly.`);
+async function logPartnerLead(type, data) {
+    // Uses the global activeAsset window we set in selectAsset
+    const asset = window.currentAsset;
     
-    if (window.closeModalOverlay) window.closeModalOverlay();
-    return true;
+    if (!asset) {
+        showToast("CRITICAL: NO ASSET SELECTED");
+        return;
+    }
 
-  } catch (e) {
-    console.error('[RWABidAsk] Partner lead error:', e);
-    alert('Failed to record request. Please check your connection.');
-    return false;
-  }
+    if (!currentUser) {
+        showToast("AUTH REQUIRED: SIGN IN TO LOG INTENT");
+        setTimeout(() => openModal('signin'), 1000);
+        return;
+    }
+
+    try {
+        const { error } = await _sb.from('partner_leads').insert([{
+            user_id: currentUser.id,
+            asset_id: asset.id.toString(),
+            lead_type: type,
+            selection_data: { 
+                action: data, 
+                intent_timestamp: new Date().toISOString(),
+                compliance_status: "pre-licensing_inquiry"
+            },
+            status: 'pending'
+        }]);
+
+        if (error) throw error;
+
+        // COMPLIANCE-SAFE MESSAGING FOR PATENT SCREENSHOTS
+        const msg = type === 'sponsor' ? "LEDGER: SPONSORSHIP REQUESTED" :
+                    type === 'insurance' ? "INQUIRY: QUOTE PIPELINE" :
+                    type === 'bid' ? "MANIFEST: OFFER RECORDED" : 
+                    "SYSTEM: DATA ENTRY VERIFIED";
+
+        showToast(msg);
+        
+    } catch (e) {
+        console.error("Lead Error:", e);
+        showToast("DATABASE ERROR: RETRY SIGNAL");
+    }
+}
+
+// Helper to trigger the UI notification (The "Toast")
+function showToast(msg) {
+    const x = document.getElementById("toast");
+    // If the HTML isn't there yet, it uses an alert so the app doesn't crash
+    if (!x) {
+        alert(msg);
+        return;
+    }
+    x.innerHTML = msg;
+    x.className = "show";
+    setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
 }
 
 // ============================================================
