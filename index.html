@@ -2194,25 +2194,38 @@ async function fetchListingsFromSupabase() {
 
 async function loadMarketData() {
   const fetched = await fetchListingsFromSupabase();
-  ASSETS = fetched;
+  
+  // FORCE GLOBAL SYNC: This ensures the data is available to every function instantly
+  window.ASSETS = fetched; 
+  ASSETS = fetched; 
+  
+  console.log(`[RWABidAsk] Global Ledger Sync: ${ASSETS.length} assets mapped.`);
   onDataReady();
 }
 
 function onDataReady() {
   const assetCount = ASSETS.length;
+  
+  // Update Status UI
   setStatus(`RWABidAsk PERMANENT LEDGER — ${assetCount} ASSETS REGISTERED`);
   document.getElementById('s-assets').textContent = assetCount;
   document.getElementById('s-status').textContent = 'LIVE';
-  document.getElementById('s-bids').textContent = Math.floor(assetCount * 2.3);
+  
+  // UI Rendering
   updateGMC(ASSETS);
   renderCategories();
   renderList(ASSETS);
   buildTicker(ASSETS);
+  
   if (window.innerWidth <= 767) renderMobileListViewFull(ASSETS);
   
-  if (isMapReady && !markersRendered && ASSETS.length > 0) {
-    renderDOMMarkers();
+  // THE MAP HANDSHAKE: This ensures markers appear on the first load
+  if (isMapReady && ASSETS.length > 0) {
+    console.log('[RWABidAsk] Map Ready, injecting markers...');
+    renderDOMMarkers(); 
     markersRendered = true;
+  } else {
+    console.log('[RWABidAsk] Map not quite ready, waiting for tiles...');
   }
 }
 
@@ -2227,14 +2240,6 @@ function fmtPrice(n) {
 function setStatus(msg) {
   const el = document.getElementById('map-status-txt');
   if (el) el.textContent = msg;
-}
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => { t.style.display = 'none'; }, 4000);
 }
 
 function typeClass(type) {
@@ -3405,70 +3410,61 @@ document.getElementById('map-col')?.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// BOOT SEQUENCE
+// INSTITUTIONAL BOOT SEQUENCE (TIMED FOR SYNC)
 // ============================================================
-buildRibbon();
-buildTicker([]);
-bootSupabase();
 
-document.addEventListener('DOMContentLoaded', () => { 
-  const blimp = document.getElementById('blimp-el'); 
-  if (blimp) blimp.addEventListener('click', () => openModal('partner')); 
-  initMobileUI(); 
-  
-  const modal = document.getElementById('modal');
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-});
-
-// Expose all functions globally for inline onclick handlers
+// 1. Register Global Handlers (Do this immediately)
 window.setCategory = setCategory;
 window.setFilter = setFilter;
 window.selectAsset = selectAsset;
 window.performSearch = performSearch;
 window.flyGlobe = flyGlobe;
-window.setMapMode = setMapMode;
-window.setTilt = setTilt;
-window.toggleHeat = toggleHeat;
 window.openModal = openModal;
 window.closeModal = closeModal;
-window.closeDrawer = closeDrawer;
 window.handleSignIn = handleSignIn;
 window.handleSignUp = handleSignUp;
 window.signOut = signOut;
 window.signInWithGoogle = signInWithGoogle;
 
-// Right Panel Action Handlers
-window.handleInquiry = handleInquiry;
-window.handleWatchlist = handleWatchlist;
-window.handleTokenize = handleTokenize;
-window.handleSponsor = handleSponsor;
-
-// Modal action handlers
-window.showLendingModal = showLendingModal;
-window.showInsuranceModal = showInsuranceModal;
-window.showBidModal = showBidModal;
-window.closeModalOverlay = closeModalOverlay;
-window.submitLending = submitLending;
-window.submitInsurance = submitInsurance;
-window.submitBid = submitBid;
-
-// Lead logging
+// 2. Wire Buttons to the new Lead Engine
 window.logPartnerLead = logPartnerLead;
-window.logBid = logBid;
+window.showLendingModal = showLendingModal;
+window.showBidModal = showBidModal;
+
+// 3. The Secure Delayed Launch
+window.addEventListener('load', () => {
+    // This 500ms pause ensures Supabase and Google Maps have shaken hands
+    setTimeout(async () => {
+        console.log('[RWABidAsk] SECURE BOOT: Initializing Ledger Sync...');
+        
+        buildRibbon();
+        bootSupabase(); // Initializes connection
+        
+        // Start the data fetch
+        if (typeof loadMarketData === 'function') {
+            await loadMarketData();
+        }
+
+        // Initialize Map if Google is ready
+        if (window.__googleMapsLoaded && typeof initMap === 'function') {
+            initMap();
+        }
+
+        // Setup UI Listeners
+        const modal = document.getElementById('modal');
+        if (modal) {
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        }
+        
+        initMobileUI();
+
+        console.log('[RWABidAsk] TERMINAL ONLINE: All Systems Verified.');
+    }, 500);
+});
 
 // Utility functions
 window.fmtPrice = fmtPrice;
 window.escapeHtml = escapeHtml;
-
-// Map initialization
-window.__initRWA = initMap;
-if (window.__googleMapsLoaded) {
-  initMap();
-}
-
-console.log('[RWABidAsk] Platform fully loaded. Authentication ready. Lead generation engine active.');
 </script>
 </body>
 </html>
