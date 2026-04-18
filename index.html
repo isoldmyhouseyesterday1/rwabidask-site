@@ -2652,9 +2652,7 @@ function handleTokenize() {
     logPartnerLead('tokenize', 'Priority request for ownership tokenization');
 }
 
-// 4. Watchlist is handled by toggleWatchlist() which we already added!
-
-    // ============================================================
+// ============================================================
 // SELECT ASSET - Render Right Panel with Working Buttons
 // ============================================================
 /* --- ASSET INTELLIGENCE: SIDEBAR ENGINE --- */
@@ -2717,6 +2715,30 @@ function selectAsset(id) {
     // 7. Check if already on Watchlist (Visual Sync)
     syncWatchlistButton(a.id);
 }
+    
+    /* --- HELPER: SYNC WATCHLIST STATE --- */
+async function syncWatchlistButton(assetId) {
+    if (!currentUser) return; 
+    const btn = document.getElementById('watch-btn');
+    if (!btn) return;
+
+    const { data } = await _sb.from('user_watchlist')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('asset_id', assetId.toString())
+        .maybeSingle();
+
+    if (data) {
+        btn.innerHTML = "✓ PINNED";
+        btn.style.color = "var(--cyan)";
+        btn.style.borderColor = "var(--cyan)";
+    } else {
+        btn.innerHTML = "WATCHLIST";
+        btn.style.color = "";
+        btn.style.borderColor = "";
+    }
+}
+    
     
 
 /* --- SEARCH & GEOSPATIAL FILTERING ENGINE (AUTH-LOCKED) --- */
@@ -2795,7 +2817,6 @@ function syncMarkersToSearch(assetsToShow) {
 
 // Attach Event Listener
 document.getElementById('search-input')?.addEventListener('input', performSearch);
-    }
     
 
 // ============================================================
