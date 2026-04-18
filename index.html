@@ -2109,7 +2109,7 @@ function getLendingOptions(assetType) {
 }
 
 function getInsuranceOptions(assetType) {
-  const type = assetType.toLowerCase();
+  const type = (assetType || '').toLowerCase();
   if (type === 'aviation' || type === 'airplane' || type === 'jet') {
     return ['Hull Insurance', 'Liability Insurance', 'War Risk Coverage', 'Passenger Liability', 'Ground Risk Hull'];
   } else if (type === 'maritime' || type === 'boat' || type === 'ship' || type === 'yacht') {
@@ -2119,6 +2119,24 @@ function getInsuranceOptions(assetType) {
   } else {
     return ['Homeowners Insurance', 'Hazard Insurance', 'Flood Insurance', 'Earthquake Coverage', 'Title Insurance'];
   }
+}
+
+async function submitInsurance() {
+  const select = document.getElementById('insurance-select');
+  const amount = document.getElementById('coverage-amount');
+  
+  if (!select || !select.value) {
+    showToast("SELECT A COVERAGE PRODUCT");
+    return;
+  }
+
+  // Call the central Lead Engine to save to Supabase
+  await logPartnerLead('insurance', {
+    product: select.value,
+    target_coverage: amount.value || "Not Specified"
+  });
+
+  closeModalOverlay();
 }
 
 // ============================================================
@@ -2329,7 +2347,6 @@ function renderList(assetsToShow) {
 // LEAD GENERATION - Insert into partner_leads table
 // ============================================================
 async function logPartnerLead(type, data) {
-    // Uses the global activeAsset window we set in selectAsset
     const asset = window.currentAsset;
     
     if (!asset) {
@@ -2358,16 +2375,28 @@ async function logPartnerLead(type, data) {
 
         if (error) throw error;
 
-        // COMPLIANCE-SAFE MESSAGING FOR PATENT SCREENSHOTS
-        const msg = type === 'sponsor' ? "LEDGER: SPONSORSHIP REQUESTED" :
+        // 1. VISUAL FEEDBACK: Change button state immediately
+        if (type === 'watchlist') {
+            const btn = document.getElementById('watch-btn');
+            if (btn) {
+                btn.innerHTML = "✓ SAVED TO LIST";
+                btn.style.borderColor = "var(--green)";
+                btn.style.color = "var(--green)";
+                btn.style.background = "rgba(0, 255, 102, 0.05)";
+            }
+        }
+
+        // 2. MESSAGING: Institutional terminology for UI
+        const msg = type === 'sponsor'   ? "LEDGER: SPONSORSHIP REQUESTED" :
                     type === 'insurance' ? "INQUIRY: QUOTE PIPELINE" :
-                    type === 'bid' ? "MANIFEST: OFFER RECORDED" : 
+                    type === 'bid'       ? "MANIFEST: OFFER RECORDED" : 
+                    type === 'watchlist' ? "MANIFEST: ASSET PINNED" :
                     "SYSTEM: DATA ENTRY VERIFIED";
 
         showToast(msg);
         
     } catch (e) {
-        console.error("Lead Error:", e);
+        console.error("[RWABidAsk] Lead Error:", e);
         showToast("DATABASE ERROR: RETRY SIGNAL");
     }
 }
@@ -2445,24 +2474,38 @@ function showLendingModal(asset) {
   document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
-function showInsuranceModal(asset) {
-  currentAssetForModal = asset;
+function showInsuranceModal() {
+  // Use the global anchor we set during the map click
+  const asset = window.currentAsset;
+  if (!asset) {
+    console.error("[RWABidAsk] Insurance Error: No asset in memory.");
+    return;
+  }
+
+  // Ensure the old modal is removed if it exists
+  closeModalOverlay();
+
   const options = getInsuranceOptions(asset.type);
   let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
   
   const modalHtml = `
     <div class="rwa-modal-overlay" id="rwa-modal">
       <div class="rwa-modal-card">
-        <div class="title">GET INSURANCE</div>
-        <div class="sub">${escapeHtml(asset.address)} | Type: ${asset.type.toUpperCase()}</div>
-        <select id="insurance-select" class="rwa-select">
-          <option value="" disabled selected>— Select an insurance product —</option>
+        <div class="title" style="color:var(--green); font-weight:bold; letter-spacing:1px;">GET INSURANCE</div>
+        <div class="sub" style="font-size:12px; color:var(--muted); margin-bottom:15px;">
+          ${escapeHtml(asset.address)} | TYPE: ${asset.type.toUpperCase()}
+        </div>
+        
+        <select id="insurance-select" class="rwa-select" style="width:100%; background:#000; color:var(--green); border:1px solid var(--border); padding:10px; margin-bottom:10px; font-family:monospace;">
+          <option value="" disabled selected>— Select Coverage Protocol —</option>
           ${optionsHtml}
         </select>
-        <input type="number" id="coverage-amount" placeholder="Coverage amount (USD)" class="rwa-input">
-        <div class="row">
-          <button onclick="submitInsurance()">Request Quote</button>
-          <button class="secondary" onclick="closeModalOverlay()">Cancel</button>
+        
+        <input type="number" id="coverage-amount" placeholder="Target Valuation (USD)" class="rwa-input" style="width:100%; background:#000; color:#fff; border:1px solid var(--border); padding:10px; margin-bottom:20px;">
+        
+        <div class="row" style="display:flex; gap:10px;">
+          <button onclick="submitInsurance()" style="flex:1; background:var(--green); color:#000; font-weight:bold; border:none; padding:12px; cursor:pointer;">REQUEST QUOTE</button>
+          <button class="secondary" onclick="closeModalOverlay()" style="flex:1; background:rgba(255,255,255,0.05); color:#fff; border:1px solid var(--border); padding:12px; cursor:pointer;">CANCEL</button>
         </div>
       </div>
     </div>
@@ -2619,10 +2662,14 @@ function selectAsset(id) {
   const buttonsHTML = `
     <div class="act-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:20px; padding: 10px;">
       <button class="abtn a-buy" style="grid-column: span 2; background:var(--green); color:#000; font-weight:bold; height:42px; border:none; cursor:pointer;" onclick="window.logPartnerLead('inquiry', 'buy_interest')">BUY / INQUIRE</button>
+      
       <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="showBidModal()">PLACE BID</button>
       <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="showLendingModal()">FIND LENDER</button>
-      <button class="abtn" style="height:38px; border:1px solid var(--green); color:var(--green); background:none; cursor:pointer;" onclick="window.logPartnerLead('insurance', 'quote_requested')">INSURANCE</button>
-      <button class="abtn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="window.logPartnerLead('watchlist', 'saved_to_list')">WATCHLIST</button>
+      
+      <button class="abtn" style="height:38px; border:1px solid var(--green); color:var(--green); background:none; cursor:pointer;" onclick="showInsuranceModal()">INSURANCE</button>
+      
+      <button class="abtn a-save" id="watch-btn" style="height:38px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; cursor:pointer;" onclick="window.logPartnerLead('watchlist', 'saved_to_list')">WATCHLIST</button>
+      
       <button class="abtn a-sponsor" style="grid-column: span 2; border:1px solid var(--gold)!important; color:var(--gold); background:none; height:38px; margin-top:5px; cursor:pointer; font-weight:bold;" onclick="window.logPartnerLead('sponsor', 'claim_request')">SPONSOR LISTING</button>
     </div>
   `;
