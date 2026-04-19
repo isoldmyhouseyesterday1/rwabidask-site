@@ -42,6 +42,23 @@
     /* We aren't touching colors, borders, or backgrounds here */
   }
 }
+  @media (min-width: 768px) {
+  /* 1. Shrink the map so it stops where the sidebar starts */
+  #map3d-container, 
+  #map, 
+  .map-wrapper { 
+    width: calc(100% - 340px) !important; /* Subtract your sidebar width here */
+    left: 0 !important;
+    right: auto !important;
+  }
+
+  /* 2. Fix the Sidebar Border to match your original look */
+  #right {
+    width: 340px !important;
+    border-left: 1px solid var(--border, rgba(0,255,255,0.2)) !important;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.5) !important; /* Adds depth */
+  }
+}
   <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
