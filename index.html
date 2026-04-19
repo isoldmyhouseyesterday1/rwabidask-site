@@ -24,13 +24,23 @@
   window.__mapReady = function() { window.__googleMapsLoaded = true; window.__initRWA && window.__initRWA(); };
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady&loading=async" async defer></script>
-/* 1. HIDE THE LEDGER */
+<style>
+/* 1. HIDE THE PORTFOLIO TERMINAL */
 #portfolio-drawer {
     display: none !important;
 }
 
-/* 2. THE CLEAN RIGHT PANEL */
+/* 2. THE DESKTOP LAYOUT (ZILLOW-STYLE) */
 @media (min-width: 768px) {
+    #map3d-container, #map, .map-wrapper {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: calc(100% - 340px) !important;
+        height: 100vh !important;
+        z-index: 1 !important;
+    }
+
     #right {
         position: fixed !important;
         top: 0 !important;
@@ -38,19 +48,27 @@
         left: auto !important;
         width: 340px !important;
         height: 100vh !important;
-        z-index: 1000 !important;
+        background: var(--bg1, #050a0f) !important;
+        border-left: 1px solid var(--border, rgba(0,255,255,0.2)) !important;
+        z-index: 2000 !important;
+        display: flex !important;
+        flex-direction: column !important;
         transform: none !important;
-        background: #050a0f !important; /* Your original dark theme color */
-        border-left: 1px solid rgba(0,255,255,0.2) !important;
-    }
-
-    /* PUSH THE MAP TO THE LEFT SO IT DOESN'T OVERLAP */
-    #map3d-container {
-        width: calc(100% - 340px) !important;
-        position: absolute !important;
-        left: 0 !important;
+        visibility: visible !important;
     }
 }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #1c2540;
+  --bg1:      #232d4e;
+  --bg2:      #2a3560;
+  --bg3:      #303d6e;
+/* ... keep all the rest of your variables here ... */
+
+  <style>
+  
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
