@@ -32,16 +32,14 @@
 
 /* 2. THE INSTITUTIONAL 3-COLUMN FIX */
 @media (min-width: 768px) {
-    /* Restore your original 3-column layout */
     #main-row {
         display: grid !important;
-        grid-template-columns: 288px 1fr 340px !important; /* Left | Map | Right */
+        grid-template-columns: 288px 1fr 340px !important;
         width: 100vw;
         height: 100vh;
         overflow: hidden;
     }
 
-    /* THE MAP: Fills the middle column only */
     #map3d-container, #map, .map-wrapper {
         position: relative !important; 
         grid-column: 2;
@@ -50,7 +48,6 @@
         z-index: 1;
     }
 
-    /* THE RIGHT PANEL: Fills the right column only */
     #right {
         position: relative !important;
         grid-column: 3;
@@ -64,11 +61,13 @@
         z-index: 10;
     }
 
-    /* THE LEFT BAR: Fills the left column only */
     #left-bar, .sidebar-left {
         grid-column: 1;
         width: 288px !important;
     }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   
 :root {
   --bg:       #1c2540;
