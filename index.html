@@ -26,9 +26,7 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady&loading=async" async defer></script>
 <style>
 /* 1. HIDE THE PORTFOLIO TERMINAL */
-#portfolio-drawer {
-    display: none !important;
-}
+#portfolio-drawer { display: none !important; }
 
 /* 2. THE INSTITUTIONAL 3-COLUMN FIX */
 @media (min-width: 768px) {
@@ -36,7 +34,8 @@
         display: grid !important;
         grid-template-columns: 288px 1fr 340px !important;
         width: 100vw;
-        height: 100vh;
+        /* Subtracting space for your topbars and footers (approx 110px) */
+        height: calc(100vh - 110px) !important; 
         overflow: hidden;
     }
 
@@ -65,8 +64,7 @@
         grid-column: 1;
         width: 288px !important;
     }
-}
-
+} 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   
 :root {
