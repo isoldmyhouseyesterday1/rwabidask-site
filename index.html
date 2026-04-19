@@ -30,24 +30,47 @@
 
 /* 2. DESKTOP 2-COLUMN LAYOUT (left sidebar + map; right panel is fixed overlay) */
 @media (min-width: 768px) {
+    /* Proper 3-column terminal layout */
+    body { min-width: 900px; overflow-x: auto; }
     #main-row {
         display: grid !important;
-        grid-template-columns: 288px 1fr !important;
-        width: calc(100vw - 340px) !important; /* leave room for fixed right panel */
-        height: calc(100vh - 134px) !important; /* ribbon24 + topbar54 + ticker30 + footer26 = 134 */
-        overflow: hidden;
+        grid-template-columns: 288px 1fr 340px !important;
+        width: 100vw !important;
+        height: calc(100vh - 134px) !important; /* ribbon24 + topbar54 + ticker30 + footer26 */
+        overflow: hidden !important;
     }
-    #map3d-container, #map, .map-wrapper {
+    #left {
+        grid-column: 1 !important;
+        display: flex !important;
         position: relative !important;
-        grid-column: 2;
+        width: 288px !important;
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+    #map-col, #map3d-container, #map, .map-wrapper {
+        grid-column: 2 !important;
+        position: relative !important;
         width: 100% !important;
         height: 100% !important;
-        z-index: 1;
+        z-index: 1 !important;
     }
-    #left-bar, .sidebar-left {
-        grid-column: 1;
-        width: 288px !important;
+    #right {
+        grid-column: 3 !important;
+        position: relative !important;
+        width: 340px !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        transform: none !important;
+        border-left: 1px solid var(--border) !important;
+        background: var(--bg1) !important;
+        z-index: 10 !important;
     }
+    /* Hide mobile-only elements on desktop */
+    #mobile-view-toggle { display: none !important; }
+    #mobile-list-view   { display: none !important; }
+    .view-toggle        { display: none !important; }
 } 
 /* === TERMINAL SELECT: REMOVE DEFAULT BROWSER ARROWS === */
 select {
@@ -95,6 +118,10 @@ html, body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Mobile-only elements: hidden by default, shown inside mobile @media */
+#mobile-view-toggle { display: none; }
+#mobile-list-view   { display: none; }
 
 #shell {
   display: grid;
@@ -1091,6 +1118,7 @@ body { min-width: 900px; overflow-x: auto; }
   #market-ribbon, #ticker-bar, #footer, #left {
     display: none !important;
   }
+  #mobile-view-toggle { display: flex !important; }
 }
 
 /* MOBILE VIEW (Screens smaller than 768px) */
@@ -1128,24 +1156,7 @@ body { min-width: 900px; overflow-x: auto; }
   }
 }
 
-/* DESKTOP VIEW */
-@media (min-width: 768px) {
-  #right {
-    position: fixed !important;
-    right: 0 !important;
-    top: 78px !important;        /* below ribbon(24) + topbar(54) */
-    bottom: 56px !important;     /* above ticker(30) + footer(26) */
-    left: auto !important;
-    width: 340px !important;
-    height: auto !important;
-    border-left: 1px solid var(--border) !important;
-    transform: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    z-index: 1000 !important;
-    background: var(--bg1) !important;
-  }
-}
+/* DESKTOP: right panel handled by 3-col grid above */
 
 /* --- END OF REPLACEMENT --- */
   .rhead, .rinner {
