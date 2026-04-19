@@ -2871,19 +2871,18 @@ function selectAsset(id) {
     // 4. Action Grid (The Command Center)
     const buttonsHTML = `
         <div class="act-grid">
-            <button class="abtn a-primary" style="grid-column: span 2;" onclick="handleInquiry()">
+            <button class="abtn a-primary" style="grid-column: span 2;" onclick="handleInquiry('${a.id}')">
                 ACQUIRE / INQUIRE
             </button>
             
-            <button class="abtn" onclick="showBidModal()">PLACE BID</button>
-            <button class="abtn" onclick="showLendingModal()">DEBT CAPITAL</button>
+            <button class="abtn" onclick="showBidModal('${a.id}')">PLACE BID</button>
+            <button class="abtn" onclick="showLendingModal('${a.id}')">DEBT CAPITAL</button>
             
-            <button class="abtn" onclick="showInsuranceModal()">INSURANCE</button>
-            <button class="abtn" id="watch-btn" onclick="toggleWatchlist()">WATCHLIST</button>
+            <button class="abtn" onclick="showInsuranceModal('${a.id}')">INSURANCE</button>
+            <button id="watch-btn" class="abtn" onclick="toggleWatchlist('${a.id}')">WATCHLIST</button>
             
-            <button class="abtn a-sponsor" style="grid-column: span 2;" onclick="handleSponsor()">
-                SPONSOR LISTING / CLAIM ASSET
-            </button>
+            <button class="abtn a-sponsor" onclick="handleSponsor('${a.id}')">SPONSOR</button>
+            <button class="abtn a-claim" onclick="handleClaim('${a.id}')">CLAIM / VERIFY</button>
         </div>
     `;
     
@@ -3758,6 +3757,24 @@ window.signInWithGoogle = signInWithGoogle;
 window.logPartnerLead = logPartnerLead;
 window.showLendingModal = showLendingModal;
 window.showBidModal = showBidModal;
+window.handleSponsor = handleSponsor;
+window.handleClaim = handleClaim;
+window.handleInquiry = handleInquiry;
+
+    function handleSponsor(id) {
+    showToast(`SPONSORSHIP INITIATED FOR ASSET #${id}`);
+    logPartnerLead(id, 'SPONSOR'); // Sends to Supabase
+}
+
+function handleClaim(id) {
+    showToast(`VERIFYING OWNERSHIP FOR ASSET #${id}`);
+    logPartnerLead(id, 'CLAIM'); // Sends to Supabase
+}
+
+function handleInquiry(id) {
+    showToast(`CONNECTING TO CUSTODIAN FOR ASSET #${id}`);
+    logPartnerLead(id, 'INQUIRY'); // Sends to Supabase
+}
 
 // 3. The Secure Delayed Launch
 window.addEventListener('load', () => {
