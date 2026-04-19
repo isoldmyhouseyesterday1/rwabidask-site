@@ -3648,13 +3648,18 @@ async function restoreSession() {
 }
 
 async function signInWithGoogle() {
-  if (!_sb) { toast('Supabase not ready'); return false; }
+  if (!_sb) { showToast('SUPABASE NOT READY'); return false; }
   try {
-    const { error } = await _sb.auth.signInWithOAuth({ provider: 'google' });
+    const { error } = await _sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + window.location.pathname
+      }
+    });
     if (error) throw error;
     return true;
   } catch (e) {
-    toast('Google sign in failed: ' + e.message);
+    showToast('GOOGLE SIGN IN FAILED: ' + e.message);
     return false;
   }
 }
