@@ -855,6 +855,7 @@ body { min-width: 900px; overflow-x: auto; }
     background-position: right 10px center;
     padding-right: 32px !important;
 }
+#market-ribbon {
   background: #0d1526;
   border-bottom: 1px solid rgba(0,255,200,.1);
   overflow: hidden;
@@ -922,16 +923,6 @@ body { min-width: 900px; overflow-x: auto; }
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-
-#footer {
-  background: #161e38;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 20px;
-}
-
 
 
 #modal {
@@ -2787,31 +2778,36 @@ async function renderPortfolio() {
  */
 function showLendingModal() {
     const asset = window.currentAsset;
-    if (!asset) { showToast("ERROR: SELECT ASSET FIRST"); return; }
+    if (!asset) { showToast("SELECT AN ASSET FIRST"); return; }
 
     const options = getLendingOptions(asset.type);
-    let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+    const optHtml = options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
 
-    const modalBody = document.getElementById('modal-body');
     const modalTitle = document.getElementById('modal-title');
-    
-    modalTitle.textContent = "DEBT CAPITAL / LENDING PROTOCOL";
+    const modalBody  = document.getElementById('modal-body');
+    if (!modalTitle || !modalBody) return;
+
+    modalTitle.textContent = "Financing Options";
     modalBody.innerHTML = `
-        <div class="mfield">
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">ASSET ORIGINATION</label>
-            <div style="font-size:11px; color:#fff; margin-bottom:15px; font-family:monospace;">${asset.address}</div>
-            
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">PRODUCT TYPE</label>
-            <select id="lending-select" class="rwa-select" style="width:100%; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
-                <option value="" disabled selected>— SELECT CAPITAL STRATEGY —</option>
-                ${optionsHtml}
-            </select>
-            
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">DESIRED LOAN AMOUNT (USD)</label>
-            <input type="number" id="loan-amount" placeholder="5,000,000" style="width:100%; margin-bottom:20px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
-            
-            <button class="msub-btn" style="width:100%; background:var(--cyan); color:#000; font-weight:bold; border:none; padding:12px; cursor:pointer;" onclick="submitLending()">SUBMIT CAPITAL INQUIRY</button>
-        </div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:16px;line-height:1.7;">
+        Select a financing type for <strong style="color:var(--text)">${escapeHtml(asset.address)}</strong>. 
+        We'll connect you with the right lender or capital partner.
+      </div>
+      <div class="mfield">
+        <label>FINANCING TYPE</label>
+        <select id="lending-select">
+          <option value="">— Choose one —</option>
+          ${optHtml}
+        </select>
+      </div>
+      <div class="mfield">
+        <label>LOAN AMOUNT NEEDED (USD)</label>
+        <input type="number" id="loan-amount" placeholder="e.g. 5000000">
+      </div>
+      <div class="mfooter">
+        <button class="msub-btn" style="flex:2;" onclick="submitLending()">SEND REQUEST</button>
+        <button class="mcan-btn" style="flex:1;" onclick="closeModal()">CANCEL</button>
+      </div>
     `;
     openModal('lending');
 }
@@ -2821,31 +2817,36 @@ function showLendingModal() {
  */
 function showInsuranceModal() {
     const asset = window.currentAsset;
-    if (!asset) { showToast("ERROR: SELECT ASSET FIRST"); return; }
+    if (!asset) { showToast("SELECT AN ASSET FIRST"); return; }
 
     const options = getInsuranceOptions(asset.type);
-    let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+    const optHtml = options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
 
-    const modalBody = document.getElementById('modal-body');
     const modalTitle = document.getElementById('modal-title');
-    
-    modalTitle.textContent = "INSURANCE & RISK MITIGATION";
+    const modalBody  = document.getElementById('modal-body');
+    if (!modalTitle || !modalBody) return;
+
+    modalTitle.textContent = "Insurance & Risk Coverage";
     modalBody.innerHTML = `
-        <div class="mfield">
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">ASSET IDENTIFIER</label>
-            <div style="font-size:11px; color:#fff; margin-bottom:15px; font-family:monospace;">${asset.address}</div>
-            
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">COVERAGE PROTOCOL</label>
-            <select id="insurance-select" class="rwa-select" style="width:100%; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
-                <option value="" disabled selected>— SELECT COVERAGE TYPE —</option>
-                ${optionsHtml}
-            </select>
-            
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">TARGET VALUATION (USD)</label>
-            <input type="number" id="coverage-amount" placeholder="VALUATION AMT" style="width:100%; margin-bottom:20px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
-            
-            <button class="msub-btn" style="width:100%; background:var(--cyan); color:#000; font-weight:bold; border:none; padding:12px; cursor:pointer;" onclick="submitInsurance()">REQUEST QUOTE</button>
-        </div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:16px;line-height:1.7;">
+        Select a coverage type for <strong style="color:var(--text)">${escapeHtml(asset.address)}</strong>. 
+        We'll route your request to the right underwriter or broker.
+      </div>
+      <div class="mfield">
+        <label>COVERAGE TYPE</label>
+        <select id="insurance-select">
+          <option value="">— Choose one —</option>
+          ${optHtml}
+        </select>
+      </div>
+      <div class="mfield">
+        <label>ASSET VALUATION FOR COVERAGE (USD)</label>
+        <input type="number" id="coverage-amount" placeholder="e.g. 2500000" value="${asset.price || ''}">
+      </div>
+      <div class="mfooter">
+        <button class="msub-btn" style="flex:2;" onclick="submitInsurance()">REQUEST QUOTE</button>
+        <button class="mcan-btn" style="flex:1;" onclick="closeModal()">CANCEL</button>
+      </div>
     `;
     openModal('insurance');
 }
@@ -2878,41 +2879,67 @@ async function submitInsurance() {
  */
 function showBidModal() {
     const asset = window.currentAsset;
-    if (!asset) { showToast("ERROR: SELECT ASSET FIRST"); return; }
+    if (!asset) { showToast("SELECT AN ASSET FIRST"); return; }
 
-    const modalBody = document.getElementById('modal-body');
+    const askingPrice = asset.price || 0;
+    const bids = Array.isArray(asset.bids) ? asset.bids : [];
+    const highBid = bids.length ? Math.max(...bids.map(b => parseFloat(b.amount)||0)) : null;
+
     const modalTitle = document.getElementById('modal-title');
-    
-    modalTitle.textContent = "MANIFEST: PLACE BINDING OFFER";
-    modalBody.innerHTML = `
-        <div class="mfield">
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">OFFER TARGET</label>
-            <div style="font-size:11px; color:#fff; margin-bottom:15px; font-family:monospace;">${asset.address} | LIST: ${fmtPrice(asset.price)}</div>
-            
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">BID AMOUNT (USD)</label>
-            <input type="number" id="bid-amount" placeholder="Enter offer amount" style="width:100%; margin-bottom:15px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
-            
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <div style="flex:1;">
-                    <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">INT. RATE (%)</label>
-                    <input type="number" id="bid-rate" placeholder="5.5" style="width:100%; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
-                </div>
-                <div style="flex:1;">
-                    <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">TERM (YRS)</label>
-                    <input type="number" id="bid-term" placeholder="30" style="width:100%; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
-                </div>
-            </div>
+    const modalBody  = document.getElementById('modal-body');
+    if (!modalTitle || !modalBody) return;
 
-            <label style="display:block; font-size:9px; color:var(--cyan); margin-bottom:5px;">EXECUTION TERMS</label>
-            <select id="bid-terms" style="width:100%; margin-bottom:20px; background:#000; color:#fff; border:1px solid var(--border); padding:8px;">
-                <option value="All Cash">ALL CASH</option>
-                <option value="Financed">FINANCED</option>
-                <option value="1031 Exchange">1031 EXCHANGE</option>
-                <option value="Crypto/USDC">CRYPTO / USDC</option>
-            </select>
-            
-            <button class="msub-btn" style="width:100%; background:var(--cyan); color:#000; font-weight:bold; border:none; padding:12px; cursor:pointer;" onclick="submitBid()">TRANSMIT BINDING OFFER</button>
+    modalTitle.textContent = "PLACE AN OFFER";
+    modalBody.innerHTML = `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Property</div>
+        <div style="font-size:13px;color:var(--text);font-weight:600;">${escapeHtml(asset.address)}</div>
+        <div style="font-size:11px;color:var(--dim);">${escapeHtml(asset.city||'')}</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;padding:14px;background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);">
+        <div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Asking Price</div>
+          <div style="font-size:18px;font-weight:700;color:var(--cyan);">${fmtPrice(askingPrice)}</div>
         </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Current High Offer</div>
+          <div style="font-size:18px;font-weight:700;color:${highBid ? 'var(--gold)' : 'var(--muted)'};">${highBid ? fmtPrice(highBid) : 'None yet'}</div>
+        </div>
+      </div>
+
+      <div class="mfield">
+        <label>YOUR OFFER AMOUNT (USD)</label>
+        <input type="number" id="bid-amount" placeholder="${askingPrice > 0 ? askingPrice : '0'}"
+          value="${askingPrice > 0 ? askingPrice : ''}"
+          style="font-size:18px;font-weight:700;color:var(--cyan);"
+          oninput="document.getElementById('bid-preview').textContent = this.value ? '$'+parseFloat(this.value).toLocaleString() : '—'">
+        <div id="bid-preview" style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right;">${askingPrice > 0 ? '$'+askingPrice.toLocaleString() : '—'}</div>
+      </div>
+
+      <div class="mfield">
+        <label>TERMS</label>
+        <select id="bid-terms">
+          <option value="All Cash">All Cash</option>
+          <option value="Financed">Financed</option>
+          <option value="1031 Exchange">1031 Exchange</option>
+          <option value="Seller Financing">Seller Financing</option>
+          <option value="Crypto / USDC">Crypto / USDC</option>
+        </select>
+      </div>
+
+      <div class="mfield">
+        <label>NOTE (OPTIONAL)</label>
+        <textarea id="bid-note" placeholder="Any conditions, contingencies, or message to seller…" style="min-height:60px;resize:none;"></textarea>
+      </div>
+
+      <div class="mfooter">
+        <button class="msub-btn" style="flex:2;" onclick="submitBid()">SUBMIT OFFER</button>
+        <button class="mcan-btn" style="flex:1;" onclick="closeModal()">CANCEL</button>
+      </div>
+      <div style="font-size:9px;color:var(--muted);margin-top:10px;line-height:1.7;">
+        Submitting an offer records your intent on the RWABidAsk ledger. This is not a legally binding contract until executed by both parties.
+      </div>
     `;
     openModal('bid');
 }
@@ -2921,19 +2948,53 @@ function showBidModal() {
  * 5. submitBid: Transmits offer data to the Unified Ledger
  */
 async function submitBid() {
-    const amount = document.getElementById('bid-amount').value;
-    const terms  = document.getElementById('bid-terms').value;
-    const rate   = document.getElementById('bid-rate').value;
-    const term   = document.getElementById('bid-term').value;
+    const amountRaw = document.getElementById('bid-amount')?.value;
+    const terms     = document.getElementById('bid-terms')?.value || 'All Cash';
+    const note      = document.getElementById('bid-note')?.value || '';
+    const amount    = parseFloat(amountRaw);
 
-    if (!amount || amount <= 0) { showToast("REQUIRED: VALID OFFER AMOUNT"); return; }
+    if (!amountRaw || isNaN(amount) || amount <= 0) {
+        showToast("ENTER A VALID OFFER AMOUNT");
+        return;
+    }
 
     const asset = window.currentAsset;
-    if (!asset) { showToast("ERROR: NO ASSET ANCHORED"); return; }
+    if (!asset) { showToast("NO ASSET SELECTED"); return; }
 
-    await logPartnerLead(asset.id, `BID:${amount}:${terms}:${rate}pct:${term}yr`);
-    showToast(`BINDING OFFER TRANSMITTED — ${fmtPrice(parseFloat(amount))}`);
-    closeModal();
+    if (!currentUser) {
+        showToast("SIGN IN TO SUBMIT AN OFFER");
+        setTimeout(() => openModal('signin'), 800);
+        return;
+    }
+
+    try {
+        const { error } = await _sb.from('partner_leads').insert({
+            user_id:  currentUser.id,
+            asset_id: asset.id.toString(),
+            lead_type: 'BID',
+            selection_data: {
+                offer_amount:   amount,
+                offer_terms:    terms,
+                note:           note,
+                asking_price:   asset.price || 0,
+                intent_timestamp: new Date().toISOString(),
+                compliance_status: 'pre-licensing_inquiry'
+            },
+            status: 'pending'
+        });
+        if (error) throw error;
+
+        // Update local bid cache so order book reflects instantly
+        if (!Array.isArray(asset.bids)) asset.bids = [];
+        asset.bids.push({ amount, terms });
+
+        showToast(`OFFER OF ${fmtPrice(amount)} SUBMITTED`);
+        closeModal();
+
+    } catch(e) {
+        console.error('[RWABidAsk] submitBid error:', e);
+        showToast("ERROR SAVING OFFER — CHECK CONNECTION");
+    }
 }
 // ── Right panel legacy stubs (consolidated above) ──
 
@@ -2960,15 +3021,7 @@ function selectAsset(id) {
         </div>
     `;
 
-    // ── Build lending options ───────────────────────────────────
-    const lendingOpts = getLendingOptions(a.type);
-    const lendingHtml = lendingOpts.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
-
-    // ── Build insurance options ─────────────────────────────────
-    const insuranceOpts = getInsuranceOptions(a.type);
-    const insuranceHtml = insuranceOpts.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
-
-    // ── Current bid placeholder (highest recorded offer) ────────
+    // ── Build bid book ──────────────────────────────────────────
     const bids = Array.isArray(a.bids) ? a.bids : [];
     const highBid = bids.length ? Math.max(...bids.map(b => parseFloat(b.amount) || 0)) : null;
     const bidBookHtml = highBid
@@ -2981,85 +3034,51 @@ function selectAsset(id) {
 
       <!-- ASSET SPEC ROW -->
       <div class="rsect">
-        <div class="rsect-title">ASSET SPECIFICATIONS</div>
-        <div class="rrow"><span class="rk">IDENTIFIER</span><span class="rv">#${a.id}</span></div>
-        <div class="rrow"><span class="rk">COORDINATES</span><span class="rv">${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}</span></div>
-        <div class="rrow"><span class="rk">STATUS</span><span class="rv" style="color:var(--green)">VERIFIED ACTIVE</span></div>
+        <div class="rsect-title">ASSET DETAILS</div>
+        <div class="rrow"><span class="rk">TYPE</span><span class="rv">${(a.type||'Asset').toUpperCase()}</span></div>
+        <div class="rrow"><span class="rk">STATUS</span><span class="rv" style="color:var(--green)">ACTIVE</span></div>
         ${a.sqft ? `<div class="rrow"><span class="rk">AREA</span><span class="rv">${parseInt(a.sqft).toLocaleString()} SF</span></div>` : ''}
-        ${a.tokenized ? `<div class="rrow"><span class="rk">LEDGER</span><span class="rv hl">DIGITIZED ✓</span></div>` : ''}
+        <div class="rrow"><span class="rk">DAYS LISTED</span><span class="rv">${a.days || '—'}</span></div>
+        ${a.tokenized ? `<div class="rrow"><span class="rk">DIGITIZED</span><span class="rv hl">YES ✓</span></div>` : ''}
       </div>
 
       <!-- BID ORDER BOOK -->
       <div class="rsect">
-        <div class="rsect-title">BID ORDER BOOK</div>
+        <div class="rsect-title">CURRENT OFFERS</div>
         ${bidBookHtml}
-        <div class="rrow"><span class="rk">DAYS LISTED</span><span class="rv">${a.days || '—'}</span></div>
+        <div class="rrow"><span class="rk">ASKING PRICE</span><span class="rv hl">${fmtPrice(a.price)}</span></div>
       </div>
 
       <!-- PRIMARY ACTION GRID -->
       <div class="act-grid" style="margin-bottom:18px;">
         <button class="abtn a-buy" style="grid-column:span 2;"
-          onclick="logPartnerLead('${a.id}','ACQUIRE'); showToast('ACQUISITION INTENT LOGGED — ASSET #${a.id}')">
-          ACQUIRE / INQUIRE
+          onclick="logPartnerLead('${a.id}','ACQUIRE'); showToast('INQUIRY SENT')">
+          INQUIRE / ACQUIRE
         </button>
         <button class="abtn a-bid"
           onclick="showBidModal()">
-          PLACE BID
+          PLACE OFFER
         </button>
         <button id="watch-btn" class="abtn a-save"
           onclick="toggleWatchlist()">
           WATCHLIST
         </button>
+        <button class="abtn a-lend" style="grid-column:span 2;"
+          onclick="showLendingModal()">
+          FINANCING OPTIONS
+        </button>
+        <button class="abtn" style="grid-column:span 2;border-color:rgba(226,197,90,.3);color:var(--gold);"
+          onclick="showInsuranceModal()">
+          INSURANCE / RISK COVERAGE
+        </button>
         <button class="abtn a-sponsor" style="grid-column:span 2;"
           onclick="handleSponsor('${a.id}')">
-          SPONSOR — LIST AS BROKER / INSTITUTION
+          SPONSOR THIS LISTING
         </button>
         <button class="abtn a-claim" style="grid-column:span 2;"
           onclick="handleClaim('${a.id}')">
-          CLAIM / VERIFY OWNERSHIP & DIGITIZE
+          CLAIM OWNERSHIP
         </button>
-      </div>
-
-      <!-- CAPITAL STACK MODULE -->
-      <div class="rsect">
-        <div class="rsect-title">CAPITAL STACK &amp; GLOBAL LENDING</div>
-        <div style="margin-bottom:8px;">
-          <label style="display:block;font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">SELECT DEBT STRATEGY</label>
-          <select id="lending-select"
-            onchange="if(this.value){logPartnerLead('${a.id}','LENDING:'+this.value); showToast(this.value.toUpperCase()+' INTENT LOGGED')}">
-            <option value="">— SELECT CAPITAL STRUCTURE —</option>
-            ${lendingHtml}
-          </select>
-        </div>
-        <button class="abtn a-lend" style="width:100%;margin-top:4px;"
-          onclick="showLendingModal()">
-          OPEN CAPITAL INQUIRY TERMINAL
-        </button>
-      </div>
-
-      <!-- GLOBAL RISK & INSURANCE MODULE -->
-      <div class="rsect">
-        <div class="rsect-title">GLOBAL RISK &amp; INSURANCE</div>
-        <div style="margin-bottom:8px;">
-          <label style="display:block;font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">SELECT COVERAGE PROTOCOL</label>
-          <select id="insurance-select"
-            onchange="if(this.value){logPartnerLead('${a.id}','INSURANCE:'+this.value); showToast(this.value.toUpperCase()+' INTENT LOGGED')}">
-            <option value="">— SELECT RISK COVERAGE —</option>
-            ${insuranceHtml}
-          </select>
-        </div>
-        <button class="abtn a-lend" style="width:100%;margin-top:4px;border-color:rgba(226,197,90,.3);color:var(--gold);"
-          onclick="showInsuranceModal()">
-          OPEN RISK QUOTE TERMINAL
-        </button>
-      </div>
-
-      <!-- INSTITUTIONAL DATA LEDGER -->
-      <div class="rsect">
-        <div class="rsect-title">INSTITUTIONAL DATA LEDGER</div>
-        <div class="rrow"><span class="rk">SOURCE</span><span class="rv">${escapeHtml(a.source || 'Supabase Ledger')}</span></div>
-        <div class="rrow"><span class="rk">BROKER ACTIVE</span><span class="rv">${a.broker_active ? '<span style="color:var(--green)">YES</span>' : '<span style="color:var(--muted)">NO</span>'}</span></div>
-        <div class="rrow"><span class="rk">LEDGER HASH</span><span class="rv" style="font-family:monospace;font-size:9px;color:var(--muted)">${a.id}-${(a.lat*1000|0)}-${(a.lng*1000|0)}</span></div>
       </div>
 
     </div>`;
