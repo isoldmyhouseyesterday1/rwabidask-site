@@ -36,7 +36,7 @@
         display: grid !important;
         grid-template-columns: 288px 1fr 340px !important;
         width: 100vw !important;
-        height: calc(100vh - 134px) !important; /* ribbon24 + topbar54 + ticker30 + footer26 */
+        height: calc(100vh - 152px) !important; /* ribbon24 + topbar54 + ticker30 + footer44 */
         overflow: hidden !important;
     }
     #left {
@@ -125,7 +125,7 @@ html, body {
 
 #shell {
   display: grid;
-  grid-template-rows: 24px 54px 1fr 30px 26px;
+  grid-template-rows: 24px 54px 1fr 30px 44px;
   height: 100vh;
   min-height: 0;
   min-width: 900px;
@@ -1908,22 +1908,9 @@ body { min-width: 900px; overflow-x: auto; }
 @keyframes toast-in  { to { opacity: 1; transform: translateY(0); } }
 @keyframes toast-out { to { opacity: 0; transform: translateY(-8px); } }
 
-/* --- INSTITUTIONAL FOOTER --- */
+/* --- FOOTER: styled via inline attributes on the element --- */
 #footer {
-    background: #0f172a;
-    border-top: 1px solid rgba(255,255,255,.08);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    height: 28px;
     flex-shrink: 0;
-    font-family: var(--font);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: .8px;
-    text-transform: uppercase;
-    color: var(--muted);
     z-index: 9999;
     position: relative;
 }
@@ -1958,7 +1945,6 @@ body { min-width: 900px; overflow-x: auto; }
     <div class="logo-mark"></div>
     <div>
       <div class="logo-text">RWABidAsk</div>
-      <div class="logo-tag">GLOBAL ASSET MARKET</div>
     </div>
   </div>
   <div class="search-wrap">
@@ -2078,22 +2064,18 @@ body { min-width: 900px; overflow-x: auto; }
   <div class="ticker-track" id="ticker-track"></div>
 </div>
 
-<div id="footer">
-  <div class="footer-left">
-    <span class="status-dot"></span>
-    SYSTEM: OPERATIONAL &nbsp;|&nbsp; LATENCY: 18ms &nbsp;|&nbsp; LEDGER: ACTIVE
+<footer id="footer" style="display:flex;justify-content:space-between;align-items:center;padding:12px 25px;background:#000;color:#0f0;border-top:1px solid #222;font-family:'Courier New',monospace;font-size:11px;text-transform:uppercase;">
+  <div class="footer-left" style="flex:1;letter-spacing:1px;">
+    <span class="status-dot" style="display:inline-block;width:7px;height:7px;background:#0f0;border-radius:50%;margin-right:10px;box-shadow:0 0 8px #0f0;"></span>
+    SYSTEM: OPERATIONAL | PERMANENT LEDGER™: ACTIVE
   </div>
-  <div class="footer-center">
-    RWABidAsk — GLOBAL ASSET MARKET &nbsp;|&nbsp; INSTITUTIONAL DIGITIZATION
+  <div class="footer-center" style="flex:1;text-align:center;font-weight:900;letter-spacing:4px;font-size:14px;color:#fff;">
+    RWABIDASK™ — GLOBAL ASSET MARKET
   </div>
-  <div class="footer-right">
-    <a href="#" onclick="openModal('tos');return false">Terms</a>
-    &nbsp;·&nbsp;
-    <a href="#" onclick="openModal('privacy');return false">Privacy</a>
-    &nbsp;·&nbsp;
-    © 2026 ANNIE GROUP LLC
+  <div class="footer-right" style="flex:1;text-align:right;color:#666;letter-spacing:1px;">
+    © 2026 ANNIE GROUP LLC | ALL RIGHTS RESERVED
   </div>
-</div>
+</footer>
 
 </div>
 
