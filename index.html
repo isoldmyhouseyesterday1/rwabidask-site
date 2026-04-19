@@ -25,47 +25,52 @@
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady&loading=async" async defer></script>
 
-  <style>
-/* 1. HIDE THE TERMINAL */
+<style>
+/* 1. HIDE THE PORTFOLIO (The "Dumb Thing") */
 #portfolio-drawer {
     display: none !important;
 }
 
-/* 2. THE DESKTOP LAYOUT (PADDING METHOD) */
+/* 2. THE DESKTOP FIX (SIDE-BY-SIDE) */
 @media (min-width: 768px) {
     body {
         margin: 0;
-        padding: 0;
-        overflow: hidden !important;
+        display: flex !important; /* Force them to stand next to each other */
+        flex-direction: row;
+        overflow: hidden;
+        background: #000;
     }
 
-    /* THE MAP: We let it be 100%, but we FORCE it to pad the right side */
+    /* Map stays on the left, shrinks to make room */
     #map3d-container, #map, .map-wrapper {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
+        position: relative !important;
+        flex: 1 !important; /* Takes up all space EXCEPT the sidebar */
         height: 100vh !important;
-        /* THIS PUSHES THE GLOBE AND BUTTONS TO THE LEFT */
-        padding-right: 340px !important; 
-        box-sizing: border-box !important;
-        z-index: 1 !important;
+        width: auto !important;
     }
 
-    /* THE SIDEBAR: Pinned to the edge like a true terminal */
+    /* Sidebar stays on the right, uses your original styles */
     #right {
-        position: fixed !important;
-        top: 0 !important;
-        right: 0 !important;
-        left: auto !important;
+        position: relative !important;
         width: 340px !important;
         height: 100vh !important;
-        background: var(--bg1) !important;
+        background: var(--bg1, #050a0f) !important;
         border-left: 1px solid var(--border, rgba(0,255,255,0.2)) !important;
-        z-index: 1000 !important; /* Higher than the map */
         display: flex !important;
-        flex-direction: column !important;
+        flex-direction: column;
+        z-index: 10;
         transform: none !important;
+    }
+}
+
+/* 3. MOBILE VIEW (Keeps your phone layout safe) */
+@media (max-width: 767px) {
+    #right {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 75vh;
+        z-index: 2000;
     }
 }
 </style>
