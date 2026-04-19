@@ -1908,26 +1908,40 @@ body { min-width: 900px; overflow-x: auto; }
 @keyframes toast-in  { to { opacity: 1; transform: translateY(0); } }
 @keyframes toast-out { to { opacity: 0; transform: translateY(-8px); } }
 
-/* --- FOOTER: styled via inline attributes on the element --- */
+/* --- FOOTER --- */
 #footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 44px;
     flex-shrink: 0;
+    background: var(--bg1);
+    border-top: 1px solid var(--border);
+    font-family: var(--font);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
     z-index: 9999;
     position: relative;
 }
-.footer-left  { display: flex; align-items: center; gap: 2px; white-space: nowrap; }
-.footer-center { color: rgba(248,250,252,.7); white-space: nowrap; }
-.footer-right { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-.footer-right a { color: var(--muted); text-decoration: none; transition: color .15s; }
-.footer-right a:hover { color: var(--dim); }
+.footer-left  { flex: 1; display: flex; align-items: center; color: var(--dim); }
+.footer-center { flex: 1; text-align: center; color: var(--silver); font-weight: 700; letter-spacing: 2px; }
+.footer-right { flex: 1; text-align: right; color: var(--muted); }
 .status-dot {
     display: inline-block;
     width: 6px; height: 6px;
-    background: #10b981;
+    background: var(--green);
     border-radius: 50%;
-    margin-right: 8px;
-    box-shadow: 0 0 8px #10b981;
+    margin-right: 9px;
+    box-shadow: 0 0 7px var(--green);
     animation: live-blink 2.4s ease-in-out infinite;
+    flex-shrink: 0;
 }
+
+
 </style>
 </head>
 <body>
@@ -2064,16 +2078,16 @@ body { min-width: 900px; overflow-x: auto; }
   <div class="ticker-track" id="ticker-track"></div>
 </div>
 
-<footer id="footer" style="display:flex;justify-content:space-between;align-items:center;padding:12px 25px;background:#000;color:#0f0;border-top:1px solid #222;font-family:'Courier New',monospace;font-size:11px;text-transform:uppercase;">
-  <div class="footer-left" style="flex:1;letter-spacing:1px;">
-    <span class="status-dot" style="display:inline-block;width:7px;height:7px;background:#0f0;border-radius:50%;margin-right:10px;box-shadow:0 0 8px #0f0;"></span>
-    SYSTEM: OPERATIONAL | PERMANENT LEDGER™: ACTIVE
+<footer id="footer">
+  <div class="footer-left">
+    <span class="status-dot"></span>
+    SYSTEM: OPERATIONAL &nbsp;|&nbsp; PERMANENT LEDGER™: ACTIVE
   </div>
-  <div class="footer-center" style="flex:1;text-align:center;font-weight:900;letter-spacing:4px;font-size:14px;color:#fff;">
-    RWABIDASK™ — GLOBAL ASSET MARKET
+  <div class="footer-center">
+    RWABIDASK™ &nbsp;—&nbsp; GLOBAL ASSET MARKET
   </div>
-  <div class="footer-right" style="flex:1;text-align:right;color:#666;letter-spacing:1px;">
-    © 2026 ANNIE GROUP LLC | ALL RIGHTS RESERVED
+  <div class="footer-right">
+    © 2026 ANNIE GROUP LLC &nbsp;|&nbsp; ALL RIGHTS RESERVED
   </div>
 </footer>
 
