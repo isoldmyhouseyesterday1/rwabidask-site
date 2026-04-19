@@ -65,7 +65,20 @@
         width: 288px !important;
     }
 } 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* === TERMINAL SELECT: REMOVE DEFAULT BROWSER ARROWS === */
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300ffc8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 32px !important;
+    cursor: pointer;
+}
+select option { background: var(--bg2); color: var(--text); }
+
+
   
 :root {
   --bg:       #1c2540;
@@ -818,7 +831,30 @@ body { min-width: 900px; overflow-x: auto; }
   font-size: 9px;
 }
 
-#market-ribbon {
+/* Sidebar inline selects (inside .rinner / rsect) */
+.rinner select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 11px;
+    padding: 9px 32px 9px 10px;
+    outline: none;
+    transition: border-color .15s;
+    letter-spacing: .3px;
+}
+.rinner select:focus { border-color: rgba(0,255,200,.5); box-shadow: 0 0 0 2px rgba(0,255,200,.07); }
+/* Ensure modal selects also strip appearance */
+.mfield select, .rwa-modal-card select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300ffc8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 32px !important;
+}
   background: #0d1526;
   border-bottom: 1px solid rgba(0,255,200,.1);
   overflow: hidden;
@@ -895,20 +931,8 @@ body { min-width: 900px; overflow-x: auto; }
   justify-content: center;
   padding: 0 20px;
 }
-.footer-copy {
-  font-size: 9px;
-  color: var(--muted);
-  letter-spacing: .6px;
-  text-align: center;
-  line-height: 1;
-}
-.footer-copy strong { color: var(--dim); font-weight: 500; }
-.footer-copy a {
-  color: var(--muted);
-  text-decoration: none;
-  transition: color .15s;
-}
-.footer-copy a:hover { color: var(--dim); }
+
+
 
 #modal {
   display: none;
@@ -1862,82 +1886,80 @@ body { min-width: 900px; overflow-x: auto; }
   border: 1px solid var(--border2);
   color: var(--silver);
 }
-/* --- UNIFIED TERMINAL NOTIFICATION --- */
-#toast {
-    visibility: hidden;
-    min-width: 300px;
-    background-color: #0f172a; /* Solid Navy to match sidebar */
-    color: #00ffc8;
-    text-align: center;
-    border: 1px solid #00ffc8;
-    padding: 14px;
+/* --- UNIFIED TERMINAL NOTIFICATION (TOAST) --- */
+#toast-container {
     position: fixed;
-    z-index: 10000;
+    bottom: 48px; /* Clear the 28px footer with breathing room */
     left: 50%;
-    bottom: 60px; /* Sits right above your footer */
     transform: translateX(-50%);
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     pointer-events: none;
+    width: max-content;
+    max-width: 90vw;
 }
-
-#toast.show {
-    visibility: visible;
-    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+.toast {
+    background: rgba(10, 16, 36, 0.97);
+    border: 1px solid var(--cyan);
+    color: var(--text);
+    padding: 11px 22px;
+    font-family: var(--font);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 0 0 24px rgba(0,255,200,0.18), 0 4px 20px rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: translateY(12px);
+    animation: toast-in 0.3s cubic-bezier(.4,0,.2,1) forwards, toast-out 0.4s cubic-bezier(.4,0,.2,1) 2.8s forwards;
 }
+.toast .toast-prefix { color: var(--cyan); opacity: 0.65; margin-right: 8px; }
+@keyframes toast-in  { to { opacity: 1; transform: translateY(0); } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(-8px); } }
 
-@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 60px; opacity: 1;} }
-@keyframes fadeout { from {bottom: 60px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
-@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 40px; opacity: 1;} }
-@keyframes fadeout { from {bottom: 40px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
-/* --- NEW INSTITUTIONAL FOOTER STYLES --- */
+/* --- INSTITUTIONAL FOOTER --- */
 #footer {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 28px !important;
-    background: #0f172a !important; /* Deep Navy Black */
-    border-top: 1px solid rgba(255,255,255,0.1) !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 0 12px !important;
-    font-family: 'Inter', sans-serif;
-    font-size: 10px !important;
-    font-weight: 600 !important;
-    color: #94a3b8 !important; /* Muted slate */
-    letter-spacing: 0.05em !important;
-    text-transform: uppercase !important;
-    z-index: 9999 !important;
+    background: #0f172a;
+    border-top: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 28px;
+    flex-shrink: 0;
+    font-family: var(--font);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    z-index: 9999;
+    position: relative;
 }
-
+.footer-left  { display: flex; align-items: center; gap: 2px; white-space: nowrap; }
+.footer-center { color: rgba(248,250,252,.7); white-space: nowrap; }
+.footer-right { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.footer-right a { color: var(--muted); text-decoration: none; transition: color .15s; }
+.footer-right a:hover { color: var(--dim); }
 .status-dot {
     display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: #10b981; /* Terminal Green */
+    width: 6px; height: 6px;
+    background: #10b981;
     border-radius: 50%;
     margin-right: 8px;
     box-shadow: 0 0 8px #10b981;
+    animation: live-blink 2.4s ease-in-out infinite;
 }
-
-.footer-center {
-    color: #f8fafc;
-    opacity: 0.8;
-}
-</style>
-  
 </style>
 </head>
 <body>
 
-<div id="toast">SYSTEM: INITIALIZING...</div>
+<div id="toast-container"></div>
   
 <div id="shell">
 
@@ -2071,18 +2093,19 @@ body { min-width: 900px; overflow-x: auto; }
 </div>
 
 <div id="footer">
-  <div class="footer-copy">
-    <strong>© 2026 ANNIE GROUP LLC. All Rights Reserved.</strong>
-    &nbsp;·&nbsp;
-    RWABidAsk is a Registered Trade Name of Annie Group LLC
-    &nbsp;·&nbsp;
-    Non-Custodial Asset Digitization Platform — Not a Broker, Dealer, or Investment Advisor
-    &nbsp;·&nbsp;
+  <div class="footer-left">
+    <span class="status-dot"></span>
+    SYSTEM: OPERATIONAL &nbsp;|&nbsp; LATENCY: 18ms &nbsp;|&nbsp; LEDGER: ACTIVE
+  </div>
+  <div class="footer-center">
+    RWABidAsk — GLOBAL ASSET MARKET &nbsp;|&nbsp; INSTITUTIONAL DIGITIZATION
+  </div>
+  <div class="footer-right">
     <a href="#" onclick="openModal('tos');return false">Terms</a>
     &nbsp;·&nbsp;
     <a href="#" onclick="openModal('privacy');return false">Privacy</a>
     &nbsp;·&nbsp;
-    <a href="/cdn-cgi/l/email-protection#0f607f7c4f7d786e6d666b6e7c64216c6062"><span class="__cf_email__" data-cfemail="3f504f4c7f4d485e5d565b5e4c54115c5052">[email&#160;protected]</span></a>
+    © 2026 ANNIE GROUP LLC
   </div>
 </div>
 
@@ -2099,7 +2122,6 @@ body { min-width: 900px; overflow-x: auto; }
        </div>
   </div>
 </div>
-<div id="toast"></div>
 
 <div class="view-toggle" id="mobile-view-toggle">
   <button class="view-toggle-btn active" data-view="globe">GLOBE</button>
@@ -2195,48 +2217,174 @@ let currentAsset = null; // This is the ONLY anchor for the active asset.
 // CONTEXTUAL OPTIONS - Based on Asset Type
 // ============================================================
 function getLendingOptions(assetType) {
-  const type = assetType.toLowerCase();
-  if (type === 'aviation' || type === 'airplane' || type === 'jet') {
-    return ['Pre-Delivery Payment Financing', 'Term Loan with Balloon', 'Operating Lease', 'Finance Lease', 'Engine Finance', 'Jet-A Fuel Financing'];
-  } else if (type === 'maritime' || type === 'boat' || type === 'ship' || type === 'yacht') {
-    return ['Preferred Ship Mortgage', 'Bareboat Charter Financing', 'Construction Financing', 'Second Lien Vessel Financing'];
-  } else if (type === 'commercial' || type === 'office' || type === 'retail') {
-    return ['CMBS Loan', 'Bridge Loan', 'Construction Loan', 'Permanent Fixed Rate', 'Mezzanine Financing'];
-  } else {
-    return ['Conventional Mortgage', 'FHA Loan', 'VA Loan', 'Jumbo Loan', 'Hard Money Loan'];
+  const type = (assetType || '').toLowerCase();
+  // Real Estate (Residential & Commercial)
+  if (['residential','land','castle','estate','property'].includes(type)) {
+    return [
+      'Conventional Fixed-Rate Mortgage',
+      'Jumbo / HNW Portfolio Financing',
+      'SBA 504 (Green Energy / Owner-Occupied)',
+      'CMBS (Conduit) — Non-Recourse',
+      'Bridge / Hard Money (REO/Distressed)',
+      'Construction-to-Permanent Loan'
+    ];
   }
+  if (['commercial','office','retail','business'].includes(type)) {
+    return [
+      'CMBS (Conduit) — Non-Recourse',
+      'Bridge / Hard Money (Value-Add)',
+      'Conventional Fixed-Rate Commercial',
+      'Mezzanine / Preferred Equity',
+      'SBA 504 (Owner-Occupied CRE)',
+      'Construction-to-Permanent'
+    ];
+  }
+  // Infrastructure & Energy
+  if (['infrastructure','energy'].includes(type)) {
+    return [
+      'Tax-Equity Partnership (ITC / PTC)',
+      'USDA Business & Industry (B&I) — Rural Development',
+      'Mezzanine Debt / Subordinated Tranche',
+      'Construction-to-Permanent (C2P)',
+      'Sovereign / Multilateral (World Bank / IFC)',
+      'Green Bond Issuance'
+    ];
+  }
+  // Natural Resources / Minerals
+  if (['resources','minerals'].includes(type)) {
+    return [
+      'Reserve-Based Lending (RBL)',
+      'Pre-Export Finance (PXF)',
+      'Production Payment Agreements (PPA)',
+      'Volumetric Production Payment (VPP)',
+      'Project Finance (Non-Recourse)',
+      'Offtake-Backed Term Loan'
+    ];
+  }
+  // Aviation
+  if (['aviation','airplane','jet'].includes(type)) {
+    return [
+      'Aviation Finance — EETC (Enhanced Equipment Trust Certificate)',
+      'Pre-Delivery Payment (PDP) Financing',
+      'Operating Lease — Sale & Leaseback',
+      'Finance Lease (Capital Lease)',
+      'EXIM Bank Direct Loan / Guarantee',
+      'Asset-Backed Securitization (ABS)'
+    ];
+  }
+  // Maritime
+  if (['maritime','boat','ship','yacht'].includes(type)) {
+    return [
+      'Maritime Mortgage (Preferred Ship Mortgage)',
+      'Bareboat Charter Financing',
+      'EXIM Bank Maritime Credit',
+      'Asset-Backed Securitization (ABS)',
+      'Construction Financing',
+      'Second Lien Vessel Financing'
+    ];
+  }
+  // Financial / IP / Debt
+  if (['ip','debt','financial'].includes(type)) {
+    return [
+      'Asset-Backed Securitization (ABS)',
+      'Receivables / Invoice Finance',
+      'Structured Credit Facility',
+      'NAV Financing (Fund-Level)',
+      'Subscription Line of Credit',
+      'EXIM Bank Credit Facility'
+    ];
+  }
+  // Default fallback
+  return [
+    'Conventional Fixed-Rate Mortgage',
+    'Jumbo / HNW Portfolio Financing',
+    'Bridge / Hard Money',
+    'Mezzanine Debt',
+    'Construction-to-Permanent',
+    'Sovereign / Multilateral Funding'
+  ];
 }
 
 function getInsuranceOptions(assetType) {
   const type = (assetType || '').toLowerCase();
-  if (type === 'aviation' || type === 'airplane' || type === 'jet') {
-    return ['Hull Insurance', 'Liability Insurance', 'War Risk Coverage', 'Passenger Liability', 'Ground Risk Hull'];
-  } else if (type === 'maritime' || type === 'boat' || type === 'ship' || type === 'yacht') {
-    return ['Hull & Machinery', 'Protection & Indemnity (P&I)', 'Cargo Insurance', 'War Risk', 'Marine General Liability'];
-  } else if (type === 'commercial') {
-    return ['Property Insurance', 'General Liability', 'Business Interruption', 'Builder\'s Risk', 'Cyber Liability'];
-  } else {
-    return ['Homeowners Insurance', 'Hazard Insurance', 'Flood Insurance', 'Earthquake Coverage', 'Title Insurance'];
+  // Aviation
+  if (['aviation','airplane','jet'].includes(type)) {
+    return [
+      'Aviation Hull & Liability (All-Risk)',
+      'Aviation War Risk (Hull & Liability)',
+      'Passenger & Third-Party Liability',
+      'Ground Risk Hull (In-Motion & Not-In-Motion)',
+      'Hangarkeepers Legal Liability',
+      'Political Risk Insurance (PRI) — Cross-Border'
+    ];
   }
+  // Maritime
+  if (['maritime','boat','ship','yacht'].includes(type)) {
+    return [
+      'Maritime Protection & Indemnity (P&I)',
+      'Hull & Machinery (H&M) — All Risk',
+      'Cargo & Freight Liability',
+      'War Risk (Hull & P&I)',
+      'Marine General Liability',
+      'Loss of Hire Insurance'
+    ];
+  }
+  // Natural Resources & Mining
+  if (['resources','minerals','energy'].includes(type)) {
+    return [
+      'Environmental Reclamation Bonds',
+      'Pollution Liability (Sudden & Gradual)',
+      'Timber / Casualty (Standing Timber)',
+      'Key Man Life Insurance',
+      'Production Guarantee Insurance',
+      'Political Risk Insurance (PRI)'
+    ];
+  }
+  // Infrastructure
+  if (['infrastructure'].includes(type)) {
+    return [
+      'Environmental Reclamation Bonds',
+      'Contractor All-Risk (CAR) / Builders Risk',
+      'Political Risk Insurance (PRI)',
+      'Performance Bond / Surety',
+      'Parametric Weather (Energy / Solar)',
+      'Cyber & Data Liability'
+    ];
+  }
+  // Commercial Real Estate
+  if (['commercial','office','retail','business'].includes(type)) {
+    return [
+      'GL & Property All-Risk',
+      'Reps & Warranties (M&A / Acquisition)',
+      'Cyber & Data Liability',
+      'Directors & Officers (D&O)',
+      'Business Interruption',
+      'Title Insurance (ALTA / CLTA)'
+    ];
+  }
+  // Financial / IP
+  if (['ip','debt','financial'].includes(type)) {
+    return [
+      'Reps & Warranties (M&A Transaction)',
+      'Cyber & Data Liability',
+      'Directors & Officers (D&O)',
+      'Errors & Omissions (E&O)',
+      'Key Man Life Insurance',
+      'Political Risk Insurance (PRI)'
+    ];
+  }
+  // Residential / Land / Default
+  return [
+    'GL & Property (All-Risk)',
+    'Residential Homeowners (HO3 / HO5)',
+    'Title & Mineral Rights Insurance',
+    'Flood / Earthquake Coverage',
+    'Umbrella / Excess Liability',
+    'Parametric Weather (Agri / Solar)'
+  ];
 }
 
-async function submitInsurance() {
-  const select = document.getElementById('insurance-select');
-  const amount = document.getElementById('coverage-amount');
-  
-  if (!select || !select.value) {
-    showToast("SELECT A COVERAGE PRODUCT");
-    return;
-  }
-
-  // Call the central Lead Engine to save to Supabase
-  await logPartnerLead('insurance', {
-    product: select.value,
-    target_coverage: amount.value || "Not Specified"
-  });
-
-  closeModalOverlay();
-}
+/* submitInsurance is defined below with the modal handlers */
 
 // ============================================================
 // FETCH ASSETS FROM SUPABASE
@@ -2481,45 +2629,44 @@ function togglePortfolio() {
 /**
  * 2. logPartnerLead: Handles Bids, Lending, Insurance
  */
-async function logPartnerLead(type, data) {
-    const asset = window.currentAsset;
-    
-    if (!asset) {
-        showToast("CRITICAL: NO ASSET SELECTED");
-        return;
+async function logPartnerLead(assetId, actionType) {
+    // Support legacy call patterns: logPartnerLead(type, data) when no currentAsset passed
+    let resolvedAssetId = assetId;
+    let resolvedAction  = actionType;
+
+    // If first arg looks like a lead type string and no second arg, use currentAsset
+    if (typeof assetId === 'string' && !actionType && window.currentAsset) {
+        resolvedAction  = assetId;
+        resolvedAssetId = window.currentAsset.id;
+    }
+
+    if (!resolvedAssetId) {
+        const asset = window.currentAsset;
+        if (!asset) { showToast("CRITICAL: NO ASSET SELECTED"); return; }
+        resolvedAssetId = asset.id;
     }
 
     if (!currentUser) {
-        showToast("AUTH REQUIRED: SIGN IN TO LOG INTENT");
+        showToast("AUTH REQUIRED — SIGN IN TO LOG INTENT");
         setTimeout(() => openModal('signin'), 1000);
         return;
     }
 
     try {
         const { error } = await _sb.from('partner_leads').insert({
-            user_id: currentUser.id,
-            asset_id: asset.id.toString(),
-            lead_type: type,
-            selection_data: { 
-                action: data, 
-                intent_timestamp: new Date().toISOString(),
-                compliance_status: "pre-licensing_inquiry"
+            user_id:        currentUser.id,
+            asset_id:       resolvedAssetId.toString(),
+            lead_type:      (resolvedAction || 'view').toUpperCase(),
+            selection_data: {
+                action:            resolvedAction,
+                intent_timestamp:  new Date().toISOString(),
+                compliance_status: 'pre-licensing_inquiry'
             },
             status: 'pending'
         });
-
         if (error) throw error;
-
-        const msg = type === 'sponsor'   ? "LEDGER: SPONSORSHIP REQUESTED" :
-                    type === 'insurance' ? "INQUIRY: QUOTE PIPELINE" :
-                    type === 'bid'       ? "MANIFEST: OFFER RECORDED" : 
-                    "SYSTEM: DATA ENTRY VERIFIED";
-
-        showToast(msg);
-        
     } catch (e) {
         console.error("[RWABidAsk] Lead Error:", e);
-        showToast("DATABASE ERROR: RETRY SIGNAL");
     }
 }
 
@@ -2528,16 +2675,13 @@ async function logPartnerLead(type, data) {
  */
 async function toggleWatchlist() {
     const asset = window.currentAsset;
-    const btn = document.getElementById('watch-btn');
-    
+    const btn   = document.getElementById('watch-btn');
     if (!asset) return;
-    
     if (!currentUser) {
         showToast("SIGN IN TO SYNC WATCHLIST");
         setTimeout(() => openModal('signin'), 1000);
         return;
     }
-
     try {
         const { data: existing } = await _sb
             .from('user_watchlist')
@@ -2548,22 +2692,13 @@ async function toggleWatchlist() {
 
         if (existing) {
             await _sb.from('user_watchlist').delete().eq('id', existing.id);
-            btn.innerHTML = "WATCHLIST";
-            btn.style.color = "#fff";
-            btn.style.background = "none";
-            btn.style.borderColor = "var(--border)";
-            showToast("LEDGER: ASSET REMOVED");
+            if (btn) { btn.innerHTML = "WATCHLIST"; btn.style.color = ""; btn.style.borderColor = ""; }
+            showToast("ASSET REMOVED FROM MONITOR");
         } else {
-            await _sb.from('user_watchlist').insert([{
-                user_id: currentUser.id,
-                asset_id: asset.id.toString()
-            }]);
-
-            btn.innerHTML = "✓ PINNED";
-            btn.style.color = "var(--cyan)";
-            btn.style.background = "rgba(0, 255, 200, 0.05)";
-            btn.style.borderColor = "var(--cyan)";
-            showToast("MANIFEST: SAVED TO CLOUD");
+            await _sb.from('user_watchlist').insert([{ user_id: currentUser.id, asset_id: asset.id.toString() }]);
+            if (btn) { btn.innerHTML = "✓ PINNED"; btn.style.color = "var(--cyan)"; btn.style.borderColor = "var(--cyan)"; }
+            logPartnerLead(asset.id, 'WATCHLIST');
+            showToast("ASSET PINNED — CLOUD SYNC CONFIRMED");
         }
     } catch (e) {
         console.error("[RWABidAsk] Watchlist Error:", e);
@@ -2581,17 +2716,11 @@ function showToast(message) {
         container.id = 'toast-container';
         document.body.appendChild(container);
     }
-
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `<span style="color:var(--cyan); opacity:0.6;">[ SYSTEM ]</span> ${message}`;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.add('fade-out');
-        setTimeout(() => toast.remove(), 500);
-    }, 3000);
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `<span class="toast-prefix">[ SYS ]</span>${message}`;
+    container.appendChild(el);
+    setTimeout(() => { el.style.animation = 'toast-out 0.4s cubic-bezier(.4,0,.2,1) forwards'; setTimeout(() => el.remove(), 420); }, 3000);
 }
     /**
  * 5. renderPortfolio: Fetches user data and builds the UI cards.
@@ -2726,17 +2855,21 @@ function showInsuranceModal() {
  */
 async function submitLending() {
     const product = document.getElementById('lending-select').value;
-    const amount = document.getElementById('loan-amount').value;
-    if(!product || !amount) { showToast("REQUIRED: COMPLETE ALL FIELDS"); return; }
-    await logPartnerLead('lending', { product, amount });
+    const amount  = document.getElementById('loan-amount').value;
+    if (!product || !amount) { showToast("REQUIRED: COMPLETE ALL FIELDS"); return; }
+    const asset = window.currentAsset;
+    await logPartnerLead(asset ? asset.id : 'unknown', `LENDING:${product}`);
+    showToast(`${product.toUpperCase()} INTENT LOGGED`);
     closeModal();
 }
 
 async function submitInsurance() {
     const protocol = document.getElementById('insurance-select').value;
-    const amount = document.getElementById('coverage-amount').value;
-    if(!protocol || !amount) { showToast("REQUIRED: COMPLETE ALL FIELDS"); return; }
-    await logPartnerLead('insurance', { protocol, amount });
+    const amount   = document.getElementById('coverage-amount').value;
+    if (!protocol || !amount) { showToast("REQUIRED: COMPLETE ALL FIELDS"); return; }
+    const asset = window.currentAsset;
+    await logPartnerLead(asset ? asset.id : 'unknown', `INSURANCE:${protocol}`);
+    showToast(`${protocol.toUpperCase()} QUOTE REQUESTED`);
     closeModal();
 }
 
@@ -2789,40 +2922,20 @@ function showBidModal() {
  */
 async function submitBid() {
     const amount = document.getElementById('bid-amount').value;
-    const terms = document.getElementById('bid-terms').value;
-    const rate = document.getElementById('bid-rate').value;
-    const term = document.getElementById('bid-term').value;
+    const terms  = document.getElementById('bid-terms').value;
+    const rate   = document.getElementById('bid-rate').value;
+    const term   = document.getElementById('bid-term').value;
 
-    if(!amount || amount <= 0) { showToast("REQUIRED: VALID BID AMOUNT"); return; }
+    if (!amount || amount <= 0) { showToast("REQUIRED: VALID OFFER AMOUNT"); return; }
 
-    await logPartnerLead('bid', { 
-        amount, 
-        terms, 
-        interest_rate: rate, 
-        loan_term: term,
-        status: 'binding_offer_transmitted'
-    });
-    
+    const asset = window.currentAsset;
+    if (!asset) { showToast("ERROR: NO ASSET ANCHORED"); return; }
+
+    await logPartnerLead(asset.id, `BID:${amount}:${terms}:${rate}pct:${term}yr`);
+    showToast(`BINDING OFFER TRANSMITTED — ${fmtPrice(parseFloat(amount))}`);
     closeModal();
 }
-// ============================================================
-// RIGHT PANEL ACTION HANDLERS
-// ============================================================
-
-// 1. General Inquiry
-function handleInquiry() {
-    logPartnerLead('inquiry', 'General interest in asset acquisition');
-}
-
-// 2. Sponsorship / Listing Agent Inquiry
-function handleSponsor() {
-    logPartnerLead('sponsor', 'Agent/Institutional listing sponsorship inquiry');
-}
-
-// 3. Tokenization / RWA Claim
-function handleTokenize() {
-    logPartnerLead('tokenize', 'Priority request for ownership tokenization');
-}
+// ── Right panel legacy stubs (consolidated above) ──
 
 // ============================================================
 // SELECT ASSET - Render Right Panel with Working Buttons
@@ -2830,72 +2943,138 @@ function handleTokenize() {
 /* --- ASSET INTELLIGENCE: SIDEBAR ENGINE --- */
 
 function selectAsset(id) {
-    // 1. Sync with the Global Ledger
     const a = (window.ASSETS || []).find(x => x.id == id);
+    if (!a) { console.error(`[RWABidAsk] ERROR: Asset #${id} NOT FOUND.`); return; }
 
-    if (!a) {
-        console.error(`[RWABidAsk] ERROR: Asset #${id} NOT FOUND.`);
-        return;
-    }
+    window.currentAsset = a;
+    activeId = a.id;
 
-    // 2. Set the Global Anchor (The Machine's current target)
-    window.currentAsset = a; 
-    
-    // 3. Render Header (The Identity Panel)
+    // ── Header ─────────────────────────────────────────────────
     document.getElementById('rhead').innerHTML = `
         <div class="rtype">${(a.type || 'ASSET').toUpperCase()} // ${(a.status || 'ACTIVE').toUpperCase()}</div>
         <div class="rname">${escapeHtml(a.address)}</div>
-        <div class="rcity">${escapeHtml(a.city)}, ${escapeHtml(a.state || 'USA')}</div>
-    `;
-    
-    // 4. Action Grid (The Command Center)
-    const buttonsHTML = `
-        <div class="act-grid">
-            <button class="abtn a-primary" style="grid-column: span 2;" onclick="handleInquiry('${a.id}')">
-                ACQUIRE / INQUIRE
-            </button>
-            
-            <div class="mfield" style="grid-column: span 2;">
-                <label style="font-size: 9px; color: #94a3b8; margin-bottom: 4px; display: block;">LENDING / DEBT INTENT</label>
-                <select id="lending-select" class="lending-dropdown" onchange="handleLendingChange('${a.id}', this.value)">
-                    <option value="">-- SELECT FINANCING --</option>
-                    <option value="SBA">SBA 504 / GREEN ENERGY</option>
-                    <option value="BRIDGE">BRIDGE LOAN (REO)</option>
-                    <option value="EQUITY">TAX-EQUITY PARTNER</option>
-                </select>
-            </div>
-
-            <button class="abtn" onclick="showBidModal('${a.id}')">PLACE BID</button>
-            <button id="watch-btn" class="abtn" onclick="toggleWatchlist('${a.id}')">WATCHLIST</button>
-            
-            <button class="abtn a-sponsor" onclick="handleSponsor('${a.id}')">SPONSOR</button>
-            <button class="abtn a-claim" onclick="handleClaim('${a.id}')">CLAIM / VERIFY</button>
+        <div class="rcity">${escapeHtml(a.city)}, ${escapeHtml(a.state || a.country || 'USA')}</div>
+        <div class="rprice-row">
+            <div class="rprice">${window.fmtPrice(a.price)}</div>
+            <div class="rprice-psf">LISTED VALUATION</div>
         </div>
     `;
 
-    // 5. Render Data Sectors
+    // ── Build lending options ───────────────────────────────────
+    const lendingOpts = getLendingOptions(a.type);
+    const lendingHtml = lendingOpts.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
+
+    // ── Build insurance options ─────────────────────────────────
+    const insuranceOpts = getInsuranceOptions(a.type);
+    const insuranceHtml = insuranceOpts.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
+
+    // ── Current bid placeholder (highest recorded offer) ────────
+    const bids = Array.isArray(a.bids) ? a.bids : [];
+    const highBid = bids.length ? Math.max(...bids.map(b => parseFloat(b.amount) || 0)) : null;
+    const bidBookHtml = highBid
+        ? `<div class="rrow"><span class="rk">HIGHEST OFFER</span><span class="rv hl">${fmtPrice(highBid)}</span></div>`
+        : `<div class="rrow"><span class="rk">HIGHEST OFFER</span><span class="rv" style="color:var(--muted)">NO OFFERS YET</span></div>`;
+
+    // ── Full body ───────────────────────────────────────────────
     document.getElementById('rbody').innerHTML = `
-        <div class="rinner">
-            <div class="rsect">
-                <div class="rsect-title">ASSET SPECIFICATIONS</div>
-                <div class="rrow"><span class="rk">VALUATION</span><span class="rv">${window.fmtPrice(a.price)}</span></div>
-                <div class="rrow"><span class="rk">IDENTIFIER</span><span class="rv">#${a.id}</span></div>
-            </div>
-            ${buttonsHTML}
-            <div class="rsect" style="margin-top:15px;">
-                <div class="rsect-title">INSTITUTIONAL DATA LEDGER</div>
-                <div class="rrow"><span class="rk">COORDINATES</span><span class="rv">${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}</span></div>
-                <div class="rrow"><span class="rk">STATUS</span><span class="rv" style="color:#10b981">VERIFIED ACTIVE</span></div>
-            </div>
+    <div class="rinner">
+
+      <!-- ASSET SPEC ROW -->
+      <div class="rsect">
+        <div class="rsect-title">ASSET SPECIFICATIONS</div>
+        <div class="rrow"><span class="rk">IDENTIFIER</span><span class="rv">#${a.id}</span></div>
+        <div class="rrow"><span class="rk">COORDINATES</span><span class="rv">${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}</span></div>
+        <div class="rrow"><span class="rk">STATUS</span><span class="rv" style="color:var(--green)">VERIFIED ACTIVE</span></div>
+        ${a.sqft ? `<div class="rrow"><span class="rk">AREA</span><span class="rv">${parseInt(a.sqft).toLocaleString()} SF</span></div>` : ''}
+        ${a.tokenized ? `<div class="rrow"><span class="rk">LEDGER</span><span class="rv hl">DIGITIZED ✓</span></div>` : ''}
+      </div>
+
+      <!-- BID ORDER BOOK -->
+      <div class="rsect">
+        <div class="rsect-title">BID ORDER BOOK</div>
+        ${bidBookHtml}
+        <div class="rrow"><span class="rk">DAYS LISTED</span><span class="rv">${a.days || '—'}</span></div>
+      </div>
+
+      <!-- PRIMARY ACTION GRID -->
+      <div class="act-grid" style="margin-bottom:18px;">
+        <button class="abtn a-buy" style="grid-column:span 2;"
+          onclick="logPartnerLead('${a.id}','ACQUIRE'); showToast('ACQUISITION INTENT LOGGED — ASSET #${a.id}')">
+          ACQUIRE / INQUIRE
+        </button>
+        <button class="abtn a-bid"
+          onclick="showBidModal()">
+          PLACE BID
+        </button>
+        <button id="watch-btn" class="abtn a-save"
+          onclick="toggleWatchlist()">
+          WATCHLIST
+        </button>
+        <button class="abtn a-sponsor" style="grid-column:span 2;"
+          onclick="handleSponsor('${a.id}')">
+          SPONSOR — LIST AS BROKER / INSTITUTION
+        </button>
+        <button class="abtn a-claim" style="grid-column:span 2;"
+          onclick="handleClaim('${a.id}')">
+          CLAIM / VERIFY OWNERSHIP & DIGITIZE
+        </button>
+      </div>
+
+      <!-- CAPITAL STACK MODULE -->
+      <div class="rsect">
+        <div class="rsect-title">CAPITAL STACK &amp; GLOBAL LENDING</div>
+        <div style="margin-bottom:8px;">
+          <label style="display:block;font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">SELECT DEBT STRATEGY</label>
+          <select id="lending-select"
+            onchange="if(this.value){logPartnerLead('${a.id}','LENDING:'+this.value); showToast(this.value.toUpperCase()+' INTENT LOGGED')}">
+            <option value="">— SELECT CAPITAL STRUCTURE —</option>
+            ${lendingHtml}
+          </select>
         </div>
-    `;
-    
-    // 6. Map Execution & Mobile UI
+        <button class="abtn a-lend" style="width:100%;margin-top:4px;"
+          onclick="showLendingModal()">
+          OPEN CAPITAL INQUIRY TERMINAL
+        </button>
+      </div>
+
+      <!-- GLOBAL RISK & INSURANCE MODULE -->
+      <div class="rsect">
+        <div class="rsect-title">GLOBAL RISK &amp; INSURANCE</div>
+        <div style="margin-bottom:8px;">
+          <label style="display:block;font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">SELECT COVERAGE PROTOCOL</label>
+          <select id="insurance-select"
+            onchange="if(this.value){logPartnerLead('${a.id}','INSURANCE:'+this.value); showToast(this.value.toUpperCase()+' INTENT LOGGED')}">
+            <option value="">— SELECT RISK COVERAGE —</option>
+            ${insuranceHtml}
+          </select>
+        </div>
+        <button class="abtn a-lend" style="width:100%;margin-top:4px;border-color:rgba(226,197,90,.3);color:var(--gold);"
+          onclick="showInsuranceModal()">
+          OPEN RISK QUOTE TERMINAL
+        </button>
+      </div>
+
+      <!-- INSTITUTIONAL DATA LEDGER -->
+      <div class="rsect">
+        <div class="rsect-title">INSTITUTIONAL DATA LEDGER</div>
+        <div class="rrow"><span class="rk">SOURCE</span><span class="rv">${escapeHtml(a.source || 'Supabase Ledger')}</span></div>
+        <div class="rrow"><span class="rk">BROKER ACTIVE</span><span class="rv">${a.broker_active ? '<span style="color:var(--green)">YES</span>' : '<span style="color:var(--muted)">NO</span>'}</span></div>
+        <div class="rrow"><span class="rk">LEDGER HASH</span><span class="rv" style="font-family:monospace;font-size:9px;color:var(--muted)">${a.id}-${(a.lat*1000|0)}-${(a.lng*1000|0)}</span></div>
+      </div>
+
+    </div>`;
+
+    // ── Map fly-to & mobile drawer ──────────────────────────────
     if (typeof flyTo === 'function') flyTo(a.lat, a.lng, 1400, 45);
     if (window.innerWidth <= 767) document.getElementById('right').classList.add('open-drawer');
 
-    // 7. Check if already on Watchlist (Visual Sync)
+    // ── Update list selection highlight ────────────────────────
+    document.querySelectorAll('.pcard').forEach(c => c.classList.remove('active'));
+    const activeCard = document.querySelector(`.pcard[onclick*="'${a.id}'"]`);
+    if (activeCard) activeCard.classList.add('active');
+
     syncWatchlistButton(a.id);
+    logPartnerLead(a.id, 'VIEW');
 }
     
     /* --- HELPER: SYNC WATCHLIST STATE --- */
@@ -3747,24 +3926,30 @@ window.signInWithGoogle = signInWithGoogle;
 // 2. Wire Buttons to the new Lead Engine
 window.logPartnerLead = logPartnerLead;
 window.showLendingModal = showLendingModal;
+window.showInsuranceModal = showInsuranceModal;
 window.showBidModal = showBidModal;
 window.handleSponsor = handleSponsor;
 window.handleClaim = handleClaim;
 window.handleInquiry = handleInquiry;
+window.toggleWatchlist = toggleWatchlist;
+window.submitBid = submitBid;
+window.submitLending = submitLending;
+window.submitInsurance = submitInsurance;
+window.showToast = showToast;
 
     function handleSponsor(id) {
-    showToast(`SPONSORSHIP INITIATED FOR ASSET #${id}`);
-    logPartnerLead(id, 'SPONSOR'); // Sends to Supabase
+    logPartnerLead(id || (window.currentAsset && window.currentAsset.id), 'SPONSOR');
+    showToast('SPONSORSHIP INTENT LOGGED — BROKER REGISTRY PENDING');
 }
 
 function handleClaim(id) {
-    showToast(`VERIFYING OWNERSHIP FOR ASSET #${id}`);
-    logPartnerLead(id, 'CLAIM'); // Sends to Supabase
+    logPartnerLead(id || (window.currentAsset && window.currentAsset.id), 'CLAIM');
+    showToast('OWNERSHIP CLAIM INITIATED — VERIFICATION QUEUED');
 }
 
 function handleInquiry(id) {
-    showToast(`CONNECTING TO CUSTODIAN FOR ASSET #${id}`);
-    logPartnerLead(id, 'INQUIRY'); // Sends to Supabase
+    logPartnerLead(id || (window.currentAsset && window.currentAsset.id), 'INQUIRY');
+    showToast('CUSTODIAN INQUIRY TRANSMITTED');
 }
 
 // 3. The Secure Delayed Launch
@@ -3803,18 +3988,6 @@ window.fmtPrice = fmtPrice;
 window.escapeHtml = escapeHtml;
 </script>
 
-<footer id="footer">
-    <div class="footer-left">
-        <span class="status-dot"></span>
-        SYSTEM: OPERATIONAL | LATENCY: 18ms | PERSISTENT LEDGER: ACTIVE
-    </div>
-    <div class="footer-center">
-        RWABidAsk — GLOBAL ASSET MARKET | INSTITUTIONAL DIGITIZATION
-    </div>
-    <div class="footer-right">
-        RWABidAsk is a registered trade name of ANNIE GROUP LLC
-    </div>
-</footer>
 
 </body>
 </html>
