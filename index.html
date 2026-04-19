@@ -25,34 +25,21 @@
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady&loading=async" async defer></script>
 <style>
-  /* 1. HIDE THE PORTFOLIO TERMINAL */
+/* 1. KEEP THE HIDE RULE - This gets rid of the ledger terminal */
 #portfolio-drawer {
     display: none !important; 
-    visibility: hidden !important;
-    pointer-events: none !important;
 }
 
-/* 2. FIX THE DESKTOP LAYOUT (Zillow Mode) */
+/* 2. THE ANCHOR - This only moves your ORIGINAL panel to the right */
 @media (min-width: 768px) {
   #right {
     position: fixed !important;
-    right: 0 !important;      /* Force to the right */
-    left: auto !important;     /* Stop it from being on the left */
+    right: 0 !important;      /* Locks it to the right */
+    left: auto !important;     /* Unlocks it from the left */
     top: 0 !important;
-    width: 340px !important;   /* Matches your sidebar width */
-    height: 100vh !important;
-    background: #050a0f !important;
-    display: flex !important;
+    transform: none !important; /* Stops it from sliding away */
     z-index: 1000 !important;
-    transform: none !important;
-  }
-
-  /* Adjust the globe container so it doesn't hide behind the sidebar */
-  #map3d-container {
-    width: calc(100% - 340px) !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
+    /* We aren't touching colors, borders, or backgrounds here */
   }
 }
   <style>
