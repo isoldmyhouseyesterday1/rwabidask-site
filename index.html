@@ -28,38 +28,22 @@
 /* 1. HIDE THE PORTFOLIO TERMINAL */
 #portfolio-drawer { display: none !important; }
 
-/* 2. THE INSTITUTIONAL 3-COLUMN FIX */
+/* 2. DESKTOP 2-COLUMN LAYOUT (left sidebar + map; right panel is fixed overlay) */
 @media (min-width: 768px) {
     #main-row {
         display: grid !important;
-        grid-template-columns: 288px 1fr 340px !important;
-        width: 100vw;
-        /* Subtracting space for your topbars and footers (approx 110px) */
-        height: calc(100vh - 110px) !important; 
+        grid-template-columns: 288px 1fr !important;
+        width: calc(100vw - 340px) !important; /* leave room for fixed right panel */
+        height: calc(100vh - 134px) !important; /* ribbon24 + topbar54 + ticker30 + footer26 = 134 */
         overflow: hidden;
     }
-
     #map3d-container, #map, .map-wrapper {
-        position: relative !important; 
+        position: relative !important;
         grid-column: 2;
         width: 100% !important;
         height: 100% !important;
         z-index: 1;
     }
-
-    #right {
-        position: relative !important;
-        grid-column: 3;
-        width: 340px !important;
-        height: 100% !important;
-        background: var(--bg1) !important;
-        border-left: 1px solid var(--border) !important;
-        display: flex !important;
-        visibility: visible !important;
-        transform: none !important;
-        z-index: 10;
-    }
-
     #left-bar, .sidebar-left {
         grid-column: 1;
         width: 288px !important;
@@ -1144,16 +1128,16 @@ body { min-width: 900px; overflow-x: auto; }
   }
 }
 
-/* DESKTOP VIEW (Your MacBook Screen) */
+/* DESKTOP VIEW */
 @media (min-width: 768px) {
   #right {
     position: fixed !important;
     right: 0 !important;
-    top: 0 !important;
+    top: 78px !important;        /* below ribbon(24) + topbar(54) */
+    bottom: 56px !important;     /* above ticker(30) + footer(26) */
     left: auto !important;
-    bottom: auto !important;
     width: 340px !important;
-    height: 100vh !important;
+    height: auto !important;
     border-left: 1px solid var(--border) !important;
     transform: none !important;
     display: flex !important;
@@ -3742,50 +3726,43 @@ function updateAuthUI() {
 
 function openModal(type) {
   const modal = document.getElementById('modal');
-  const mbox = document.getElementById('mbox');
   const modalTitle = document.getElementById('modal-title');
-  const modalBody = document.getElementById('modal-body');
-
+  const modalBody  = document.getElementById('modal-body');
   if (!modal || !modalBody) return;
 
-  // 1. Reset Content area
-  modalBody.innerHTML = '';
-  
-  // 2. Routing Logic: What are we showing?
+  // For signin/register: build content here. For all others (bid/lending/insurance/etc)
+  // the caller already wrote modalTitle + modalBody — just open the modal.
   if (type === 'signin') {
-    if(modalTitle) modalTitle.textContent = "AUTHENTICATION: SECURE LOGIN";
+    if (modalTitle) modalTitle.textContent = "SIGN IN";
     modalBody.innerHTML = `
-      <div class="msub" style="margin-bottom:15px; color:var(--muted); font-size:11px;">Access the Global Asset Directory and Permanent Ledger</div>
-      <div class="mfield"><label>EMAIL</label><input type="email" id="login-email" class="styled-input" placeholder="investor@domain.com"></div>
-      <div class="mfield"><label>PASSWORD</label><input type="password" id="login-password" class="styled-input" placeholder="••••••••"></div>
-      <div class="mfooter" style="margin-top:20px; display:flex; gap:10px;">
-        <button class="msub-btn" style="flex:2;" onclick="handleSignIn()">ACCESS TERMINAL</button>
+      <div class="msub" style="margin-bottom:15px;color:var(--muted);font-size:11px;">Access the Global Asset Directory and Permanent Ledger</div>
+      <div class="mfield"><label>EMAIL</label><input type="email" id="login-email" placeholder="investor@domain.com"></div>
+      <div class="mfield"><label>PASSWORD</label><input type="password" id="login-password" placeholder="••••••••"></div>
+      <div class="mfooter" style="margin-top:20px;display:flex;gap:10px;">
+        <button class="msub-btn" style="flex:2;" onclick="handleSignIn()">SIGN IN</button>
         <button class="mcan-btn" style="flex:1;" onclick="closeModal()">CANCEL</button>
       </div>
-      <div class="legal-note" style="text-align:center; margin-top:15px;">
-        <button onclick="signInWithGoogle()" style="background:none; border:1px solid var(--cyan); color:var(--cyan); padding:8px; width:100%; cursor:pointer;">SIGN IN WITH GOOGLE</button>
+      <div class="legal-note" style="text-align:center;margin-top:15px;">
+        <button onclick="signInWithGoogle()" style="background:none;border:1px solid var(--cyan);color:var(--cyan);padding:8px;width:100%;cursor:pointer;font-family:var(--font);font-size:11px;">SIGN IN WITH GOOGLE</button>
       </div>
-      <div class="legal-note" style="margin-top:10px; font-size:10px;">New User? <a href="#" onclick="openModal('register');return false" style="color:var(--cyan)">Create Account</a></div>
+      <div class="legal-note" style="margin-top:10px;font-size:10px;">New? <a href="#" onclick="openModal('register');return false" style="color:var(--cyan)">Create Account</a></div>
     `;
-  } 
-  
-  else if (type === 'register') {
-    if(modalTitle) modalTitle.textContent = "REGISTRY: CREATE ACCOUNT";
+  } else if (type === 'register') {
+    if (modalTitle) modalTitle.textContent = "CREATE ACCOUNT";
     modalBody.innerHTML = `
-      <div class="mfield"><label>FULL NAME</label><input type="text" id="reg-name" class="styled-input" placeholder="John Smith"></div>
-      <div class="mfield"><label>EMAIL</label><input type="email" id="reg-email" class="styled-input" placeholder="investor@domain.com"></div>
-      <div class="mfield"><label>PASSWORD</label><input type="password" id="reg-password" class="styled-input" placeholder="••••••••"></div>
-      <div class="mfooter" style="margin-top:20px; display:flex; gap:10px;">
-        <button class="msub-btn" style="flex:2;" onclick="handleSignUp()">INITIALIZE ACCOUNT</button>
+      <div class="mfield"><label>FULL NAME</label><input type="text" id="reg-name" placeholder="John Smith"></div>
+      <div class="mfield"><label>EMAIL</label><input type="email" id="reg-email" placeholder="investor@domain.com"></div>
+      <div class="mfield"><label>PASSWORD</label><input type="password" id="reg-password" placeholder="••••••••"></div>
+      <div class="mfooter" style="margin-top:20px;display:flex;gap:10px;">
+        <button class="msub-btn" style="flex:2;" onclick="handleSignUp()">CREATE ACCOUNT</button>
         <button class="mcan-btn" style="flex:1;" onclick="closeModal()">CANCEL</button>
       </div>
-      <div class="legal-note" style="margin-top:10px; font-size:10px;">Already Registered? <a href="#" onclick="openModal('signin');return false" style="color:var(--cyan)">Sign In</a></div>
+      <div class="legal-note" style="margin-top:10px;font-size:10px;">Already registered? <a href="#" onclick="openModal('signin');return false" style="color:var(--cyan)">Sign In</a></div>
     `;
   }
-
-  // 3. Physical Execution: Open the window
-  modal.style.display = 'flex'; // Use this if your CSS uses display:none
-  modal.classList.add('open');  // Keep this if your CSS uses classes for animation
+  // All other types (bid, lending, insurance, etc): content already set by caller — just open.
+  modal.style.display = 'flex';
+  modal.classList.add('open');
 }
 
 function closeModal() {
