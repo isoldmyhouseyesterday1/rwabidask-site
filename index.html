@@ -24,63 +24,33 @@
   window.__mapReady = function() { window.__googleMapsLoaded = true; window.__initRWA && window.__initRWA(); };
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady&loading=async" async defer></script>
-<style>
-/* 1. HIDE THE LEDGER TERMINAL (Clears the "Initializing" clutter) */
+/* 1. HIDE THE LEDGER */
 #portfolio-drawer {
     display: none !important;
 }
 
-/* 2. DESKTOP LAYOUT - Side-by-Side Mode */
+/* 2. THE CLEAN RIGHT PANEL */
 @media (min-width: 768px) {
-    /* Prevent the page from shaking or scrolling horizontally */
-    body {
-        margin: 0;
-        padding: 0;
-        display: flex !important;
-        flex-direction: row !important;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden !important;
-    }
-
-    /* THE MAP: Forces it to stop exactly where the sidebar begins */
-    #map3d-container, #map, .map-wrapper {
-        position: relative !important;
-        flex: 1 !important; /* Tells map to fill all remaining space on the left */
-        width: auto !important;
-        height: 100vh !important;
-        left: 0 !important;
-    }
-
-    /* THE SIDEBAR: Your original panel, locked to the right side */
-    #right {
-        position: relative !important; /* Changed from fixed so it sits NEXT to the map */
-        width: 340px !important;       /* Standard width for your lead-gen panel */
-        height: 100vh !important;
-        flex-shrink: 0 !important;     /* Prevents the map from squishing it */
-        border-left: 1px solid var(--border, rgba(0,255,255,0.2)) !important;
-        display: flex !important;
-        flex-direction: column !important;
-        background: var(--bg1) !important; /* Uses your original background color */
-        box-shadow: -5px 0 15px rgba(0,0,0,0.3) !important;
-        z-index: 10;
-        transform: none !important;
-    }
-}
-
-/* 3. MOBILE VIEW - Keeps your original "Bottom Drawer" behavior for phones */
-@media (max-width: 767px) {
     #right {
         position: fixed !important;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 75vh;
-        z-index: 2000;
-        /* Note: Add 'open-drawer' class via JS to slide this up on mobile */
+        top: 0 !important;
+        right: 0 !important;
+        left: auto !important;
+        width: 340px !important;
+        height: 100vh !important;
+        z-index: 1000 !important;
+        transform: none !important;
+        background: #050a0f !important; /* Your original dark theme color */
+        border-left: 1px solid rgba(0,255,255,0.2) !important;
+    }
+
+    /* PUSH THE MAP TO THE LEFT SO IT DOESN'T OVERLAP */
+    #map3d-container {
+        width: calc(100% - 340px) !important;
+        position: absolute !important;
+        left: 0 !important;
     }
 }
-</style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
