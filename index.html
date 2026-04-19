@@ -25,12 +25,37 @@
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady&loading=async" async defer></script>
 <style>
-  .dismissButton, [class*="dismissButton"],
-  div[style*="z-index: 1000000"], div[style*="z-index:1000000"],
-  .gm-style-pbc, .gm-err-container { display: none !important; }
-</style>
+  /* 1. HIDE THE PORTFOLIO TERMINAL */
+#portfolio-drawer {
+    display: none !important; 
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
 
-<style>
+/* 2. FIX THE DESKTOP LAYOUT (Zillow Mode) */
+@media (min-width: 768px) {
+  #right {
+    position: fixed !important;
+    right: 0 !important;      /* Force to the right */
+    left: auto !important;     /* Stop it from being on the left */
+    top: 0 !important;
+    width: 340px !important;   /* Matches your sidebar width */
+    height: 100vh !important;
+    background: #050a0f !important;
+    display: flex !important;
+    z-index: 1000 !important;
+    transform: none !important;
+  }
+
+  /* Adjust the globe container so it doesn't hide behind the sidebar */
+  #map3d-container {
+    width: calc(100% - 340px) !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+  }
+}
+  <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
