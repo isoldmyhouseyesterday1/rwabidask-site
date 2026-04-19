@@ -1055,29 +1055,6 @@ body { min-width: 900px; overflow-x: auto; }
   line-height: 1.9;
   margin-top: 4px;
 }
-#toast {
-  position: fixed;
-  top: 64px;
-  right: 18px;
-  z-index: 99999;
-  background: var(--bg2);
-  border: 1px solid rgba(0,255,200,.3);
-  padding: 12px 18px;
-  font-family: var(--font);
-  font-size: 11px;
-  color: var(--cyan);
-  display: none;
-  border-radius: 2px;
-  max-width: 340px;
-  letter-spacing: .3px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.6);
-  animation: toast-in .2s ease;
-}
-@keyframes toast-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 #asset-drawer {
   position: fixed;
   top: 78px;
@@ -1885,32 +1862,35 @@ body { min-width: 900px; overflow-x: auto; }
   border: 1px solid var(--border2);
   color: var(--silver);
 }
-  /* --- Add to your CSS section --- */
+/* --- UNIFIED TERMINAL NOTIFICATION --- */
 #toast {
     visibility: hidden;
-    min-width: 280px;
-    background-color: #050505;
+    min-width: 300px;
+    background-color: #0f172a; /* Solid Navy to match sidebar */
     color: #00ffc8;
     text-align: center;
-    border: 1px solid rgba(0, 255, 200, 0.4);
-    border-radius: 2px;
-    padding: 16px;
+    border: 1px solid #00ffc8;
+    padding: 14px;
     position: fixed;
     z-index: 10000;
     left: 50%;
-    bottom: 40px;
+    bottom: 60px; /* Sits right above your footer */
     transform: translateX(-50%);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 2px;
-    box-shadow: 0 0 20px rgba(0, 255, 200, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+    pointer-events: none;
 }
 
 #toast.show {
     visibility: visible;
     animation: fadein 0.5s, fadeout 0.5s 2.5s;
 }
+
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 60px; opacity: 1;} }
+@keyframes fadeout { from {bottom: 60px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
 @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 40px; opacity: 1;} }
 @keyframes fadeout { from {bottom: 40px; opacity: 1;} to {bottom: 0; opacity: 0;} }
@@ -2875,26 +2855,37 @@ function selectAsset(id) {
                 ACQUIRE / INQUIRE
             </button>
             
+            <div class="mfield" style="grid-column: span 2;">
+                <label style="font-size: 9px; color: #94a3b8; margin-bottom: 4px; display: block;">LENDING / DEBT INTENT</label>
+                <select id="lending-select" class="lending-dropdown" onchange="handleLendingChange('${a.id}', this.value)">
+                    <option value="">-- SELECT FINANCING --</option>
+                    <option value="SBA">SBA 504 / GREEN ENERGY</option>
+                    <option value="BRIDGE">BRIDGE LOAN (REO)</option>
+                    <option value="EQUITY">TAX-EQUITY PARTNER</option>
+                </select>
+            </div>
+
             <button class="abtn" onclick="showBidModal('${a.id}')">PLACE BID</button>
-            <button class="abtn" onclick="showLendingModal('${a.id}')">DEBT CAPITAL</button>
-            
-            <button class="abtn" onclick="showInsuranceModal('${a.id}')">INSURANCE</button>
             <button id="watch-btn" class="abtn" onclick="toggleWatchlist('${a.id}')">WATCHLIST</button>
             
             <button class="abtn a-sponsor" onclick="handleSponsor('${a.id}')">SPONSOR</button>
             <button class="abtn a-claim" onclick="handleClaim('${a.id}')">CLAIM / VERIFY</button>
         </div>
     `;
-    
+
     // 5. Render Data Sectors
     document.getElementById('rbody').innerHTML = `
         <div class="rinner">
-            ${buttonsHTML}
             <div class="rsect">
+                <div class="rsect-title">ASSET SPECIFICATIONS</div>
+                <div class="rrow"><span class="rk">VALUATION</span><span class="rv">${window.fmtPrice(a.price)}</span></div>
+                <div class="rrow"><span class="rk">IDENTIFIER</span><span class="rv">#${a.id}</span></div>
+            </div>
+            ${buttonsHTML}
+            <div class="rsect" style="margin-top:15px;">
                 <div class="rsect-title">INSTITUTIONAL DATA LEDGER</div>
-                <div class="rrow"><span class="rk">MARKET VALUATION</span><span class="rv">${window.fmtPrice(a.price)}</span></div>
-                <div class="rrow"><span class="rk">UNIQUE IDENTIFIER</span><span class="rv">#${a.id}</span></div>
-                <div class="rrow"><span class="rk">GEOSPATIAL COORDS</span><span class="rv">${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}</span></div>
+                <div class="rrow"><span class="rk">COORDINATES</span><span class="rv">${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}</span></div>
+                <div class="rrow"><span class="rk">STATUS</span><span class="rv" style="color:#10b981">VERIFIED ACTIVE</span></div>
             </div>
         </div>
     `;
