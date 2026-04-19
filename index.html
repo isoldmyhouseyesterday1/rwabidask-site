@@ -2041,19 +2041,9 @@ body { min-width: 900px; overflow-x: auto; }
         <div class="blimp-flag">AIRSPACE</div>
       </div>
     </div>
-  </div>
+  </div><!-- /#map-col -->
 
-  <div id="portfolio-drawer" class="drawer-left">
-    <div class="drawer-header">
-        <div class="drawer-title">TERMINAL // ACTIVE POSITIONS</div>
-        <button class="close-btn" onclick="togglePortfolio()">[ CLOSE ]</button>
-    </div>
-    <div id="portfolio-content" class="drawer-body">
-        <div class="system-loader">INITIALIZING LEDGER...</div>
-    </div>
-</div>
-
-<div id="right">
+  <div id="right">
     <div class="rhead" id="rhead">
       <div class="rtype">Select an Asset</div>
       <div class="rname" style="opacity:.25">Click any marker or listing</div>
@@ -2065,8 +2055,18 @@ body { min-width: 900px; overflow-x: auto; }
           <div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div>
       </div>
     </div>
-</div>
+  </div><!-- /#right -->
 
+</div><!-- /#main-row -->
+
+<div id="portfolio-drawer" class="drawer-left">
+    <div class="drawer-header">
+        <div class="drawer-title">TERMINAL // ACTIVE POSITIONS</div>
+        <button class="close-btn" onclick="togglePortfolio()">[ CLOSE ]</button>
+    </div>
+    <div id="portfolio-content" class="drawer-body">
+        <div class="system-loader">INITIALIZING LEDGER...</div>
+    </div>
 </div>
 
 <div id="asset-drawer">
@@ -3062,7 +3062,7 @@ function selectAsset(id) {
           onclick="showLendingModal()">
           FINANCING OPTIONS
         </button>
-        <button class="abtn a-sponsor" style="grid-column:span 2;"
+        <button class="abtn a-lend" style="grid-column:span 2;"
           onclick="showInsuranceModal()">
           INSURANCE / RISK COVERAGE
         </button>
