@@ -2103,22 +2103,42 @@ body { min-width: 900px; overflow-x: auto; }
 /* ── LOG SLIDER ─────────────────────────────────────────────── */
 #price-min, #price-max {
   -webkit-appearance: none; appearance: none;
-  height: 0; background: transparent; outline: none; margin: 0; padding: 0;
+  position: absolute; top: 50%; left: 0; right: 0;
+  transform: translateY(-50%); width: 100%;
+  height: 20px; background: transparent; outline: none;
+  margin: 0; padding: 0; pointer-events: auto;
 }
 #price-min::-webkit-slider-thumb, #price-max::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
-  width: 14px; height: 14px; border-radius: 50%;
+  width: 16px; height: 16px; border-radius: 50%;
   background: var(--cyan); border: 2px solid #0d1526;
-  cursor: pointer; box-shadow: 0 0 6px rgba(0,255,200,.5);
-  margin-top: 0;
+  cursor: ew-resize; box-shadow: 0 0 8px rgba(0,255,200,.6), 0 2px 4px rgba(0,0,0,.4);
+  transition: box-shadow .1s;
+}
+#price-min::-webkit-slider-thumb:hover, #price-max::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 14px rgba(0,255,200,.9), 0 2px 6px rgba(0,0,0,.5);
 }
 #price-min::-moz-range-thumb, #price-max::-moz-range-thumb {
-  width: 14px; height: 14px; border-radius: 50%;
+  width: 16px; height: 16px; border-radius: 50%;
   background: var(--cyan); border: 2px solid #0d1526;
-  cursor: pointer; box-shadow: 0 0 6px rgba(0,255,200,.5);
+  cursor: ew-resize; box-shadow: 0 0 8px rgba(0,255,200,.6);
+}
+#price-min::-webkit-slider-runnable-track, #price-max::-webkit-slider-runnable-track {
+  background: transparent; height: 2px;
 }
 #price-min { z-index: 4; }
 #price-max { z-index: 3; }
+/* High-contrast digital readout */
+#price-min-label, #price-max-label {
+  font-size: 11px; font-weight: 800; color: var(--cyan);
+  font-variant-numeric: tabular-nums; letter-spacing: .3px;
+  text-shadow: 0 0 8px rgba(0,255,200,.4);
+}
+#price-slider-wrap .readout-center {
+  text-align: center; font-size: 10px; color: var(--silver);
+  font-variant-numeric: tabular-nums; letter-spacing: .5px;
+  margin-top: 2px; min-height: 14px;
+}
 </style>
 </head>
 <body>
@@ -2175,19 +2195,22 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="left-title">Global Directory</div>
       <div class="ptabs" id="category-tabs"></div>
       <div id="price-slider-wrap" style="padding:10px 14px 8px;border-bottom:1px solid var(--border);flex-shrink:0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
           <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">PRICE RANGE</span>
-          <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px" onclick="resetPriceSlider()">RESET</button>
+          <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="resetPriceSlider()">RESET</button>
         </div>
-        <div style="position:relative;height:28px;margin:0 4px;">
+        <div style="text-align:center;margin-bottom:6px;">
+          <span id="price-readout" style="font-size:11px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 8px rgba(0,255,200,.35)">$1 — $1T</span>
+        </div>
+        <div style="position:relative;height:24px;margin:0 6px;">
           <div id="slider-track" style="position:absolute;top:50%;left:0;right:0;height:2px;background:var(--border2);transform:translateY(-50%);border-radius:1px;"></div>
-          <div id="slider-fill" style="position:absolute;top:50%;height:2px;background:var(--cyan);transform:translateY(-50%);border-radius:1px;pointer-events:none;"></div>
-          <input type="range" id="price-min" min="0" max="36" step="1" value="0" oninput="onPriceSlider()" style="position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);width:100%;appearance:none;-webkit-appearance:none;background:transparent;z-index:3;pointer-events:auto;">
-          <input type="range" id="price-max" min="0" max="36" step="1" value="36" oninput="onPriceSlider()" style="position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);width:100%;appearance:none;-webkit-appearance:none;background:transparent;z-index:3;pointer-events:auto;">
+          <div id="slider-fill" style="position:absolute;top:50%;left:0%;width:100%;height:2px;background:var(--cyan);transform:translateY(-50%);border-radius:1px;pointer-events:none;box-shadow:0 0 6px rgba(0,255,200,.3);"></div>
+          <input type="range" id="price-min" min="0" max="36" step="1" value="0" oninput="onPriceSlider()">
+          <input type="range" id="price-max" min="0" max="36" step="1" value="36" oninput="onPriceSlider()">
         </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.2px;">
-          <span id="price-min-label" style="color:var(--cyan)">$1</span>
-          <span id="price-max-label" style="color:var(--cyan)">$1T</span>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;">
+          <span style="font-size:8px;color:var(--muted);letter-spacing:.5px">$1</span>
+          <span style="font-size:8px;color:var(--muted);letter-spacing:.5px">$1T</span>
         </div>
       </div>
     </div>
@@ -2302,10 +2325,10 @@ body { min-width: 900px; overflow-x: auto; }
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-card">
     <div class="auth-gate-title">RWABidAsk | Access Terminal</div>
-    <div class="auth-gate-sub">Sign in or create an account to access the Global Asset Directory, Persistent Ledger, and institutional bidding platform.</div>
+    <div class="auth-gate-sub">Access the Global Asset Directory, Permanent Ledger, and institutional order book. Verification from $10.</div>
     <div class="auth-gate-buttons">
-      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('register')">Request Access</button>
-      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button>
+      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('register')">$10 Sign Up</button>
+      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button>
     </div>
   </div>
 </div>
@@ -2323,51 +2346,64 @@ let markersRendered = false;
 // ASSET CATEGORIES - Castle/Estates mapped to Real Estate
 // ============================================================
 const ASSET_CATEGORIES = [
-  { id: 'all',         label: 'ALL',               physical: false },
-  { id: 'financial',   label: 'FINANCIALS',         physical: false },
-  { id: 'realestate',  label: 'REAL ESTATE',        physical: true  },
-  { id: 'maritime',    label: 'MARITIME',           physical: true  },
-  { id: 'aviation',    label: 'AVIATION',           physical: true  },
-  { id: 'equities',    label: 'EQUITIES',           physical: false },
-  { id: 'resources',   label: 'NATURAL RESOURCES',  physical: true  },
+  { id: 'all',            label: 'ALL',               physical: false },
+  { id: 'financial',      label: 'FINANCIALS',         physical: false },
+  { id: 'realestate',     label: 'REAL ESTATE',        physical: true  },
+  { id: 'infrastructure', label: 'INFRASTRUCTURE',     physical: true  },
+  { id: 'energy',         label: 'ENERGY',             physical: true  },
+  { id: 'maritime',       label: 'MARITIME',           physical: true  },
+  { id: 'aviation',       label: 'AVIATION',           physical: true  },
+  { id: 'resources',      label: 'NATURAL RESOURCES',  physical: true  },
 ];
 
 function getAssetCategory(type) {
   const t = (type || '').toLowerCase().trim();
   const map = {
-    // Real Estate
-    residential: 'realestate', land: 'realestate', castle: 'realestate',
-    estate: 'realestate', property: 'realestate', realestate: 'realestate',
-    'real estate': 'realestate', house: 'realestate', condo: 'realestate',
-    // Maritime
-    maritime: 'maritime', vessel: 'maritime', ship: 'maritime',
-    boat: 'maritime', yacht: 'maritime', tanker: 'maritime', ferry: 'maritime',
-    // Aviation
-    aviation: 'aviation', aircraft: 'aviation', airplane: 'aviation',
-    jet: 'aviation', helicopter: 'aviation', drone: 'aviation',
-    // Financials / Debt / IP
-    financial: 'financial', financials: 'financial',
-    debt: 'financial', bond: 'financial', 'treasury bill': 'financial',
-    treasury: 'financial', ip: 'financial', patent: 'financial',
-    copyright: 'financial', credit: 'financial', loan: 'financial',
-    // Equities
-    equity: 'equities', equities: 'equities', stock: 'equities',
-    share: 'equities', fund: 'equities', reit: 'equities',
-    etf: 'equities', 'private equity': 'equities',
-    // Natural Resources
-    resources: 'resources', minerals: 'resources', mining: 'resources',
-    energy: 'resources', oil: 'resources', gas: 'resources',
-    timber: 'resources', farmland: 'resources', agriculture: 'resources',
-    // Commercial → realestate (no separate commercial tab now)
-    commercial: 'realestate', office: 'realestate', retail: 'realestate',
-    industrial: 'realestate', warehouse: 'realestate',
-    // Business/infrastructure → financial
-    business: 'financial', infrastructure: 'financial',
+    // ── Real Estate ─────────────────────────────────────────
+    residential:'realestate', land:'realestate', castle:'realestate',
+    estate:'realestate', property:'realestate', realestate:'realestate',
+    'real estate':'realestate', house:'realestate', condo:'realestate',
+    apartment:'realestate', commercial:'realestate', office:'realestate',
+    retail:'realestate', industrial:'realestate', warehouse:'realestate',
+    multifamily:'realestate', hotel:'realestate', resort:'realestate',
+    // ── Infrastructure ──────────────────────────────────────
+    infrastructure:'infrastructure', bridge:'infrastructure', tunnel:'infrastructure',
+    satellite:'infrastructure', telecom:'infrastructure', port:'infrastructure',
+    pipeline:'infrastructure', rail:'infrastructure', road:'infrastructure',
+    datacenter:'infrastructure', 'data center':'infrastructure', tower:'infrastructure',
+    // ── Energy ──────────────────────────────────────────────
+    energy:'energy', solar:'energy', wind:'energy', 'power plant':'energy',
+    nuclear:'energy', hydro:'energy', geothermal:'energy', battery:'energy',
+    grid:'energy', 'energy storage':'energy', biomass:'energy', powerplant:'energy',
+    // ── Maritime ────────────────────────────────────────────
+    maritime:'maritime', vessel:'maritime', ship:'maritime', boat:'maritime',
+    yacht:'maritime', tanker:'maritime', ferry:'maritime', cargo:'maritime',
+    submarine:'maritime', barge:'maritime', trawler:'maritime',
+    // ── Aviation ────────────────────────────────────────────
+    aviation:'aviation', aircraft:'aviation', airplane:'aviation',
+    jet:'aviation', helicopter:'aviation', drone:'aviation', hangar:'aviation',
+    // ── Natural Resources ───────────────────────────────────
+    resources:'resources', minerals:'resources', mining:'resources',
+    oil:'resources', gas:'resources', timber:'resources',
+    farmland:'resources', agriculture:'resources', coal:'resources', lithium:'resources',
+    // ── Financials ──────────────────────────────────────────
+    financial:'financial', financials:'financial', debt:'financial',
+    bond:'financial', 'treasury bill':'financial', treasury:'financial',
+    ip:'financial', patent:'financial', copyright:'financial',
+    credit:'financial', loan:'financial', stock:'financial',
+    equity:'financial', equities:'financial', fund:'financial',
+    reit:'financial', etf:'financial', 'private equity':'financial',
+    business:'financial', tranche:'financial', note:'financial', cdo:'financial',
   };
-  return map[t] || (t.includes('real') ? 'realestate' : t.includes('mar') ? 'maritime' :
-    t.includes('avi') || t.includes('air') ? 'aviation' :
-    t.includes('equit') || t.includes('stock') ? 'equities' :
-    t.includes('resour') || t.includes('min') || t.includes('energ') ? 'resources' : 'financial');
+  if (map[t]) return map[t];
+  // fuzzy fallback
+  if (t.includes('real') || t.includes('estat')) return 'realestate';
+  if (t.includes('infra') || t.includes('satell') || t.includes('bridge') || t.includes('port')) return 'infrastructure';
+  if (t.includes('solar') || t.includes('wind') || t.includes('power') || t.includes('energ')) return 'energy';
+  if (t.includes('mar') || t.includes('vessel') || t.includes('ship') || t.includes('yacht')) return 'maritime';
+  if (t.includes('avi') || t.includes('air') || t.includes('jet') || t.includes('plane')) return 'aviation';
+  if (t.includes('resour') || t.includes('min') || t.includes('oil') || t.includes('farm')) return 'resources';
+  return 'financial'; // default: financials bucket
 }
 
 function isPhysicalAsset(type) {
@@ -2591,64 +2627,96 @@ async function fetchListingsFromSupabase() {
   }
   try {
     setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');
+    // Broad select — works whether table is 'listings', 'assets', or a joined view
     const { data, error } = await _sb
       .from('listings')
-      .select('*, specs, fleet, images, state')
-      .eq('status', 'active')
+      .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) {
       console.error('[RWABidAsk] Supabase fetch error:', error);
       setStatus('LEDGER CONNECTION ISSUE — RETRYING');
       return [];
     }
-    
+
     if (!data || data.length === 0) {
       console.log('[RWABidAsk] No listings found in database');
       setStatus('NO ASSETS IN LEDGER — ADD LISTINGS VIA DASHBOARD');
       return [];
     }
-    
+
+    console.log(`[RWABidAsk] Raw rows: ${data.length}`);
+
     const transformed = data.map(row => {
-      const lat = parseFloat(row.lat ?? row.latitude ?? row.Latitude);
-      const lng = parseFloat(row.lng ?? row.longitude ?? row.Longitude);
-      
+      // ── Handle Supabase join: item.assets may be array or object ──
+      const assetInfo = row.assets
+        ? (Array.isArray(row.assets) ? (row.assets[0] || {}) : row.assets)
+        : {};
+
+      // Merge join data into row (row fields take precedence)
+      const r = Object.assign({}, assetInfo, row);
+
+      // ── Coordinates — check every known column name ──
+      const lat = parseFloat(r.lat ?? r.latitude ?? r.Latitude ?? r.lat_lng?.lat ?? 0);
+      const lng = parseFloat(r.lng ?? r.longitude ?? r.Longitude ?? r.lat_lng?.lng ?? 0);
+
+      // Only skip if truly no coordinates — never skip due to missing image/desc
       if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
-        console.warn(`[RWABidAsk] Skipping asset ${row.id} - invalid coordinates`);
-        return null;
+        // Assign a fallback position near 0,0 so it still shows — log it
+        console.warn('[RWABidAsk] No coords for row id=' + r.id + ', skipping globe pin but still listing');
+        // Still include in list but without a globe marker
       }
-      
+
+      // ── Asset Identity — title is THE primary identifier ──
+      const assetTitle =
+        r.title || r.name || r.asset_name || r.address ||
+        r.property_address || r.vessel_name || r.aircraft_id ||
+        r.instrument_name || ('Asset #' + r.id);
+
+      // ── Type — check every known field ──
+      const rawType = (
+        r.asset_type || r.category || r.asset_class ||
+        r.type || r.class || 'financial'
+      ).toLowerCase();
+
       return {
-        id: row.id,
-        address: row.title || row.name || row.address || row.property_address || row.asset_name || 'Asset',
-        city: row.city || 'Unknown',
-        country: row.country || 'Global',
-        lat: lat,
-        lng: lng,
-        price: parseFloat(row.price) || 0,
-        type: (row.asset_type || row.category || row.type || 'financial').toLowerCase(),
-        sqft: row.sqft ? parseInt(row.sqft) : null,
-        status: row.listing_status || 'For Sale',
+        id: r.id,
+        // 'address' stores the TITLE — the primary identity label
+        address: assetTitle,
+        // Secondary location line
+        city: r.city || r.location || r.port_of_registry || r.domicile || 'Global',
+        country: r.country || r.jurisdiction || 'Global',
+        lat: isNaN(lat) ? 0 : lat,
+        lng: isNaN(lng) ? 0 : lng,
+        _hasCoords: !isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0),
+        price: parseFloat(r.price || r.asking_price || r.market_value || r.face_value || 0),
+        type: rawType,
+        sqft: r.sqft ? parseInt(r.sqft) : (r.gross_tonnage ? r.gross_tonnage : null),
+        status: r.listing_status || r.status || 'Active',
         source: 'Supabase Ledger',
-        days: row.days_on_market || 0,
-        broker_active: row.broker_active !== false,
-        tokenized: row.tokenized === true,
-        structures: row.structures || [],
-        infrastructure: row.infrastructure || {},
-        land: row.land || {},
-        financials: row.financials || {},
-        bids: row.bids || [],
-        image_url: row.image_url || null,
-        images: row.images || (row.image_url ? [row.image_url] : []),
-        description: row.description || null,
-        specs: row.specs || {},
-        fleet: row.fleet || [],
-        state: row.state || null,
+        days: r.days_on_market || r.days_listed || 0,
+        broker_active: r.broker_active !== false,
+        tokenized: r.tokenized === true || r.digitized === true,
+        structures: r.structures || [],
+        infrastructure: r.infrastructure || {},
+        land: r.land || {},
+        financials: r.financials || r.financial_data || {},
+        bids: r.bids || [],
+        image_url: r.image_url || r.photo_url || r.thumbnail || null,
+        images: r.images || r.photos || (r.image_url ? [r.image_url] : []),
+        description: r.description || r.notes || null,
+        specs: r.specs || r.specifications || r.technical_specs || {},
+        fleet: r.fleet || r.sub_assets || r.manifest || [],
+        state: r.state || r.flag_state || null,
+        // Preserve all raw fields for the vault display
+        _raw: r,
       };
-    }).filter(Boolean);
-    
-    console.log(`[RWABidAsk] Loaded ${transformed.length} listings from Supabase`);
+    }); // No filter — include ALL rows even without coords
+
+    const withCoords = transformed.filter(a => a._hasCoords).length;
+    console.log(`[RWABidAsk] Loaded ${transformed.length} assets (${withCoords} with globe pins)`);
     return transformed;
+
   } catch (err) {
     console.error('[RWABidAsk] Exception fetching listings:', err);
     setStatus('LEDGER FETCH FAILED — CHECK CONNECTION');
@@ -2784,9 +2852,10 @@ function fmtSliderPrice(v) {
 function onPriceSlider() {
   let mn = parseInt(document.getElementById('price-min').value);
   let mx = parseInt(document.getElementById('price-max').value);
+  // Dual-handle: swap if crossed
   if (mn > mx) { const t = mn; mn = mx; mx = t; }
-  document.getElementById('price-min-label').textContent = fmtSliderPrice(mn);
-  document.getElementById('price-max-label').textContent = fmtSliderPrice(mx);
+  const readout = document.getElementById('price-readout');
+  if (readout) readout.textContent = fmtSliderPrice(mn) + ' — ' + fmtSliderPrice(mx);
   const pct1 = (mn/36)*100, pct2 = (mx/36)*100;
   const fill = document.getElementById('slider-fill');
   if (fill) { fill.style.left = pct1 + '%'; fill.style.width = (pct2-pct1) + '%'; }
@@ -2803,8 +2872,8 @@ function resetPriceSlider() {
   document.getElementById('price-max').value = 36;
   sliderMinPrice = 1;
   sliderMaxPrice = 1e12;
-  document.getElementById('price-min-label').textContent = '$1';
-  document.getElementById('price-max-label').textContent = '$1T';
+  const readout = document.getElementById('price-readout');
+  if (readout) readout.textContent = '$1 — $1T';
   const fill = document.getElementById('slider-fill');
   if (fill) { fill.style.left = '0%'; fill.style.width = '100%'; }
   const filtered = filterAssets(ASSETS);
@@ -3271,13 +3340,15 @@ function selectAsset(id) {
     const role = (currentUserRole || '').toLowerCase();
     const isPro = role === 'pro' || role === 'broker' || role === 'owner' || role === 'institutional';
 
-    // ── Header ─────────────────────────────────────────────────
-    // Clinical Identity: use specific asset title/name, never generic category
-    const assetTitle = a.title || a.name || a.address || a.asset_name || 'Unnamed Asset';
-    const assetSub = (a.title || a.name) ? (a.address || a.city || '') : (a.city || a.country || '');
+    // ── Clinical Identity Header ─────────────────────────────
+    // 'address' in our model IS the title (mapped in fetchListings)
+    // Secondary line: city / location / jurisdiction
+    const assetTitle = a.address || a.title || a.name || ('Asset #' + a.id);
+    const assetSub   = [a.city, a.country].filter(Boolean).filter((v,i,arr)=>arr.indexOf(v)===i).join(', ') || '—';
+    const catLabel   = (ASSET_CATEGORIES.find(c=>c.id===getAssetCategory(a.type))||{label:a.type||'ASSET'}).label;
     document.getElementById('rhead').innerHTML = `
-        <div class="rtype">${(a.type || 'ASSET').toUpperCase()} // ${(a.status || 'ACTIVE').toUpperCase()}</div>
-        <div class="rname">${escapeHtml(assetTitle)}</div>
+        <div class="rtype">${catLabel} // ${(a.status || 'ACTIVE').toUpperCase()}</div>
+        <div class="rname" style="font-size:14px;line-height:1.3">${escapeHtml(assetTitle)}</div>
         <div class="rcity">${escapeHtml(assetSub)}</div>
         <div class="rprice-row">
             <div class="rprice">${window.fmtPrice(a.price)}</div>
@@ -3403,19 +3474,19 @@ function selectAsset(id) {
     const vaultSection = currentUser
       ? `<div class="specs-grid">${specsGridHtml}</div>
          <div class="rinner">${fleetHtml || ''}${finHtml || ''}</div>`
-      : `<div style="position:relative;">
-           <div style="filter:blur(3px);pointer-events:none;user-select:none;opacity:.4;">
+      : `<div style="position:relative;min-height:200px;">
+           <div style="filter:blur(4px);pointer-events:none;user-select:none;opacity:.35;overflow:hidden;max-height:240px;">
              <div class="specs-grid">${specsGridHtml}</div>
              <div class="rinner" style="pointer-events:none">${fleetHtml || ''}</div>
            </div>
-           <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(14,20,42,.88);backdrop-filter:blur(3px);z-index:10;padding:24px;text-align:center;">
-             <div style="font-size:8px;font-weight:700;letter-spacing:2.5px;color:var(--cyan);text-transform:uppercase;">LEDGER ACCESS</div>
-             <div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.5;">Access to Ledger<br>Requires Verification</div>
-             <div style="font-size:10px;color:var(--muted);line-height:1.7;max-width:220px;">Full specifications, fleet manifest, and financials are restricted to verified users.</div>
-             <div style="display:flex;gap:8px;margin-top:4px;">
-               <button onclick="openModal('signin')" style="padding:10px 20px;background:var(--cyan);color:#000;border:none;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px;">LOG IN</button>
-               <button onclick="openModal('register')" style="padding:10px 20px;background:none;border:1px solid var(--border2);color:var(--silver);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px;">SIGN UP</button>
-             </div>
+           <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(10,14,28,.92);backdrop-filter:blur(4px);z-index:10;padding:20px;text-align:center;">
+             <div style="width:32px;height:1px;background:var(--cyan);opacity:.5;"></div>
+             <div style="font-size:8px;font-weight:700;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;opacity:.9;">RESTRICTED DATA</div>
+             <div style="font-size:14px;font-weight:800;color:var(--text);line-height:1.4;letter-spacing:-.2px;">Verification Required<br>to Access Ledger Data</div>
+             <div style="font-size:9px;color:var(--muted);line-height:1.8;max-width:210px;">Specs, fleet manifest, and financial data<br>are visible to verified members only.</div>
+             <div style="width:32px;height:1px;background:var(--border2);margin:2px 0;"></div>
+             <button onclick="openModal('register')" style="width:200px;padding:12px 0;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:2px;box-shadow:0 0 20px rgba(0,255,200,.25);">$10 SIGN UP — ACCESS LEDGER</button>
+             <button onclick="openModal('signin')" style="width:200px;padding:9px 0;background:none;border:1px solid rgba(0,255,200,.3);color:var(--cyan);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px;">EXISTING MEMBER — LOG IN</button>
            </div>
          </div>`;
 
@@ -3800,9 +3871,10 @@ function renderDOMMarkers() {
   layer.innerHTML = '';
   domMarkers = {};
   
-  const physicalAssets = ASSETS.filter(a => isPhysicalAsset(a.type));
-  
-  physicalAssets.forEach(a => addPriceMarker(a));
+  // Only pin assets that have real coordinates — all assets still appear in list
+  const pinnableAssets = ASSETS.filter(a => a._hasCoords !== false && !isNaN(a.lat) && !isNaN(a.lng) && !(a.lat === 0 && a.lng === 0));
+  console.log(`[RWABidAsk] Globe pins: ${pinnableAssets.length} of ${ASSETS.length} assets`);
+  pinnableAssets.forEach(a => addPriceMarker(a));
   
   Object.values(domMarkers).forEach(({ el }) => { 
     el.style.display = 'none';
