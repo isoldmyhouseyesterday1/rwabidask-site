@@ -1942,6 +1942,163 @@ body { min-width: 900px; overflow-x: auto; }
 }
 
 
+
+/* ── PHOTO GALLERY ─────────────────────────────────────────── */
+.photo-gallery {
+  display: flex;
+  gap: 3px;
+  padding: 8px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.photo-gallery::-webkit-scrollbar { height: 2px; }
+.photo-gallery::-webkit-scrollbar-thumb { background: var(--border2); }
+.photo-thumb {
+  width: 80px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: 1px solid var(--border2);
+  transition: border-color .15s, transform .15s;
+}
+.photo-thumb:hover { border-color: var(--cyan); transform: scale(1.04); }
+.photo-thumb.main-thumb { width: 100%; height: 140px; border-radius: 2px; object-fit: cover; }
+.photo-placeholder {
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: var(--border2);
+  letter-spacing: 4px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* ── SPECS GRID (Clinical 10-K) ─────────────────────────────── */
+.specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.spec-cell {
+  padding: 9px 12px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.spec-cell:nth-child(even) { border-right: none; }
+.spec-val {
+  font-size: 13px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 2px;
+}
+.spec-lbl {
+  font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+}
+
+/* ── ORDER BOOK TICKER ───────────────────────────────────────── */
+.order-book-ticker {
+  background: rgba(0,255,200,.04);
+  border: 1px solid rgba(0,255,200,.18);
+  border-radius: 3px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+.order-book-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+}
+.order-book-label {
+  font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--cyan); opacity: .8;
+}
+.order-book-live {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 8px; color: var(--green); font-weight: 600; letter-spacing: 1px;
+}
+.order-book-ask {
+  font-size: 22px; font-weight: 800; color: var(--cyan); letter-spacing: -.5px; line-height: 1;
+}
+.order-book-meta { display: flex; gap: 12px; margin-top: 5px; }
+.ob-meta-item { font-size: 9px; color: var(--muted); }
+.ob-meta-val { color: var(--silver); font-weight: 600; }
+
+/* ── FLEET / SUB-ASSET MANIFEST ─────────────────────────────── */
+.fleet-manifest {
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  margin-top: 6px;
+}
+.fleet-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px; border-bottom: 1px solid var(--border);
+  font-size: 9px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 1px;
+}
+.fleet-search {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--font); font-size: 10px;
+  padding: 5px 8px; outline: none; border-radius: 2px; margin: 6px 8px; width: calc(100% - 16px);
+}
+.fleet-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 10px;
+}
+.fleet-item:last-child { border-bottom: none; }
+.fleet-item-name { color: var(--dim); }
+.fleet-item-detail { color: var(--silver); font-weight: 600; }
+
+/* ── ROLE-BASED ACTION BAR ───────────────────────────────────── */
+.action-bar { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.action-bar-public { display: flex; flex-direction: column; gap: 7px; }
+.action-bar-pro { display: flex; flex-direction: column; gap: 7px; }
+.pro-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+  font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold);
+}
+.pro-badge {
+  padding: 2px 7px; background: rgba(226,197,90,.12); border: 1px solid rgba(226,197,90,.3);
+  border-radius: 2px; font-size: 7px; font-weight: 700; letter-spacing: 1.5px; color: var(--gold);
+}
+.abtn-primary {
+  width: 100%; padding: 13px; background: linear-gradient(135deg,#00c49a,#00ffc8);
+  color: #041a12; border: none; font-size: 12px; font-weight: 800;
+  letter-spacing: .8px; text-transform: uppercase; cursor: pointer; border-radius: 2px;
+  transition: opacity .15s, transform .1s;
+}
+.abtn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.abtn-secondary {
+  width: 100%; padding: 10px; background: none;
+  border: 1px solid rgba(0,255,200,.3); color: var(--cyan);
+  font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+.abtn-secondary:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.6); }
+.abtn-pro-manage {
+  width: 100%; padding: 11px; background: rgba(226,197,90,.08);
+  border: 1px solid rgba(226,197,90,.35); color: var(--gold);
+  font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+.abtn-pro-manage:hover { background: rgba(226,197,90,.15); }
+.abtn-pro-leads {
+  width: 100%; padding: 9px; background: none;
+  border: 1px solid rgba(34,197,94,.3); color: var(--green);
+  font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+.abtn-pro-leads:hover { background: rgba(34,197,94,.08); }
+.abtn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.abtn-aux {
+  padding: 9px 8px; background: none; border: 1px solid var(--border2);
+  color: var(--dim); font-size: 9px; font-weight: 700;
+  letter-spacing: .5px; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+.abtn-aux:hover { border-color: var(--border3); color: var(--silver); }
+
+/* ── RIGHT PANEL: wider on desktop ─────────────────────────── */
+@media (min-width:768px) {
+  #right { width: 360px !important; }
+  #main-row { grid-template-columns: 288px 1fr 360px !important; }
+}
 </style>
 </head>
 <body>
@@ -1999,10 +2156,10 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="ptabs" id="category-tabs"></div>
       <div class="frow" id="price-filters">
         <button class="fchip on" onclick="setFilter(this,'any')">Any</button>
-        <button class="fchip" onclick="setFilter(this,'sub1m')">–$1M</button>
-        <button class="fchip" onclick="setFilter(this,'1m5m')">$1–5M</button>
-        <button class="fchip" onclick="setFilter(this,'5m25m')">$5–25M</button>
-        <button class="fchip" onclick="setFilter(this,'25mplus')">$25M+</button>
+        <button class="fchip" onclick="setFilter(this,'micro')" title="$1 – $10K">Micro</button>
+        <button class="fchip" onclick="setFilter(this,'retail')" title="$10K – $2M">Retail</button>
+        <button class="fchip" onclick="setFilter(this,'institutional')" title="$2M – $50M">Inst.</button>
+        <button class="fchip" onclick="setFilter(this,'sovereign')" title="$50M+">Sovereign</button>
       </div>
     </div>
     <div class="list-scroll" id="list-scroll">
@@ -2380,7 +2537,7 @@ async function fetchListingsFromSupabase() {
     setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');
     const { data, error } = await _sb
       .from('listings')
-      .select('*')
+      .select('*, specs, fleet, images, state')
       .eq('status', 'active')
       .order('created_at', { ascending: false });
     
@@ -2426,7 +2583,11 @@ async function fetchListingsFromSupabase() {
         financials: row.financials || {},
         bids: row.bids || [],
         image_url: row.image_url || null,
-        description: row.description || null
+        images: row.images || (row.image_url ? [row.image_url] : []),
+        description: row.description || null,
+        specs: row.specs || {},
+        fleet: row.fleet || [],
+        state: row.state || null,
       };
     }).filter(Boolean);
     
@@ -2551,10 +2712,11 @@ function filterAssets(assets) {
   if (activeTab !== 'all') {
     filtered = filtered.filter(a => getAssetCategory(a.type) === activeTab);
   }
-  if (activeFilter === 'sub1m') filtered = filtered.filter(a => a.price < 1e6);
-  else if (activeFilter === '1m5m') filtered = filtered.filter(a => a.price >= 1e6 && a.price <= 5e6);
-  else if (activeFilter === '5m25m') filtered = filtered.filter(a => a.price > 5e6 && a.price <= 25e6);
-  else if (activeFilter === '25mplus') filtered = filtered.filter(a => a.price > 25e6);
+  // HYPER-SCALE BUCKETS: $1 micro-fractional → $1B+ sovereign
+  if (activeFilter === 'micro')       filtered = filtered.filter(a => a.price > 0 && a.price < 10000);
+  else if (activeFilter === 'retail') filtered = filtered.filter(a => a.price >= 10000 && a.price < 2e6);
+  else if (activeFilter === 'institutional') filtered = filtered.filter(a => a.price >= 2e6 && a.price <= 50e6);
+  else if (activeFilter === 'sovereign') filtered = filtered.filter(a => a.price > 50e6);
   return filtered;
 }
 
@@ -3000,6 +3162,8 @@ function selectAsset(id) {
 
     window.currentAsset = a;
     activeId = a.id;
+    const role = (currentUserRole || '').toLowerCase();
+    const isPro = role === 'pro' || role === 'broker' || role === 'owner' || role === 'institutional';
 
     // ── Header ─────────────────────────────────────────────────
     document.getElementById('rhead').innerHTML = `
@@ -3012,67 +3176,145 @@ function selectAsset(id) {
         </div>
     `;
 
-    // ── Build bid book ──────────────────────────────────────────
+    // ── Photo Gallery ───────────────────────────────────────────
+    const imgs = a.images || (a.image_url ? [a.image_url] : []);
+    let galleryHtml = '';
+    if (imgs.length > 0) {
+        const mainImg = `<img class="photo-thumb main-thumb" src="${escapeHtml(imgs[0])}" alt="Asset photo" onerror="this.style.display='none'">`;
+        const thumbs = imgs.slice(1).map(u => `<img class="photo-thumb" src="${escapeHtml(u)}" alt="" onerror="this.remove()">`).join('');
+        galleryHtml = mainImg + (thumbs ? `<div class="photo-gallery">${thumbs}</div>` : '');
+    } else {
+        galleryHtml = `<div class="photo-placeholder">◎</div>`;
+    }
+
+    // ── Specs Grid from JSONB ───────────────────────────────────
+    const specs = a.specs || {};
+    const mainStruct = (a.structures && a.structures[0]) || {};
+    const specsData = {
+        'Area': a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '—'),
+        'Type': (a.type || '—').toUpperCase(),
+        'Status': (a.status || 'Active').toUpperCase(),
+        'Days Listed': a.days || '—',
+        ...(mainStruct.beds ? { 'Beds': mainStruct.beds, 'Baths': mainStruct.baths || '—' } : {}),
+        ...(specs.year_built ? { 'Year Built': specs.year_built } : {}),
+        ...(specs.lot_size ? { 'Lot Size': specs.lot_size } : {}),
+        ...(specs.zoning ? { 'Zoning': specs.zoning } : {}),
+        ...(specs.units ? { 'Units': specs.units } : {}),
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+    };
+    const specsGridHtml = Object.entries(specsData).map(([k,v]) => `
+        <div class="spec-cell">
+            <div class="spec-val">${escapeHtml(String(v))}</div>
+            <div class="spec-lbl">${escapeHtml(k)}</div>
+        </div>`).join('');
+
+    // ── Order Book Ticker ───────────────────────────────────────
     const bids = Array.isArray(a.bids) ? a.bids : [];
     const highBid = bids.length ? Math.max(...bids.map(b => parseFloat(b.amount) || 0)) : null;
-    const bidBookHtml = highBid
-        ? `<div class="rrow"><span class="rk">HIGHEST OFFER</span><span class="rv hl">${fmtPrice(highBid)}</span></div>`
-        : `<div class="rrow"><span class="rk">HIGHEST OFFER</span><span class="rv" style="color:var(--muted)">NO OFFERS YET</span></div>`;
+    const orderBookHtml = `
+        <div class="order-book-ticker">
+            <div class="order-book-header">
+                <span class="order-book-label">ORDER TO BUY</span>
+                <span class="order-book-live"><span class="live-dot" style="width:5px;height:5px;display:inline-block;"></span>LIVE</span>
+            </div>
+            <div class="order-book-ask">${fmtPrice(a.price)}</div>
+            <div class="order-book-meta">
+                <span class="ob-meta-item">HIGH BID: <span class="ob-meta-val">${highBid ? fmtPrice(highBid) : 'None'}</span></span>
+                <span class="ob-meta-item">OFFERS: <span class="ob-meta-val">${bids.length}</span></span>
+            </div>
+        </div>`;
+
+    // ── Fleet / Sub-Asset Manifest ──────────────────────────────
+    const isFleetAsset = ['business','commercial','infrastructure','aviation','maritime'].includes(a.type);
+    const fleet = a.fleet || (a.specs && a.specs.fleet) || [];
+    let fleetHtml = '';
+    if (isFleetAsset && (fleet.length > 0 || (a.specs && Object.keys(a.specs).length > 0))) {
+        const fleetItems = fleet.length > 0 ? fleet.map(item => `
+            <div class="fleet-item">
+                <span class="fleet-item-name">${escapeHtml(item.name || item.type || 'Asset')}</span>
+                <span class="fleet-item-detail">${escapeHtml(item.count ? item.count + 'x' : (item.value ? fmtPrice(item.value) : '—'))}</span>
+            </div>`).join('') : Object.entries(a.specs || {}).filter(([k]) => !['area','zoning','lot_size','year_built','units'].includes(k)).map(([k,v]) => `
+            <div class="fleet-item">
+                <span class="fleet-item-name">${escapeHtml(k.replace(/_/g,' ').toUpperCase())}</span>
+                <span class="fleet-item-detail">${escapeHtml(String(v))}</span>
+            </div>`).join('');
+        fleetHtml = `<div class="rsect">
+            <div class="rsect-title">ASSET MANIFEST</div>
+            <div class="fleet-manifest">
+                <div class="fleet-header"><span>SUB-ASSETS</span><span style="color:var(--cyan)">${fleet.length || '—'} ITEMS</span></div>
+                <input class="fleet-search" placeholder="Search manifest…" oninput="this.closest('.fleet-manifest').querySelectorAll('.fleet-item').forEach(el=>{el.style.display=el.textContent.toLowerCase().includes(this.value.toLowerCase())?'flex':'none'})">
+                ${fleetItems}
+            </div>
+        </div>`;
+    }
+
+    // ── Financial Specs from Supabase ───────────────────────────
+    const fin = a.financials || {};
+    let finHtml = '';
+    if (Object.keys(fin).length) {
+        finHtml = `<div class="rsect"><div class="rsect-title">FINANCIALS</div>` +
+            Object.entries(fin).map(([k,v]) => `<div class="rrow"><span class="rk">${escapeHtml(k.replace(/_/g,' ').toUpperCase())}</span><span class="rv">${escapeHtml(String(v))}</span></div>`).join('') +
+            `</div>`;
+    }
+
+    // ── Role-Based Action Bar ───────────────────────────────────
+    const actionBarHtml = isPro ? `
+        <div class="action-bar">
+            <div class="action-bar-pro">
+                <div class="pro-header"><span class="pro-badge">PRO</span> BROKER TOOLS</div>
+                <button class="abtn-pro-manage" onclick="showToast('ASSET MANAGEMENT CONSOLE — COMING SOON')">MANAGE ASSET</button>
+                <button class="abtn-pro-leads" onclick="showToast('LEAD LOG: $9.99/EA — ACCESS PENDING')">VIEW LEAD LOG ($9.99/ea)</button>
+                <button class="abtn-pro-manage" onclick="showToast('FULL LEAD BOOK PURCHASE — PENDING')">BUY FULL LEAD BOOK</button>
+                <div class="abtn-row">
+                    <button class="abtn-aux" onclick="showLendingModal()">FINANCING</button>
+                    <button class="abtn-aux" onclick="showInsuranceModal()">INSURANCE</button>
+                </div>
+                <button class="abtn-aux" style="width:100%" onclick="handleSponsor('${a.id}')">SPONSOR THIS LISTING</button>
+            </div>
+        </div>` : `
+        <div class="action-bar">
+            <div class="action-bar-public">
+                <button class="abtn-primary" onclick="logPartnerLead('${a.id}','ACQUIRE'); showToast('INQUIRY TRANSMITTED')">INQUIRE / ACQUIRE</button>
+                <button class="abtn-secondary" onclick="showBidModal()">PLACE OFFER</button>
+                <div class="abtn-row">
+                    <button id="watch-btn" class="abtn-aux" onclick="toggleWatchlist()">WATCHLIST</button>
+                    <button class="abtn-aux" onclick="showLendingModal()">FINANCING</button>
+                </div>
+                <div class="abtn-row">
+                    <button class="abtn-aux" onclick="showInsuranceModal()">INSURANCE</button>
+                    <button class="abtn-aux" onclick="handleSponsor('${a.id}')">SPONSOR</button>
+                </div>
+                <button class="abtn-aux" style="width:100%;border-color:rgba(34,197,94,.25);color:var(--green)" onclick="handleClaim('${a.id}')">CLAIM OWNERSHIP</button>
+            </div>
+        </div>`;
 
     // ── Full body ───────────────────────────────────────────────
     document.getElementById('rbody').innerHTML = `
-    <div class="rinner">
-
-      <!-- ASSET SPEC ROW -->
-      <div class="rsect">
-        <div class="rsect-title">ASSET DETAILS</div>
-        <div class="rrow"><span class="rk">TYPE</span><span class="rv">${(a.type||'Asset').toUpperCase()}</span></div>
-        <div class="rrow"><span class="rk">STATUS</span><span class="rv" style="color:var(--green)">ACTIVE</span></div>
-        ${a.sqft ? `<div class="rrow"><span class="rk">AREA</span><span class="rv">${parseInt(a.sqft).toLocaleString()} SF</span></div>` : ''}
-        <div class="rrow"><span class="rk">DAYS LISTED</span><span class="rv">${a.days || '—'}</span></div>
-        ${a.tokenized ? `<div class="rrow"><span class="rk">DIGITIZED</span><span class="rv hl">YES ✓</span></div>` : ''}
-      </div>
-
-      <!-- BID ORDER BOOK -->
-      <div class="rsect">
-        <div class="rsect-title">CURRENT OFFERS</div>
-        ${bidBookHtml}
-        <div class="rrow"><span class="rk">ASKING PRICE</span><span class="rv hl">${fmtPrice(a.price)}</span></div>
-      </div>
-
-      <!-- PRIMARY ACTION GRID -->
-      <div class="act-grid" style="margin-bottom:18px;">
-        <button class="abtn a-buy" style="grid-column:span 2;"
-          onclick="logPartnerLead('${a.id}','ACQUIRE'); showToast('INQUIRY SENT')">
-          INQUIRE / ACQUIRE
-        </button>
-        <button class="abtn a-bid"
-          onclick="showBidModal()">
-          PLACE OFFER
-        </button>
-        <button id="watch-btn" class="abtn a-save"
-          onclick="toggleWatchlist()">
-          WATCHLIST
-        </button>
-        <button class="abtn a-lend" style="grid-column:span 2;"
-          onclick="showLendingModal()">
-          FINANCING OPTIONS
-        </button>
-        <button class="abtn a-lend" style="grid-column:span 2;"
-          onclick="showInsuranceModal()">
-          INSURANCE / RISK COVERAGE
-        </button>
-        <button class="abtn a-sponsor" style="grid-column:span 2;"
-          onclick="handleSponsor('${a.id}')">
-          SPONSOR THIS LISTING
-        </button>
-        <button class="abtn a-claim" style="grid-column:span 2;"
-          onclick="handleClaim('${a.id}')">
-          CLAIM OWNERSHIP
-        </button>
-      </div>
-
-    </div>`;
+        ${galleryHtml}
+        <div class="specs-grid">${specsGridHtml}</div>
+        <div class="rinner">
+            ${orderBookHtml}
+            ${fleetHtml}
+            ${finHtml}
+            <div class="rsect">
+                <div class="rsect-title">STRUCTURE & INFRASTRUCTURE</div>
+                ${(a.structures || []).map(s => `
+                    <div class="struct-card">
+                        <div class="struct-label">${escapeHtml(s.type || 'Structure')}</div>
+                        ${Object.entries(s).filter(([k])=>k!=='type').map(([k,v])=>`<div class="rrow"><span class="rk">${escapeHtml(k.replace(/_/g,' '))}</span><span class="rv">${escapeHtml(String(v))}</span></div>`).join('')}
+                    </div>`).join('') || '<div style="font-size:10px;color:var(--muted)">No structure data</div>'}
+            </div>
+            ${(a.description ? `<div class="rsect"><div class="rsect-title">DESCRIPTION</div><div style="font-size:11px;color:var(--dim);line-height:1.7">${escapeHtml(a.description)}</div></div>` : '')}
+            <div class="rsect">
+                <div class="rsect-title">LEDGER</div>
+                <div class="rrow"><span class="rk">ASSET ID</span><span class="rv" style="font-family:monospace;font-size:9px">${a.id}</span></div>
+                <div class="rrow"><span class="rk">SOURCE</span><span class="rv">${escapeHtml(a.source || 'SUPABASE LEDGER')}</span></div>
+                <div class="rrow"><span class="rk">DATA PERMANENCE</span><span class="rv hl">PERMANENT ✓</span></div>
+            </div>
+        </div>
+        ${actionBarHtml}
+        <div style="padding:8px 16px 10px;font-size:8px;color:var(--muted);line-height:1.7;border-top:1px solid var(--border)">RWABidAsk Permanent Ledger™ — Data persists beyond listing expiry. Not financial advice.</div>
+    `;
 
     // ── Map fly-to & mobile drawer ──────────────────────────────
     if (typeof flyTo === 'function') flyTo(a.lat, a.lng, 1400, 45);
@@ -3632,8 +3874,8 @@ async function restoreSession() {
   const { data } = await _sb.auth.getSession(); 
   if (data?.session?.user) { 
     currentUser = data.session.user; 
-    currentUserRole = currentUser.user_metadata?.role || 'Investor'; 
-    updateAuthUI(); 
+    currentUserRole = currentUser.user_metadata?.role || null;
+    await updateAuthUI(); 
     isAuthenticated = true; 
     document.getElementById('auth-gate')?.classList.add('hidden'); 
     if (map3dEl) onCameraChange(); 
@@ -3666,11 +3908,12 @@ async function signIn(email, password) {
     const { data, error } = await _sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
     currentUser = data.user;
+    currentUserRole = data.user?.user_metadata?.role || null;
     isAuthenticated = true;
-    updateAuthUI();
+    await updateAuthUI();
     document.getElementById('auth-gate').classList.add('hidden');
     closeModal();
-    toast(`Welcome back, ${currentUser.email?.split('@')[0] || 'Investor'}!`);
+    showToast(`AUTHENTICATED: ${currentUser.email?.split('@')[0] || 'INVESTOR'}`);
     if (map3dEl) onCameraChange();
     return true;
   } catch (e) {
@@ -3710,13 +3953,24 @@ async function signOut() {
   if (map3dEl) onCameraChange();
 }
 
-function updateAuthUI() { 
+async function updateAuthUI() { 
   const signinBtn = document.getElementById('signin-btn'); 
   const joinBtn = document.getElementById('join-btn'); 
-  if (currentUser) { 
+  if (currentUser) {
+    // Fetch role from Supabase profiles table if available
+    if (_sb && !currentUserRole) {
+      try {
+        const { data: profile } = await _sb.from('profiles').select('role').eq('id', currentUser.id).maybeSingle();
+        if (profile?.role) currentUserRole = profile.role;
+        else currentUserRole = currentUser.user_metadata?.role || 'Investor';
+      } catch(e) { currentUserRole = currentUser.user_metadata?.role || 'Investor'; }
+    }
+    const role = (currentUserRole || 'Investor').toLowerCase();
+    const isPro = role === 'pro' || role === 'broker' || role === 'owner' || role === 'institutional';
     if (signinBtn) { 
-      signinBtn.textContent = (currentUser.email?.split('@')[0] || 'Account').slice(0, 12); 
-      signinBtn.onclick = () => toast(`Logged in as ${currentUser.email}`); 
+      signinBtn.textContent = ((isPro ? '[PRO] ' : '') + (currentUser.email?.split('@')[0] || 'Account')).slice(0, 16); 
+      signinBtn.style.color = isPro ? 'var(--gold)' : '';
+      signinBtn.onclick = () => showToast(`SIGNED IN: ${currentUser.email} [${(currentUserRole||'Investor').toUpperCase()}]`); 
     } 
     if (joinBtn) { 
       joinBtn.textContent = 'Sign Out'; 
@@ -3725,10 +3979,11 @@ function updateAuthUI() {
   } else { 
     if (signinBtn) { 
       signinBtn.textContent = 'Sign In'; 
+      signinBtn.style.color = '';
       signinBtn.onclick = () => openModal('signin'); 
     } 
     if (joinBtn) { 
-      joinBtn.textContent = 'Join'; 
+      joinBtn.textContent = 'Join Free'; 
       joinBtn.onclick = () => openModal('register'); 
     } 
   } 
@@ -3813,8 +4068,8 @@ function renderMobileListViewFull(assets) {
   ).join('');
   
   const priceFilters = [
-    { id: 'any', label: 'Any' }, { id: 'sub1m', label: '–$1M' },
-    { id: '1m5m', label: '$1–5M' }, { id: '5m25m', label: '$5–25M' }, { id: '25mplus', label: '$25M+' }
+    { id: 'any', label: 'Any' }, { id: 'micro', label: 'Micro<$10K' },
+    { id: 'retail', label: 'Retail<$2M' }, { id: 'institutional', label: 'Inst.<$50M' }, { id: 'sovereign', label: 'Sovereign' }
   ];
   const priceHtml = priceFilters.map(pf => 
     `<button class="list-price-chip ${activeFilter === pf.id ? 'on' : ''}" data-price="${pf.id}" style="padding:4px 10px;font-size:9px;background:none;border:1px solid var(--border2);margin:2px;border-radius:2px;${activeFilter === pf.id ? 'border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)' : 'color:var(--dim)'}">${pf.label}</button>`
