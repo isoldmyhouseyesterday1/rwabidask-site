@@ -2100,45 +2100,16 @@ body { min-width: 900px; overflow-x: auto; }
   #main-row { grid-template-columns: 288px 1fr 360px !important; }
 }
 
-/* ── LOG SLIDER ─────────────────────────────────────────────── */
-#price-min, #price-max {
-  -webkit-appearance: none; appearance: none;
-  position: absolute; top: 50%; left: 0; right: 0;
-  transform: translateY(-50%); width: 100%;
-  height: 20px; background: transparent; outline: none;
-  margin: 0; padding: 0; pointer-events: auto;
+/* ── CUSTOM DUAL-HANDLE SLIDER ──────────────────────────────── */
+#dual-slider { touch-action: none; }
+#handle-min:hover, #handle-max:hover {
+  box-shadow: 0 0 14px rgba(0,255,200,.9), 0 0 4px rgba(0,0,0,.5) !important;
+  transform: translate(-50%,-50%) scale(1.15) !important;
 }
-#price-min::-webkit-slider-thumb, #price-max::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 16px; height: 16px; border-radius: 50%;
-  background: var(--cyan); border: 2px solid #0d1526;
-  cursor: ew-resize; box-shadow: 0 0 8px rgba(0,255,200,.6), 0 2px 4px rgba(0,0,0,.4);
-  transition: box-shadow .1s;
+#handle-min:active, #handle-max:active {
+  box-shadow: 0 0 20px rgba(0,255,200,1) !important;
 }
-#price-min::-webkit-slider-thumb:hover, #price-max::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 14px rgba(0,255,200,.9), 0 2px 6px rgba(0,0,0,.5);
-}
-#price-min::-moz-range-thumb, #price-max::-moz-range-thumb {
-  width: 16px; height: 16px; border-radius: 50%;
-  background: var(--cyan); border: 2px solid #0d1526;
-  cursor: ew-resize; box-shadow: 0 0 8px rgba(0,255,200,.6);
-}
-#price-min::-webkit-slider-runnable-track, #price-max::-webkit-slider-runnable-track {
-  background: transparent; height: 2px;
-}
-#price-min { z-index: 4; }
-#price-max { z-index: 3; }
-/* High-contrast digital readout */
-#price-min-label, #price-max-label {
-  font-size: 11px; font-weight: 800; color: var(--cyan);
-  font-variant-numeric: tabular-nums; letter-spacing: .3px;
-  text-shadow: 0 0 8px rgba(0,255,200,.4);
-}
-#price-slider-wrap .readout-center {
-  text-align: center; font-size: 10px; color: var(--silver);
-  font-variant-numeric: tabular-nums; letter-spacing: .5px;
-  margin-top: 2px; min-height: 14px;
-}
+#price-readout { transition: none; }
 </style>
 </head>
 <body>
@@ -2194,23 +2165,24 @@ body { min-width: 900px; overflow-x: auto; }
     <div class="left-head">
       <div class="left-title">Global Directory</div>
       <div class="ptabs" id="category-tabs"></div>
-      <div id="price-slider-wrap" style="padding:10px 14px 8px;border-bottom:1px solid var(--border);flex-shrink:0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+      <div id="price-slider-wrap" style="padding:10px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">PRICE RANGE</span>
           <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="resetPriceSlider()">RESET</button>
         </div>
-        <div style="text-align:center;margin-bottom:6px;">
-          <span id="price-readout" style="font-size:11px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 8px rgba(0,255,200,.35)">$1 — $1T</span>
+        <div style="text-align:center;margin-bottom:7px;">
+          <span id="price-readout" style="font-size:12px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 10px rgba(0,255,200,.4)">$1 — $1T</span>
         </div>
-        <div style="position:relative;height:24px;margin:0 6px;">
+        <div id="dual-slider" style="position:relative;height:20px;margin:0 8px;user-select:none;">
           <div id="slider-track" style="position:absolute;top:50%;left:0;right:0;height:2px;background:var(--border2);transform:translateY(-50%);border-radius:1px;"></div>
-          <div id="slider-fill" style="position:absolute;top:50%;left:0%;width:100%;height:2px;background:var(--cyan);transform:translateY(-50%);border-radius:1px;pointer-events:none;box-shadow:0 0 6px rgba(0,255,200,.3);"></div>
-          <input type="range" id="price-min" min="0" max="36" step="1" value="0" oninput="onPriceSlider()">
-          <input type="range" id="price-max" min="0" max="36" step="1" value="36" oninput="onPriceSlider()">
+          <div id="slider-fill" style="position:absolute;top:50%;left:0%;width:100%;height:2px;background:var(--cyan);transform:translateY(-50%);border-radius:1px;pointer-events:none;box-shadow:0 0 6px rgba(0,255,200,.35);"></div>
+          <div id="handle-min" style="position:absolute;top:50%;width:16px;height:16px;background:var(--cyan);border:2px solid #0d1526;border-radius:50%;transform:translate(-50%,-50%);cursor:ew-resize;box-shadow:0 0 8px rgba(0,255,200,.6);z-index:5;left:0%;"></div>
+          <div id="handle-max" style="position:absolute;top:50%;width:16px;height:16px;background:var(--cyan);border:2px solid #0d1526;border-radius:50%;transform:translate(-50%,-50%);cursor:ew-resize;box-shadow:0 0 8px rgba(0,255,200,.6);z-index:4;left:100%;"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:5px;">
-          <span style="font-size:8px;color:var(--muted);letter-spacing:.5px">$1</span>
-          <span style="font-size:8px;color:var(--muted);letter-spacing:.5px">$1T</span>
+          <span style="font-size:8px;color:var(--muted)">$1</span>
+          <span id="price-fine-tune" style="font-size:8px;color:var(--muted);letter-spacing:.3px;text-align:center;flex:1"></span>
+          <span style="font-size:8px;color:var(--muted)">$1T</span>
         </div>
       </div>
     </div>
@@ -2348,12 +2320,12 @@ let markersRendered = false;
 const ASSET_CATEGORIES = [
   { id: 'all',            label: 'ALL',               physical: false },
   { id: 'financial',      label: 'FINANCIALS',         physical: false },
+  { id: 'equities',       label: 'EQUITIES',           physical: false },
   { id: 'realestate',     label: 'REAL ESTATE',        physical: true  },
   { id: 'infrastructure', label: 'INFRASTRUCTURE',     physical: true  },
   { id: 'energy',         label: 'ENERGY',             physical: true  },
   { id: 'maritime',       label: 'MARITIME',           physical: true  },
   { id: 'aviation',       label: 'AVIATION',           physical: true  },
-  { id: 'resources',      label: 'NATURAL RESOURCES',  physical: true  },
 ];
 
 function getAssetCategory(type) {
@@ -2371,39 +2343,52 @@ function getAssetCategory(type) {
     satellite:'infrastructure', telecom:'infrastructure', port:'infrastructure',
     pipeline:'infrastructure', rail:'infrastructure', road:'infrastructure',
     datacenter:'infrastructure', 'data center':'infrastructure', tower:'infrastructure',
+    cable:'infrastructure', dam:'infrastructure', desalination:'infrastructure',
     // ── Energy ──────────────────────────────────────────────
     energy:'energy', solar:'energy', wind:'energy', 'power plant':'energy',
     nuclear:'energy', hydro:'energy', geothermal:'energy', battery:'energy',
     grid:'energy', 'energy storage':'energy', biomass:'energy', powerplant:'energy',
+    'wind farm':'energy', 'solar farm':'energy', substation:'energy',
     // ── Maritime ────────────────────────────────────────────
     maritime:'maritime', vessel:'maritime', ship:'maritime', boat:'maritime',
     yacht:'maritime', tanker:'maritime', ferry:'maritime', cargo:'maritime',
     submarine:'maritime', barge:'maritime', trawler:'maritime',
+    'cargo ship':'maritime', 'oil tanker':'maritime', cruiser:'maritime',
     // ── Aviation ────────────────────────────────────────────
     aviation:'aviation', aircraft:'aviation', airplane:'aviation',
     jet:'aviation', helicopter:'aviation', drone:'aviation', hangar:'aviation',
-    // ── Natural Resources ───────────────────────────────────
-    resources:'resources', minerals:'resources', mining:'resources',
-    oil:'resources', gas:'resources', timber:'resources',
-    farmland:'resources', agriculture:'resources', coal:'resources', lithium:'resources',
-    // ── Financials ──────────────────────────────────────────
+    'private jet':'aviation', turboprop:'aviation', rotorcraft:'aviation',
+    // ── EQUITIES — Business Brokerage, PE, Tokenized Stocks ──
+    equities:'equities', equity:'equities', stock:'equities',
+    stocks:'equities', share:'equities', shares:'equities',
+    business:'equities', 'business brokerage':'equities',
+    'private equity':'equities', 'pe fund':'equities', reit:'equities',
+    etf:'equities', fund:'equities', 'venture capital':'equities',
+    'tokenized stock':'equities', 'tokenized equity':'equities',
+    spac:'equities', ipo:'equities', 'hedge fund':'equities',
+    // ── Financials — Debt, Bonds, IP, Credit ────────────────
     financial:'financial', financials:'financial', debt:'financial',
-    bond:'financial', 'treasury bill':'financial', treasury:'financial',
-    ip:'financial', patent:'financial', copyright:'financial',
-    credit:'financial', loan:'financial', stock:'financial',
-    equity:'financial', equities:'financial', fund:'financial',
-    reit:'financial', etf:'financial', 'private equity':'financial',
-    business:'financial', tranche:'financial', note:'financial', cdo:'financial',
+    bond:'financial', bonds:'financial', 'treasury bill':'financial',
+    treasury:'financial', ip:'financial', patent:'financial',
+    copyright:'financial', credit:'financial', loan:'financial',
+    tranche:'financial', note:'financial', cdo:'financial',
+    clo:'financial', mbs:'financial', abs:'financial',
+    'receivables':'financial', 'trade finance':'financial',
+    // ── Natural Resources (maps to financial bucket now) ────
+    resources:'financial', minerals:'financial', mining:'financial',
+    oil:'financial', gas:'financial', timber:'financial',
+    farmland:'realestate', agriculture:'realestate',
+    coal:'financial', lithium:'financial',
   };
   if (map[t]) return map[t];
-  // fuzzy fallback
-  if (t.includes('real') || t.includes('estat')) return 'realestate';
-  if (t.includes('infra') || t.includes('satell') || t.includes('bridge') || t.includes('port')) return 'infrastructure';
-  if (t.includes('solar') || t.includes('wind') || t.includes('power') || t.includes('energ')) return 'energy';
-  if (t.includes('mar') || t.includes('vessel') || t.includes('ship') || t.includes('yacht')) return 'maritime';
-  if (t.includes('avi') || t.includes('air') || t.includes('jet') || t.includes('plane')) return 'aviation';
-  if (t.includes('resour') || t.includes('min') || t.includes('oil') || t.includes('farm')) return 'resources';
-  return 'financial'; // default: financials bucket
+  // fuzzy fallback — order matters, more specific first
+  if (t.includes('real') || t.includes('estat') || t.includes('propert')) return 'realestate';
+  if (t.includes('infra') || t.includes('satell') || t.includes('bridge') || t.includes('tunnel') || t.includes('port')) return 'infrastructure';
+  if (t.includes('solar') || t.includes('wind') || t.includes('power') || t.includes('nuclear') || t.includes('hydro')) return 'energy';
+  if (t.includes('mar') || t.includes('vessel') || t.includes('ship') || t.includes('yacht') || t.includes('boat')) return 'maritime';
+  if (t.includes('avi') || t.includes('air') || t.includes('jet') || t.includes('plane') || t.includes('heli')) return 'aviation';
+  if (t.includes('busi') || t.includes('equit') || t.includes('stock') || t.includes('fund') || t.includes('reit')) return 'equities';
+  return 'financial'; // default
 }
 
 function isPhysicalAsset(type) {
@@ -2657,14 +2642,44 @@ async function fetchListingsFromSupabase() {
       const r = Object.assign({}, assetInfo, row);
 
       // ── Coordinates — check every known column name ──
-      const lat = parseFloat(r.lat ?? r.latitude ?? r.Latitude ?? r.lat_lng?.lat ?? 0);
-      const lng = parseFloat(r.lng ?? r.longitude ?? r.Longitude ?? r.lat_lng?.lng ?? 0);
+      let lat = parseFloat(r.lat ?? r.latitude ?? r.Latitude ?? r.lat_lng?.lat ?? '');
+      let lng = parseFloat(r.lng ?? r.longitude ?? r.Longitude ?? r.lat_lng?.lng ?? '');
 
-      // Only skip if truly no coordinates — never skip due to missing image/desc
-      if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) {
-        // Assign a fallback position near 0,0 so it still shows — log it
-        console.warn('[RWABidAsk] No coords for row id=' + r.id + ', skipping globe pin but still listing');
-        // Still include in list but without a globe marker
+      let _hasCoords = !isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0);
+
+      // ── FALLBACK: randomized transport hub coords for assets without location ──
+      if (!_hasCoords) {
+        const rawType2 = (r.asset_type || r.category || r.type || '').toLowerCase();
+        const cat2 = getAssetCategory(rawType2);
+        const jitter = () => (Math.random() - 0.5) * 0.18; // ~10km spread
+
+        // Maritime hubs: Port of Singapore, Rotterdam, Los Angeles, Shanghai
+        const MARITIME_HUBS = [
+          [1.2644, 103.8218], [51.9225, 4.4792], [33.7395, -118.2595], [31.2222, 121.4581]
+        ];
+        // Aviation hubs: Dubai World Central, Teterboro NJ, Singapore Changi, London Biggin Hill
+        const AVIATION_HUBS = [
+          [24.8963, 55.1614], [40.8501, -74.0607], [1.3644, 103.9915], [51.3309, 0.0323]
+        ];
+        // Financial hubs: NYC, London, Singapore, Hong Kong, Dubai
+        const FINANCIAL_HUBS = [
+          [40.7128, -74.0060], [51.5074, -0.1278], [1.3521, 103.8198], [22.3193, 114.1694], [25.2048, 55.2708]
+        ];
+        // Infrastructure/Energy hubs: spread globally
+        const INFRA_HUBS = [
+          [51.5074, -0.1278], [35.6762, 139.6503], [28.6139, 77.2090], [-33.8688, 151.2093]
+        ];
+
+        let hubs = FINANCIAL_HUBS;
+        if (cat2 === 'maritime') hubs = MARITIME_HUBS;
+        else if (cat2 === 'aviation') hubs = AVIATION_HUBS;
+        else if (cat2 === 'infrastructure' || cat2 === 'energy') hubs = INFRA_HUBS;
+
+        const hub = hubs[Math.floor(Math.random() * hubs.length)];
+        lat = hub[0] + jitter();
+        lng = hub[1] + jitter();
+        _hasCoords = true; // now has a valid fallback pin
+        console.log('[RWABidAsk] Hub fallback for id=' + r.id + ' (' + cat2 + ') → ' + lat.toFixed(3) + ',' + lng.toFixed(3));
       }
 
       // ── Asset Identity — title is THE primary identifier ──
@@ -2686,10 +2701,14 @@ async function fetchListingsFromSupabase() {
         // Secondary location line
         city: r.city || r.location || r.port_of_registry || r.domicile || 'Global',
         country: r.country || r.jurisdiction || 'Global',
-        lat: isNaN(lat) ? 0 : lat,
-        lng: isNaN(lng) ? 0 : lng,
-        _hasCoords: !isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0),
-        price: parseFloat(r.price || r.asking_price || r.market_value || r.face_value || 0),
+        lat: lat,
+        lng: lng,
+        _hasCoords: _hasCoords,
+        // price_usd is the canonical field; fall back through all known aliases; always float
+        price: parseFloat(
+          String(r.price_usd || r.price || r.asking_price || r.market_value ||
+                 r.face_value || r.value || r.usd_value || '0').replace(/[^0-9.]/g, '')
+        ) || 0,
         type: rawType,
         sqft: r.sqft ? parseInt(r.sqft) : (r.gross_tonnage ? r.gross_tonnage : null),
         status: r.listing_status || r.status || 'Active',
@@ -2791,8 +2810,12 @@ function setStatus(msg) {
 
 function typeClass(type) {
   const cat = getAssetCategory(type);
-  const map = { realestate: 't-res', commercial: 't-com', resources: 't-res2', aviation: 't-avi', maritime: 't-mar', infrastructure: 't-energy', financial: 't-fin' };
-  return map[cat] || 't-res';
+  const map = {
+    realestate: 't-res', commercial: 't-com', resources: 't-res2',
+    aviation: 't-avi', maritime: 't-mar', infrastructure: 't-energy',
+    financial: 't-fin', equities: 't-biz', energy: 't-fin'
+  };
+  return map[cat] || 't-fin';
 }
 
 function escapeHtml(str) {
@@ -2820,84 +2843,170 @@ function renderCategories() {
 
 function setCategory(catId, btn) {
   document.querySelectorAll('.ptab').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
+  if (btn) btn.classList.add('on');
   activeTab = catId;
   SEARCH_ACTIVE = false;
-  document.getElementById('search-input').value = '';
+  const si = document.getElementById('search-input');
+  if (si) { si.value = ''; }
   currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
-  syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
+  // Hard-link: immediately re-render globe pins for this category
+  if (markersRendered) {
+    const visibleIds = new Set(filtered.filter(a => a._hasCoords).map(a => String(a.id)));
+    Object.keys(domMarkers).forEach(id => {
+      domMarkers[id].el.style.display = visibleIds.has(String(id)) ? 'flex' : 'none';
+    });
+    if (map3dEl) reprojectMarkersWithMatrix();
+  }
+  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull(filtered);
 }
 
-// Log slider: 37 steps, $1 → $1T
-function logSliderToPrice(v) {
-  if (v <= 0) return 1;
-  if (v >= 36) return 1e12;
-  return Math.round(Math.pow(10, v * (12 / 36)));
+// ── LOG SLIDER ENGINE (Custom drag — fully independent handles) ──
+const SLIDER_STEPS = 48; // more steps = smoother
+let sliderMinStep = 0;
+let sliderMaxStep = SLIDER_STEPS;
+let sliderMinPrice = 1;
+let sliderMaxPrice = 1e12;
+
+function logSliderToPrice(step) {
+  if (step <= 0) return 1;
+  if (step >= SLIDER_STEPS) return 1e12;
+  // True log scale: 10^(step/steps * 12) → maps 0→$1, 48→$1T
+  return Math.round(Math.pow(10, (step / SLIDER_STEPS) * 12));
 }
 
-function fmtSliderPrice(v) {
-  if (v <= 0) return '$1';
-  if (v >= 36) return '$1T';
-  const p = logSliderToPrice(v);
+function fmtSliderPrice(step) {
+  const p = logSliderToPrice(step);
   if (p >= 1e12) return '$1T';
-  if (p >= 1e9) return '$' + (p/1e9).toFixed(p>=1e11?0:1) + 'B';
-  if (p >= 1e6) return '$' + (p/1e6).toFixed(p>=1e8?0:1) + 'M';
+  if (p >= 1e9) return '$' + (p/1e9).toFixed(p >= 1e11 ? 0 : p >= 1e10 ? 0 : 1) + 'B';
+  if (p >= 1e6) return '$' + (p/1e6).toFixed(p >= 1e8 ? 0 : 1) + 'M';
   if (p >= 1e3) return '$' + (p/1e3).toFixed(0) + 'K';
   return '$' + p;
 }
 
-function onPriceSlider() {
-  let mn = parseInt(document.getElementById('price-min').value);
-  let mx = parseInt(document.getElementById('price-max').value);
-  // Dual-handle: swap if crossed
-  if (mn > mx) { const t = mn; mn = mx; mx = t; }
-  const readout = document.getElementById('price-readout');
-  if (readout) readout.textContent = fmtSliderPrice(mn) + ' — ' + fmtSliderPrice(mx);
-  const pct1 = (mn/36)*100, pct2 = (mx/36)*100;
+function updateSliderUI() {
+  const pct1 = (sliderMinStep / SLIDER_STEPS) * 100;
+  const pct2 = (sliderMaxStep / SLIDER_STEPS) * 100;
+  const hMin = document.getElementById('handle-min');
+  const hMax = document.getElementById('handle-max');
   const fill = document.getElementById('slider-fill');
-  if (fill) { fill.style.left = pct1 + '%'; fill.style.width = (pct2-pct1) + '%'; }
-  sliderMinPrice = logSliderToPrice(mn);
-  sliderMaxPrice = logSliderToPrice(mx);
+  const readout = document.getElementById('price-readout');
+  const finetune = document.getElementById('price-fine-tune');
+  if (hMin) hMin.style.left = pct1 + '%';
+  if (hMax) hMax.style.left = pct2 + '%';
+  if (fill) { fill.style.left = pct1 + '%'; fill.style.width = (pct2 - pct1) + '%'; }
+  const minLabel = fmtSliderPrice(sliderMinStep);
+  const maxLabel = fmtSliderPrice(sliderMaxStep);
+  if (readout) readout.textContent = minLabel + ' — ' + maxLabel;
+  if (finetune) finetune.textContent = '↔ drag handles';
+}
+
+function applySliderFilter() {
+  sliderMinPrice = logSliderToPrice(sliderMinStep);
+  sliderMaxPrice = logSliderToPrice(sliderMaxStep);
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
   syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
+  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull(filtered);
 }
 
 function resetPriceSlider() {
-  document.getElementById('price-min').value = 0;
-  document.getElementById('price-max').value = 36;
+  sliderMinStep = 0;
+  sliderMaxStep = SLIDER_STEPS;
   sliderMinPrice = 1;
   sliderMaxPrice = 1e12;
-  const readout = document.getElementById('price-readout');
-  if (readout) readout.textContent = '$1 — $1T';
-  const fill = document.getElementById('slider-fill');
-  if (fill) { fill.style.left = '0%'; fill.style.width = '100%'; }
-  const filtered = filterAssets(ASSETS);
-  renderList(filtered);
-  syncMarkerVisibility();
-  if (window.innerWidth <= 767) renderMobileListViewFull(filtered);
+  updateSliderUI();
+  applySliderFilter();
 }
 
-let sliderMinPrice = 1;
-let sliderMaxPrice = 1e12;
+// ── Drag logic — works on mouse and touch ──
+function initDualSlider() {
+  const track = document.getElementById('dual-slider');
+  if (!track) return;
+  updateSliderUI();
+
+  function getStepFromEvent(e, trackEl) {
+    const rect = trackEl.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    return Math.round(pct * SLIDER_STEPS);
+  }
+
+  function makeHandleDraggable(handleId, isMin) {
+    const handle = document.getElementById(handleId);
+    if (!handle) return;
+    let dragging = false;
+
+    function onStart(e) {
+      e.preventDefault();
+      dragging = true;
+      handle.style.zIndex = '10';
+      const other = document.getElementById(isMin ? 'handle-max' : 'handle-min');
+      if (other) other.style.zIndex = '4';
+
+      function onMove(ev) {
+        if (!dragging) return;
+        const step = getStepFromEvent(ev, track);
+        if (isMin) {
+          sliderMinStep = Math.min(step, sliderMaxStep);
+        } else {
+          sliderMaxStep = Math.max(step, sliderMinStep);
+        }
+        updateSliderUI();
+        applySliderFilter();
+      }
+      function onEnd() {
+        dragging = false;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onEnd);
+    }
+
+    handle.addEventListener('mousedown', onStart);
+    handle.addEventListener('touchstart', onStart, { passive: false });
+  }
+
+  makeHandleDraggable('handle-min', true);
+  makeHandleDraggable('handle-max', false);
+
+  // Also allow clicking the track directly
+  track.addEventListener('click', (e) => {
+    if (e.target.id === 'handle-min' || e.target.id === 'handle-max') return;
+    const step = getStepFromEvent(e, track);
+    const distMin = Math.abs(step - sliderMinStep);
+    const distMax = Math.abs(step - sliderMaxStep);
+    if (distMin <= distMax) sliderMinStep = Math.min(step, sliderMaxStep);
+    else sliderMaxStep = Math.max(step, sliderMinStep);
+    updateSliderUI();
+    applySliderFilter();
+  });
+}
+
+// Legacy stub — kept for any old oninput references
+function onPriceSlider() { applySliderFilter(); }
 
 function filterAssets(assets) {
   let filtered = assets;
-  // Category tab filter
+  // Category filter — asset_type is primary, category is fallback
   if (activeTab !== 'all') {
     filtered = filtered.filter(a => {
-      const cat = getAssetCategory(a.type || a.asset_type || a.category || '');
-      return cat === activeTab;
+      // Use _raw fields if available for the most accurate type resolution
+      const rawFields = a._raw || {};
+      const typeStr = rawFields.asset_type || rawFields.category || a.type || a.asset_type || a.category || '';
+      return getAssetCategory(typeStr) === activeTab;
     });
   }
-  // Log slider price range
+  // Log slider price filter — always compare as float
   filtered = filtered.filter(a => {
-    const p = a.price || 0;
-    if (p <= 0) return sliderMinPrice <= 1; // show $0 assets only if near bottom
+    const p = parseFloat(a.price) || 0;
+    if (p <= 0) return sliderMinPrice <= 1;
     return p >= sliderMinPrice && p <= sliderMaxPrice;
   });
   return filtered;
@@ -4423,6 +4532,7 @@ window.addEventListener('load', () => {
         }
         
         initMobileUI();
+        initDualSlider(); // boot the custom drag slider
 
         console.log('[RWABidAsk] TERMINAL ONLINE: All Systems Verified.');
     }, 500);
