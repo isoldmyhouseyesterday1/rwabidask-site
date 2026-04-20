@@ -1966,7 +1966,11 @@ body { min-width: 900px; overflow-x: auto; }
   transition: border-color .15s, transform .15s;
 }
 .photo-thumb:hover { border-color: var(--cyan); transform: scale(1.04); }
-.photo-thumb.main-thumb { width: 100%; height: 140px; border-radius: 2px; object-fit: cover; }
+.photo-thumb.main-thumb {
+  width: 100%; height: 180px; border-radius: 2px;
+  object-fit: cover; object-position: center;
+  display: block; background: var(--bg2);
+}
 .photo-placeholder {
   width: 100%;
   height: 120px;
@@ -2098,6 +2102,30 @@ body { min-width: 900px; overflow-x: auto; }
 @media (min-width:768px) {
   #right { width: 360px !important; }
   #main-row { grid-template-columns: 288px 1fr 360px !important; }
+}
+
+/* ── CLUSTER BUBBLES ────────────────────────────────────────── */
+.cluster-bubble { pointer-events: auto; }
+.cluster-inner {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: rgba(10,14,28,.9); border: 2px solid;
+  transition: transform .15s; position: relative;
+}
+.cluster-inner:hover { transform: scale(1.12); }
+.cluster-count { font-size: 12px; font-weight: 800; line-height: 1; letter-spacing: -.5px; }
+.cluster-label { font-size: 7px; font-weight: 700; letter-spacing: .8px; opacity: .7; margin-top: 1px; }
+.cluster-stem { width: 1px; height: 14px; }
+
+/* ── RIBBON FEATURED ITEM ───────────────────────────────────── */
+.ribbon-featured {
+  background: rgba(0,255,200,.08) !important;
+  border: 1px solid rgba(0,255,200,.25) !important;
+  border-radius: 3px; padding: 0 8px !important; margin: 0 4px;
+}
+.ribbon-val-hl {
+  font-size: 13px !important; font-weight: 800 !important;
+  color: var(--cyan) !important; text-shadow: 0 0 8px rgba(0,255,200,.5);
 }
 
 /* ── CUSTOM DUAL-HANDLE SLIDER ──────────────────────────────── */
@@ -2326,6 +2354,8 @@ const ASSET_CATEGORIES = [
   { id: 'energy',         label: 'ENERGY',             physical: true  },
   { id: 'maritime',       label: 'MARITIME',           physical: true  },
   { id: 'aviation',       label: 'AVIATION',           physical: true  },
+  { id: 'commodities',    label: 'COMMODITIES',        physical: true  },
+  { id: 'ecosystems',     label: 'HUMAN ECOSYSTEMS',   physical: false },
 ];
 
 function getAssetCategory(type) {
@@ -2373,12 +2403,28 @@ function getAssetCategory(type) {
     copyright:'financial', credit:'financial', loan:'financial',
     tranche:'financial', note:'financial', cdo:'financial',
     clo:'financial', mbs:'financial', abs:'financial',
-    'receivables':'financial', 'trade finance':'financial',
-    // ── Natural Resources (maps to financial bucket now) ────
-    resources:'financial', minerals:'financial', mining:'financial',
-    oil:'financial', gas:'financial', timber:'financial',
+    receivables:'financial', 'trade finance':'financial',
+    // ── Commodities — physical grades/chemicals ──────────────
+    commodities:'commodities', commodity:'commodities',
+    wheat:'commodities', corn:'commodities', soy:'commodities', cocoa:'commodities',
+    coffee:'commodities', sugar:'commodities', cotton:'commodities',
+    copper:'commodities', gold:'commodities', silver:'commodities',
+    platinum:'commodities', palladium:'commodities', aluminum:'commodities',
+    iron:'commodities', steel:'commodities', nickel:'commodities',
+    oil:'commodities', gas:'commodities', 'crude oil':'commodities',
+    'natural gas':'commodities', lng:'commodities', 'rare earth':'commodities',
+    lithium:'commodities', uranium:'commodities', cobalt:'commodities',
+    timber:'commodities', minerals:'commodities', mining:'commodities',
+    coal:'commodities', resources:'commodities',
+    // ── Human Ecosystems ─────────────────────────────────────
+    ecosystems:'ecosystems', ecosystem:'ecosystems',
+    'human ecosystem':'ecosystems', workforce:'ecosystems',
+    'task force':'ecosystems', 'response unit':'ecosystems',
+    'rapid response':'ecosystems', 'emergency unit':'ecosystems',
+    'security detail':'ecosystems', 'medical team':'ecosystems',
+    personnel:'ecosystems', unit:'ecosystems', team:'ecosystems',
+    // Natural Resources (non-commodity) → commodities
     farmland:'realestate', agriculture:'realestate',
-    coal:'financial', lithium:'financial',
   };
   if (map[t]) return map[t];
   // fuzzy fallback — order matters, more specific first
@@ -2388,6 +2434,8 @@ function getAssetCategory(type) {
   if (t.includes('mar') || t.includes('vessel') || t.includes('ship') || t.includes('yacht') || t.includes('boat')) return 'maritime';
   if (t.includes('avi') || t.includes('air') || t.includes('jet') || t.includes('plane') || t.includes('heli')) return 'aviation';
   if (t.includes('busi') || t.includes('equit') || t.includes('stock') || t.includes('fund') || t.includes('reit')) return 'equities';
+  if (t.includes('wheat') || t.includes('copper') || t.includes('gold') || t.includes('crude') || t.includes('commod')) return 'commodities';
+  if (t.includes('task') || t.includes('force') || t.includes('unit') || t.includes('ecosys') || t.includes('person') || t.includes('team')) return 'ecosystems';
   return 'financial'; // default
 }
 
@@ -2851,15 +2899,9 @@ function setCategory(catId, btn) {
   currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
-  // Hard-link: immediately re-render globe pins for this category
-  if (markersRendered) {
-    const visibleIds = new Set(filtered.filter(a => a._hasCoords).map(a => String(a.id)));
-    Object.keys(domMarkers).forEach(id => {
-      domMarkers[id].el.style.display = visibleIds.has(String(id)) ? 'flex' : 'none';
-    });
-    if (map3dEl) reprojectMarkersWithMatrix();
-  }
-  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull(filtered);
+  // Hard-sync: re-cluster and re-pin immediately for this category
+  if (markersRendered) renderDOMMarkers();
+  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull(ASSETS);
 }
 
 // ── LOG SLIDER ENGINE (Custom drag — fully independent handles) ──
@@ -2907,8 +2949,9 @@ function applySliderFilter() {
   sliderMaxPrice = logSliderToPrice(sliderMaxStep);
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
-  syncMarkerVisibility();
-  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull(filtered);
+  // Hard-sync: immediately re-render globe pins/clusters for new price range
+  if (markersRendered) { renderDOMMarkers(); }
+  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull(ASSETS);
 }
 
 function resetPriceSlider() {
@@ -3466,7 +3509,10 @@ function selectAsset(id) {
     `;
 
     // ── Photo Gallery ───────────────────────────────────────────
-    const imgs = a.images || (a.image_url ? [a.image_url] : []);
+    // Handle image_url (single), images (array), or photos (array) from Supabase
+    const imgs = (a.images && a.images.length ? a.images : null) ||
+                 (a.photos && a.photos.length ? a.photos : null) ||
+                 (a.image_url ? [a.image_url] : []);
     let galleryHtml = '';
     if (imgs.length > 0) {
         const mainImg = `<img class="photo-thumb main-thumb" src="${escapeHtml(imgs[0])}" alt="Asset photo" onerror="this.style.display='none'">`;
@@ -3479,7 +3525,47 @@ function selectAsset(id) {
     // ── Specs Grid from JSONB ───────────────────────────────────
     const specs = a.specs || {};
     const mainStruct = (a.structures && a.structures[0]) || {};
-    const specsData = {
+    const assetCat = getAssetCategory(a.type);
+    const isEcosystem  = assetCat === 'ecosystems';
+    const isCommodity  = assetCat === 'commodities';
+    const isMaritime   = assetCat === 'maritime';
+
+    // ── Category-specific specs ──────────────────────────────
+    let specsData = {};
+    if (isEcosystem) {
+      specsData = {
+        'Unit Name': specs.unit_name || a.address || '—',
+        'Headcount': specs.headcount || specs.personnel_count || '—',
+        'Mobilization Time': specs.mobilization_time || specs.mob_time || '—',
+        'Status': (a.status || 'Active').toUpperCase(),
+        ...(specs.tech_certifications ? { 'Certifications': specs.tech_certifications } : {}),
+        ...(specs.specialization ? { 'Specialization': specs.specialization } : {}),
+        ...(specs.deployment_zone ? { 'Deployment Zone': specs.deployment_zone } : {}),
+      };
+    } else if (isCommodity) {
+      specsData = {
+        'Grade/Standard': specs.grade || specs.standard || '—',
+        'Chemical Formula': specs.chemical_formula || specs.formula || '—',
+        'Unit': specs.unit || '—',
+        'Purity': specs.purity || '—',
+        'Origin': specs.origin || a.country || '—',
+        'Status': (a.status || 'Active').toUpperCase(),
+        ...(specs.lot_size ? { 'Lot Size': specs.lot_size } : {}),
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+      };
+    } else if (isMaritime) {
+      specsData = {
+        'Vessel Class': specs.vessel_class || specs.type || (a.type||'').toUpperCase(),
+        'Flag State': a.state || specs.flag_state || '—',
+        'Status': (a.status || 'Active').toUpperCase(),
+        ...(specs.gross_tonnage ? { 'Gross Tonnage': specs.gross_tonnage } : {}),
+        ...(specs.length ? { 'LOA': specs.length } : {}),
+        ...(specs.year_built ? { 'Year Built': specs.year_built } : {}),
+        ...(specs.imo_number ? { 'IMO': specs.imo_number } : {}),
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+      };
+    } else {
+      specsData = {
         'Area': a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '—'),
         'Type': (a.type || '—').toUpperCase(),
         'Status': (a.status || 'Active').toUpperCase(),
@@ -3490,7 +3576,8 @@ function selectAsset(id) {
         ...(specs.zoning ? { 'Zoning': specs.zoning } : {}),
         ...(specs.units ? { 'Units': specs.units } : {}),
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
-    };
+      };
+    }
     const specsGridHtml = Object.entries(specsData).map(([k,v]) => `
         <div class="spec-cell">
             <div class="spec-val">${escapeHtml(String(v))}</div>
@@ -3713,25 +3800,12 @@ function updateSearchUI(assets, statusMsg) {
  */
 function syncMarkersToSearch(assetsToShow) {
     if (!map3dEl) return;
-    
     const currentRange = map3dEl.range || 22000000;
     const isZoomedIn = currentRange <= (window.MARKER_VISIBLE_RANGE || 50000);
-    
-    // AUTH GATE: If no user, kill all markers and exit
-    if (!currentUser) {
-        Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
-        return;
-    }
-
-    const visibleIds = new Set(assetsToShow.map(a => a.id));
-
+    const visibleIds = new Set(assetsToShow.map(a => String(a.id)));
     Object.keys(domMarkers).forEach(id => {
         const marker = domMarkers[id];
-        const asset = marker.asset;
-        
-        const isInSearch = visibleIds.has(asset.id);
-        const shouldBeVisible = isInSearch && isZoomedIn;
-        
+        const shouldBeVisible = visibleIds.has(String(id)) && isZoomedIn;
         marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
     });
 }
@@ -3925,11 +3999,7 @@ function onCameraChange() {
     isCameraProcessing = true;
     try {
       if (!map3dEl) return;
-      if (!isAuthenticated) {
-        Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; });
-        isCameraProcessing = false;
-        return;
-      }
+      // No auth gate on marker visibility — vault data is gated, not map pins
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
@@ -3973,24 +4043,149 @@ function getVisibleAssetsInViewport(assets) {
   } catch(e) { return assets.slice(0, 100); }
 }
 
+// ── CLUSTERING ENGINE ────────────────────────────────────────────
+// Grid-based spatial clustering: divides the visible world into cells
+// and groups assets that share the same cell at the current zoom level.
+let clusterMarkers = {}; // cluster DOM elements keyed by cell id
+
+function getCellSize(range) {
+  // Returns degree-cell-size based on camera range
+  if (range > 8000000) return 20;   // continent view: 20° cells
+  if (range > 2000000) return 5;    // country view: 5° cells
+  if (range > 500000)  return 1;    // regional view: 1° cells
+  if (range > 100000)  return 0.25; // city view: 0.25° cells
+  return 0;                          // street view: no clustering
+}
+
+function buildClusters(assets, range) {
+  const cellSize = getCellSize(range);
+  if (cellSize === 0) return null; // no clustering at this zoom
+  const cells = {};
+  for (const a of assets) {
+    if (!a._hasCoords) continue;
+    const cx = Math.floor(a.lng / cellSize);
+    const cy = Math.floor(a.lat / cellSize);
+    const key = `${cx}_${cy}`;
+    if (!cells[key]) cells[key] = { assets: [], lat: 0, lng: 0, key };
+    cells[key].assets.push(a);
+    cells[key].lat += a.lat;
+    cells[key].lng += a.lng;
+  }
+  // Average center per cell
+  for (const key of Object.keys(cells)) {
+    const c = cells[key];
+    c.lat /= c.assets.length;
+    c.lng /= c.assets.length;
+  }
+  return cells;
+}
+
+function fmtClusterCount(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
+  return String(n);
+}
+
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
-  
+  // Clear previous
   layer.innerHTML = '';
   domMarkers = {};
-  
-  // Only pin assets that have real coordinates — all assets still appear in list
-  const pinnableAssets = ASSETS.filter(a => a._hasCoords !== false && !isNaN(a.lat) && !isNaN(a.lng) && !(a.lat === 0 && a.lng === 0));
-  console.log(`[RWABidAsk] Globe pins: ${pinnableAssets.length} of ${ASSETS.length} assets`);
-  pinnableAssets.forEach(a => addPriceMarker(a));
-  
-  Object.values(domMarkers).forEach(({ el }) => { 
-    el.style.display = 'none';
-    el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+  clusterMarkers = {};
+
+  const filteredAssets = filterAssets(ASSETS).filter(a => a._hasCoords !== false);
+  console.log(`[RWABidAsk] Rendering ${filteredAssets.length} assets (clustered/pinned)`);
+  const range = map3dEl.range || 22000000;
+  const cells = buildClusters(filteredAssets, range);
+
+  if (cells) {
+    // Clustered view
+    for (const key of Object.keys(cells)) {
+      const c = cells[key];
+      if (c.assets.length === 1) {
+        addPriceMarker(c.assets[0]);
+      } else {
+        addClusterMarker(key, c.lat, c.lng, c.assets);
+      }
+    }
+  } else {
+    // Street-level: individual pins with viewport culling
+    const visible = getVisibleAssetsInViewport(filteredAssets);
+    visible.forEach(a => addPriceMarker(a));
+  }
+  reprojectMarkersWithMatrix();
+}
+
+function addClusterMarker(key, lat, lng, assets) {
+  const layer = document.getElementById('overlay-layer');
+  if (!layer) return;
+  const el = document.createElement('div');
+  el.className = 'cluster-bubble';
+  const n = assets.length;
+  // Color by dominant category
+  const cats = {};
+  assets.forEach(a => { const c = getAssetCategory(a.type); cats[c] = (cats[c]||0)+1; });
+  const dominant = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0][0];
+  const catColors = {
+    maritime:'#00b4d8', aviation:'#7b2ff7', financial:'#00ffc8',
+    equities:'#00c49a', realestate:'#f4c430', infrastructure:'#a78bfa',
+    energy:'#fb923c', commodities:'#facc15', ecosystems:'#34d399'
+  };
+  const color = catColors[dominant] || '#00ffc8';
+  el.innerHTML = `
+    <div class="cluster-inner" style="border-color:${color};box-shadow:0 0 16px ${color}40;">
+      <div class="cluster-count" style="color:${color}">${fmtClusterCount(n)}</div>
+      <div class="cluster-label">${dominant.toUpperCase().slice(0,3)}</div>
+    </div>
+    <div class="cluster-stem" style="background:linear-gradient(to bottom,${color}80,${color}00)"></div>
+  `;
+  el.style.cssText = 'position:absolute;display:flex;flex-direction:column;align-items:center;cursor:pointer;transform:translate(-50%,-100%) translate(-9999px,-9999px);';
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Zoom into cluster center
+    const spread = assets.reduce((acc,a)=>Math.max(acc,Math.abs(a.lat-lat),Math.abs(a.lng-lng)),0);
+    const newRange = Math.max(50000, spread * 111000 * 3);
+    flyTo(lat, lng, newRange, 45);
+    // Show these assets in list
+    renderList(assets);
+    showToast(`${n} ASSETS IN CLUSTER — ZOOMING IN`);
   });
-  
-  console.log(`[RWABidAsk] Markers rendered: ${Object.keys(domMarkers).length} markers created`);
+  layer.appendChild(el);
+  clusterMarkers[key] = { el, lat, lng, assets };
+  requestAnimationFrame(() => projectCluster(key));
+}
+
+function projectCluster(key) {
+  const c = clusterMarkers[key];
+  if (!c || !map3dEl) return;
+  try {
+    const mapCol = document.getElementById('map-col');
+    if (!mapCol) return;
+    const rect = mapCol.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const camCenter = map3dEl.center || { lat: 20, lng: 10 };
+    const camRange = map3dEl.range || 22000000;
+    const camTilt = map3dEl.tilt || 0;
+    const camHead = map3dEl.heading || 0;
+    const dLat = c.lat - camCenter.lat;
+    const dLng = c.lng - camCenter.lng;
+    const ppd = (W / 2) / Math.max(1, camRange / 111320);
+    const cosLat = Math.cos(camCenter.lat * Math.PI / 180);
+    const headRad = camHead * Math.PI / 180;
+    const rx = dLng * cosLat * ppd * Math.cos(headRad) + dLat * ppd * Math.sin(headRad);
+    const ry = -dLat * ppd * Math.cos(headRad) + dLng * cosLat * ppd * Math.sin(headRad);
+    const tiltFactor = Math.max(0.1, Math.cos(camTilt * Math.PI / 180));
+    const sx = W/2 + rx, sy = H/2 + ry * tiltFactor;
+    const globeRadius = Math.min(W,H) * 0.48;
+    const dist = Math.sqrt((sx-W/2)**2 + (sy-H/2)**2);
+    if (camRange > 3000000 && dist > globeRadius * 1.1) {
+      c.el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
+    } else {
+      c.el.style.transform = `translate(-50%,-100%) translate(${sx}px,${sy}px)`;
+      c.el.style.zIndex = String(Math.floor(1000 - dist / 10));
+    }
+  } catch(e) {}
 }
 
 function addPriceMarker(asset) {
@@ -4078,18 +4273,10 @@ function reprojectMarkersWithMatrix() {
 }
 
 function syncMarkerVisibility() {
-  if (!markersVisible()) { 
-    Object.values(domMarkers).forEach(({ el }) => { el.style.display = 'none'; }); 
-    return; 
-  }
-  const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
-  const visibleAssets = getVisibleAssetsInViewport(baseAssets);
-  const visibleIds = new Set(visibleAssets.map(a => a.id));
-  Object.entries(domMarkers).forEach(([id, { el, asset }]) => {
-    const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
-    el.style.display = shouldBeVisible ? 'flex' : 'none';
-  });
+  // Hard-sync: re-cluster and re-pin for current filter state
+  if (markersRendered) renderDOMMarkers();
 }
+
 
 function markersVisible() { 
   return !!(map3dEl) && (map3dEl.range || 12e6) <= MARKER_VISIBLE_RANGE; 
@@ -4099,15 +4286,19 @@ function markersVisible() {
 // TICKER & RIBBON
 // ============================================================
 function buildRibbon() {
+  const assetCount = (window.ASSETS || []).length;
+  const totalVal   = (window.ASSETS || []).reduce((s,a)=>s+(a.price||0),0);
+  const rwaIdx     = (1284 + Math.floor(assetCount * 0.7)).toLocaleString();
   const markets = [
+    { label: 'RWABidAsk Index', val: rwaIdx, chg: '+2.1%', dir: 'up', highlight: true },
+    { label: 'Assets on Ledger', val: assetCount.toLocaleString(), chg: 'LIVE', dir: 'up' },
     { label: 'BTC/USD', val: '$83,241', chg: '+1.2%', dir: 'up' },
     { label: 'ETH/USD', val: '$3,218', chg: '+0.8%', dir: 'up' },
     { label: 'Gold Spot', val: '$3,118/oz', chg: '+0.4%', dir: 'up' },
     { label: '10Y T-Bill', val: '4.38%', chg: '-0.02', dir: 'down' },
     { label: 'S&P 500', val: '5,234', chg: '+0.7%', dir: 'up' },
-    { label: 'RWABidAsk Index', val: '1,284', chg: '+2.1%', dir: 'up' }
   ];
-  const items = markets.map(m => `<div class="ribbon-item"><span class="ribbon-label">${m.label}</span><span class="ribbon-val">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');
+  const items = markets.map(m => `<div class="ribbon-item${m.highlight?' ribbon-featured':''}"><span class="ribbon-label">${m.label}</span><span class="ribbon-val${m.highlight?' ribbon-val-hl':''}">${m.val}</span><span class="ribbon-chg ${m.dir}">${m.chg}</span></div>`).join('');
   const track = document.getElementById('ribbon-track');
   if (track) track.innerHTML = items + items;
 }
@@ -4378,7 +4569,8 @@ function renderMobileListViewFull(assets) {
   
   const priceHtml = `<div style="font-size:9px;color:var(--muted);padding:2px 2px;">Range: <span style="color:var(--cyan)">${fmtSliderPrice(parseInt((document.getElementById('price-min')||{value:0}).value||0))} — ${fmtSliderPrice(parseInt((document.getElementById('price-max')||{value:36}).value||36))}</span></div>`;
   
-  const filteredAssets = filterAssets(assets);
+  // Always filter from the full ASSETS ledger to avoid mobile showing subset
+  const filteredAssets = filterAssets(window.ASSETS || assets);
   const resultsHtml = filteredAssets.map(a => `
     <div class="list-tile" onclick="selectAsset('${a.id}')" style="background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px;cursor:pointer">
       <div class="list-tile-type" style="font-size:9px;font-weight:600;color:var(--cyan);margin-bottom:6px">${a.type.toUpperCase()}</div>
