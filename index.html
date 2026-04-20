@@ -2104,6 +2104,45 @@ body { min-width: 900px; overflow-x: auto; }
   #main-row { grid-template-columns: 288px 1fr 360px !important; }
 }
 
+/* ── BIO & HUMAN ECOSYSTEM STYLES ───────────────────────────── */
+/* Formula badge in right panel header */
+.bio-formula-badge {
+  display: inline-block;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 15px; font-weight: 700; letter-spacing: 1px;
+  color: #34d399; background: rgba(52,211,153,.08);
+  border: 1px solid rgba(52,211,153,.35); border-radius: 3px;
+  padding: 4px 10px; margin: 4px 0 2px;
+  text-shadow: 0 0 10px rgba(52,211,153,.4);
+}
+.bio-cas { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
+.bio-cas-num { font-family: monospace; color: #86efac; font-weight: 600; }
+
+/* Monospace clinical field values */
+.spec-val-mono {
+  font-family: 'Courier New', Courier, monospace !important;
+  font-size: 12px !important; letter-spacing: .5px;
+  color: #34d399 !important; text-shadow: 0 0 6px rgba(52,211,153,.3);
+}
+.spec-cell-bio { background: rgba(52,211,153,.03); border-color: rgba(52,211,153,.12) !important; }
+.specs-grid-bio { border-color: rgba(52,211,153,.2); }
+
+/* Lab manifest section */
+.bio-lab-section { border-left: 2px solid rgba(52,211,153,.4) !important; }
+.bio-mono { font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #86efac; }
+
+/* Bio globe pin */
+.bio-marker { z-index: 10 !important; }
+.bio-pin-tag {
+  background: rgba(10,28,20,.92); border: 1px solid rgba(52,211,153,.5);
+  border-radius: 3px; padding: 5px 9px; min-width: 110px;
+  box-shadow: 0 0 12px rgba(52,211,153,.3);
+}
+.bio-pin-hex { font-size: 16px; color: #34d399; line-height: 1; margin-bottom: 2px; }
+.bio-pin-label { font-size: 9px; font-weight: 700; color: #d1fae5; letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+.bio-pin-formula { font-family: monospace; font-size: 10px; color: #34d399; letter-spacing: .5px; margin-top: 1px; }
+.bio-pin-price { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
 /* ── CLUSTER BUBBLES ────────────────────────────────────────── */
 .cluster-bubble { pointer-events: auto; }
 .cluster-inner {
@@ -2355,7 +2394,7 @@ const ASSET_CATEGORIES = [
   { id: 'maritime',       label: 'MARITIME',           physical: true  },
   { id: 'aviation',       label: 'AVIATION',           physical: true  },
   { id: 'commodities',    label: 'COMMODITIES',        physical: true  },
-  { id: 'ecosystems',     label: 'HUMAN ECOSYSTEMS',   physical: false },
+  { id: 'ecosystems',     label: 'BIO & HUMAN ECOSYSTEM', physical: false },
 ];
 
 function getAssetCategory(type) {
@@ -2416,13 +2455,24 @@ function getAssetCategory(type) {
     lithium:'commodities', uranium:'commodities', cobalt:'commodities',
     timber:'commodities', minerals:'commodities', mining:'commodities',
     coal:'commodities', resources:'commodities',
-    // ── Human Ecosystems ─────────────────────────────────────
+    // ── Bio & Human Ecosystem ────────────────────────────────
     ecosystems:'ecosystems', ecosystem:'ecosystems',
     'human ecosystem':'ecosystems', workforce:'ecosystems',
     'task force':'ecosystems', 'response unit':'ecosystems',
     'rapid response':'ecosystems', 'emergency unit':'ecosystems',
     'security detail':'ecosystems', 'medical team':'ecosystems',
     personnel:'ecosystems', unit:'ecosystems', team:'ecosystems',
+    // Bio-assets (molecular/pharma/botanical)
+    compound:'ecosystems', molecule:'ecosystems', molecular:'ecosystems',
+    pharmaceutical:'ecosystems', pharma:'ecosystems', drug:'ecosystems',
+    'drug candidate':'ecosystems', bioactive:'ecosystems',
+    botanical:'ecosystems', extract:'ecosystems', phytochemical:'ecosystems',
+    discovery:'ecosystems', 'bio-discovery':'ecosystems', bioasset:'ecosystems',
+    'bio asset':'ecosystems', nutraceutical:'ecosystems', peptide:'ecosystems',
+    enzyme:'ecosystems', protein:'ecosystems', lipid:'ecosystems',
+    alkaloid:'ecosystems', flavonoid:'ecosystems', terpene:'ecosystems',
+    cannabinoid:'ecosystems', 'active ingredient':'ecosystems',
+    'clinical candidate':'ecosystems', 'research compound':'ecosystems',
     // Natural Resources (non-commodity) → commodities
     farmland:'realestate', agriculture:'realestate',
   };
@@ -2436,6 +2486,7 @@ function getAssetCategory(type) {
   if (t.includes('busi') || t.includes('equit') || t.includes('stock') || t.includes('fund') || t.includes('reit')) return 'equities';
   if (t.includes('wheat') || t.includes('copper') || t.includes('gold') || t.includes('crude') || t.includes('commod')) return 'commodities';
   if (t.includes('task') || t.includes('force') || t.includes('unit') || t.includes('ecosys') || t.includes('person') || t.includes('team')) return 'ecosystems';
+  if (t.includes('pharma') || t.includes('molecule') || t.includes('compound') || t.includes('cas') || t.includes('botanical') || t.includes('extract') || t.includes('peptide') || t.includes('alkaloid')) return 'ecosystems';
   return 'financial'; // default
 }
 
@@ -2730,6 +2781,20 @@ async function fetchListingsFromSupabase() {
         console.log('[RWABidAsk] Hub fallback for id=' + r.id + ' (' + cat2 + ') → ' + lat.toFixed(3) + ',' + lng.toFixed(3));
       }
 
+      // ── Bio-Discovery Override: use geographic_origin_lat/lng if present ──
+      const bioLat = parseFloat(r.geographic_origin_lat || r.origin_lat || r.discovery_lat || '');
+      const bioLng = parseFloat(r.geographic_origin_lng || r.origin_lng || r.discovery_lng || '');
+      if (!isNaN(bioLat) && !isNaN(bioLng) && !(bioLat === 0 && bioLng === 0)) {
+        const typeForBio = (r.asset_type || r.category || r.type || '').toLowerCase();
+        const hasMolData = !!(r.molecular_formula || r.cas_number || (r.specs && (r.specs.molecular_formula || r.specs.cas_number)));
+        if (getAssetCategory(typeForBio) === 'ecosystems' && hasMolData) {
+          lat = bioLat + (Math.random() - 0.5) * 0.02; // tiny jitter within discovery site
+          lng = bioLng + (Math.random() - 0.5) * 0.02;
+          _hasCoords = true;
+          console.log('[RWABidAsk] Bio-Discovery origin pin for id=' + r.id + ' → ' + lat.toFixed(4) + ',' + lng.toFixed(4));
+        }
+      }
+
       // ── Asset Identity — title is THE primary identifier ──
       const assetTitle =
         r.title || r.name || r.asset_name || r.address ||
@@ -2775,6 +2840,9 @@ async function fetchListingsFromSupabase() {
         specs: r.specs || r.specifications || r.technical_specs || {},
         fleet: r.fleet || r.sub_assets || r.manifest || [],
         state: r.state || r.flag_state || null,
+        // Molecular / bio fields — surfaced at top level for fast detection
+        molecular_formula: r.molecular_formula || (r.specs && r.specs.molecular_formula) || null,
+        cas_number: r.cas_number || (r.specs && r.specs.cas_number) || null,
         // Preserve all raw fields for the vault display
         _raw: r,
       };
@@ -3493,18 +3561,36 @@ function selectAsset(id) {
     const isPro = role === 'pro' || role === 'broker' || role === 'owner' || role === 'institutional';
 
     // ── Clinical Identity Header ─────────────────────────────
-    // 'address' in our model IS the title (mapped in fetchListings)
-    // Secondary line: city / location / jurisdiction
+    const assetCatForHeader = getAssetCategory(a.type);
+    const specs_early = a.specs || (a._raw) || {};
+    // Bio-asset detection: molecular_formula or cas_number present in any metadata field
+    const molFormula   = specs_early.molecular_formula || specs_early.formula || specs_early.chemical_formula
+                         || (a._raw || {}).molecular_formula || '';
+    const casNumber    = specs_early.cas_number || specs_early.cas || (a._raw || {}).cas_number || '';
+    const isBioAsset   = assetCatForHeader === 'ecosystems' && !!(molFormula || casNumber);
+
     const assetTitle = a.address || a.title || a.name || ('Asset #' + a.id);
     const assetSub   = [a.city, a.country].filter(Boolean).filter((v,i,arr)=>arr.indexOf(v)===i).join(', ') || '—';
-    const catLabel   = (ASSET_CATEGORIES.find(c=>c.id===getAssetCategory(a.type))||{label:a.type||'ASSET'}).label;
+    const catLabel   = (ASSET_CATEGORIES.find(c=>c.id===assetCatForHeader)||{label:a.type||'ASSET'}).label;
+
+    // Bio-asset: header leads with compound name + formula badge
+    const headerMode = isBioAsset ? 'LAB MANIFEST' : catLabel;
+    const formulaBadge = isBioAsset
+      ? `<div class="bio-formula-badge">${escapeHtml(molFormula || '—')}</div>`
+      : '';
+    const casLine = (isBioAsset && casNumber)
+      ? `<div class="bio-cas">CAS: <span class="bio-cas-num">${escapeHtml(casNumber)}</span></div>`
+      : '';
+
     document.getElementById('rhead').innerHTML = `
-        <div class="rtype">${catLabel} // ${(a.status || 'ACTIVE').toUpperCase()}</div>
+        <div class="rtype">${headerMode} // ${(a.status || 'ACTIVE').toUpperCase()}</div>
         <div class="rname" style="font-size:14px;line-height:1.3">${escapeHtml(assetTitle)}</div>
+        ${formulaBadge}
+        ${casLine}
         <div class="rcity">${escapeHtml(assetSub)}</div>
         <div class="rprice-row">
             <div class="rprice">${window.fmtPrice(a.price)}</div>
-            <div class="rprice-psf">LISTED VALUATION</div>
+            <div class="rprice-psf">${isBioAsset ? 'LICENSING VALUATION' : 'LISTED VALUATION'}</div>
         </div>
     `;
 
@@ -3525,14 +3611,33 @@ function selectAsset(id) {
     // ── Specs Grid from JSONB ───────────────────────────────────
     const specs = a.specs || {};
     const mainStruct = (a.structures && a.structures[0]) || {};
-    const assetCat = getAssetCategory(a.type);
+    const assetCat = assetCatForHeader; // already computed above
     const isEcosystem  = assetCat === 'ecosystems';
     const isCommodity  = assetCat === 'commodities';
     const isMaritime   = assetCat === 'maritime';
+    // isBioAsset already set above
 
     // ── Category-specific specs ──────────────────────────────
     let specsData = {};
-    if (isEcosystem) {
+    if (isBioAsset) {
+      // LAB MANIFEST mode — molecular & clinical fields
+      specsData = {
+        'Compound': specs_early.compound_name || specs_early.iupac_name || assetTitle,
+        'Molecular Formula': molFormula || '—',
+        'Molecular Weight': specs_early.molecular_weight || specs_early.mol_weight || specs_early.mw || '—',
+        'Purity Grade': specs_early.purity_grade || specs_early.purity || '—',
+        'CAS Number': casNumber || '—',
+        'Clinical Phase': specs_early.clinical_phase || specs_early.phase || 'Pre-Clinical',
+        'Status': (a.status || 'Active').toUpperCase(),
+        ...(specs_early.origin_species ? { 'Origin Species': specs_early.origin_species } : {}),
+        ...(specs_early.origin_region  ? { 'Geographic Origin': specs_early.origin_region } : {}),
+        ...(specs_early.mechanism      ? { 'Mechanism of Action': specs_early.mechanism } : {}),
+        ...(specs_early.indication     ? { 'Indication': specs_early.indication } : {}),
+        ...(specs_early.solubility     ? { 'Solubility': specs_early.solubility } : {}),
+        ...(specs_early.storage_temp   ? { 'Storage Temp': specs_early.storage_temp } : {}),
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+      };
+    } else if (isEcosystem) {
       specsData = {
         'Unit Name': specs.unit_name || a.address || '—',
         'Headcount': specs.headcount || specs.personnel_count || '—',
@@ -3578,11 +3683,15 @@ function selectAsset(id) {
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
     }
-    const specsGridHtml = Object.entries(specsData).map(([k,v]) => `
-        <div class="spec-cell">
-            <div class="spec-val">${escapeHtml(String(v))}</div>
+    // Bio-assets get a monospace clinical grid; others use standard
+    const bioFieldsMono = new Set(['Molecular Formula','Molecular Weight','CAS Number','Purity Grade','Solubility','Storage Temp']);
+    const specsGridHtml = Object.entries(specsData).map(([k,v]) => {
+        const isMono = isBioAsset && bioFieldsMono.has(k);
+        return `<div class="spec-cell${isBioAsset ? ' spec-cell-bio' : ''}">
+            <div class="spec-val${isMono ? ' spec-val-mono' : ''}">${escapeHtml(String(v))}</div>
             <div class="spec-lbl">${escapeHtml(k)}</div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 
     // ── Order Book Ticker ───────────────────────────────────────
     const bids = Array.isArray(a.bids) ? a.bids : [];
@@ -3665,11 +3774,33 @@ function selectAsset(id) {
             </div>
         </div>`;
 
+    // ── Bio Lab Manifest section (additional vault content) ──────
+    let bioLabHtml = '';
+    if (isBioAsset && currentUser) {
+      const rawData = a._raw || {};
+      const synRoutes = specs_early.synthesis_routes || rawData.synthesis_routes || [];
+      const patents   = specs_early.patents || rawData.patents || [];
+      const trials    = specs_early.clinical_trials || rawData.clinical_trials || [];
+      bioLabHtml = `
+        <div class="rsect bio-lab-section">
+          <div class="rsect-title" style="color:#34d399;letter-spacing:2px">⬡ LAB MANIFEST</div>
+          ${specs_early.origin_region ? `<div class="rrow"><span class="rk">GEO ORIGIN</span><span class="rv bio-mono">${escapeHtml(specs_early.origin_region)}</span></div>` : ''}
+          ${specs_early.origin_species ? `<div class="rrow"><span class="rk">SOURCE SPECIES</span><span class="rv bio-mono" style="font-style:italic">${escapeHtml(specs_early.origin_species)}</span></div>` : ''}
+          ${specs_early.mechanism ? `<div class="rrow"><span class="rk">MECHANISM</span><span class="rv">${escapeHtml(specs_early.mechanism)}</span></div>` : ''}
+          ${specs_early.indication ? `<div class="rrow"><span class="rk">INDICATION</span><span class="rv">${escapeHtml(specs_early.indication)}</span></div>` : ''}
+          ${specs_early.dosage_form ? `<div class="rrow"><span class="rk">DOSAGE FORM</span><span class="rv bio-mono">${escapeHtml(specs_early.dosage_form)}</span></div>` : ''}
+          ${specs_early.half_life ? `<div class="rrow"><span class="rk">HALF-LIFE</span><span class="rv bio-mono">${escapeHtml(specs_early.half_life)}</span></div>` : ''}
+          ${patents.length ? `<div class="rrow"><span class="rk">PATENTS</span><span class="rv">${patents.map(p=>escapeHtml(p)).join(', ')}</span></div>` : ''}
+          ${trials.length ? `<div class="rsect-title" style="font-size:9px;margin-top:8px">CLINICAL TRIALS</div>${trials.map(t=>`<div class="rrow"><span class="rk">${escapeHtml(t.phase||'Phase')}</span><span class="rv">${escapeHtml(t.title||t.id||'—')}</span></div>`).join('')}` : ''}
+          ${synRoutes.length ? `<div class="rsect-title" style="font-size:9px;margin-top:8px">SYNTHESIS ROUTES</div><div style="font-size:9px;color:var(--dim);font-family:monospace;line-height:1.8;padding:6px 12px">${synRoutes.map(r=>escapeHtml(r)).join('<br>')}</div>` : ''}
+        </div>`;
+    }
+
     // ── Full body ───────────────────────────────────────────────
     // VAULT SECTION: specs + fleet are visible to auth users; locked overlay for guests
     const vaultSection = currentUser
-      ? `<div class="specs-grid">${specsGridHtml}</div>
-         <div class="rinner">${fleetHtml || ''}${finHtml || ''}</div>`
+      ? `<div class="specs-grid${isBioAsset ? ' specs-grid-bio' : ''}">${specsGridHtml}</div>
+         <div class="rinner">${bioLabHtml || ''}${(!isBioAsset ? (fleetHtml || '') : '')}${finHtml || ''}</div>`
       : `<div style="position:relative;min-height:200px;">
            <div style="filter:blur(4px);pointer-events:none;user-select:none;opacity:.35;overflow:hidden;max-height:240px;">
              <div class="specs-grid">${specsGridHtml}</div>
@@ -4192,11 +4323,25 @@ function addPriceMarker(asset) {
   const layer = document.getElementById('overlay-layer');
   if (!layer) return;
   const el = document.createElement('div');
-  el.className = 'price-marker standard';
+  const isBio = getAssetCategory(asset.type) === 'ecosystems' && !!(asset.molecular_formula || asset.cas_number);
+  el.className = isBio ? 'price-marker bio-marker' : 'price-marker standard';
   el.title = asset.address || 'Asset';
   const priceStr = fmtPrice(asset.price);
-  const typeStr = asset.type || 'asset';
-  el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
+  const typeStr  = asset.type || 'asset';
+  const formula  = asset.molecular_formula || '';
+  if (isBio) {
+    el.innerHTML = `
+      <div class="bio-pin-tag">
+        <div class="bio-pin-hex">⬡</div>
+        <div class="bio-pin-label">${escapeHtml(asset.address || 'Compound').slice(0,18)}</div>
+        ${formula ? `<div class="bio-pin-formula">${escapeHtml(formula)}</div>` : ''}
+        <div class="bio-pin-price">${priceStr}</div>
+      </div>
+      <div class="price-stem" style="background:linear-gradient(to bottom,rgba(52,211,153,.7),rgba(52,211,153,0))"></div>
+      <div class="price-dot" style="background:#34d399;box-shadow:0 0 6px #34d399,0 0 14px rgba(52,211,153,.5)"></div>`;
+  } else {
+    el.innerHTML = `<div class="price-tag"><div class="price-tag-val">${priceStr}</div><div class="price-tag-type">${typeStr}</div></div><div class="price-stem"></div><div class="price-dot"></div>`;
+  }
   el.addEventListener('click', (e) => { e.stopPropagation(); selectAsset(asset.id); });
   layer.appendChild(el);
   domMarkers[asset.id] = { el, asset };
