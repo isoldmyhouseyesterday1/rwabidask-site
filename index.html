@@ -2188,7 +2188,203 @@ body { min-width: 900px; overflow-x: auto; }
   box-shadow: 0 0 20px rgba(0,255,200,1) !important;
 }
 #price-readout { transition: none; }
+
+/* ════════════════════════════════════════════════════════════════
+   LIVE ASSET DASHBOARD STRIP (replaces plain filter labels)
+   ════════════════════════════════════════════════════════════════ */
+.left-head { flex-shrink:0; }
+.asset-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.dash-stat {
+  padding: 7px 10px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.dash-stat:nth-child(3n) { border-right: none; }
+.dash-stat-val {
+  font-size: 13px; font-weight: 800; color: var(--cyan);
+  font-variant-numeric: tabular-nums; line-height: 1;
+  text-shadow: 0 0 8px rgba(0,255,200,.3);
+}
+.dash-stat-lbl {
+  font-size: 7px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--muted); margin-top: 3px;
+}
+.dash-stat.gold .dash-stat-val { color: var(--gold); text-shadow: 0 0 8px rgba(226,197,90,.3); }
+.dash-stat.red   .dash-stat-val { color: #f87171; }
+.dash-stat.green .dash-stat-val { color: #34d399; }
+
+/* Category ribbon — clean, no DASH badges */
+.ptabs {
+  display: flex; flex-wrap: wrap; gap: 2px;
+  padding: 6px 8px; border-bottom: 1px solid var(--border);
+}
+.ptab {
+  padding: 5px 9px; font-size: 9px; font-weight: 700;
+  letter-spacing: .8px; text-transform: uppercase;
+  background: none; border: 1px solid transparent;
+  color: var(--dim); cursor: pointer; border-radius: 2px;
+  transition: all .12s; white-space: nowrap;
+}
+.ptab:hover { border-color: var(--border2); color: var(--silver); }
+.ptab.on {
+  background: rgba(0,255,200,.08); border-color: rgba(0,255,200,.3);
+  color: var(--cyan);
+}
+.ptab.map-tab.on { border-color: var(--cyan); }
+.ptab.dash-tab { color: var(--border3); }
+.ptab.dash-tab.on { color: var(--muted); border-color: var(--border2); background: rgba(255,255,255,.02); }
+
+/* Category sponsor badge */
+.cat-sponsor {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 14px; background: rgba(226,197,90,.06);
+  border-bottom: 1px solid rgba(226,197,90,.15);
+  font-size: 8px; color: var(--gold); letter-spacing: 1px;
+  font-weight: 700; text-transform: uppercase;
+  animation: sponsorFade 10s infinite;
+}
+@keyframes sponsorFade { 0%,45%{opacity:1} 50%{opacity:0} 55%,100%{opacity:1} }
+.cat-sponsor-logo { width:20px; height:20px; border-radius:2px; object-fit:contain; }
+
+/* ════════════════════════════════════════════════════════════════
+   WALLET / STRIPE MODAL
+   ════════════════════════════════════════════════════════════════ */
+#wallet-modal {
+  position: fixed; inset: 0; z-index: 19000;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+}
+#wallet-modal.open { display: flex; }
+.wallet-card {
+  background: var(--bg1); border: 1px solid var(--border2);
+  border-radius: 4px; width: 380px; max-width: 96vw;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.6);
+}
+.wallet-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.wallet-title { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--text); }
+.wallet-close { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; }
+.wallet-body { padding: 18px; }
+.wallet-balance {
+  background: rgba(0,255,200,.04); border: 1px solid rgba(0,255,200,.18);
+  border-radius: 3px; padding: 14px; margin-bottom: 16px; text-align:center;
+}
+.wallet-bal-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform:uppercase; margin-bottom:6px; }
+.wallet-bal-val { font-size: 28px; font-weight: 800; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.wallet-bal-sub { font-size: 9px; color: var(--muted); margin-top: 4px; }
+.wallet-topup-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+.topup-btn {
+  padding: 9px 4px; background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--dim); font-size: 10px; font-weight: 700; cursor: pointer;
+  border-radius: 2px; text-align:center; transition: all .12s;
+}
+.topup-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+.topup-btn.selected { background: rgba(0,255,200,.08); border-color: var(--cyan); color: var(--cyan); }
+#stripe-card-element {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 2px; padding: 12px; margin-bottom: 14px;
+}
+.wallet-pay-btn {
+  width: 100%; padding: 13px; background: linear-gradient(135deg,#00c49a,#00ffc8);
+  color: #041a12; border:none; font-size: 11px; font-weight: 900;
+  letter-spacing: .8px; text-transform:uppercase; cursor: pointer; border-radius: 2px;
+}
+.wallet-pay-btn:disabled { opacity:.5; cursor:not-allowed; }
+.wallet-history { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+.wallet-history-title { font-size: 8px; color: var(--muted); letter-spacing: 1.5px; text-transform:uppercase; margin-bottom: 8px; }
+.wallet-txn { display:flex; justify-content:space-between; padding: 5px 0; border-bottom:1px solid rgba(255,255,255,.04); font-size:10px; }
+.wallet-txn-desc { color: var(--dim); }
+.wallet-txn-amt { font-weight:700; }
+.wallet-txn-amt.credit { color:var(--green); }
+.wallet-txn-amt.debit  { color:#f87171; }
+.wallet-notice { font-size: 8px; color: var(--muted); text-align:center; margin-top:10px; line-height:1.7; }
+
+/* ════════════════════════════════════════════════════════════════
+   CLAIM / SPONSOR BUTTONS on asset listing
+   ════════════════════════════════════════════════════════════════ */
+.abtn-claim-listing {
+  width: 100%; padding: 11px; background: rgba(226,197,90,.07);
+  border: 1px solid rgba(226,197,90,.3); color: var(--gold);
+  font-size: 10px; font-weight: 800; letter-spacing: .8px;
+  text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+.abtn-claim-listing:hover { background: rgba(226,197,90,.14); border-color: var(--gold); }
+.abtn-sponsor-listing {
+  width: 100%; padding: 10px; background: none;
+  border: 1px solid rgba(147,51,234,.4); color: #c084fc;
+  font-size: 10px; font-weight: 700; letter-spacing: .6px;
+  text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all .15s;
+}
+.abtn-sponsor-listing:hover { background: rgba(147,51,234,.1); }
+
+/* ════════════════════════════════════════════════════════════════
+   PREMIUM BLUR LOCK on is_premium_data assets
+   ════════════════════════════════════════════════════════════════ */
+.premium-blur-wrap { position: relative; }
+.premium-blur-content {
+  filter: blur(8px); pointer-events:none; user-select:none; opacity:.4;
+  overflow: hidden; max-height: 300px;
+}
+.premium-unlock-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; background: rgba(10,14,28,.9); backdrop-filter: blur(4px);
+  z-index: 10; padding: 20px; text-align: center;
+}
+.premium-icon { font-size: 24px; margin-bottom: 2px; }
+.premium-title { font-size: 12px; font-weight: 800; color: var(--text); }
+.premium-sub { font-size: 9px; color: var(--muted); line-height: 1.7; max-width: 200px; }
+.premium-pay-btn {
+  padding: 11px 24px; background: linear-gradient(135deg,#f59e0b,#fbbf24);
+  color: #1c0a00; border:none; font-size: 11px; font-weight: 900;
+  letter-spacing: .8px; text-transform:uppercase; cursor:pointer; border-radius:2px;
+  box-shadow: 0 0 20px rgba(251,191,36,.3);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   POF UPLOAD & LEAD GATE
+   ════════════════════════════════════════════════════════════════ */
+.lead-gate-box {
+  background: rgba(0,255,200,.03); border: 1px solid rgba(0,255,200,.15);
+  border-radius: 3px; padding: 14px; margin-top: 12px;
+}
+.lead-gate-title { font-size: 9px; font-weight:800; letter-spacing:1.5px; color:var(--cyan); text-transform:uppercase; margin-bottom:8px; }
+.lead-price { font-size:18px; font-weight:800; color:var(--cyan); margin-bottom:6px; }
+.pof-status { font-size:9px; color:var(--muted); margin-bottom:10px; }
+.pof-status.verified { color:var(--green); }
+.abtn-buy-lead {
+  width:100%; padding:12px; background:linear-gradient(135deg,#00c49a,#00ffc8);
+  color:#041a12; border:none; font-size:11px; font-weight:900;
+  letter-spacing:.8px; text-transform:uppercase; cursor:pointer; border-radius:2px;
+}
+.abtn-buy-lead:disabled { opacity:.35; cursor:not-allowed; }
+.abtn-upload-pof {
+  width:100%; padding:10px; background:none;
+  border:1px solid var(--border2); color:var(--dim);
+  font-size:10px; font-weight:700; letter-spacing:.6px;
+  text-transform:uppercase; cursor:pointer; border-radius:2px; margin-top:6px;
+}
+/* Wallet button in topbar */
+.tbtn.wallet-btn {
+  border-color: rgba(0,255,200,.4); color:var(--cyan); position:relative;
+}
+.wallet-credits-badge {
+  position:absolute; top:-5px; right:-5px; background:var(--cyan); color:#000;
+  font-size:8px; font-weight:800; border-radius:10px; padding:1px 5px; min-width:16px;
+  text-align:center;
+}
+
 </style>
+
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -2232,6 +2428,9 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="tstat-l">Bids 24h</div>
       <div class="tstat-v" id="s-bids">—</div>
     </div>
+    <button class="tbtn wallet-btn" id="wallet-btn" onclick="openWallet()" title="Credits & Wallet" style="display:none">
+      ⬡ WALLET<span class="wallet-credits-badge" id="wallet-credits-badge">0</span>
+    </button>
     <button class="tbtn" id="signin-btn">Sign In</button>
     <button class="tbtn primary" id="join-btn">Join</button>
   </div>
@@ -2241,7 +2440,19 @@ body { min-width: 900px; overflow-x: auto; }
 
   <div id="left">
     <div class="left-head">
-      <div class="left-title">Global Directory</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 6px;">
+        <div class="left-title" style="margin:0">Global Directory</div>
+        <div style="font-size:8px;color:var(--muted);letter-spacing:1px" id="left-live-badge"><span class="live-dot"></span>LIVE</div>
+      </div>
+      <div class="asset-dashboard" id="asset-dashboard">
+        <div class="dash-stat gold"><div class="dash-stat-val" id="ds-total">—</div><div class="dash-stat-lbl">Total AUM</div></div>
+        <div class="dash-stat"><div class="dash-stat-val" id="ds-assets">—</div><div class="dash-stat-lbl">Assets</div></div>
+        <div class="dash-stat green"><div class="dash-stat-val" id="ds-bids">—</div><div class="dash-stat-lbl">Active Bids</div></div>
+        <div class="dash-stat"><div class="dash-stat-val" id="ds-maritime">—</div><div class="dash-stat-lbl">Maritime</div></div>
+        <div class="dash-stat"><div class="dash-stat-val" id="ds-aviation">—</div><div class="dash-stat-lbl">Aviation</div></div>
+        <div class="dash-stat red"><div class="dash-stat-val" id="ds-robotics">—</div><div class="dash-stat-lbl">Robotics</div></div>
+      </div>
+      <div id="cat-sponsor-strip" style="display:none"></div>
       <div class="ptabs" id="category-tabs"></div>
       <div id="price-slider-wrap" style="padding:10px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -2351,6 +2562,41 @@ body { min-width: 900px; overflow-x: auto; }
   </div>
 </footer>
 
+
+<!-- ════════════════════════════════════════════════════════════════
+     WALLET MODAL — Stripe Elements + Credit Balance
+     ════════════════════════════════════════════════════════════════ -->
+<div id="wallet-modal">
+  <div class="wallet-card">
+    <div class="wallet-header">
+      <span class="wallet-title">⬡ RWABidAsk WALLET</span>
+      <button class="wallet-close" onclick="closeWallet()">✕</button>
+    </div>
+    <div class="wallet-body">
+      <div class="wallet-balance">
+        <div class="wallet-bal-lbl">Available Credits</div>
+        <div class="wallet-bal-val" id="wallet-bal">$0.00</div>
+        <div class="wallet-bal-sub">1 Credit = $1.00 USD · All sales final</div>
+      </div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">Top-Up Amount</div>
+      <div class="wallet-topup-row">
+        <div class="topup-btn" data-amount="10" onclick="selectTopup(this,10)">$10</div>
+        <div class="topup-btn" data-amount="25" onclick="selectTopup(this,25)">$25</div>
+        <div class="topup-btn" data-amount="50" onclick="selectTopup(this,50)">$50</div>
+        <div class="topup-btn" data-amount="100" onclick="selectTopup(this,100)">$100</div>
+      </div>
+      <div id="stripe-card-element"></div>
+      <button class="wallet-pay-btn" id="wallet-pay-btn" onclick="processTopup()" disabled>
+        ADD CREDITS
+      </button>
+      <div class="wallet-notice">All transactions are final. No refunds. Secured by Stripe.</div>
+      <div class="wallet-history">
+        <div class="wallet-history-title">Recent Transactions</div>
+        <div id="wallet-txn-list"><div style="font-size:10px;color:var(--muted)">No transactions yet</div></div>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 
 <div id="info-win" class="info-win" style="display:none;position:fixed;z-index:9999;"></div>
@@ -2960,6 +3206,7 @@ function onDataReady() {
   if (typeof updateGMC === "function") updateGMC(ASSETS);
   if (typeof renderCategories === "function") renderCategories();
   if (typeof renderList === "function") renderList(ASSETS);
+  if (typeof updateDashboardStats === "function") updateDashboardStats();
   if (typeof buildTicker === "function") buildTicker(ASSETS);
   
   if (window.innerWidth <= 767 && typeof renderMobileListViewFull === "function") {
@@ -3037,8 +3284,8 @@ function renderCategories() {
   if (!container) return;
   container.innerHTML = ASSET_CATEGORIES.map(cat => {
     const isMapCat = MAP_PIN_CATEGORIES.has(cat.id) || cat.id === 'all';
-    const badge = !isMapCat ? ' <span style="font-size:6px;vertical-align:super;color:var(--border3)">DASH</span>' : '';
-    return `<button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}', this)" title="${isMapCat ? 'Globe + Dashboard' : 'Dashboard only'}">${cat.label}${badge}</button>`;
+    const cls = `ptab ${activeTab === cat.id ? 'on' : ''} ${isMapCat ? 'map-tab' : 'dash-tab'}`;
+    return `<button class="${cls}" onclick="setCategory('${cat.id}', this)">${cat.label}</button>`;
   }).join('');
 }
 
@@ -3895,9 +4142,10 @@ function selectAsset(id) {
                 </div>
                 <div class="abtn-row">
                     <button class="abtn-aux" onclick="showInsuranceModal()">INSURANCE</button>
-                    <button class="abtn-aux" onclick="handleSponsor('${a.id}')">SPONSOR</button>
+                    <button class="abtn-aux" onclick="showBuyLeadModal('${a.id}')">BUY LEAD</button>
                 </div>
-                <button class="abtn-aux" style="width:100%;border-color:rgba(34,197,94,.25);color:var(--green)" onclick="handleClaim('${a.id}')">CLAIM OWNERSHIP</button>
+                <button class="abtn-claim-listing" onclick="showClaimModal('${a.id}')">CLAIM THIS LISTING</button>
+                <button class="abtn-sponsor-listing" onclick="showSponsorModal('${a.id}')">SPONSOR THIS LISTING</button>
             </div>
         </div>`;
 
@@ -3923,11 +4171,27 @@ function selectAsset(id) {
         </div>`;
     }
 
+    // ── Premium data blur lock ─────────────────────────────────
+    const isPremium = !!(a._raw && a._raw.is_premium_data);
+    const leadPrice = a._raw ? (parseFloat(a._raw.lead_price) || 9.99) : 9.99;
+
     // ── Full body ───────────────────────────────────────────────
-    // VAULT SECTION: specs + fleet are visible to auth users; locked overlay for guests
     const vaultSection = currentUser
-      ? `<div class="specs-grid${isBioAsset ? ' specs-grid-bio' : ''}">${specsGridHtml}</div>
-         <div class="rinner">${bioLabHtml || ''}${(!isBioAsset ? (fleetHtml || '') : '')}${finHtml || ''}</div>`
+      ? (isPremium ? `
+         <div class="premium-blur-wrap">
+           <div class="premium-blur-content">
+             <div class="specs-grid">${specsGridHtml}</div>
+             <div class="rinner">${fleetHtml || ''}</div>
+           </div>
+           <div class="premium-unlock-overlay">
+             <div class="premium-icon">🔒</div>
+             <div class="premium-title">Premium Data</div>
+             <div class="premium-sub">Full specifications locked behind a one-time access fee.</div>
+             <button class="premium-pay-btn" onclick="unlockPremiumData('${a.id}', ${leadPrice})">PAY $${leadPrice.toFixed(2)} TO UNLOCK</button>
+           </div>
+         </div>` :
+         `<div class="specs-grid${isBioAsset ? ' specs-grid-bio' : ''}">${specsGridHtml}</div>
+          <div class="rinner">${bioLabHtml || ''}${(!isBioAsset ? (fleetHtml || '') : '')}${finHtml || ''}</div>`)
       : `<div style="position:relative;min-height:200px;">
            <div style="filter:blur(4px);pointer-events:none;user-select:none;opacity:.35;overflow:hidden;max-height:240px;">
              <div class="specs-grid">${specsGridHtml}</div>
@@ -5021,6 +5285,432 @@ window.addEventListener('load', () => {
 // Utility functions
 window.fmtPrice = fmtPrice;
 window.escapeHtml = escapeHtml;
+
+// ════════════════════════════════════════════════════════════════════
+// LIVE DASHBOARD STATS
+// ════════════════════════════════════════════════════════════════════
+function updateDashboardStats() {
+  const A = window.ASSETS || [];
+  const total = A.reduce((s,a) => s + (a.price||0), 0);
+  const bidsCount = A.reduce((s,a) => s + (Array.isArray(a.bids) ? a.bids.length : 0), 0);
+  const maritime = A.filter(a => getAssetCategory(a.type) === 'maritime').length;
+  const aviation = A.filter(a => getAssetCategory(a.type) === 'aviation').length;
+  const robotics = A.filter(a => getAssetCategory(a.type) === 'robotics').length;
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('ds-total', fmtPrice(total));
+  set('ds-assets', A.length.toLocaleString());
+  set('ds-bids', bidsCount || '—');
+  set('ds-maritime', maritime || '—');
+  set('ds-aviation', aviation || '—');
+  set('ds-robotics', robotics || '—');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CATEGORY SPONSOR ROTATION
+// ════════════════════════════════════════════════════════════════════
+const CATEGORY_SPONSORS = {
+  maritime:  [{ name: 'Maersk',      logo: '' }, { name: 'MSC',        logo: '' }],
+  robotics:  [{ name: 'Boston Dynamics', logo: '' }, { name: 'Tesla Bot', logo: '' }],
+  aviation:  [{ name: 'Textron Aviation', logo: '' }],
+  energy:    [{ name: 'Schlumberger', logo: '' }],
+};
+let sponsorRotateTimer = null;
+let sponsorIdx = 0;
+
+function startSponsorRotation(catId) {
+  clearInterval(sponsorRotateTimer);
+  const strip = document.getElementById('cat-sponsor-strip');
+  if (!strip) return;
+  const sponsors = CATEGORY_SPONSORS[catId];
+  if (!sponsors || !sponsors.length) { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+  const render = () => {
+    const s = sponsors[sponsorIdx % sponsors.length];
+    strip.innerHTML = `<span>SPONSORED BY</span><strong style="color:var(--gold);margin-left:4px">${s.name}</strong>`;
+    sponsorIdx++;
+  };
+  render();
+  sponsorRotateTimer = setInterval(render, 10000);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// STRIPE WALLET ENGINE
+// ════════════════════════════════════════════════════════════════════
+let _stripe = null;
+let _stripeElements = null;
+let _cardElement = null;
+let _selectedTopupAmount = 0;
+let _userCredits = 0;
+
+const STRIPE_PUBLIC_KEY = 'pk_test_YOUR_STRIPE_PUBLIC_KEY_HERE'; // replace with live key
+
+function initStripe() {
+  if (typeof Stripe === 'undefined') {
+    console.warn('[RWABidAsk] Stripe.js not loaded');
+    return;
+  }
+  _stripe = Stripe(STRIPE_PUBLIC_KEY);
+}
+
+async function openWallet() {
+  if (!currentUser) { openModal('signin'); return; }
+  document.getElementById('wallet-modal').classList.add('open');
+  await loadWalletBalance();
+  await loadWalletHistory();
+  initStripeCard();
+}
+
+function closeWallet() {
+  document.getElementById('wallet-modal').classList.remove('open');
+}
+
+function initStripeCard() {
+  if (!_stripe) { initStripe(); }
+  if (!_stripe) return;
+  if (_cardElement) return; // already initialized
+  _stripeElements = _stripe.elements({ appearance: { theme: 'night', variables: { colorPrimary: '#00ffc8' } } });
+  _cardElement = _stripeElements.create('card', {
+    style: { base: { color: '#f0f4ff', fontSize: '13px', fontFamily: 'monospace', '::placeholder': { color: '#4a5568' } } }
+  });
+  const mountEl = document.getElementById('stripe-card-element');
+  if (mountEl && mountEl.children.length === 0) _cardElement.mount('#stripe-card-element');
+}
+
+function selectTopup(el, amount) {
+  document.querySelectorAll('.topup-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  _selectedTopupAmount = amount;
+  const btn = document.getElementById('wallet-pay-btn');
+  if (btn) { btn.disabled = false; btn.textContent = `ADD $${amount} CREDITS`; }
+}
+
+async function processTopup() {
+  if (!_selectedTopupAmount || !_stripe || !_cardElement || !currentUser) {
+    showToast('SELECT AN AMOUNT AND ENTER CARD DETAILS');
+    return;
+  }
+  const btn = document.getElementById('wallet-pay-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'PROCESSING…'; }
+  try {
+    // Create Payment Intent via Supabase Edge Function
+    // Your Supabase edge function /functions/v1/create-payment-intent must return {clientSecret}
+    const res  = await fetch(`${SB_URL}/functions/v1/create-payment-intent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(await _sb.auth.getSession()).data.session?.access_token}` },
+      body: JSON.stringify({ amount: _selectedTopupAmount * 100, currency: 'usd', user_id: currentUser.id })
+    });
+    const { clientSecret, error: fnErr } = await res.json();
+    if (fnErr || !clientSecret) throw new Error(fnErr || 'No clientSecret returned');
+
+    const { error } = await _stripe.confirmCardPayment(clientSecret, {
+      payment_method: { card: _cardElement, billing_details: { email: currentUser.email } }
+    });
+    if (error) throw new Error(error.message);
+
+    showToast(`$${_selectedTopupAmount} ADDED TO WALLET`);
+    await loadWalletBalance();
+    await loadWalletHistory();
+    logAuditTrail('WALLET_TOPUP', null, { amount: _selectedTopupAmount });
+  } catch (err) {
+    showToast('PAYMENT FAILED: ' + (err.message || 'Unknown error'));
+    console.error('[RWABidAsk] Stripe error:', err);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = `ADD $${_selectedTopupAmount} CREDITS`; }
+  }
+}
+
+async function loadWalletBalance() {
+  if (!_sb || !currentUser) return;
+  try {
+    const { data } = await _sb.from('profiles').select('user_credits').eq('id', currentUser.id).maybeSingle();
+    _userCredits = parseFloat(data?.user_credits || 0);
+    const el = document.getElementById('wallet-bal');
+    if (el) el.textContent = '$' + _userCredits.toFixed(2);
+    // Update badge
+    const badge = document.getElementById('wallet-credits-badge');
+    if (badge) badge.textContent = _userCredits > 0 ? '$' + _userCredits.toFixed(0) : '0';
+  } catch(e) { console.warn('loadWalletBalance error', e); }
+}
+
+async function loadWalletHistory() {
+  if (!_sb || !currentUser) return;
+  try {
+    const { data } = await _sb
+      .from('inquiry_history')
+      .select('action, amount, created_at, metadata')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(8);
+    const list = document.getElementById('wallet-txn-list');
+    if (!list) return;
+    if (!data || !data.length) { list.innerHTML = '<div style="font-size:10px;color:var(--muted)">No transactions yet</div>'; return; }
+    list.innerHTML = data.map(t => {
+      const amt = parseFloat(t.amount || 0);
+      const isCredit = amt > 0;
+      const date = new Date(t.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+      return `<div class="wallet-txn">
+        <span class="wallet-txn-desc">${t.action || '—'}</span>
+        <span class="wallet-txn-amt ${isCredit ? 'credit' : 'debit'}">${isCredit ? '+' : ''}$${Math.abs(amt).toFixed(2)}</span>
+      </div>`;
+    }).join('');
+  } catch(e) { console.warn('loadWalletHistory error', e); }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// AUDIT TRAIL — every unlock/lead buy logged
+// ════════════════════════════════════════════════════════════════════
+async function logAuditTrail(action, assetId, metadata = {}) {
+  if (!_sb || !currentUser) return;
+  try {
+    await _sb.from('inquiry_history').insert({
+      user_id:  currentUser.id,
+      asset_id: assetId ? String(assetId) : null,
+      action,
+      amount:   metadata.amount || null,
+      metadata: { ...metadata, timestamp: new Date().toISOString() }
+    });
+  } catch(e) { console.warn('[RWABidAsk] Audit trail error:', e); }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// BUY LEAD GATE — POF Upload + lead_price unlock
+// ════════════════════════════════════════════════════════════════════
+let _pofVerified = false;
+
+async function checkPofStatus() {
+  if (!_sb || !currentUser) return;
+  try {
+    const { data } = await _sb.from('profiles').select('pof_verified, pof_url').eq('id', currentUser.id).maybeSingle();
+    _pofVerified = !!(data?.pof_verified);
+  } catch(e) {}
+}
+
+async function uploadPOF(inputEl, assetId) {
+  if (!currentUser) { openModal('signin'); return; }
+  const file = inputEl.files[0];
+  if (!file) return;
+  try {
+    showToast('UPLOADING PROOF OF FUNDS…');
+    const path = `pof/${currentUser.id}/${Date.now()}_${file.name}`;
+    const { error } = await _sb.storage.from('documents').upload(path, file, { upsert: true });
+    if (error) throw error;
+    // Update profile
+    await _sb.from('profiles').update({ pof_url: path, pof_verified: false }).eq('id', currentUser.id);
+    showToast('POF UPLOADED — PENDING REVIEW');
+    logAuditTrail('POF_UPLOAD', assetId, { file: file.name });
+    showBuyLeadModal(assetId); // refresh modal
+  } catch(e) { showToast('UPLOAD FAILED: ' + e.message); }
+}
+
+async function showBuyLeadModal(assetId) {
+  await checkPofStatus();
+  const a = (window.ASSETS || []).find(x => x.id == assetId);
+  if (!a) return;
+  const rawR = a._raw || {};
+  const price = parseFloat(rawR.lead_price || 9.99);
+  const pofLine = _pofVerified
+    ? `<div class="pof-status verified">✓ PROOF OF FUNDS VERIFIED</div>`
+    : `<div class="pof-status">Proof of Funds required before purchase</div>
+       <label style="cursor:pointer">
+         <input type="file" accept=".pdf,.jpg,.png" style="display:none" onchange="uploadPOF(this,'${assetId}')">
+         <div class="abtn-upload-pof">UPLOAD PROOF OF FUNDS</div>
+       </label>`;
+  const bodyHtml = `
+    <div class="lead-gate-box">
+      <div class="lead-gate-title">BUY LEAD — SELLER CONTACT</div>
+      <div class="lead-price">$${price.toFixed(2)}</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:10px">One-time unlock. Logged in audit trail for success fee compliance.</div>
+      ${pofLine}
+      <button class="abtn-buy-lead" ${_pofVerified ? '' : 'disabled'} onclick="purchaseLead('${assetId}', ${price})">
+        ${_pofVerified ? 'BUY LEAD NOW' : 'VERIFY FUNDS TO UNLOCK'}
+      </button>
+    </div>`;
+  openModal('buyLead', `LEAD ACCESS — ${(a.address||'').toUpperCase().slice(0,30)}`, bodyHtml);
+}
+
+async function purchaseLead(assetId, price) {
+  if (!currentUser) { openModal('signin'); return; }
+  if (_userCredits < price) {
+    showToast('INSUFFICIENT CREDITS — TOP UP YOUR WALLET');
+    openWallet();
+    return;
+  }
+  try {
+    // Deduct credits
+    await _sb.from('profiles').update({ user_credits: _userCredits - price }).eq('id', currentUser.id);
+    // Log audit trail
+    await logAuditTrail('LEAD_PURCHASE', assetId, { amount: -price, lead_price: price });
+    // Show seller contact (from is_contact_visible or contact_data field)
+    const a = (window.ASSETS || []).find(x => x.id == assetId);
+    const contact = (a?._raw?.contact_data) || { email: 'contact@rwabidask.com', note: 'Contact data will be relayed within 24h' };
+    _userCredits -= price;
+    showToast('LEAD PURCHASED');
+    openModal('leadContact', 'SELLER CONTACT UNLOCKED', `
+      <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.15);border-radius:3px;padding:16px;font-family:monospace">
+        ${Object.entries(contact).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="color:var(--muted);font-size:9px;text-transform:uppercase">${k}</span><span style="color:var(--cyan);font-size:10px">${v}</span></div>`).join('')}
+      </div>
+      <div style="font-size:8px;color:var(--muted);margin-top:12px;line-height:1.8">This lead purchase has been logged. A 3% success fee applies to any completed transaction originating from this contact.</div>`);
+  } catch(e) { showToast('PURCHASE FAILED: ' + e.message); }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CLAIM LISTING MODAL — TOS click-wrap + 3% success fee agreement
+// ════════════════════════════════════════════════════════════════════
+async function showClaimModal(assetId) {
+  if (!currentUser) { openModal('signin'); return; }
+  const a = (window.ASSETS || []).find(x => x.id == assetId);
+  openModal('claimListing', 'CLAIM THIS LISTING', `
+    <div style="font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:16px">
+      Claiming ownership of <strong style="color:var(--text)">${escapeHtml(a?.address||'this asset')}</strong> verifies you as the authorized representative.
+    </div>
+    <div style="background:rgba(226,197,90,.05);border:1px solid rgba(226,197,90,.2);border-radius:3px;padding:14px;font-size:10px;color:var(--dim);line-height:1.9;margin-bottom:16px">
+      <strong style="color:var(--gold)">SUCCESS FEE AGREEMENT</strong><br>
+      By claiming this listing, you agree that RWABidAsk (Annie Group LLC) is entitled to a <strong style="color:var(--gold)">3% success fee</strong> on any transaction 
+      completed through a lead, inquiry, bid, or introduction originating from this platform. 
+      This agreement is binding upon claim submission and logged as a permanent audit record.
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:16px">
+      <input type="checkbox" id="tos-agree" style="margin-top:2px;accent-color:var(--cyan)">
+      <span style="font-size:10px;color:var(--muted)">I agree to the 3% Success Fee Agreement and RWABidAsk Terms of Service</span>
+    </label>
+    <button onclick="submitClaim('${assetId}')" style="width:100%;padding:13px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1c0a00;border:none;font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px">
+      SUBMIT CLAIM — AGREE TO 3% FEE
+    </button>`);
+}
+
+async function submitClaim(assetId) {
+  if (!document.getElementById('tos-agree')?.checked) {
+    showToast('PLEASE AGREE TO THE SUCCESS FEE TERMS');
+    return;
+  }
+  try {
+    await logAuditTrail('CLAIM_SUBMITTED', assetId, { tos_agreed: true, success_fee_pct: 3 });
+    if (_sb) {
+      await _sb.from('partner_leads').insert({
+        user_id: currentUser.id, asset_id: String(assetId),
+        lead_type: 'CLAIM',
+        selection_data: { tos_agreed: true, success_fee_pct: 3, claimed_at: new Date().toISOString() }
+      });
+    }
+    showToast('CLAIM SUBMITTED — UNDER REVIEW');
+    closeModal();
+  } catch(e) { showToast('CLAIM FAILED: ' + e.message); }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SPONSOR LISTING MODAL
+// ════════════════════════════════════════════════════════════════════
+async function showSponsorModal(assetId) {
+  if (!currentUser) { openModal('signin'); return; }
+  const a = (window.ASSETS || []).find(x => x.id == assetId);
+  openModal('sponsorListing', 'SPONSOR THIS LISTING', `
+    <div style="font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:16px">
+      Sponsoring <strong style="color:var(--text)">${escapeHtml(a?.address||'this asset')}</strong> places your brand as the exclusive promoter of this pin. Competitors are removed from the surrounding search radius.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:12px;text-align:center">
+        <div style="font-size:18px;font-weight:800;color:var(--cyan)">$99</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:4px">7 DAYS</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:12px;text-align:center">
+        <div style="font-size:18px;font-weight:800;color:var(--gold)">$299</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:4px">30 DAYS</div>
+      </div>
+    </div>
+    <button onclick="purchaseSponsor('${assetId}', 99, 7)" style="width:100%;padding:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--dim);font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;border-radius:2px;margin-bottom:8px">
+      SPONSOR 7 DAYS — $99
+    </button>
+    <button onclick="purchaseSponsor('${assetId}', 299, 30)" style="width:100%;padding:12px;background:rgba(226,197,90,.07);border:1px solid rgba(226,197,90,.3);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;border-radius:2px">
+      SPONSOR 30 DAYS — $299
+    </button>`);
+}
+
+async function purchaseSponsor(assetId, price, days) {
+  if (_userCredits < price) {
+    showToast(`NEED $${price} IN WALLET — TOP UP NOW`);
+    closeModal();
+    openWallet();
+    return;
+  }
+  try {
+    await _sb.from('profiles').update({ user_credits: _userCredits - price }).eq('id', currentUser.id);
+    await logAuditTrail('SPONSOR_PURCHASE', assetId, { amount: -price, days, price_paid: price });
+    _userCredits -= price;
+    showToast(`LISTING SPONSORED FOR ${days} DAYS`);
+    closeModal();
+  } catch(e) { showToast('SPONSOR PURCHASE FAILED: ' + e.message); }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// PREMIUM DATA UNLOCK
+// ════════════════════════════════════════════════════════════════════
+async function unlockPremiumData(assetId, price) {
+  if (!currentUser) { openModal('signin'); return; }
+  if (_userCredits < price) {
+    showToast(`NEED $${price.toFixed(2)} IN WALLET`);
+    openWallet();
+    return;
+  }
+  try {
+    await _sb.from('profiles').update({ user_credits: _userCredits - price }).eq('id', currentUser.id);
+    await logAuditTrail('PREMIUM_UNLOCK', assetId, { amount: -price, price_paid: price });
+    _userCredits -= price;
+    showToast('DATA UNLOCKED');
+    // Re-render the right panel without blur
+    const a = window.ASSETS?.find(x => x.id == assetId);
+    if (a && a._raw) { a._raw.is_premium_data = false; selectAsset(assetId); }
+  } catch(e) { showToast('UNLOCK FAILED: ' + e.message); }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// openModal helper extension — supports custom title+body
+// ════════════════════════════════════════════════════════════════════
+function openModal(type, title, bodyHtml) {
+  const modal = document.getElementById('modal');
+  const titleEl = document.getElementById('modal-title');
+  const bodyEl  = document.getElementById('modal-body');
+  if (!modal) return;
+  if (title && titleEl) titleEl.textContent = title;
+  if (bodyHtml && bodyEl) { bodyEl.innerHTML = bodyHtml; }
+  else { buildModalContent(type); } // fallback to existing modal builder
+  modal.classList.add('open');
+  modal.style.display = 'flex';
+}
+
+// Hook Stripe init into the auth flow
+const _origUpdateAuthUI = typeof updateAuthUI !== 'undefined' ? updateAuthUI : null;
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    initStripe();
+    // Show wallet button when user is signed in
+    const origUpdateAuth = window.updateAuthUI;
+    if (typeof origUpdateAuth === 'function') {
+      window.updateAuthUI = async function() {
+        await origUpdateAuth();
+        const walletBtn = document.getElementById('wallet-btn');
+        if (walletBtn) walletBtn.style.display = currentUser ? 'flex' : 'none';
+        if (currentUser) { loadWalletBalance(); }
+      };
+    }
+  }, 500);
+});
+
+// ════════════════════════════════════════════════════════════════════
+// CATEGORY SPONSOR HOOK — show sponsor strip on category select
+// ════════════════════════════════════════════════════════════════════
+const _origSetCategory = window.setCategory;
+// Extend setCategory after it's defined to add sponsor rotation
+setTimeout(() => {
+  const sc = window.setCategory;
+  if (sc) {
+    window.setCategory = function(catId, btn) {
+      sc(catId, btn);
+      startSponsorRotation(catId);
+    };
+  }
+}, 1000);
+
 </script>
 
 
