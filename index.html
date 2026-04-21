@@ -2396,57 +2396,96 @@ let markersRendered = false;
 // ASSET CATEGORIES - Castle/Estates mapped to Real Estate
 // ============================================================
 const ASSET_CATEGORIES = [
-  { id: 'all',            label: 'ALL',               physical: false },
-  { id: 'financial',      label: 'FINANCIALS',         physical: false },
-  { id: 'equities',       label: 'EQUITIES',           physical: false },
-  { id: 'realestate',     label: 'REAL ESTATE',        physical: true  },
-  { id: 'infrastructure', label: 'INFRASTRUCTURE',     physical: true  },
-  { id: 'energy',         label: 'ENERGY',             physical: true  },
-  { id: 'maritime',       label: 'MARITIME',           physical: true  },
-  { id: 'aviation',       label: 'AVIATION',           physical: true  },
-  { id: 'commodities',    label: 'COMMODITIES',        physical: true  },
-  { id: 'ecosystems',     label: 'BIO & HUMAN',            physical: false },
+  // ── Tab ribbon (ordered left to right) ──────────────────────────
+  { id: 'all',            label: 'ALL',           physical: false, mapPin: false },
+  { id: 'maritime',       label: 'MARITIME',      physical: true,  mapPin: true  },
+  { id: 'aviation',       label: 'AVIATION',      physical: true,  mapPin: true  },
+  { id: 'robotics',       label: 'ROBOTICS',      physical: true,  mapPin: true  },
+  { id: 'anthro',         label: 'ANTHRO',        physical: true,  mapPin: true  },
+  { id: 'bio',            label: 'BIO',           physical: true,  mapPin: true  },
+  { id: 'energy',         label: 'ENERGY',        physical: true,  mapPin: true  },
+  // ── Dashboard-only (no globe pins) ──────────────────────────────
+  { id: 'realestate',     label: 'REAL ESTATE',   physical: false, mapPin: false },
+  { id: 'infrastructure', label: 'INFRASTRUCTURE',physical: false, mapPin: false },
+  { id: 'financial',      label: 'FINANCIALS',    physical: false, mapPin: false },
+  { id: 'equities',       label: 'EQUITIES',      physical: false, mapPin: false },
 ];
+
+// Categories that render globe pins (physical, tangible, locatable)
+const MAP_PIN_CATEGORIES = new Set(['maritime','aviation','robotics','anthro','bio','energy']);
+// Categories that are dashboard-only (intangible / no fixed location)
+const DASHBOARD_ONLY_CATEGORIES = new Set(['financial','equities','realestate','infrastructure']);
 
 function getAssetCategory(type) {
   const t = (type || '').toLowerCase().trim();
   const map = {
-    // ── Real Estate ─────────────────────────────────────────
+    // ── MARITIME — physical vessels ───────────────────────────────
+    maritime:'maritime', vessel:'maritime', ship:'maritime', boat:'maritime',
+    yacht:'maritime', tanker:'maritime', ferry:'maritime', cargo:'maritime',
+    submarine:'maritime', barge:'maritime', trawler:'maritime',
+    'cargo ship':'maritime', 'oil tanker':'maritime', cruiser:'maritime',
+    // ── AVIATION — physical aircraft ────────────────────────────
+    aviation:'aviation', aircraft:'aviation', airplane:'aviation',
+    jet:'aviation', helicopter:'aviation', drone:'aviation', hangar:'aviation',
+    'private jet':'aviation', turboprop:'aviation', rotorcraft:'aviation',
+    // ── ROBOTICS — automated physical infrastructure ─────────────
+    robotics:'robotics', robot:'robotics', autonomous:'robotics',
+    'automated system':'robotics', automation:'robotics', uav:'robotics',
+    ugv:'robotics', usv:'robotics', 'robotic fleet':'robotics',
+    'autonomous vehicle':'robotics', 'drone fleet':'robotics',
+    'industrial robot':'robotics', exoskeleton:'robotics',
+    // ── ANTHRO — Human Operating Capital ────────────────────────
+    anthro:'anthro', 'human capital':'anthro', labor:'anthro',
+    labour:'anthro', workforce:'anthro', personnel:'anthro',
+    'labor pool':'anthro', 'intelligence pool':'anthro',
+    'task force':'anthro', 'response unit':'anthro',
+    'rapid response':'anthro', 'emergency unit':'anthro',
+    'security detail':'anthro', 'medical team':'anthro',
+    unit:'anthro', team:'anthro', crew:'anthro', squad:'anthro',
+    'operating capital':'anthro', 'human ecosystem':'anthro',
+    // ── BIO — physical biological production/facilities ──────────
+    // Rule: must have a physical location (farm/lab/facility)
+    // Intangible bio IP (patent-only) → financial
+    bio:'bio', biological:'bio', biotech:'bio',
+    'bio-manufacturing':'bio', biomanufacturing:'bio',
+    'bio facility':'bio', 'research facility':'bio',
+    farm:'bio', greenhouse:'bio', laboratory:'bio', lab:'bio',
+    'growing facility':'bio', hydroponic:'bio', aquaculture:'bio',
+    'bio production':'bio', 'cell culture':'bio', fermentation:'bio',
+    'bio asset':'bio', bioactive:'bio', botanical:'bio',
+    'plant extract':'bio', phytochemical:'bio', terpene:'bio',
+    'pharma facility':'bio', 'bioprocessing':'bio',
+    agriculture:'bio', agri:'bio', aquafarm:'bio',
+    // Note: patents/IP/molecules without a facility → financial (see physicality test)
+    compound:'bio', molecule:'bio', pharmaceutical:'bio',
+    // ── ENERGY — physical generation assets ─────────────────────
+    energy:'energy', solar:'energy', wind:'energy', 'power plant':'energy',
+    nuclear:'energy', hydro:'energy', geothermal:'energy', battery:'energy',
+    grid:'energy', 'energy storage':'energy', biomass:'energy', powerplant:'energy',
+    'wind farm':'energy', 'solar farm':'energy', substation:'energy',
+    // ── REAL ESTATE — structures/land (dashboard-only) ───────────
     residential:'realestate', land:'realestate', castle:'realestate',
     estate:'realestate', property:'realestate', realestate:'realestate',
     'real estate':'realestate', house:'realestate', condo:'realestate',
     apartment:'realestate', commercial:'realestate', office:'realestate',
     retail:'realestate', industrial:'realestate', warehouse:'realestate',
     multifamily:'realestate', hotel:'realestate', resort:'realestate',
-    // ── Infrastructure ──────────────────────────────────────
+    farmland:'realestate',
+    // ── INFRASTRUCTURE — fixed network assets (dashboard-only) ───
     infrastructure:'infrastructure', bridge:'infrastructure', tunnel:'infrastructure',
     satellite:'infrastructure', telecom:'infrastructure', port:'infrastructure',
     pipeline:'infrastructure', rail:'infrastructure', road:'infrastructure',
     datacenter:'infrastructure', 'data center':'infrastructure', tower:'infrastructure',
     cable:'infrastructure', dam:'infrastructure', desalination:'infrastructure',
-    // ── Energy ──────────────────────────────────────────────
-    energy:'energy', solar:'energy', wind:'energy', 'power plant':'energy',
-    nuclear:'energy', hydro:'energy', geothermal:'energy', battery:'energy',
-    grid:'energy', 'energy storage':'energy', biomass:'energy', powerplant:'energy',
-    'wind farm':'energy', 'solar farm':'energy', substation:'energy',
-    // ── Maritime ────────────────────────────────────────────
-    maritime:'maritime', vessel:'maritime', ship:'maritime', boat:'maritime',
-    yacht:'maritime', tanker:'maritime', ferry:'maritime', cargo:'maritime',
-    submarine:'maritime', barge:'maritime', trawler:'maritime',
-    'cargo ship':'maritime', 'oil tanker':'maritime', cruiser:'maritime',
-    // ── Aviation ────────────────────────────────────────────
-    aviation:'aviation', aircraft:'aviation', airplane:'aviation',
-    jet:'aviation', helicopter:'aviation', drone:'aviation', hangar:'aviation',
-    'private jet':'aviation', turboprop:'aviation', rotorcraft:'aviation',
-    // ── EQUITIES — Business Brokerage, PE, Tokenized Stocks ──
+    // ── EQUITIES — business/stock (dashboard-only) ───────────────
     equities:'equities', equity:'equities', stock:'equities',
     stocks:'equities', share:'equities', shares:'equities',
     business:'equities', 'business brokerage':'equities',
     'private equity':'equities', 'pe fund':'equities', reit:'equities',
     etf:'equities', fund:'equities', 'venture capital':'equities',
-    'tokenized stock':'equities', 'tokenized equity':'equities',
-    spac:'equities', ipo:'equities', 'hedge fund':'equities',
-    // ── Financials — Debt, Bonds, IP, Credit ────────────────
+    'tokenized stock':'equities', spac:'equities', ipo:'equities',
+    'hedge fund':'equities',
+    // ── FINANCIALS — intangibles, debt, cash, IP (dashboard-only) ─
     financial:'financial', financials:'financial', debt:'financial',
     bond:'financial', bonds:'financial', 'treasury bill':'financial',
     treasury:'financial', ip:'financial', patent:'financial',
@@ -2454,57 +2493,58 @@ function getAssetCategory(type) {
     tranche:'financial', note:'financial', cdo:'financial',
     clo:'financial', mbs:'financial', abs:'financial',
     receivables:'financial', 'trade finance':'financial',
-    // ── Commodities — physical grades/chemicals ──────────────
-    commodities:'commodities', commodity:'commodities',
-    wheat:'commodities', corn:'commodities', soy:'commodities', cocoa:'commodities',
-    coffee:'commodities', sugar:'commodities', cotton:'commodities',
-    copper:'commodities', gold:'commodities', silver:'commodities',
-    platinum:'commodities', palladium:'commodities', aluminum:'commodities',
-    iron:'commodities', steel:'commodities', nickel:'commodities',
-    oil:'commodities', gas:'commodities', 'crude oil':'commodities',
-    'natural gas':'commodities', lng:'commodities', 'rare earth':'commodities',
-    lithium:'commodities', uranium:'commodities', cobalt:'commodities',
-    timber:'commodities', minerals:'commodities', mining:'commodities',
-    coal:'commodities', resources:'commodities',
-    // ── Bio & Human Ecosystem ────────────────────────────────
-    ecosystems:'ecosystems', ecosystem:'ecosystems',
-    'human ecosystem':'ecosystems', workforce:'ecosystems',
-    'task force':'ecosystems', 'response unit':'ecosystems',
-    'rapid response':'ecosystems', 'emergency unit':'ecosystems',
-    'security detail':'ecosystems', 'medical team':'ecosystems',
-    personnel:'ecosystems', unit:'ecosystems', team:'ecosystems',
-    // Bio-assets (molecular/pharma/botanical)
-    compound:'ecosystems', molecule:'ecosystems', molecular:'ecosystems',
-    pharmaceutical:'ecosystems', pharma:'ecosystems', drug:'ecosystems',
-    'drug candidate':'ecosystems', bioactive:'ecosystems',
-    botanical:'ecosystems', extract:'ecosystems', phytochemical:'ecosystems',
-    discovery:'ecosystems', 'bio-discovery':'ecosystems', bioasset:'ecosystems',
-    'bio asset':'ecosystems', nutraceutical:'ecosystems', peptide:'ecosystems',
-    enzyme:'ecosystems', protein:'ecosystems', lipid:'ecosystems',
-    alkaloid:'ecosystems', flavonoid:'ecosystems', terpene:'ecosystems',
-    cannabinoid:'ecosystems', 'active ingredient':'ecosystems',
-    'clinical candidate':'ecosystems', 'research compound':'ecosystems',
-    // Natural Resources (non-commodity) → commodities
-    farmland:'realestate', agriculture:'realestate',
+    cash:'financial', 'cash equivalent':'financial',
+    commodities:'financial', commodity:'financial',
+    gold:'financial', silver:'financial', copper:'financial',
+    oil:'financial', gas:'financial', 'crude oil':'financial',
+    wheat:'financial', corn:'financial', lithium:'financial',
+    // molecular compounds without facility → financial
+    peptide:'financial', enzyme:'financial', alkaloid:'financial',
+    flavonoid:'financial', cannabinoid:'financial',
+    'clinical candidate':'financial', 'research compound':'financial',
+    'drug candidate':'financial', nutraceutical:'financial',
+    cas:'financial',
   };
   if (map[t]) return map[t];
-  // fuzzy fallback — order matters, more specific first
-  if (t.includes('real') || t.includes('estat') || t.includes('propert')) return 'realestate';
-  if (t.includes('infra') || t.includes('satell') || t.includes('bridge') || t.includes('tunnel') || t.includes('port')) return 'infrastructure';
-  if (t.includes('solar') || t.includes('wind') || t.includes('power') || t.includes('nuclear') || t.includes('hydro')) return 'energy';
+  // ── Fuzzy fallback ────────────────────────────────────────────
+  if (t.includes('robot') || t.includes('autonom') || t.includes('ugv') || t.includes('uav')) return 'robotics';
+  if (t.includes('anthro') || t.includes('labor') || t.includes('personn') || t.includes('crew') || t.includes('task force')) return 'anthro';
+  if (t.includes('farm') || t.includes('lab') || t.includes('bio') || t.includes('agri') || t.includes('aqua')) return 'bio';
   if (t.includes('mar') || t.includes('vessel') || t.includes('ship') || t.includes('yacht') || t.includes('boat')) return 'maritime';
   if (t.includes('avi') || t.includes('air') || t.includes('jet') || t.includes('plane') || t.includes('heli')) return 'aviation';
-  if (t.includes('busi') || t.includes('equit') || t.includes('stock') || t.includes('fund') || t.includes('reit')) return 'equities';
-  if (t.includes('wheat') || t.includes('copper') || t.includes('gold') || t.includes('crude') || t.includes('commod')) return 'commodities';
-  if (t.includes('task') || t.includes('force') || t.includes('unit') || t.includes('ecosys') || t.includes('person') || t.includes('team')) return 'ecosystems';
-  if (t.includes('pharma') || t.includes('molecule') || t.includes('compound') || t.includes('cas') || t.includes('botanical') || t.includes('extract') || t.includes('peptide') || t.includes('alkaloid')) return 'ecosystems';
-  return 'financial'; // default
+  if (t.includes('solar') || t.includes('wind') || t.includes('power') || t.includes('nuclear') || t.includes('hydro')) return 'energy';
+  if (t.includes('real') || t.includes('estat') || t.includes('propert')) return 'realestate';
+  if (t.includes('infra') || t.includes('satell') || t.includes('bridge') || t.includes('port')) return 'infrastructure';
+  if (t.includes('busi') || t.includes('equit') || t.includes('stock') || t.includes('fund')) return 'equities';
+  return 'financial'; // default: all intangibles
 }
 
 function isPhysicalAsset(type) {
+  return isMapPinAsset(type);
+}
+
+// isMapPinAsset: returns true ONLY for assets that should render on the globe.
+// Rule: physical, tangible, has a real location — not a document, patent, or dashboard metric.
+function isMapPinAsset(type, asset) {
   const cat = getAssetCategory(type);
-  const category = ASSET_CATEGORIES.find(c => c.id === cat);
-  return category ? category.physical : false;
+  if (!MAP_PIN_CATEGORIES.has(cat)) return false;
+
+  // BIO PHYSICALITY TEST: bio patents/molecules without a physical facility → no pin
+  if (cat === 'bio' && asset) {
+    const rawFields = asset._raw || {};
+    const specs     = asset.specs || {};
+    // If it has cas_number or molecular_formula but NO facility indicators → intangible
+    const hasMolecular = !!(rawFields.cas_number || specs.cas_number ||
+                             rawFields.molecular_formula || specs.molecular_formula);
+    const hasFacility  = !!(rawFields.facility_name || rawFields.lab_address ||
+                             rawFields.farm_name || rawFields.facility_type ||
+                             specs.facility_name || specs.facility_type ||
+                             asset.address_is_facility);
+    // A bio asset is only physical if it has a facility, OR if it has real (non-hub) coords
+    if (hasMolecular && !hasFacility && asset._coordsFromHub) return false;
+  }
+
+  return true;
 }
 
 // ============================================================
@@ -2756,6 +2796,7 @@ async function fetchListingsFromSupabase() {
       let lng = parseFloat(r.lng ?? r.longitude ?? r.Longitude ?? r.lat_lng?.lng ?? '');
 
       let _hasCoords = !isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0);
+      let _coordsFromHub = false; // will be set true if we fall back to a hub
 
       // ── FALLBACK: randomized transport hub coords for assets without location ──
       if (!_hasCoords) {
@@ -2788,7 +2829,8 @@ async function fetchListingsFromSupabase() {
         const hub = hubs[Math.floor(Math.random() * hubs.length)];
         lat = hub[0] + jitter();
         lng = hub[1] + jitter();
-        _hasCoords = true; // now has a valid fallback pin
+        _hasCoords = true;     // has a valid fallback pin
+        _coordsFromHub = true;  // flag: coordinates are synthetic (hub fallback)
         console.log('[RWABidAsk] Hub fallback for id=' + r.id + ' (' + cat2 + ') → ' + lat.toFixed(3) + ',' + lng.toFixed(3));
       }
 
@@ -2840,6 +2882,7 @@ async function fetchListingsFromSupabase() {
         lat: lat,
         lng: lng,
         _hasCoords: _hasCoords,
+        _coordsFromHub: _coordsFromHub, // true = hub fallback, used for bio physicality test
         // price is always USD float; original currency stored separately
         price: priceUSD,
         original_currency: origCurrency || null,
@@ -2992,11 +3035,11 @@ function escapeHtml(str) {
 function renderCategories() {
   const container = document.getElementById('category-tabs');
   if (!container) return;
-  container.innerHTML = ASSET_CATEGORIES.map(cat => `
-    <button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}', this)">
-      ${cat.label}
-    </button>
-  `).join('');
+  container.innerHTML = ASSET_CATEGORIES.map(cat => {
+    const isMapCat = MAP_PIN_CATEGORIES.has(cat.id) || cat.id === 'all';
+    const badge = !isMapCat ? ' <span style="font-size:6px;vertical-align:super;color:var(--border3)">DASH</span>' : '';
+    return `<button class="ptab ${activeTab === cat.id ? 'on' : ''}" onclick="setCategory('${cat.id}', this)" title="${isMapCat ? 'Globe + Dashboard' : 'Dashboard only'}">${cat.label}${badge}</button>`;
+  }).join('');
 }
 
 function setCategory(catId, btn) {
@@ -3610,7 +3653,7 @@ function selectAsset(id) {
     const molFormula   = specs_early.molecular_formula || specs_early.formula || specs_early.chemical_formula
                          || (a._raw || {}).molecular_formula || '';
     const casNumber    = specs_early.cas_number || specs_early.cas || (a._raw || {}).cas_number || '';
-    const isBioAsset   = assetCatForHeader === 'ecosystems' && !!(molFormula || casNumber);
+    const isBioAsset   = (assetCatForHeader === 'bio' || assetCatForHeader === 'ecosystems') && !!(molFormula || casNumber);
 
     const assetTitle = a.address || a.title || a.name || ('Asset #' + a.id);
     const assetSub   = [a.city, a.country].filter(Boolean).filter((v,i,arr)=>arr.indexOf(v)===i).join(', ') || '—';
@@ -3658,7 +3701,7 @@ function selectAsset(id) {
     const specs = a.specs || {};
     const mainStruct = (a.structures && a.structures[0]) || {};
     const assetCat = assetCatForHeader; // already computed above
-    const isEcosystem  = assetCat === 'ecosystems';
+    const isEcosystem  = assetCat === 'ecosystems' || assetCat === 'anthro' || assetCat === 'robotics';
     const isCommodity  = assetCat === 'commodities';
     const isMaritime   = assetCat === 'maritime';
     // isBioAsset already set above
@@ -3683,17 +3726,53 @@ function selectAsset(id) {
         ...(specs_early.storage_temp   ? { 'Storage Temp': specs_early.storage_temp } : {}),
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
+    } else if (assetCat === 'anthro') {
+      // ANTHRO — Human Operating Capital
+      specsData = {
+        'Unit Name':       specs.unit_name || a.address || '—',
+        'Headcount':       specs.headcount || specs.personnel_count || specs.units || '—',
+        'Deployment Speed':specs.deployment_speed || specs.mobilization_time || specs.mob_time || '—',
+        'Status':         (a.status || 'Active').toUpperCase(),
+        ...(specs.specialization    ? { 'Specialization':   specs.specialization    } : {}),
+        ...(specs.deployment_zone   ? { 'Deployment Zone':  specs.deployment_zone   } : {}),
+        ...(specs.language          ? { 'Language':         specs.language          } : {}),
+        ...(specs.clearance_level   ? { 'Clearance Level':  specs.clearance_level   } : {}),
+        ...(specs.tech_certifications ? { 'Certifications': specs.tech_certifications } : {}),
+      };
+    } else if (assetCat === 'robotics') {
+      // ROBOTICS — Automated Physical Infrastructure
+      specsData = {
+        'Fleet Size':      specs.fleet_size || specs.units || specs.unit_count || '—',
+        'Unit Type':       specs.unit_type || specs.robot_type || (a.type||'').toUpperCase(),
+        'Autonomy Level':  specs.autonomy_level || specs.autonomy || '—',
+        'Status':         (a.status || 'Active').toUpperCase(),
+        ...(specs.payload_kg        ? { 'Payload (kg)':     specs.payload_kg        } : {}),
+        ...(specs.range_km          ? { 'Range (km)':       specs.range_km          } : {}),
+        ...(specs.operating_env     ? { 'Operating Env':    specs.operating_env     } : {}),
+        ...(specs.manufacturer      ? { 'Manufacturer':     specs.manufacturer      } : {}),
+        ...(specs.certifications    ? { 'Certifications':   specs.certifications    } : {}),
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+      };
+    } else if (assetCat === 'bio') {
+      // BIO — physical biological production/facility
+      specsData = {
+        'Facility Type':   specs.facility_type || specs.bio_type || (a.type||'').toUpperCase(),
+        'Capacity':        specs.capacity || specs.production_capacity || '—',
+        'Status':         (a.status || 'Active').toUpperCase(),
+        ...(specs.crop_type         ? { 'Crop/Product':     specs.crop_type         } : {}),
+        ...(specs.acreage           ? { 'Acreage':          specs.acreage           } : {}),
+        ...(specs.certifications    ? { 'Certifications':   specs.certifications    } : {}),
+        ...(specs.output_per_year   ? { 'Annual Output':    specs.output_per_year   } : {}),
+        ...(specs.bio_grade         ? { 'Grade':            specs.bio_grade         } : {}),
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+      };
     } else if (isEcosystem) {
+      // Fallback for old 'ecosystems' category data
       specsData = {
         'Unit Name': specs.unit_name || a.address || '—',
         'Headcount': specs.headcount || specs.personnel_count || '—',
-        'Deployment Speed': specs.deployment_speed || specs.mobilization_time || specs.mob_time || '—',
+        'Deployment Speed': specs.deployment_speed || specs.mobilization_time || '—',
         'Status': (a.status || 'Active').toUpperCase(),
-        ...(specs.tech_certifications ? { 'Certifications': specs.tech_certifications } : {}),
-        ...(specs.specialization ? { 'Specialization': specs.specialization } : {}),
-        ...(specs.deployment_zone ? { 'Deployment Zone': specs.deployment_zone } : {}),
-        ...(specs.language ? { 'Language': specs.language } : {}),
-        ...(specs.clearance_level ? { 'Clearance Level': specs.clearance_level } : {}),
       };
     } else if (isCommodity) {
       specsData = {
@@ -4196,18 +4275,19 @@ function onCameraChange() {
 }
 
 function getVisibleAssetsInViewport(assets) {
-  if (!map3dEl) return assets; // no map yet: return all
+  if (!map3dEl) return assets;
   try {
     const center = map3dEl.center || { lat: 20, lng: 10 };
     const range  = map3dEl.range || 22000000;
 
-    // At globe scale (>8M range), show everything — clustering handles density
-    if (range > 8000000) return assets;
+    // ── Globe/hemisphere scale: clusters only — no individual pins loaded ──
+    // Clusters render from buildClusters(); this function controls pin loading only
+    if (range > 2000000) return assets; // clustering handles; pass all for cluster build
 
-    // Scale viewport spread with zoom: range/111000 gives approx visible degrees
-    // Use generous 1.6x multiplier to avoid edge-clipping when panning
-    const degLat = Math.min(85, (range / 111000) * 1.6);
-    const degLng = Math.min(180, degLat / Math.max(0.1, Math.cos(center.lat * Math.PI / 180)));
+    // ── Regional/city/street scale: bounds-based culling ──────────────────
+    // Only render assets inside the user's current camera viewbox
+    const degLat = Math.min(45, (range / 111000) * 1.8);
+    const degLng = Math.min(90, degLat / Math.max(0.1, Math.cos(center.lat * Math.PI / 180)));
 
     const latMin = center.lat - degLat;
     const latMax = center.lat + degLat;
@@ -4219,8 +4299,8 @@ function getVisibleAssetsInViewport(assets) {
       a.lng >= lngMin && a.lng <= lngMax
     );
 
-    // Always return at least 1 item if there's data — prevents blank screen
-    return inView.length > 0 ? inView : assets.slice(0, 50);
+    console.log(`[RWABidAsk] Bounds culled: ${inView.length}/${assets.length} in viewport`);
+    return inView.length > 0 ? inView : [];
   } catch(e) { return assets; }
 }
 
@@ -4230,12 +4310,13 @@ function getVisibleAssetsInViewport(assets) {
 let clusterMarkers = {}; // cluster DOM elements keyed by cell id
 
 function getCellSize(range) {
-  // Returns degree-cell-size based on camera range
-  if (range > 8000000) return 20;   // continent view: 20° cells
-  if (range > 2000000) return 5;    // country view: 5° cells
-  if (range > 500000)  return 1;    // regional view: 1° cells
-  if (range > 100000)  return 0.25; // city view: 0.25° cells
-  return 0;                          // street view: no clustering
+  // Globe/continent: show aggregate cluster bubbles — no individual pins
+  if (range > 12000000) return 30;  // global: 30° mega-cells (continents)
+  if (range > 5000000)  return 12;  // hemisphere: 12° cells
+  if (range > 2000000)  return 4;   // country: 4° cells
+  if (range > 500000)   return 1;   // regional: 1° cells
+  if (range > 100000)   return 0.2; // city: 0.2° cells (~22km)
+  return 0;                          // street-level: individual pins + culling
 }
 
 function buildClusters(assets, range) {
@@ -4275,10 +4356,16 @@ function renderDOMMarkers() {
   clusterMarkers = {};
 
   const range  = map3dEl.range || 22000000;
-  const allFiltered = filterAssets(ASSETS).filter(a => a._hasCoords !== false);
 
-  // ── Viewport culling: only process assets in current view ──────
-  const viewportAssets = getVisibleAssetsInViewport(allFiltered);
+  // ── STRICT PHYSICAL FILTER: only tangible, located assets get map pins ──
+  // Financial/intangible assets (Treasury Bills, Patents, Cash) → dashboard only
+  const physicalFiltered = filterAssets(ASSETS).filter(a => {
+    if (!a._hasCoords) return false;
+    return isMapPinAsset(a.type, a);
+  });
+
+  // ── Viewport culling: only process assets within camera bounds ──────
+  const viewportAssets = getVisibleAssetsInViewport(physicalFiltered);
   console.log(`[RWABidAsk] Viewport: ${viewportAssets.length}/${allFiltered.length} assets`);
 
   const cells = buildClusters(viewportAssets, range);
@@ -4375,7 +4462,8 @@ function addPriceMarker(asset) {
   const layer = document.getElementById('overlay-layer');
   if (!layer) return;
   const el = document.createElement('div');
-  const isBio = getAssetCategory(asset.type) === 'ecosystems' && !!(asset.molecular_formula || asset.cas_number);
+  const cat_pin = getAssetCategory(asset.type);
+  const isBio = (cat_pin === 'bio' || cat_pin === 'ecosystems') && !!(asset.molecular_formula || asset.cas_number);
   el.className = isBio ? 'price-marker bio-marker' : 'price-marker standard';
   el.title = asset.address || 'Asset';
   const priceStr = fmtPrice(asset.price);
