@@ -498,6 +498,7 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .mctl:hover, .mctl.on { color: var(--cyan); background: var(--cyan-dim); }
 .map-status {
+  display: none !important; /* Globe status box removed — status is in topbar */
   position: absolute;
   bottom: 14px;
   left: 50%;
@@ -2547,7 +2548,7 @@ body { min-width: 900px; overflow-x: auto; }
     <div class="rbody" id="rbody">
       <div class="r-empty">
           <div class="r-empty-glyph">◎</div>
-          <div class="r-empty-text">SEARCH · BID · BUY · FINANCE<br>RESIDENTIAL · COMMERCIAL · LAND<br>TIMESHARES · LEASES · BUSINESSES</div>
+          <div class="r-empty-text" style="opacity:.35">SELECT AN ASSET TO VIEW DETAILS</div>
       </div>
     </div>
   </div><!-- /#right -->
@@ -3325,8 +3326,11 @@ function fmtOriginalPrice(amount, currency) {
 }
 
 function setStatus(msg) {
-  const el = document.getElementById('map-status-txt');
-  if (el) el.textContent = msg;
+  // Route to topbar status instead of globe overlay box
+  const topEl = document.getElementById('s-status');
+  if (topEl) topEl.textContent = (msg || '').slice(0, 20); // truncate for topbar
+  const mapEl = document.getElementById('map-status-txt');
+  if (mapEl) mapEl.textContent = msg; // keep internal text for debugging
 }
 
 function typeClass(type) {
@@ -3575,6 +3579,7 @@ function togglePortfolio() {
  * 2. logPartnerLead: Handles Bids, Lending, Insurance
  */
 async function logPartnerLead(assetId, actionType) {
+    if (!currentUser) return; // Open House: skip DB writes for guests
     // Support legacy call patterns: logPartnerLead(type, data) when no currentAsset passed
     let resolvedAssetId = assetId;
     let resolvedAction  = actionType;
@@ -4906,7 +4911,7 @@ function renderDOMMarkers() {
 
   // ── Viewport culling: only process assets within camera bounds ──────
   const viewportAssets = getVisibleAssetsInViewport(physicalFiltered);
-  console.log(`[RWABidAsk] Viewport: ${viewportAssets.length}/${allFiltered.length} assets`);
+  console.log(`[RWABidAsk] Viewport: ${viewportAssets.length}/${physicalFiltered.length} assets`);
 
   const cells = buildClusters(viewportAssets, range);
 
@@ -6114,6 +6119,11 @@ async function fetchMarketActivity(assetId) {
   const body = document.getElementById('market-activity-body');
   if (!body) return;
   if (!_sb) { body.innerHTML = '<div style="font-size:10px;color:var(--muted)">Database not connected</div>'; return; }
+  // Open House: anonymous users see a sign-in prompt, not a 400 error
+  if (!currentUser) {
+    body.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:4px 0">Sign in to view market activity</div>';
+    return;
+  }
   try {
     const { data, error } = await _sb
       .from('asset_inquiries')
