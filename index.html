@@ -2382,6 +2382,37 @@ body { min-width: 900px; overflow-x: auto; }
   text-align:center;
 }
 
+
+/* ════════════════════════════════════════════════════════════════
+   GOLD ROW BLUR — Teaser-First Paywall Rows
+   ════════════════════════════════════════════════════════════════ */
+.spec-row-locked {
+  position: relative;
+  background: rgba(226,197,90,.03);
+  border-left: 2px solid rgba(226,197,90,.2) !important;
+}
+.spec-row-blur {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  filter: blur(4px);
+  user-select: none;
+  pointer-events: none;
+  display: inline-block;
+}
+.spec-row-lock-icon {
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--gold);
+  flex-shrink: 0;
+  transition: transform .1s;
+}
+.spec-row-lock-icon:hover { transform: scale(1.2); }
+.rrow-null .rv { display: flex; align-items: center; }
+
+/* Auth gate override — hidden in Open House mode */
+.auth-gate { display: none !important; }
+.auth-gate.force-show { display: flex !important; }
+
 </style>
 
 <script src="https://js.stripe.com/v3/"></script>
@@ -2610,14 +2641,14 @@ body { min-width: 900px; overflow-x: auto; }
 </div>
 <!-- mobile list view is rendered inside map-col via JS -->
 
-<!-- CLINICAL AUTHENTICATION GATE — Persistent, No Escape -->
-<div class="auth-gate" id="auth-gate">
+<!-- AUTH GATE — Hidden by default (Open House mode). Triggered only on gated actions. -->
+<div class="auth-gate hidden" id="auth-gate" style="display:none!important">
   <div class="auth-gate-card">
-    <div class="auth-gate-title">RWABidAsk | Access Terminal</div>
-    <div class="auth-gate-sub">Access the Global Asset Directory, Permanent Ledger, and institutional order book. Verification from $10.</div>
+    <div class="auth-gate-title">RWABidAsk | Sign In Required</div>
+    <div class="auth-gate-sub">Sign in to place offers, request financing, and unlock premium data.</div>
     <div class="auth-gate-buttons">
-      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('register')">$10 Sign Up</button>
-      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">Sign In</button>
+      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('register')">CREATE ACCOUNT</button>
+      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">SIGN IN</button>
     </div>
   </div>
 </div>
@@ -3939,50 +3970,91 @@ async function submitBid() {
 
 
 // ════════════════════════════════════════════════════════════════════
-// UNIVERSAL SPECS PARSER
-// Maps from the polymorphic specs JSONB: specs.physical, specs.anthro,
-// specs.ledger, specs.media, etc.  Works for any asset category.
+// UNIVERSAL SPECS PARSER — Teaser-First with Gold Row Blur
+// Every 3rd row is blurred (backdrop-filter) with a lock icon.
+// Admin users and unlocked users see all rows clearly.
 // ════════════════════════════════════════════════════════════════════
-function renderSpecs(specs, assetCat, assetRaw) {
-  if (!specs || typeof specs !== 'object') return '<div class="rrow"><span class="rk">DATA</span><span class="rv" style="color:var(--muted)">No spec data in JSONB</span></div>';
+function renderSpecs(specs, assetCat, assetRaw, isUnlockedCtx) {
+  if (!specs || typeof specs !== 'object') {
+    return '<div class="rrow"><span class="rk">DATA</span><span class="rv" style="color:var(--muted)">No spec data in JSONB</span></div>';
+  }
 
-  // Sub-objects to render (skip media — handled separately)
+  const admin = isAdminUser();
+  const unlocked = isUnlockedCtx || admin;
   const SKIP_KEYS = new Set(['media','gallery','photos','images','fleet','bids']);
-  const OUTPUT_SECTIONS = [];
+  let allRows = []; // flat list of {key, val, isNull} before rendering
 
-  // ── Flat top-level fields first ──────────────────────────────
-  const flatEntries = Object.entries(specs).filter(([k,v]) => !SKIP_KEYS.has(k) && typeof v !== 'object');
-  if (flatEntries.length) {
-    OUTPUT_SECTIONS.push(flatEntries.map(([k,v]) =>
-      `<div class="rrow"><span class="rk">${escapeHtml(k.replace(/_/g,' ').toUpperCase())}</span><span class="rv">${escapeHtml(String(v))}</span></div>`
-    ).join(''));
-  }
+  // ── Collect flat top-level fields ──────────────────────────
+  Object.entries(specs)
+    .filter(([k,v]) => !SKIP_KEYS.has(k) && typeof v !== 'object')
+    .forEach(([k,v]) => allRows.push({ section: null, key: k, val: v }));
 
-  // ── Nested sub-objects (physical, anthro, ledger, etc.) ──────
-  const nestedEntries = Object.entries(specs).filter(([k,v]) => !SKIP_KEYS.has(k) && typeof v === 'object' && v !== null && !Array.isArray(v));
-  for (const [sectionKey, sectionData] of nestedEntries) {
-    const sectionLabel = sectionKey.replace(/_/g,' ').toUpperCase();
-    const rows = Object.entries(sectionData).map(([k,v]) => {
-      const val = typeof v === 'object' ? JSON.stringify(v) : String(v);
-      return `<div class="rrow"><span class="rk">${escapeHtml(k.replace(/_/g,' ').toUpperCase())}</span><span class="rv">${escapeHtml(val)}</span></div>`;
-    }).join('');
-    if (rows) {
-      OUTPUT_SECTIONS.push(`<div class="rsect-title" style="margin-top:8px">${escapeHtml(sectionLabel)}</div>${rows}`);
+  // ── Collect nested sub-object fields ──────────────────────
+  Object.entries(specs)
+    .filter(([k,v]) => !SKIP_KEYS.has(k) && typeof v === 'object' && v !== null && !Array.isArray(v))
+    .forEach(([sectionKey, sectionData]) => {
+      allRows.push({ section: sectionKey, key: null, val: null, isHeader: true });
+      Object.entries(sectionData).forEach(([k,v]) => {
+        const val = typeof v === 'object' ? JSON.stringify(v) : String(v);
+        allRows.push({ section: sectionKey, key: k, val });
+      });
+    });
+
+  // ── Render rows with Gold Row blur on every 3rd data row ──
+  let dataRowIdx = 0;
+  const rendered = allRows.map(row => {
+    if (row.isHeader) {
+      return `<div class="rsect-title" style="margin-top:8px;font-size:8px;letter-spacing:1.5px;color:var(--muted)">${escapeHtml(row.section.replace(/_/g,' ').toUpperCase())}</div>`;
     }
-  }
+    dataRowIdx++;
+    const isEmpty = !row.val || row.val === 'null' || row.val === '—';
+    const displayVal = escapeHtml(isEmpty ? '—' : String(row.val));
+    const displayKey = escapeHtml(row.key.replace(/_/g,' ').toUpperCase());
+    const isGoldRow  = (dataRowIdx % 3 === 0) && !unlocked; // every 3rd row locked
 
-  // ── Array fields (fleet, manifest) ───────────────────────────
-  const arrayEntries = Object.entries(specs).filter(([k,v]) => !SKIP_KEYS.has(k) && Array.isArray(v));
-  for (const [k, arr] of arrayEntries) {
-    if (!arr.length) continue;
-    const items = arr.map(item => {
-      if (typeof item === 'string') return `<div class="fleet-item"><span class="fleet-item-name">${escapeHtml(item)}</span></div>`;
-      return `<div class="fleet-item">${Object.entries(item).slice(0,3).map(([ik,iv])=>`<span class="fleet-item-name">${escapeHtml(ik)}: ${escapeHtml(String(iv))}</span>`).join(' · ')}</div>`;
-    }).join('');
-    OUTPUT_SECTIONS.push(`<div class="rsect-title" style="margin-top:8px">${escapeHtml(k.toUpperCase())}</div>${items}`);
-  }
+    if (isEmpty) {
+      // Null field — broker CTA
+      return `<div class="rrow rrow-null">
+        <span class="rk">${displayKey}</span>
+        <span class="rv" style="color:var(--border3)">
+          <button onclick="showClaimModal(window.currentAsset?.id)" style="font-size:8px;background:none;border:1px solid rgba(226,197,90,.3);color:var(--gold);padding:2px 7px;cursor:pointer;border-radius:2px;letter-spacing:.5px">CLAIM TO UPDATE</button>
+        </span>
+      </div>`;
+    }
 
-  return OUTPUT_SECTIONS.join('') || '<div style="font-size:10px;color:var(--muted);padding:6px 0">No structured data available</div>';
+    if (isGoldRow) {
+      return `<div class="rrow spec-row-locked" title="Premium Data: Unlock for $9.99">
+        <span class="rk">${displayKey}</span>
+        <span class="rv" style="position:relative;display:inline-flex;align-items:center;gap:6px;">
+          <span class="spec-row-blur" style="backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);filter:blur(4px);pointer-events:none;user-select:none">${displayVal}</span>
+          <span class="spec-row-lock-icon" onclick="buyInstitutionalAccess(window.currentAsset?.id,9.99)" title="Premium Data: Unlock for $9.99" style="cursor:pointer;font-size:11px;color:var(--gold);flex-shrink:0" aria-label="Locked — click to unlock">🔒</span>
+        </span>
+      </div>`;
+    }
+
+    return `<div class="rrow">
+      <span class="rk">${displayKey}</span>
+      <span class="rv">${displayVal}</span>
+    </div>`;
+  });
+
+  // ── Array fields (fleet, manifest) ──────────────────────────
+  Object.entries(specs)
+    .filter(([k,v]) => !SKIP_KEYS.has(k) && Array.isArray(v) && v.length)
+    .forEach(([k, arr]) => {
+      rendered.push(`<div class="rsect-title" style="margin-top:8px">${escapeHtml(k.toUpperCase())}</div>`);
+      arr.forEach((item, i) => {
+        const isGoldFleet = ((i+1) % 3 === 0) && !unlocked;
+        if (typeof item === 'string') {
+          rendered.push(`<div class="fleet-item${isGoldFleet?' spec-row-locked':''}">${isGoldFleet?`<span style="filter:blur(4px)">`:''}<span class="fleet-item-name">${escapeHtml(item)}</span>${isGoldFleet?'</span><span class="spec-row-lock-icon" onclick="buyInstitutionalAccess(window.currentAsset?.id,9.99)">🔒</span>':''}</div>`);
+        } else {
+          const content = Object.entries(item).slice(0,3).map(([ik,iv])=>`<span class="fleet-item-name">${escapeHtml(ik)}: ${escapeHtml(String(iv))}</span>`).join(' · ');
+          rendered.push(`<div class="fleet-item${isGoldFleet?' spec-row-locked':''}">${isGoldFleet?`<span style="filter:blur(4px)">`:''>${content}${isGoldFleet?'</span><span class="spec-row-lock-icon" onclick="buyInstitutionalAccess(window.currentAsset?.id,9.99)">🔒</span>':''}</div>`);
+        }
+      });
+    });
+
+  return rendered.join('') || '<div style="font-size:10px;color:var(--muted);padding:6px 0">No structured data available</div>';
 }
 
 // Extract gallery images from the polymorphic specs.media JSONB
@@ -4003,12 +4075,16 @@ function extractGallery(asset) {
 
 // Geocoding fix: build city/country line from specs or raw, never default to USA
 function buildLocationLine(a) {
-  const raw = a._raw || {};
-  // Prefer explicit country field; fall back to specs.physical.country, etc.
-  const country = raw.country || (a.specs?.physical?.country) || (a.specs?.location?.country) || a.country || '';
-  const city    = raw.city    || (a.specs?.physical?.city)    || (a.specs?.location?.city)    || a.city    || '';
-  const parts   = [city, country].filter(Boolean).filter((v,i,arr) => arr.indexOf(v) === i);
-  // Never inject 'USA' as default for international assets
+  const raw  = a._raw || {};
+  const specs = a.specs || {};
+  // STRICT: city from assets.city column; country from specs->'physical'->'country'
+  // Never default to 'USA' — leave blank if unknown
+  const city    = (raw.city || a.city || specs?.physical?.city || specs?.location?.city || '').trim();
+  const country = (specs?.physical?.country || specs?.location?.country || raw.country || a.country || '').trim();
+  // Guard against returning generic placeholders
+  const safeCity    = (city    && city    !== 'Unknown' && city    !== 'Global') ? city    : '';
+  const safeCountry = (country && country !== 'Unknown' && country !== 'Global') ? country : '';
+  const parts = [safeCity, safeCountry].filter(Boolean);
   return parts.join(', ') || '—';
 }
 
@@ -4212,7 +4288,7 @@ function selectAsset(id) {
       }).join('')}</div>`;
     } else {
       // Universal parser: loop through all specs JSONB sub-objects dynamically
-      const specsContent = renderSpecs(a.specs, assetCat, a._raw);
+      const specsContent = renderSpecs(a.specs, assetCat, a._raw, isUnlocked || isAdminUser());
       // Also render specsData fields (hard-coded per-category fields) as a compact grid first
       const hardGrid = Object.entries(specsData).map(([k,v]) =>
         `<div class="spec-cell"><div class="spec-val">${escapeHtml(String(v))}</div><div class="spec-lbl">${escapeHtml(k)}</div></div>`
@@ -4288,18 +4364,18 @@ function selectAsset(id) {
         </div>` : `
         <div class="action-bar">
             <div class="action-bar-public">
-                <button class="abtn-primary" onclick="logPartnerLead('${a.id}','ACQUIRE'); showToast('INQUIRY TRANSMITTED')">INQUIRE / ACQUIRE</button>
-                <button class="abtn-secondary" onclick="showBidModal()">PLACE OFFER</button>
+                <button class="abtn-primary" onclick="requireAuth(()=>{ logPartnerLead('${a.id}','ACQUIRE'); showToast('INQUIRY TRANSMITTED'); })">INQUIRE / ACQUIRE</button>
+                <button class="abtn-secondary" onclick="requireAuth(()=>showBidModal())">PLACE OFFER</button>
                 <div class="abtn-row">
-                    <button id="watch-btn" class="abtn-aux" onclick="toggleWatchlist()">WATCHLIST</button>
-                    <button class="abtn-aux" onclick="showLendingModal()">FINANCING</button>
+                    <button id="watch-btn" class="abtn-aux" onclick="requireAuth(()=>toggleWatchlist())">WATCHLIST</button>
+                    <button class="abtn-aux" onclick="requireAuth(()=>showLendingModal())">REQUEST FINANCING</button>
                 </div>
                 <div class="abtn-row">
-                    <button class="abtn-aux" onclick="showInsuranceModal()">INSURANCE</button>
+                    <button class="abtn-aux" onclick="requireAuth(()=>showInsuranceModal())">INSURANCE QUOTE</button>
                     <button class="abtn-aux" onclick="showBuyLeadModal('${a.id}')">BUY LEAD</button>
                 </div>
-                <button class="abtn-claim-listing" onclick="showClaimModal('${a.id}')">CLAIM THIS LISTING</button>
-                <button class="abtn-sponsor-listing" onclick="showSponsorModal('${a.id}')">SPONSOR THIS LISTING</button>
+                <button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">CLAIM THIS LISTING</button>
+                <button class="abtn-sponsor-listing" onclick="requireAuth(()=>showSponsorModal('${a.id}'))">SPONSOR THIS LISTING</button>
             </div>
         </div>`;
 
@@ -4373,6 +4449,29 @@ function selectAsset(id) {
                     </div>`).join('') || '<div style="font-size:10px;color:var(--muted)">No structure data</div>'}
             </div>
             ${(a.description ? `<div class="rsect"><div class="rsect-title">DESCRIPTION</div><div style="font-size:11px;color:var(--dim);line-height:1.7">${escapeHtml(a.description)}</div></div>` : '')}
+            ${(function buildTechnicalManifest(asset, isUnlocked, isAdmin) {
+              const raw = asset._raw || {};
+              const specs = asset.specs || {};
+              const machinery = specs.machinery || specs.mechanical || specs.engine || raw.machinery || null;
+              const compliance = specs.compliance || specs.regulatory || specs.certifications || raw.compliance || null;
+              const financialLedger = specs.ledger || specs.financials || asset.financials || raw.financial_ledger || null;
+
+              const renderManifestSection = (label, data) => {
+                if (!data) return `<div class="rrow"><span class="rk">${label}</span><span class="rv" style="color:var(--border3)"><button onclick="showClaimModal(window.currentAsset?.id)" style="font-size:8px;background:none;border:1px solid rgba(226,197,90,.3);color:var(--gold);padding:2px 7px;cursor:pointer;border-radius:2px;letter-spacing:.5px">BROKER: CLAIM & UPDATE</button></span></div>`;
+                const entries = typeof data === 'object' ? Object.entries(data) : [['data', data]];
+                return entries.map(([k,v]) => `<div class="rrow"><span class="rk">${escapeHtml(k.replace(/_/g,' ').toUpperCase())}</span><span class="rv">${escapeHtml(String(typeof v === 'object' ? JSON.stringify(v) : v))}</span></div>`).join('');
+              };
+
+              return `<div class="rsect" style="border-left:2px solid rgba(0,255,200,.2)">
+                <div class="rsect-title" style="color:var(--cyan);letter-spacing:2px">⬡ TECHNICAL MANIFEST</div>
+                <div class="rsect-title" style="font-size:8px;margin-top:6px">MACHINERY & MECHANICALS</div>
+                ${renderManifestSection('MACHINERY', machinery)}
+                <div class="rsect-title" style="font-size:8px;margin-top:8px">COMPLIANCE & REGULATORY</div>
+                ${renderManifestSection('COMPLIANCE', compliance)}
+                <div class="rsect-title" style="font-size:8px;margin-top:8px">FINANCIAL LEDGER</div>
+                ${renderManifestSection('FINANCIALS', financialLedger)}
+              </div>`;
+            })(a, isUnlocked || isAdminUser(), isAdminUser())}
             <div class="rsect">
                 <div class="rsect-title">LEDGER</div>
                 <div class="rrow"><span class="rk">ASSET ID</span><span class="rv" style="font-family:monospace;font-size:9px">${a.id}</span></div>
@@ -4389,7 +4488,7 @@ function selectAsset(id) {
               <div id="ma-loading" style="font-size:10px;color:var(--muted);padding:8px 0">Loading inquiries…</div>
             </div>
         </div>
-        <div style="padding:6px 16px 10px;font-size:8px;color:var(--muted);line-height:1.7;border-top:1px solid var(--border)">RWABidAsk Permanent Ledger™ — Data persists beyond listing expiry. Not financial advice.</div>
+        <!-- Permanent Ledger footer removed — clean panel end -->
     `;
 
     // ── Map fly-to & mobile drawer ──────────────────────────────
@@ -5083,13 +5182,14 @@ async function restoreSession() {
   if (data?.session?.user) { 
     currentUser = data.session.user; 
     currentUserRole = currentUser.user_metadata?.role || null;
-    await updateAuthUI(); 
+    await updateAuthUI();
+    applyAdminBypass(); 
     isAuthenticated = true; 
     document.getElementById('auth-gate')?.classList.add('hidden'); 
     if (map3dEl) onCameraChange(); 
   } else { 
     isAuthenticated = false; 
-    document.getElementById('auth-gate')?.classList.remove('hidden'); 
+    // Open House: no auth gate auto-show 
   } 
 }
 
@@ -5120,6 +5220,7 @@ async function signIn(email, password) {
     isAuthenticated = true;
     await updateAuthUI();
     document.getElementById('auth-gate').classList.add('hidden');
+    applyAdminBypass();
     closeModal();
     showToast(`AUTHENTICATED: ${currentUser.email?.split('@')[0] || 'INVESTOR'}`);
     if (map3dEl) onCameraChange();
@@ -5156,7 +5257,7 @@ async function signOut() {
   currentUser = null;
   isAuthenticated = false;
   updateAuthUI();
-  document.getElementById('auth-gate').classList.remove('hidden');
+  // Open House: no auth gate auto-show on signOut
   toast('Signed out successfully');
   if (map3dEl) onCameraChange();
 }
@@ -5502,7 +5603,51 @@ let _cardElement = null;
 let _selectedTopupAmount = 0;
 let _userCredits = 0;
 
-const STRIPE_PUBLIC_KEY = 'pk_test_YOUR_STRIPE_PUBLIC_KEY_HERE'; // replace with live key
+const STRIPE_PUBLIC_KEY = 'pk_test_51TOdHT37VLYiKe0NzbAGCRkTQQupaf1l5vMwnIh945ERySnsFCvH6zwbVJYygVFcHbXde8EWh5Xzx4fLSm0rkwGq00IW38x5Ab'; // publishable key only — secret key lives in Supabase Edge Functions
+
+
+
+// ════════════════════════════════════════════════════════════════════
+// ADMIN BYPASS — Owner/Admin sees all data unblurred, no paywalls
+// Add admin Supabase UUIDs here
+// ════════════════════════════════════════════════════════════════════
+const ADMIN_USER_IDS = new Set([
+  // Add your admin UUID(s) here, e.g.:
+  // '00000000-0000-0000-0000-000000000000'
+]);
+
+function isAdminUser() {
+  return !!(currentUser && (
+    ADMIN_USER_IDS.has(currentUser.id) ||
+    (currentUserRole || '').toLowerCase() === 'admin' ||
+    (currentUserRole || '').toLowerCase() === 'owner'
+  ));
+}
+
+// Strip all blur and paywalls for admin users
+function applyAdminBypass() {
+  if (!isAdminUser()) return;
+  const style = document.getElementById('admin-bypass-style') || document.createElement('style');
+  style.id = 'admin-bypass-style';
+  style.textContent = `
+    .premium-blur-content { filter: none !important; opacity: 1 !important; pointer-events: auto !important; }
+    .premium-unlock-overlay { display: none !important; }
+    .spec-row-locked .spec-row-blur { filter: none !important; backdrop-filter: none !important; }
+    .spec-row-lock-icon { display: none !important; }
+    .blur-row-overlay { display: none !important; }
+    [data-blurred="true"] { filter: none !important; }
+  `;
+  document.head.appendChild(style);
+}
+
+// ── requireAuth — call before any gated action (offer/financing/premium unlock) ──
+function requireAuth(callback) {
+  if (currentUser) { callback(); return; }
+  // Open House: show auth modal inline — no full-screen gate
+  const modal = document.getElementById('modal');
+  if (modal) { buildModalContent('signin'); modal.classList.add('open'); modal.style.display = 'flex'; }
+  // After sign-in completes, the page will reload/refresh and the user can retry
+}
 
 function initStripe() {
   if (typeof Stripe === 'undefined') {
@@ -6017,7 +6162,7 @@ async function requestHandshake(inquiryId) {
     "@type": "Organization",
     "name": "RWABidAsk",
     "url": "https://rwabidask.com",
-    "description": "Global institutional asset market for real-world assets: Maritime, Aviation, Robotics, Bio, Anthro, Energy, Real Estate, Financials, Equities, and Infrastructure.",
+    "description": "Global institutional asset market for real-world assets: Maritime, Aviation, Robotics, Bio, Anthro, Energy.",
     "sameAs": ["https://twitter.com/rwabidask"],
     "@graph": []
   };
