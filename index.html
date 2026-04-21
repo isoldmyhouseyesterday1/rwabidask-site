@@ -2104,6 +2104,17 @@ body { min-width: 900px; overflow-x: auto; }
   #main-row { grid-template-columns: 288px 1fr 360px !important; }
 }
 
+/* ── ORIGINAL CURRENCY DISPLAY ──────────────────────────────── */
+.rprice-orig {
+  font-size: 10px; color: var(--muted); letter-spacing: .3px;
+  padding: 0 16px 4px; margin-top: -2px;
+}
+
+/* ── CLUSTER ENHANCEMENTS ────────────────────────────────────── */
+.cluster-bubble { will-change: transform; }
+.cluster-inner { transition: transform .12s, box-shadow .12s; }
+.cluster-count { font-variant-numeric: tabular-nums; }
+
 /* ── BIO & HUMAN ECOSYSTEM STYLES ───────────────────────────── */
 /* Formula badge in right panel header */
 .bio-formula-badge {
@@ -2394,7 +2405,7 @@ const ASSET_CATEGORIES = [
   { id: 'maritime',       label: 'MARITIME',           physical: true  },
   { id: 'aviation',       label: 'AVIATION',           physical: true  },
   { id: 'commodities',    label: 'COMMODITIES',        physical: true  },
-  { id: 'ecosystems',     label: 'BIO & HUMAN ECOSYSTEM', physical: false },
+  { id: 'ecosystems',     label: 'BIO & HUMAN',            physical: false },
 ];
 
 function getAssetCategory(type) {
@@ -2807,21 +2818,32 @@ async function fetchListingsFromSupabase() {
         r.type || r.class || 'financial'
       ).toLowerCase();
 
+      // ── Price: USD canonical + original currency preservation ──
+      const priceUSD = parseFloat(
+        String(r.price_usd || r.price || r.asking_price || r.market_value ||
+               r.face_value || r.value || r.usd_value || '0').replace(/[^0-9.]/g, '')
+      ) || 0;
+      const origCurrency = (r.original_currency || r.currency || '').toUpperCase().trim();
+      const origPrice    = r.original_price != null ? parseFloat(
+        String(r.original_price).replace(/[^0-9.]/g, '')
+      ) : null;
+
       return {
         id: r.id,
+        // plid: strict bigint from schema
+        plid: r.plid != null ? Number(r.plid) : null,
         // 'address' stores the TITLE — the primary identity label
         address: assetTitle,
-        // Secondary location line
+        // city: strict text column — direct mapping, no aliases
         city: r.city || r.location || r.port_of_registry || r.domicile || 'Global',
         country: r.country || r.jurisdiction || 'Global',
         lat: lat,
         lng: lng,
         _hasCoords: _hasCoords,
-        // price_usd is the canonical field; fall back through all known aliases; always float
-        price: parseFloat(
-          String(r.price_usd || r.price || r.asking_price || r.market_value ||
-                 r.face_value || r.value || r.usd_value || '0').replace(/[^0-9.]/g, '')
-        ) || 0,
+        // price is always USD float; original currency stored separately
+        price: priceUSD,
+        original_currency: origCurrency || null,
+        original_price: origPrice,
         type: rawType,
         sqft: r.sqft ? parseInt(r.sqft) : (r.gross_tonnage ? r.gross_tonnage : null),
         status: r.listing_status || r.status || 'Active',
@@ -2898,7 +2920,7 @@ function onDataReady() {
   if (typeof buildTicker === "function") buildTicker(ASSETS);
   
   if (window.innerWidth <= 767 && typeof renderMobileListViewFull === "function") {
-      renderMobileListViewFull(ASSETS);
+      renderMobileListViewFull();
   }
   
   // THE MAP HANDSHAKE: This ensures markers appear on the first load
@@ -2913,10 +2935,30 @@ function onDataReady() {
 
 function fmtPrice(n) {
   if (!n || n === 0) return '—';
-  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
-  return '$' + n;
+  if (n >= 1e12) return '$' + (n / 1e12).toFixed(3) + 'T';
+  if (n >= 1e9)  return '$' + (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6)  return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3)  return '$' + (n / 1e3).toFixed(0) + 'K';
+  return '$' + n.toLocaleString();
+}
+
+// Format original-currency price (non-USD)
+const CURRENCY_SYMBOLS = {
+  USD:'$', EUR:'€', GBP:'£', AED:'AED ', SAR:'SAR ', JPY:'¥',
+  CNY:'¥', CHF:'CHF ', AUD:'A$', CAD:'C$', SGD:'S$', HKD:'HK$',
+  INR:'₹', BRL:'R$', KWD:'KWD ', QAR:'QAR ', BHD:'BHD '
+};
+function fmtOriginalPrice(amount, currency) {
+  if (!amount || !currency || currency === 'USD') return null;
+  const sym = CURRENCY_SYMBOLS[currency] || (currency + ' ');
+  const n = parseFloat(amount);
+  let val;
+  if (n >= 1e12) val = sym + (n/1e12).toFixed(2) + 'T';
+  else if (n >= 1e9) val = sym + (n/1e9).toFixed(2) + 'B';
+  else if (n >= 1e6) val = sym + (n/1e6).toFixed(2) + 'M';
+  else if (n >= 1e3) val = sym + (n/1e3).toFixed(0) + 'K';
+  else val = sym + n.toLocaleString();
+  return val + ' ' + currency;
 }
 
 function setStatus(msg) {
@@ -2969,20 +3011,21 @@ function setCategory(catId, btn) {
   renderList(filtered);
   // Hard-sync: re-cluster and re-pin immediately for this category
   if (markersRendered) renderDOMMarkers();
-  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull(ASSETS);
+  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull();
 }
 
 // ── LOG SLIDER ENGINE (Custom drag — fully independent handles) ──
-const SLIDER_STEPS = 48; // more steps = smoother
+const SLIDER_STEPS = 48; // 48 steps: $1 (10^0) → $1T (10^12)
 let sliderMinStep = 0;
-let sliderMaxStep = SLIDER_STEPS;
+let sliderMaxStep = SLIDER_STEPS; // default: full range visible
 let sliderMinPrice = 1;
-let sliderMaxPrice = 1e12;
+let sliderMaxPrice = 1e12; // $1T — $250B (2.5e11) is well within this range
 
 function logSliderToPrice(step) {
   if (step <= 0) return 1;
   if (step >= SLIDER_STEPS) return 1e12;
-  // True log scale: 10^(step/steps * 12) → maps 0→$1, 48→$1T
+  // 10^(step/SLIDER_STEPS * 12) gives true log scale
+  // step 41 ≈ $250B, step 48 = $1T
   return Math.round(Math.pow(10, (step / SLIDER_STEPS) * 12));
 }
 
@@ -3019,7 +3062,7 @@ function applySliderFilter() {
   renderList(filtered);
   // Hard-sync: immediately re-render globe pins/clusters for new price range
   if (markersRendered) { renderDOMMarkers(); }
-  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull(ASSETS);
+  if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull();
 }
 
 function resetPriceSlider() {
@@ -3108,16 +3151,16 @@ function filterAssets(assets) {
   // Category filter — asset_type is primary, category is fallback
   if (activeTab !== 'all') {
     filtered = filtered.filter(a => {
-      // Use _raw fields if available for the most accurate type resolution
       const rawFields = a._raw || {};
       const typeStr = rawFields.asset_type || rawFields.category || a.type || a.asset_type || a.category || '';
       return getAssetCategory(typeStr) === activeTab;
     });
   }
-  // Log slider price filter — always compare as float
+  // Price filter — compare as float; ensure $250B (2.5e11) is never clipped
+  // sliderMaxPrice defaults to 1e12 ($1T), so $250B passes unless user moved the slider
   filtered = filtered.filter(a => {
     const p = parseFloat(a.price) || 0;
-    if (p <= 0) return sliderMinPrice <= 1;
+    if (p <= 0) return sliderMinPrice <= 1; // include $0 assets at min range
     return p >= sliderMinPrice && p <= sliderMaxPrice;
   });
   return filtered;
@@ -3590,8 +3633,11 @@ function selectAsset(id) {
         <div class="rcity">${escapeHtml(assetSub)}</div>
         <div class="rprice-row">
             <div class="rprice">${window.fmtPrice(a.price)}</div>
-            <div class="rprice-psf">${isBioAsset ? 'LICENSING VALUATION' : 'LISTED VALUATION'}</div>
+            <div class="rprice-psf">${isBioAsset ? 'LICENSING VALUATION' : 'LISTED VALUATION'} · USD</div>
         </div>
+        ${(a.original_currency && a.original_currency !== 'USD' && a.original_price)
+          ? `<div style="font-size:10px;color:var(--muted);padding:2px 16px 0;letter-spacing:.3px">${escapeHtml(fmtOriginalPrice(a.original_price, a.original_currency) || '')}</div>`
+          : ''}
     `;
 
     // ── Photo Gallery ───────────────────────────────────────────
@@ -3641,11 +3687,13 @@ function selectAsset(id) {
       specsData = {
         'Unit Name': specs.unit_name || a.address || '—',
         'Headcount': specs.headcount || specs.personnel_count || '—',
-        'Mobilization Time': specs.mobilization_time || specs.mob_time || '—',
+        'Deployment Speed': specs.deployment_speed || specs.mobilization_time || specs.mob_time || '—',
         'Status': (a.status || 'Active').toUpperCase(),
         ...(specs.tech_certifications ? { 'Certifications': specs.tech_certifications } : {}),
         ...(specs.specialization ? { 'Specialization': specs.specialization } : {}),
         ...(specs.deployment_zone ? { 'Deployment Zone': specs.deployment_zone } : {}),
+        ...(specs.language ? { 'Language': specs.language } : {}),
+        ...(specs.clearance_level ? { 'Clearance Level': specs.clearance_level } : {}),
       };
     } else if (isCommodity) {
       specsData = {
@@ -3918,7 +3966,7 @@ function updateSearchUI(assets, statusMsg) {
     if (statusEl) statusEl.innerText = statusMsg;
     
     if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') {
-        renderMobileListViewFull(assets);
+        renderMobileListViewFull();
     }
 }
 
@@ -4134,23 +4182,11 @@ function onCameraChange() {
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
-      if (isZoomedIn) {
-        const baseAssets = SEARCH_ACTIVE ? SEARCH_RESULTS : ASSETS;
-        const visibleAssets = getVisibleAssetsInViewport(baseAssets);
-        const visibleIds = new Set(visibleAssets.map(a => a.id));
-        
-        Object.keys(domMarkers).forEach(id => {
-          const marker = domMarkers[id];
-          const asset = marker.asset;
-          const shouldBeVisible = isPhysicalAsset(asset.type) && visibleIds.has(id);
-          marker.el.style.display = shouldBeVisible ? 'flex' : 'none';
-        });
-        reprojectMarkersWithMatrix();
+      // Re-render clusters/pins on every camera change (zoom triggers cluster rebuild)
+      if (ASSETS.length > 0) {
+        renderDOMMarkers();
       } else {
-        Object.values(domMarkers).forEach(({ el }) => { 
-          el.style.display = 'none';
-          el.style.transform = 'translate(-50%,-100%) translate(-9999px,-9999px)';
-        });
+        reprojectMarkersWithMatrix();
       }
       const viewportList = getVisibleAssetsInViewport(ASSETS).slice(0, 30);
       buildTicker(viewportList);
@@ -4160,18 +4196,32 @@ function onCameraChange() {
 }
 
 function getVisibleAssetsInViewport(assets) {
-  if (!map3dEl) return [];
+  if (!map3dEl) return assets; // no map yet: return all
   try {
     const center = map3dEl.center || { lat: 20, lng: 10 };
-    const range = map3dEl.range || 22000000;
-    const degSpread = Math.min(30, (range / 111000) * 1.2);
-    const latMin = center.lat - degSpread;
-    const latMax = center.lat + degSpread;
-    const lngSpread = degSpread / Math.max(0.2, Math.cos(center.lat * Math.PI / 180));
-    const lngMin = center.lng - lngSpread;
-    const lngMax = center.lng + lngSpread;
-    return assets.filter(a => a.lat >= latMin && a.lat <= latMax && a.lng >= lngMin && a.lng <= lngMax);
-  } catch(e) { return assets.slice(0, 100); }
+    const range  = map3dEl.range || 22000000;
+
+    // At globe scale (>8M range), show everything — clustering handles density
+    if (range > 8000000) return assets;
+
+    // Scale viewport spread with zoom: range/111000 gives approx visible degrees
+    // Use generous 1.6x multiplier to avoid edge-clipping when panning
+    const degLat = Math.min(85, (range / 111000) * 1.6);
+    const degLng = Math.min(180, degLat / Math.max(0.1, Math.cos(center.lat * Math.PI / 180)));
+
+    const latMin = center.lat - degLat;
+    const latMax = center.lat + degLat;
+    const lngMin = center.lng - degLng;
+    const lngMax = center.lng + degLng;
+
+    const inView = assets.filter(a =>
+      a.lat >= latMin && a.lat <= latMax &&
+      a.lng >= lngMin && a.lng <= lngMax
+    );
+
+    // Always return at least 1 item if there's data — prevents blank screen
+    return inView.length > 0 ? inView : assets.slice(0, 50);
+  } catch(e) { return assets; }
 }
 
 // ── CLUSTERING ENGINE ────────────────────────────────────────────
@@ -4220,18 +4270,20 @@ function fmtClusterCount(n) {
 function renderDOMMarkers() {
   const layer = document.getElementById('overlay-layer');
   if (!layer || !map3dEl) return;
-  // Clear previous
   layer.innerHTML = '';
   domMarkers = {};
   clusterMarkers = {};
 
-  const filteredAssets = filterAssets(ASSETS).filter(a => a._hasCoords !== false);
-  console.log(`[RWABidAsk] Rendering ${filteredAssets.length} assets (clustered/pinned)`);
-  const range = map3dEl.range || 22000000;
-  const cells = buildClusters(filteredAssets, range);
+  const range  = map3dEl.range || 22000000;
+  const allFiltered = filterAssets(ASSETS).filter(a => a._hasCoords !== false);
 
-  if (cells) {
-    // Clustered view
+  // ── Viewport culling: only process assets in current view ──────
+  const viewportAssets = getVisibleAssetsInViewport(allFiltered);
+  console.log(`[RWABidAsk] Viewport: ${viewportAssets.length}/${allFiltered.length} assets`);
+
+  const cells = buildClusters(viewportAssets, range);
+
+  if (cells && Object.keys(cells).length > 0) {
     for (const key of Object.keys(cells)) {
       const c = cells[key];
       if (c.assets.length === 1) {
@@ -4241,11 +4293,11 @@ function renderDOMMarkers() {
       }
     }
   } else {
-    // Street-level: individual pins with viewport culling
-    const visible = getVisibleAssetsInViewport(filteredAssets);
-    visible.forEach(a => addPriceMarker(a));
+    // Street-level or very few assets: individual pins
+    viewportAssets.forEach(a => addPriceMarker(a));
   }
-  reprojectMarkersWithMatrix();
+
+  requestAnimationFrame(() => reprojectMarkersWithMatrix());
 }
 
 function addClusterMarker(key, lat, lng, assets) {
@@ -4704,50 +4756,53 @@ async function handleSignUp() {
 // ============================================================
 // MOBILE LISTVIEW & UI
 // ============================================================
-function renderMobileListViewFull(assets) {
+function renderMobileListViewFull() {
+  // CRITICAL FIX: always source from window.ASSETS, never a passed subset
+  const allAssets = window.ASSETS || [];
   const container = document.getElementById('mobile-list-view');
   if (!container) return;
-  
-  const categoriesHtml = ASSET_CATEGORIES.map(cat => 
+
+  const categoriesHtml = ASSET_CATEGORIES.map(cat =>
     `<button class="list-cat-btn ${activeTab === cat.id ? 'on' : ''}" data-cat="${cat.id}" style="padding:6px 10px;font-size:9px;background:none;border:1px solid var(--border2);margin:2px;border-radius:2px;${activeTab === cat.id ? 'border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)' : 'color:var(--dim)'}">${cat.label}</button>`
   ).join('');
-  
-  const priceHtml = `<div style="font-size:9px;color:var(--muted);padding:2px 2px;">Range: <span style="color:var(--cyan)">${fmtSliderPrice(parseInt((document.getElementById('price-min')||{value:0}).value||0))} — ${fmtSliderPrice(parseInt((document.getElementById('price-max')||{value:36}).value||36))}</span></div>`;
-  
-  // Always filter from the full ASSETS ledger to avoid mobile showing subset
-  const filteredAssets = filterAssets(window.ASSETS || assets);
-  const resultsHtml = filteredAssets.map(a => `
+
+  const minLabel = fmtSliderPrice(sliderMinStep);
+  const maxLabel = fmtSliderPrice(sliderMaxStep);
+  const priceHtml = `<div style="font-size:9px;color:var(--muted);padding:2px;">Range: <span style="color:var(--cyan)">${minLabel} — ${maxLabel}</span></div>`;
+
+  // Same filterAssets logic as desktop — identical behavior
+  const filteredAssets = filterAssets(allAssets);
+  const count = filteredAssets.length;
+
+  const resultsHtml = filteredAssets.map(a => {
+    const origLine = (a.original_currency && a.original_price)
+      ? `<div style="font-size:9px;color:var(--muted);margin-top:1px">${fmtOriginalPrice(a.original_price, a.original_currency)}</div>` : '';
+    return `
     <div class="list-tile" onclick="selectAsset('${a.id}')" style="background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px;cursor:pointer">
-      <div class="list-tile-type" style="font-size:9px;font-weight:600;color:var(--cyan);margin-bottom:6px">${a.type.toUpperCase()}</div>
+      <div class="list-tile-type" style="font-size:9px;font-weight:600;color:var(--cyan);margin-bottom:6px">${(a.type||'asset').toUpperCase()}</div>
       <div class="list-tile-addr" style="font-size:13px;font-weight:600;color:var(--text)">${escapeHtml(a.address)}</div>
-      <div class="list-tile-loc" style="font-size:10px;color:var(--dim);margin:4px 0">${escapeHtml(a.city)}</div>
-      <div class="list-tile-price" style="font-size:16px;font-weight:700;color:var(--cyan)">${fmtPrice(a.price)}</div>
-    </div>
-  `).join('');
-  
+      <div class="list-tile-loc" style="font-size:10px;color:var(--dim);margin:4px 0">${escapeHtml(a.city || '—')}</div>
+      <div style="font-size:16px;font-weight:700;color:var(--cyan)">${fmtPrice(a.price)}</div>
+      ${origLine}
+    </div>`;
+  }).join('');
+
   container.innerHTML = `
-    <div style="background:var(--bg1);padding:12px;border-bottom:1px solid var(--border)">
-      <div style="font-size:9px;font-weight:700;letter-spacing:2px;margin-bottom:10px">FILTERS</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">${categoriesHtml}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">${priceHtml}</div>
+    <div style="background:var(--bg1);padding:12px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--dim)">FILTERS</span>
+        <span style="font-size:9px;color:var(--muted)">${count} ASSET${count!==1?'S':''}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">${categoriesHtml}</div>
+      ${priceHtml}
     </div>
-    <div style="padding:12px;display:flex;flex-direction:column;gap:12px">${resultsHtml || '<div style="text-align:center;padding:40px;color:var(--muted)">No assets match filters</div>'}</div>
+    <div style="padding:12px;display:flex;flex-direction:column">${resultsHtml || '<div style="text-align:center;padding:40px;color:var(--muted);font-size:11px">NO ASSETS MATCH CURRENT FILTERS</div>'}</div>
   `;
-  
-  document.querySelectorAll('.list-cat-btn').forEach(btn => {
-    btn.onclick = () => {
-      const catId = btn.dataset.cat;
-      activeTab = catId;
-      SEARCH_ACTIVE = false;
-      document.getElementById('search-input').value = '';
-      const filtered = filterAssets(ASSETS);
-      renderList(filtered);
-      syncMarkerVisibility();
-      renderMobileListViewFull(ASSETS);
-    };
+
+  // Bind category buttons — call setCategory which also syncs globe
+  container.querySelectorAll('.list-cat-btn').forEach(btn => {
+    btn.onclick = () => setCategory(btn.dataset.cat, btn);
   });
-  
-  // price filtering via log slider
 }
 
 function initMobileUI() { 
@@ -4771,7 +4826,7 @@ function initMobileUI() {
           listView.style.flexDirection = 'column';
           rightPanel.classList.remove('open-drawer');
           const filtered = SEARCH_ACTIVE ? filterAssets(SEARCH_RESULTS) : filterAssets(ASSETS);
-          renderMobileListViewFull(filtered);
+          renderMobileListViewFull();
         }
       });
     });
