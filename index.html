@@ -2444,14 +2444,7 @@ body { min-width: 900px; overflow-x: auto; }
         <div class="left-title" style="margin:0">Global Directory</div>
         <div style="font-size:8px;color:var(--muted);letter-spacing:1px" id="left-live-badge"><span class="live-dot"></span>LIVE</div>
       </div>
-      <div class="asset-dashboard" id="asset-dashboard">
-        <div class="dash-stat gold"><div class="dash-stat-val" id="ds-total">—</div><div class="dash-stat-lbl">Total AUM</div></div>
-        <div class="dash-stat"><div class="dash-stat-val" id="ds-assets">—</div><div class="dash-stat-lbl">Assets</div></div>
-        <div class="dash-stat green"><div class="dash-stat-val" id="ds-bids">—</div><div class="dash-stat-lbl">Active Bids</div></div>
-        <div class="dash-stat"><div class="dash-stat-val" id="ds-maritime">—</div><div class="dash-stat-lbl">Maritime</div></div>
-        <div class="dash-stat"><div class="dash-stat-val" id="ds-aviation">—</div><div class="dash-stat-lbl">Aviation</div></div>
-        <div class="dash-stat red"><div class="dash-stat-val" id="ds-robotics">—</div><div class="dash-stat-lbl">Robotics</div></div>
-      </div>
+<!-- dashboard summary removed — data in header topbar -->
       <div id="cat-sponsor-strip" style="display:none"></div>
       <div class="ptabs" id="category-tabs"></div>
       <div id="price-slider-wrap" style="padding:10px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;">
@@ -2822,6 +2815,8 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let _sb = null;
 let currentUser = null;
 let currentUserRole = null;
+// isPro module-level helper
+function getIsPro(){const r=(currentUserRole||"").toLowerCase();return r==="pro"||r==="broker"||r==="owner"||r==="institutional";}
 let currentAsset = null; // This is the ONLY anchor for the active asset.
     
 
@@ -2830,6 +2825,7 @@ let currentAsset = null; // This is the ONLY anchor for the active asset.
 // ============================================================
 function getLendingOptions(assetType) {
   const type = (assetType || '').toLowerCase();
+  const cat  = typeof getAssetCategory === 'function' ? getAssetCategory(type) : type;
   // Real Estate (Residential & Commercial)
   if (['residential','land','castle','estate','property'].includes(type)) {
     return [
@@ -2885,18 +2881,40 @@ function getLendingOptions(assetType) {
     ];
   }
   // Maritime
-  if (['maritime','boat','ship','yacht'].includes(type)) {
+  if (cat === 'maritime' || ['maritime','boat','ship','yacht'].includes(type)) {
     return [
-      'Maritime Mortgage (Preferred Ship Mortgage)',
-      'Bareboat Charter Financing',
+      'Ship Mortgage (Preferred Ship Mortgage Act)',
+      'Sale-Leaseback (Bareboat Charter)',
+      'Bridge Loan (Short-Term Vessel Finance)',
       'EXIM Bank Maritime Credit',
       'Asset-Backed Securitization (ABS)',
-      'Construction Financing',
       'Second Lien Vessel Financing'
     ];
   }
+  // Robotics
+  if (cat === 'robotics' || type === 'robotics') {
+    return [
+      'Hardware-as-a-Service (HaaS)',
+      'VC Debt / Venture Lending',
+      'Lease-to-Own Fleet Financing',
+      'Equipment Finance (Capital Lease)',
+      'Revenue-Based Financing',
+      'R&D Tax Credit Monetization'
+    ];
+  }
+  // Anthro
+  if (cat === 'anthro' || type === 'anthro') {
+    return [
+      'Workforce Capital Advance',
+      'Government Contract Bridge Loan',
+      'Payroll Factoring',
+      'SBA Operating Line of Credit',
+      'Revenue-Based Financing',
+      'Supply Chain Finance'
+    ];
+  }
   // Financial / IP / Debt
-  if (['ip','debt','financial'].includes(type)) {
+  if (cat === 'financial' || ['ip','debt','financial','equities'].includes(type)) {
     return [
       'Asset-Backed Securitization (ABS)',
       'Receivables / Invoice Finance',
@@ -2919,6 +2937,7 @@ function getLendingOptions(assetType) {
 
 function getInsuranceOptions(assetType) {
   const type = (assetType || '').toLowerCase();
+  const cat  = typeof getAssetCategory === 'function' ? getAssetCategory(type) : type;
   // Aviation
   if (['aviation','airplane','jet'].includes(type)) {
     return [
@@ -2931,14 +2950,36 @@ function getInsuranceOptions(assetType) {
     ];
   }
   // Maritime
-  if (['maritime','boat','ship','yacht'].includes(type)) {
+  if (cat === 'maritime' || ['maritime','boat','ship','yacht'].includes(type)) {
     return [
-      'Maritime Protection & Indemnity (P&I)',
-      'Hull & Machinery (H&M) — All Risk',
-      'Cargo & Freight Liability',
+      'H&M — Hull & Machinery (All Risk)',
+      'P&I — Protection & Indemnity',
       'War Risk (Hull & P&I)',
+      'Cargo & Freight Liability',
       'Marine General Liability',
       'Loss of Hire Insurance'
+    ];
+  }
+  // Robotics
+  if (cat === 'robotics' || type === 'robotics') {
+    return [
+      'Cyber Liability (Autonomous Systems)',
+      'Product Malfunction / Recall',
+      'General Operational Liability',
+      'E&O — Professional Errors & Omissions',
+      'Drone / UAS Hull & Liability',
+      'Technology Errors & Omissions (Tech E&O)'
+    ];
+  }
+  // Anthro — Human Capital
+  if (cat === 'anthro' || type === 'anthro') {
+    return [
+      'Workers Compensation (Multi-State)',
+      'General Liability (Personnel Placement)',
+      'Professional Liability (E&O)',
+      'Key Person Life Insurance',
+      'War Risk / Political Violence (Deployment)',
+      'Group Health & Accident Coverage'
     ];
   }
   // Natural Resources & Mining
@@ -3208,6 +3249,7 @@ function onDataReady() {
   if (typeof renderList === "function") renderList(ASSETS);
   if (typeof updateDashboardStats === "function") updateDashboardStats();
   if (typeof buildTicker === "function") buildTicker(ASSETS);
+  window.dispatchEvent(new CustomEvent('rwa:assetsLoaded'));
   
   if (window.innerWidth <= 767 && typeof renderMobileListViewFull === "function") {
       renderMobileListViewFull();
@@ -3849,6 +3891,22 @@ async function submitBid() {
     }
 
     try {
+        // Insert into asset_inquiries (canonical offer table)
+        const inquiryPayload = {
+            user_id:      currentUser.id,
+            asset_id:     asset.id.toString(),
+            inquiry_type: 'BID',
+            offer_amount: amount,
+            offer_terms:  terms,
+            note:         note,
+            asking_price: asset.price || 0,
+            status:       'pending',
+            created_at:   new Date().toISOString(),
+        };
+        const { error: iqErr } = await _sb.from('asset_inquiries').insert(inquiryPayload);
+        if (iqErr) console.warn('[RWABidAsk] asset_inquiries insert error:', iqErr);
+
+        // Also insert into partner_leads for legacy lead tracking
         const { error } = await _sb.from('partner_leads').insert({
             user_id:  currentUser.id,
             asset_id: asset.id.toString(),
@@ -3879,6 +3937,81 @@ async function submitBid() {
 }
 // ── Right panel legacy stubs (consolidated above) ──
 
+
+// ════════════════════════════════════════════════════════════════════
+// UNIVERSAL SPECS PARSER
+// Maps from the polymorphic specs JSONB: specs.physical, specs.anthro,
+// specs.ledger, specs.media, etc.  Works for any asset category.
+// ════════════════════════════════════════════════════════════════════
+function renderSpecs(specs, assetCat, assetRaw) {
+  if (!specs || typeof specs !== 'object') return '<div class="rrow"><span class="rk">DATA</span><span class="rv" style="color:var(--muted)">No spec data in JSONB</span></div>';
+
+  // Sub-objects to render (skip media — handled separately)
+  const SKIP_KEYS = new Set(['media','gallery','photos','images','fleet','bids']);
+  const OUTPUT_SECTIONS = [];
+
+  // ── Flat top-level fields first ──────────────────────────────
+  const flatEntries = Object.entries(specs).filter(([k,v]) => !SKIP_KEYS.has(k) && typeof v !== 'object');
+  if (flatEntries.length) {
+    OUTPUT_SECTIONS.push(flatEntries.map(([k,v]) =>
+      `<div class="rrow"><span class="rk">${escapeHtml(k.replace(/_/g,' ').toUpperCase())}</span><span class="rv">${escapeHtml(String(v))}</span></div>`
+    ).join(''));
+  }
+
+  // ── Nested sub-objects (physical, anthro, ledger, etc.) ──────
+  const nestedEntries = Object.entries(specs).filter(([k,v]) => !SKIP_KEYS.has(k) && typeof v === 'object' && v !== null && !Array.isArray(v));
+  for (const [sectionKey, sectionData] of nestedEntries) {
+    const sectionLabel = sectionKey.replace(/_/g,' ').toUpperCase();
+    const rows = Object.entries(sectionData).map(([k,v]) => {
+      const val = typeof v === 'object' ? JSON.stringify(v) : String(v);
+      return `<div class="rrow"><span class="rk">${escapeHtml(k.replace(/_/g,' ').toUpperCase())}</span><span class="rv">${escapeHtml(val)}</span></div>`;
+    }).join('');
+    if (rows) {
+      OUTPUT_SECTIONS.push(`<div class="rsect-title" style="margin-top:8px">${escapeHtml(sectionLabel)}</div>${rows}`);
+    }
+  }
+
+  // ── Array fields (fleet, manifest) ───────────────────────────
+  const arrayEntries = Object.entries(specs).filter(([k,v]) => !SKIP_KEYS.has(k) && Array.isArray(v));
+  for (const [k, arr] of arrayEntries) {
+    if (!arr.length) continue;
+    const items = arr.map(item => {
+      if (typeof item === 'string') return `<div class="fleet-item"><span class="fleet-item-name">${escapeHtml(item)}</span></div>`;
+      return `<div class="fleet-item">${Object.entries(item).slice(0,3).map(([ik,iv])=>`<span class="fleet-item-name">${escapeHtml(ik)}: ${escapeHtml(String(iv))}</span>`).join(' · ')}</div>`;
+    }).join('');
+    OUTPUT_SECTIONS.push(`<div class="rsect-title" style="margin-top:8px">${escapeHtml(k.toUpperCase())}</div>${items}`);
+  }
+
+  return OUTPUT_SECTIONS.join('') || '<div style="font-size:10px;color:var(--muted);padding:6px 0">No structured data available</div>';
+}
+
+// Extract gallery images from the polymorphic specs.media JSONB
+function extractGallery(asset) {
+  const specs = asset.specs || {};
+  const media = specs.media || {};
+  // Try multiple known paths
+  return (
+    media.gallery ||
+    media.photos  ||
+    media.images  ||
+    specs.gallery ||
+    asset.images  ||
+    asset.photos  ||
+    (asset.image_url ? [asset.image_url] : [])
+  ).filter(u => u && typeof u === 'string');
+}
+
+// Geocoding fix: build city/country line from specs or raw, never default to USA
+function buildLocationLine(a) {
+  const raw = a._raw || {};
+  // Prefer explicit country field; fall back to specs.physical.country, etc.
+  const country = raw.country || (a.specs?.physical?.country) || (a.specs?.location?.country) || a.country || '';
+  const city    = raw.city    || (a.specs?.physical?.city)    || (a.specs?.location?.city)    || a.city    || '';
+  const parts   = [city, country].filter(Boolean).filter((v,i,arr) => arr.indexOf(v) === i);
+  // Never inject 'USA' as default for international assets
+  return parts.join(', ') || '—';
+}
+
 // ============================================================
 // SELECT ASSET - Render Right Panel with Working Buttons
 // ============================================================
@@ -3903,7 +4036,7 @@ function selectAsset(id) {
     const isBioAsset   = (assetCatForHeader === 'bio' || assetCatForHeader === 'ecosystems') && !!(molFormula || casNumber);
 
     const assetTitle = a.address || a.title || a.name || ('Asset #' + a.id);
-    const assetSub   = [a.city, a.country].filter(Boolean).filter((v,i,arr)=>arr.indexOf(v)===i).join(', ') || '—';
+    const assetSub   = buildLocationLine(a);
     const catLabel   = (ASSET_CATEGORIES.find(c=>c.id===assetCatForHeader)||{label:a.type||'ASSET'}).label;
 
     // Bio-asset: header leads with compound name + formula badge
@@ -3930,16 +4063,23 @@ function selectAsset(id) {
           : ''}
     `;
 
-    // ── Photo Gallery ───────────────────────────────────────────
-    // Handle image_url (single), images (array), or photos (array) from Supabase
-    const imgs = (a.images && a.images.length ? a.images : null) ||
-                 (a.photos && a.photos.length ? a.photos : null) ||
-                 (a.image_url ? [a.image_url] : []);
+    // ── Photo Gallery — Tiered Paywall (1 free, rest blur if premium) ─
+    // Extract from polymorphic JSONB: specs.media.gallery takes priority
+    const imgs = extractGallery(a);
+    const isUnlocked = !isPremium || !!(a._raw && a._raw.is_unlocked_by && currentUser && a._raw.is_unlocked_by.includes(currentUser.id));
     let galleryHtml = '';
     if (imgs.length > 0) {
         const mainImg = `<img class="photo-thumb main-thumb" src="${escapeHtml(imgs[0])}" alt="Asset photo" onerror="this.style.display='none'">`;
-        const thumbs = imgs.slice(1).map(u => `<img class="photo-thumb" src="${escapeHtml(u)}" alt="" onerror="this.remove()">`).join('');
-        galleryHtml = mainImg + (thumbs ? `<div class="photo-gallery">${thumbs}</div>` : '');
+        let thumbsHtml = '';
+        if (imgs.length > 1) {
+            const extraImgs = imgs.slice(1).map(u => `<img class="photo-thumb" src="${escapeHtml(u)}" alt="" onerror="this.remove()">`).join('');
+            if (!isUnlocked && isPremium) {
+                thumbsHtml = `<div style="position:relative;overflow:hidden;max-height:60px;"><div style="filter:blur(8px);pointer-events:none;user-select:none;display:flex;gap:3px;padding:4px 8px">${extraImgs}</div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,14,28,.75)"><span style="font-size:9px;font-weight:800;color:var(--gold);letter-spacing:1px">+${imgs.length-1} PHOTOS — UNLOCK FOR $${leadPrice.toFixed(2)}</span></div></div>`;
+            } else {
+                thumbsHtml = `<div class="photo-gallery">${extraImgs}</div>`;
+            }
+        }
+        galleryHtml = mainImg + thumbsHtml;
     } else {
         galleryHtml = `<div class="photo-placeholder">◎</div>`;
     }
@@ -4057,15 +4197,29 @@ function selectAsset(id) {
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
     }
-    // Bio-assets get a monospace clinical grid; others use standard
-    const bioFieldsMono = new Set(['Molecular Formula','Molecular Weight','CAS Number','Purity Grade','Solubility','Storage Temp']);
-    const specsGridHtml = Object.entries(specsData).map(([k,v]) => {
-        const isMono = isBioAsset && bioFieldsMono.has(k);
-        return `<div class="spec-cell${isBioAsset ? ' spec-cell-bio' : ''}">
-            <div class="spec-val${isMono ? ' spec-val-mono' : ''}">${escapeHtml(String(v))}</div>
-            <div class="spec-lbl">${escapeHtml(k)}</div>
+    // ── UNIVERSAL SPECS RENDERER ─────────────────────────────────
+    // For bio assets: use specsData (clinical grid). For all others: renderSpecs
+    // from the polymorphic JSONB. This auto-handles physical/anthro/ledger sub-objects.
+    let specsGridHtml = '';
+    if (isBioAsset) {
+      const bioFieldsMono = new Set(['Molecular Formula','Molecular Weight','CAS Number','Purity Grade','Solubility','Storage Temp']);
+      specsGridHtml = `<div class="specs-grid specs-grid-bio">${Object.entries(specsData).map(([k,v]) => {
+        const isMono = bioFieldsMono.has(k);
+        return `<div class="spec-cell spec-cell-bio">
+          <div class="spec-val${isMono ? ' spec-val-mono' : ''}">${escapeHtml(String(v))}</div>
+          <div class="spec-lbl">${escapeHtml(k)}</div>
         </div>`;
-    }).join('');
+      }).join('')}</div>`;
+    } else {
+      // Universal parser: loop through all specs JSONB sub-objects dynamically
+      const specsContent = renderSpecs(a.specs, assetCat, a._raw);
+      // Also render specsData fields (hard-coded per-category fields) as a compact grid first
+      const hardGrid = Object.entries(specsData).map(([k,v]) =>
+        `<div class="spec-cell"><div class="spec-val">${escapeHtml(String(v))}</div><div class="spec-lbl">${escapeHtml(k)}</div></div>`
+      ).join('');
+      specsGridHtml = `<div class="specs-grid">${hardGrid}</div>
+        <div class="rinner" style="padding:0">${specsContent}</div>`;
+    }
 
     // ── Order Book Ticker ───────────────────────────────────────
     const bids = Array.isArray(a.bids) ? a.bids : [];
@@ -4177,20 +4331,17 @@ function selectAsset(id) {
 
     // ── Full body ───────────────────────────────────────────────
     const vaultSection = currentUser
-      ? (isPremium ? `
+      ? ((isPremium && !isUnlocked) ? `
          <div class="premium-blur-wrap">
-           <div class="premium-blur-content">
-             <div class="specs-grid">${specsGridHtml}</div>
-             <div class="rinner">${fleetHtml || ''}</div>
-           </div>
+           <div class="premium-blur-content">${specsGridHtml}</div>
            <div class="premium-unlock-overlay">
              <div class="premium-icon">🔒</div>
-             <div class="premium-title">Premium Data</div>
-             <div class="premium-sub">Full specifications locked behind a one-time access fee.</div>
-             <button class="premium-pay-btn" onclick="unlockPremiumData('${a.id}', ${leadPrice})">PAY $${leadPrice.toFixed(2)} TO UNLOCK</button>
+             <div class="premium-title">Institutional Access Required</div>
+             <div class="premium-sub">Full specifications, media, and manifest are locked.</div>
+             <button class="premium-pay-btn" onclick="buyInstitutionalAccess('${a.id}', ${leadPrice})">BUY INSTITUTIONAL ACCESS — $${leadPrice.toFixed(2)}</button>
            </div>
          </div>` :
-         `<div class="specs-grid${isBioAsset ? ' specs-grid-bio' : ''}">${specsGridHtml}</div>
+         `${specsGridHtml}
           <div class="rinner">${bioLabHtml || ''}${(!isBioAsset ? (fleetHtml || '') : '')}${finHtml || ''}</div>`)
       : `<div style="position:relative;min-height:200px;">
            <div style="filter:blur(4px);pointer-events:none;user-select:none;opacity:.35;overflow:hidden;max-height:240px;">
@@ -4230,7 +4381,15 @@ function selectAsset(id) {
             </div>
         </div>
         ${actionBarHtml}
-        <div style="padding:8px 16px 10px;font-size:8px;color:var(--muted);line-height:1.7;border-top:1px solid var(--border)">RWABidAsk Permanent Ledger™ — Data persists beyond listing expiry. Not financial advice.</div>
+        <div id="market-activity-section" style="border-top:1px solid var(--border)">
+            <button onclick="toggleMarketActivity(this)" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:none;border:none;color:var(--dim);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">
+              MARKET ACTIVITY <span id="ma-chevron" style="font-size:10px;transition:transform .2s">▶</span>
+            </button>
+            <div id="market-activity-body" style="display:none;padding:0 16px 12px">
+              <div id="ma-loading" style="font-size:10px;color:var(--muted);padding:8px 0">Loading inquiries…</div>
+            </div>
+        </div>
+        <div style="padding:6px 16px 10px;font-size:8px;color:var(--muted);line-height:1.7;border-top:1px solid var(--border)">RWABidAsk Permanent Ledger™ — Data persists beyond listing expiry. Not financial advice.</div>
     `;
 
     // ── Map fly-to & mobile drawer ──────────────────────────────
@@ -5503,31 +5662,92 @@ async function uploadPOF(inputEl, assetId) {
   } catch(e) { showToast('UPLOAD FAILED: ' + e.message); }
 }
 
+
+async function buyInstitutionalAccess(assetId, price) {
+  if (!currentUser) { openModal('signin'); return; }
+  // If credits available, use them
+  if (_userCredits >= price) {
+    await unlockPremiumData(assetId, price);
+    return;
+  }
+  // Otherwise go to Stripe
+  await stripeLeadCheckout(assetId, 'access', price);
+}
+
+// BUY LEAD — No POF barrier. Payment IS the validation. Straight to Stripe.
 async function showBuyLeadModal(assetId) {
-  await checkPofStatus();
+  if (!currentUser) { openModal('signin'); return; }
   const a = (window.ASSETS || []).find(x => x.id == assetId);
   if (!a) return;
   const rawR = a._raw || {};
-  const price = parseFloat(rawR.lead_price || 9.99);
-  const pofLine = _pofVerified
-    ? `<div class="pof-status verified">✓ PROOF OF FUNDS VERIFIED</div>`
-    : `<div class="pof-status">Proof of Funds required before purchase</div>
-       <label style="cursor:pointer">
-         <input type="file" accept=".pdf,.jpg,.png" style="display:none" onchange="uploadPOF(this,'${assetId}')">
-         <div class="abtn-upload-pof">UPLOAD PROOF OF FUNDS</div>
-       </label>`;
+  const singleLeadPrice = parseFloat(rawR.lead_price || 9.99);
+  const bundlePrice = 49.99; // Credit bundle
+
   const bodyHtml = `
-    <div class="lead-gate-box">
-      <div class="lead-gate-title">BUY LEAD — SELLER CONTACT</div>
-      <div class="lead-price">$${price.toFixed(2)}</div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:10px">One-time unlock. Logged in audit trail for success fee compliance.</div>
-      ${pofLine}
-      <button class="abtn-buy-lead" ${_pofVerified ? '' : 'disabled'} onclick="purchaseLead('${assetId}', ${price})">
-        ${_pofVerified ? 'BUY LEAD NOW' : 'VERIFY FUNDS TO UNLOCK'}
-      </button>
-    </div>`;
-  openModal('buyLead', `LEAD ACCESS — ${(a.address||'').toUpperCase().slice(0,30)}`, bodyHtml);
+    <div style="font-size:11px;color:var(--dim);line-height:1.7;margin-bottom:16px">
+      Unlock direct seller contact for <strong style="color:var(--text)">${escapeHtml((a.address||'').slice(0,40))}</strong>. Your payment is your verification.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--cyan)">$${singleLeadPrice.toFixed(2)}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:4px;line-height:1.6">SINGLE LEAD<br>One seller contact</div>
+        <button onclick="stripeLeadCheckout('${assetId}', 'single', ${singleLeadPrice})" style="margin-top:12px;width:100%;padding:10px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-size:10px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;border-radius:2px">BUY NOW</button>
+      </div>
+      <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.25);border-radius:3px;padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--gold)">$${bundlePrice.toFixed(2)}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:4px;line-height:1.6">CREDIT BUNDLE<br>5 leads + $10 credit</div>
+        <button onclick="stripeLeadCheckout('${assetId}', 'bundle', ${bundlePrice})" style="margin-top:12px;width:100%;padding:10px;background:rgba(226,197,90,.1);border:1px solid rgba(226,197,90,.4);color:var(--gold);font-size:10px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;border-radius:2px">BUY BUNDLE</button>
+      </div>
+    </div>
+    <div style="font-size:8px;color:var(--muted);text-align:center;line-height:1.8">All sales final. A 3% success fee applies to completed transactions. Secured by Stripe.</div>`;
+  openModal('buyLead', 'BUY LEAD ACCESS', bodyHtml);
 }
+
+async function stripeLeadCheckout(assetId, tier, price) {
+  if (!currentUser) { openModal('signin'); return; }
+  // If user has enough wallet credits, deduct directly
+  if (_userCredits >= price) {
+    await purchaseLead(assetId, price);
+    closeModal();
+    return;
+  }
+  // Otherwise create Stripe Checkout Session
+  try {
+    showToast('REDIRECTING TO STRIPE…');
+    const session = await _sb.functions.invoke('create-checkout-session', {
+      body: {
+        user_id:   currentUser.id,
+        asset_id:  String(assetId),
+        tier,
+        price_usd: price,
+        success_url: window.location.href + '?lead_unlocked=' + assetId,
+        cancel_url:  window.location.href,
+      }
+    });
+    if (session.data?.url) {
+      window.location.href = session.data.url;
+    } else {
+      // Fallback: deduct from credits if payment tracking unavailable
+      await purchaseLead(assetId, price);
+      closeModal();
+    }
+  } catch(e) {
+    showToast('CHECKOUT ERROR: ' + e.message);
+  }
+}
+
+// Check URL for lead_unlocked param on page load (Stripe success redirect)
+(function checkLeadUnlockRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const unlockId = params.get('lead_unlocked');
+  if (unlockId) {
+    history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => {
+      showToast('LEAD UNLOCKED — CONTACT DATA AVAILABLE');
+      selectAsset(unlockId);
+    }, 1200);
+  }
+})();
 
 async function purchaseLead(assetId, price) {
   if (!currentUser) { openModal('signin'); return; }
@@ -5710,6 +5930,116 @@ setTimeout(() => {
     };
   }
 }, 1000);
+
+
+// ════════════════════════════════════════════════════════════════════
+// MARKET ACTIVITY ACCORDION
+// ════════════════════════════════════════════════════════════════════
+async function toggleMarketActivity(btn) {
+  const body   = document.getElementById('market-activity-body');
+  const chevron = document.getElementById('ma-chevron');
+  if (!body) return;
+  const isOpen = body.style.display === 'block';
+  body.style.display  = isOpen ? 'none' : 'block';
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(90deg)';
+  if (!isOpen && window.currentAsset) {
+    await fetchMarketActivity(window.currentAsset.id);
+  }
+}
+
+async function fetchMarketActivity(assetId) {
+  const body = document.getElementById('market-activity-body');
+  if (!body) return;
+  if (!_sb) { body.innerHTML = '<div style="font-size:10px;color:var(--muted)">Database not connected</div>'; return; }
+  try {
+    const { data, error } = await _sb
+      .from('asset_inquiries')
+      .select('id, inquiry_type, offer_amount, status, created_at, user_id')
+      .eq('asset_id', String(assetId))
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if (error) throw error;
+    if (!data || !data.length) {
+      body.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:4px 0">No market activity yet</div>';
+      return;
+    }
+    body.innerHTML = data.map(inq => {
+      const date = new Date(inq.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const typeCls = inq.inquiry_type === 'BID' ? 'color:var(--cyan)' : 'color:var(--gold)';
+      const amt = inq.offer_amount ? fmtPrice(parseFloat(inq.offer_amount)) : '—';
+      // Show intent but block direct peer-to-peer unless handshake accepted
+      const isOwner = currentUser && inq.user_id === currentUser.id;
+      const contactBtn = isPro && !isOwner
+        ? `<button onclick="requestHandshake('${inq.id}')" style="padding:3px 8px;font-size:8px;background:none;border:1px solid var(--border2);color:var(--dim);cursor:pointer;border-radius:2px;letter-spacing:.5px">CONNECT</button>`
+        : '';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div>
+          <span style="font-size:9px;font-weight:700;${typeCls}">${inq.inquiry_type}</span>
+          <span style="font-size:9px;color:var(--muted);margin-left:6px">${amt}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:8px;color:var(--border3)">${date}</span>
+          ${contactBtn}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    body.innerHTML = `<div style="font-size:10px;color:var(--muted)">Could not load activity</div>`;
+  }
+}
+
+async function requestHandshake(inquiryId) {
+  showToast('HANDSHAKE REQUEST SENT — AWAITING CONFIRMATION');
+  await logAuditTrail('HANDSHAKE_REQUEST', null, { inquiry_id: inquiryId });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INSTITUTIONAL SEO — JSON-LD Schema injection + Crawler detection
+// When Googlebot / GPTBot visits, inject structured data & unblur
+// ════════════════════════════════════════════════════════════════════
+(function injectStructuredData() {
+  const UA = navigator.userAgent || '';
+  const isCrawler = /Googlebot|GPTBot|Bingbot|AhrefsBot|SemrushBot|DotBot|YandexBot/i.test(UA);
+
+  if (isCrawler) {
+    // Crawlers see full text — remove auth gate and paywall blurs
+    const gate = document.getElementById('auth-gate');
+    if (gate) gate.style.display = 'none';
+    document.querySelectorAll('.premium-blur-content').forEach(el => {
+      el.style.filter = 'none'; el.style.opacity = '1'; el.style.pointerEvents = 'auto';
+    });
+    document.querySelectorAll('.premium-unlock-overlay').forEach(el => el.style.display = 'none');
+  }
+
+  // Inject base Organization schema
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "RWABidAsk",
+    "url": "https://rwabidask.com",
+    "description": "Global institutional asset market for real-world assets: Maritime, Aviation, Robotics, Bio, Anthro, Energy, Real Estate, Financials, Equities, and Infrastructure.",
+    "sameAs": ["https://twitter.com/rwabidask"],
+    "@graph": []
+  };
+
+  // Add asset schemas when ASSETS are loaded
+  window.addEventListener('rwa:assetsLoaded', () => {
+    const physicalAssets = (window.ASSETS || []).filter(a => isMapPinAsset(a.type, a)).slice(0, 50);
+    schema["@graph"] = physicalAssets.map(a => ({
+      "@type": "Product",
+      "name": a.address,
+      "description": a.description || `${a.type} asset in ${a.city || 'Global'}`,
+      "offers": { "@type": "Offer", "price": a.price, "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+      "additionalProperty": Object.entries(a.specs || {}).slice(0,8).map(([k,v]) => ({
+        "@type": "PropertyValue", "name": k, "value": String(v)
+      }))
+    }));
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+  });
+})();
 
 </script>
 
