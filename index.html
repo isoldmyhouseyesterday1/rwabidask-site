@@ -3218,8 +3218,8 @@ async function fetchListingsFromSupabase() {
         land: r.land || {},
         financials: r.financials || r.financial_data || {},
         bids: r.bids || [],
-        image_url: r.image_url || r.photo_url || r.thumbnail || null,
-        images: r.images || r.photos || (r.image_url ? [r.image_url] : []),
+        image_url: r.specs?.media?.gallery?.[0] || r.image_url || r.photo_url || r.thumbnail || null,
+        images: r.specs?.media?.gallery || r.images || r.photos || (r.image_url ? [r.image_url] : []),
         description: r.description || r.notes || null,
         specs: r.specs || r.specifications || r.technical_specs || {},
         fleet: r.fleet || r.sub_assets || r.manifest || [],
@@ -3249,9 +3249,11 @@ async function loadMarketData() {
     const fetched = await fetchListingsFromSupabase();
 
     // 2. Save it globally so the Globe and Dashboard can see it
-    window.ASSETS = fetched; 
-    ASSETS = fetched; 
-      
+    window.ASSETS = fetched;
+    ASSETS = fetched;
+    // Keep allFiltered in sync — kills any residual ReferenceError
+    window.allFiltered = fetched;
+
     console.log(`[RWABidAsk] Global Ledger Sync: ${ASSETS.length} assets mapped.`);
     
     // 3. Turn on the UI (Markers, Ticker, List)
@@ -3268,7 +3270,7 @@ function onDataReady() {
   const assetCount = ASSETS.length;
   
   // Update Status UI
-  setStatus(`RWABidAsk PERMANENT LEDGER — ${assetCount} ASSETS REGISTERED`);
+  setStatus(`LIVE`); // short — goes into topbar status cell
   
   const sAssets = document.getElementById('s-assets');
   const sStatus = document.getElementById('s-status');
@@ -3530,6 +3532,7 @@ function filterAssets(assets) {
     if (p <= 0) return sliderMinPrice <= 1; // include $0 assets at min range
     return p >= sliderMinPrice && p <= sliderMaxPrice;
   });
+  window.allFiltered = filtered; // keep global in sync
   return filtered;
 }
 
@@ -4072,30 +4075,49 @@ function renderSpecs(specs, assetCat, assetRaw, isUnlockedCtx) {
 function extractGallery(asset) {
   const specs = asset.specs || {};
   const media = specs.media || {};
-  // Try multiple known paths
-  return (
-    media.gallery ||
-    media.photos  ||
-    media.images  ||
-    specs.gallery ||
-    asset.images  ||
-    asset.photos  ||
-    (asset.image_url ? [asset.image_url] : [])
-  ).filter(u => u && typeof u === 'string');
+  const raw   = asset._raw  || {};
+  // Priority: specs.media.gallery → specs.gallery → asset.images → image_url
+  // Also check raw Supabase row for any media fields
+  const candidates = [
+    media.gallery,
+    media.photos,
+    media.images,
+    specs.gallery,
+    raw.specs?.media?.gallery,
+    asset.images,
+    asset.photos,
+    raw.images,
+    raw.photos,
+    asset.image_url  ? [asset.image_url]  : null,
+    raw.image_url    ? [raw.image_url]    : null,
+    raw.photo_url    ? [raw.photo_url]    : null,
+    raw.thumbnail    ? [raw.thumbnail]    : null,
+  ];
+  for (const c of candidates) {
+    if (Array.isArray(c) && c.length) return c.filter(u => u && typeof u === 'string');
+    if (typeof c === 'string' && c) return [c];
+  }
+  return ['https://via.placeholder.com/600x400/0d1526/00ffc8?text=SEC+AUDIT+PENDING'];
 }
 
 // Geocoding fix: build city/country line from specs or raw, never default to USA
 function buildLocationLine(a) {
-  const raw  = a._raw || {};
+  const raw   = a._raw  || {};
   const specs = a.specs || {};
-  // STRICT: city from assets.city column; country from specs->'physical'->'country'
-  // Never default to 'USA' — leave blank if unknown
-  const city    = (raw.city || a.city || specs?.physical?.city || specs?.location?.city || '').trim();
-  const country = (specs?.physical?.country || specs?.location?.country || raw.country || a.country || '').trim();
-  // Guard against returning generic placeholders
-  const safeCity    = (city    && city    !== 'Unknown' && city    !== 'Global') ? city    : '';
-  const safeCountry = (country && country !== 'Unknown' && country !== 'Global') ? country : '';
-  const parts = [safeCity, safeCountry].filter(Boolean);
+  const phys  = specs.physical || specs.location || {};
+  // Priority: specs.physical.city / country → raw DB columns → asset fields
+  // NEVER default to 'USA', 'Global', or 'Unknown'
+  const GENERIC = new Set(['unknown','global','usa','n/a','','null','undefined']);
+  function clean(v) {
+    const s = (v || '').toString().trim();
+    return GENERIC.has(s.toLowerCase()) ? '' : s;
+  }
+  const city    = clean(phys.city    || raw.city    || a.city    || '');
+  const country = clean(phys.country || raw.country || a.country || '');
+  const port    = clean(phys.port    || raw.port_of_registry || specs.port || '');
+  // Prefer port for maritime assets, city otherwise
+  const locationPrimary = port || city;
+  const parts = [locationPrimary, country].filter(Boolean);
   return parts.join(', ') || '—';
 }
 
@@ -4105,8 +4127,9 @@ function buildLocationLine(a) {
 /* --- ASSET INTELLIGENCE: SIDEBAR ENGINE --- */
 
 function selectAsset(id) {
+    console.log('[RWABidAsk] selectAsset called:', id);
     const a = (window.ASSETS || []).find(x => x.id == id);
-    if (!a) { console.error(`[RWABidAsk] ERROR: Asset #${id} NOT FOUND.`); return; }
+    if (!a) { console.error(`[RWABidAsk] ERROR: Asset #${id} NOT FOUND in ${(window.ASSETS||[]).length} assets.`); return; }
 
     window.currentAsset = a;
     activeId = a.id;
@@ -4270,17 +4293,66 @@ function selectAsset(id) {
         ...(specs.imo_number ? { 'IMO': specs.imo_number } : {}),
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
-    } else {
+    } else if (assetCat === 'realestate') {
+      // Pull from specs.physical JSONB sub-object
+      const phys = specs.physical || {};
       specsData = {
-        'Area': a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '—'),
-        'Type': (a.type || '—').toUpperCase(),
+        'Area': phys.sqft ? parseInt(phys.sqft).toLocaleString() + ' SF'
+                          : (a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '—')),
+        'Beds':       phys.bedrooms   || phys.beds   || mainStruct.beds   || specs.bedrooms  || '—',
+        'Baths':      phys.bathrooms  || phys.baths  || mainStruct.baths  || specs.bathrooms || '—',
+        'Year Built': phys.year_built || specs.year_built || '—',
+        'Lot Size':   phys.lot_size   || specs.lot_size   || '—',
+        'Zoning':     phys.zoning     || specs.zoning     || '—',
+        'Units':      phys.units      || specs.units       || '—',
+        'Type':      (a.type || '—').toUpperCase(),
+        'Status':    (a.status || 'Active').toUpperCase(),
+        'Days Listed': a.days || '—',
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+      };
+    } else if (assetCat === 'maritime') {
+      const mach = specs.machinery || specs.mechanical || {};
+      specsData = {
+        'Vessel Class': specs.vessel_class || mach.vessel_class || specs.type || (a.type||'').toUpperCase(),
+        'Flag State':   a.state || specs.flag_state || mach.flag || '—',
+        'Status':      (a.status || 'Active').toUpperCase(),
+        'IMO Number':   specs.imo_number || mach.imo || '—',
+        'Gross Tonnage':specs.gross_tonnage || mach.gross_tonnage || '—',
+        'LOA (m)':      specs.length || mach.loa || mach.length || '—',
+        'DWT':          specs.dwt    || mach.dwt    || '—',
+        'Main Engine':  mach.main_engine  || mach.engine  || specs.engine  || '—',
+        'Engine Hours': mach.engine_hours || specs.engine_hours || '—',
+        'Hull Rating':  mach.hull_rating  || specs.hull_rating  || '—',
+        'Year Built':   specs.year_built  || mach.year_built    || '—',
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+      };
+    } else if (assetCat === 'aviation') {
+      const mach = specs.machinery || specs.mechanical || {};
+      specsData = {
+        'Aircraft Type': specs.aircraft_type || mach.type || (a.type||'').toUpperCase(),
+        'Registration':  specs.registration  || mach.reg  || '—',
+        'Status':       (a.status || 'Active').toUpperCase(),
+        'Total Hours':   mach.total_hours    || specs.total_hours   || '—',
+        'Engine Model':  mach.engine_model   || specs.engine_model  || '—',
+        'Engine Hours':  mach.engine_hours   || specs.engine_hours  || '—',
+        'Last Overhaul': mach.last_overhaul  || specs.last_overhaul || '—',
+        'TTAF':          mach.ttaf           || specs.ttaf          || '—',
+        'Year':          specs.year_built    || mach.year           || '—',
+        ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
+      };
+    } else {
+      const phys = specs.physical || {};
+      specsData = {
+        'Area': phys.sqft ? parseInt(phys.sqft).toLocaleString() + ' SF'
+                          : (a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '—')),
+        'Type':   (a.type || '—').toUpperCase(),
         'Status': (a.status || 'Active').toUpperCase(),
         'Days Listed': a.days || '—',
         ...(mainStruct.beds ? { 'Beds': mainStruct.beds, 'Baths': mainStruct.baths || '—' } : {}),
-        ...(specs.year_built ? { 'Year Built': specs.year_built } : {}),
-        ...(specs.lot_size ? { 'Lot Size': specs.lot_size } : {}),
-        ...(specs.zoning ? { 'Zoning': specs.zoning } : {}),
-        ...(specs.units ? { 'Units': specs.units } : {}),
+        ...(phys.year_built  || specs.year_built  ? { 'Year Built':  phys.year_built  || specs.year_built  } : {}),
+        ...(phys.lot_size    || specs.lot_size    ? { 'Lot Size':    phys.lot_size    || specs.lot_size    } : {}),
+        ...(phys.zoning      || specs.zoning      ? { 'Zoning':      phys.zoning      || specs.zoning      } : {}),
+        ...(phys.units       || specs.units       ? { 'Units':       phys.units       || specs.units       } : {}),
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
     }
@@ -4375,18 +4447,18 @@ function selectAsset(id) {
         </div>` : `
         <div class="action-bar">
             <div class="action-bar-public">
-                <button class="abtn-primary" onclick="requireAuth(()=>{ logPartnerLead('${a.id}','ACQUIRE'); showToast('INQUIRY TRANSMITTED'); })">INQUIRE / ACQUIRE</button>
+                <button class="abtn-primary" style="font-size:11px" onclick="requireAuth(()=>{ logPartnerLead('${a.id}','ACQUIRE'); showToast('INQUIRY TRANSMITTED'); })">INQUIRE / ACQUIRE</button>
                 <button class="abtn-secondary" onclick="requireAuth(()=>showBidModal())">PLACE OFFER</button>
                 <div class="abtn-row">
-                    <button id="watch-btn" class="abtn-aux" onclick="requireAuth(()=>toggleWatchlist())">WATCHLIST</button>
                     <button class="abtn-aux" onclick="requireAuth(()=>showLendingModal())">REQUEST FINANCING</button>
+                    <button class="abtn-aux" onclick="requireAuth(()=>showInsuranceModal())">INSURANCE QUOTE</button>
                 </div>
                 <div class="abtn-row">
-                    <button class="abtn-aux" onclick="requireAuth(()=>showInsuranceModal())">INSURANCE QUOTE</button>
                     <button class="abtn-aux" onclick="showBuyLeadModal('${a.id}')">BUY LEAD</button>
+                    <button id="watch-btn" class="abtn-aux" onclick="requireAuth(()=>toggleWatchlist())">WATCHLIST</button>
                 </div>
                 <button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">CLAIM THIS LISTING</button>
-                <button class="abtn-sponsor-listing" onclick="requireAuth(()=>showSponsorModal('${a.id}'))">SPONSOR THIS LISTING</button>
+                <button class="abtn-sponsor-listing" onclick="requireAuth(()=>showSponsorModal('${a.id}'))">SPONSOR THIS LISTING ($99/$299)</button>
             </div>
         </div>`;
 
@@ -4803,6 +4875,12 @@ function onCameraChange() {
     try {
       if (!map3dEl) return;
       // No auth gate on marker visibility — vault data is gated, not map pins
+      // Trigger marker render if data already loaded (data-before-map scenario)
+      if (window.ASSETS && window.ASSETS.length > 0 && !markersRendered) {
+        console.log('[RWABidAsk] Map ready — data already loaded, injecting markers...');
+        renderDOMMarkers();
+        markersRendered = true;
+      }
       const currentRange = map3dEl.range || 22000000;
       const isZoomedIn = currentRange <= MARKER_VISIBLE_RANGE;
       
@@ -5639,12 +5717,20 @@ const ADMIN_USER_IDS = new Set([
   // '00000000-0000-0000-0000-000000000000'
 ]);
 
+const ADMIN_EMAILS = new Set([
+  // Add admin email(s) here — these accounts bypass all paywalls and blurs
+  'admin@rwabidask.com',
+  'anniegroup@rwabidask.com',
+]);
+
 function isAdminUser() {
-  return !!(currentUser && (
+  if (!currentUser) return false;
+  return (
     ADMIN_USER_IDS.has(currentUser.id) ||
+    ADMIN_EMAILS.has((currentUser.email || '').toLowerCase()) ||
     (currentUserRole || '').toLowerCase() === 'admin' ||
     (currentUserRole || '').toLowerCase() === 'owner'
-  ));
+  );
 }
 
 // Strip all blur and paywalls for admin users
