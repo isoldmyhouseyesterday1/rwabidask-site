@@ -2819,9 +2819,11 @@ function isMapPinAsset(type, asset) {
 }
 
 // ============================================================
-// GLOBAL STATE
+// GLOBAL STATE — all vars hoisted to prevent any ReferenceError
 // ============================================================
+window.allFiltered = []; // defined FIRST — no scope error possible
 let ASSETS = [];
+window.ASSETS = ASSETS;
 let SEARCH_RESULTS = [];
 let SEARCH_ACTIVE = false;
 let currentSearchQuery = '';
@@ -3072,6 +3074,117 @@ function getInsuranceOptions(assetType) {
 /* submitInsurance is defined below with the modal handlers */
 
 // ============================================================
+// DATA ADAPTER — normalizeAsset(a)
+// Maps the polymorphic `specs` JSONB column to flat display fields.
+// Handles all 28+ known sub-objects: identification, physical, ledger,
+// financials, media, machinery, logistics, strategic, force_composition,
+// avionics, anthro, robotics, bio, compliance, etc.
+// ============================================================
+function normalizeAsset(a) {
+  if (!a) return a;
+  const s     = (typeof a.specs === 'object' && a.specs) ? a.specs : {};
+
+  // ── All known JSONB sub-objects ──────────────────────────────
+  const id    = s.identification || {};
+  const phys  = s.physical       || {};
+  const loc   = s.location       || phys; // sometimes location is inside physical
+  const led   = s.ledger         || {};
+  const fin   = s.financials || s.financial || {};
+  const med   = s.media          || {};
+  const mach  = s.machinery  || s.mechanical || s.engine_data || {};
+  const logi  = s.logistics      || {};
+  const strat = s.strategic || s.strategy || {};
+  const force = s.force_composition || s.force || {};
+  const avi   = s.avionics        || {};
+  const anth  = s.anthro || s.human_capital || {};
+  const rob   = s.robotics || s.automation || {};
+  const bio   = s.bio || s.biological || {};
+  const comp  = s.compliance || s.regulatory || {};
+  const tele  = s.telecom || s.communications || {};
+  const env   = s.environmental || {};
+  const risk  = s.risk || {};
+  const broker= s.broker || {};
+
+  // ── Identity / Title ─────────────────────────────────────────
+  a.title =
+    id.name   || id.title  || id.vessel_name || id.aircraft_id ||
+    phys.name || phys.address || phys.street ||
+    a.name    || a.title   || a.address      ||
+    led.instrument_name    ||
+    ('Asset #' + a.id);
+  a.address = a.title; // address IS the display title throughout the UI
+
+  // ── Price (USD) ─────────────────────────────────────────────
+  const rawPrice =
+    led.valuation        || led.asking_price  || led.face_value  ||
+    fin.price            || fin.valuation     || fin.asking_price ||
+    a.price_usd          || a.price           || 0;
+  const parsedPrice = parseFloat(String(rawPrice).replace(/[^0-9.]/g, ''));
+  if (parsedPrice > 0) a.price = parsedPrice;
+
+  // ── Currency ─────────────────────────────────────────────────
+  if (!a.original_currency) {
+    a.original_currency = (led.currency || fin.currency || a.currency || '').toUpperCase() || null;
+  }
+
+  // ── Location — STRICT: never default to USA/Global/Unknown ──
+  const BAD_LOC = new Set(['unknown','global','usa','n/a','null','undefined','']);
+  const cleanLoc = v => { const t = (v||'').toString().trim(); return BAD_LOC.has(t.toLowerCase()) ? '' : t; };
+  a.city    = cleanLoc(phys.city    || loc.city    || a.city    || '');
+  a.country = cleanLoc(phys.country || loc.country || a.country || '');
+  a.port    = cleanLoc(phys.port    || loc.port    || logi.port || a.port || '');
+
+  // ── Coordinates from specs (if not already resolved) ─────────
+  if (!a._hasCoords) {
+    const sLat = parseFloat(phys.lat || loc.lat || s.lat || '');
+    const sLng = parseFloat(phys.lng || loc.lng || s.lng || '');
+    if (!isNaN(sLat) && !isNaN(sLng) && !(sLat===0 && sLng===0)) {
+      a.lat = sLat; a.lng = sLng; a._hasCoords = true; a._coordsFromHub = false;
+    }
+  }
+
+  // ── Type derivation from specs ────────────────────────────────
+  if (!a.type || a.type === 'financial') {
+    const st = (id.asset_type || id.type || s.asset_type || s.type || '').toLowerCase();
+    if (st) a.type = st;
+  }
+
+  // ── Media / Gallery ──────────────────────────────────────────
+  const gallery = med.gallery || med.photos || med.images || [];
+  const hero    = med.hero || med.thumbnail || med.cover || '';
+  const galArr  = Array.isArray(gallery) ? gallery.filter(u => u && typeof u === 'string') : (gallery ? [gallery] : []);
+  a.image_url   = galArr[0] || hero || a.image_url || null;
+  a.images      = galArr.length ? galArr : (hero ? [hero] : (a.images || []));
+
+  // ── Status ────────────────────────────────────────────────────
+  if (!a.status || a.status === 'Active') {
+    a.status = id.status || led.status || a.listing_status || 'Active';
+  }
+
+  // ── Attach sub-objects for Technical Manifest rendering ──────
+  // These power the dynamic JSONB iteration in renderSpecs
+  a._id     = id;
+  a._phys   = phys;
+  a._led    = led;
+  a._fin    = fin;
+  a._mach   = mach;
+  a._logi   = logi;
+  a._strat  = strat;
+  a._force  = force;
+  a._avi    = avi;
+  a._anth   = anth;
+  a._rob    = rob;
+  a._bio    = bio;
+  a._comp   = comp;
+  a._tele   = tele;
+  a._env    = env;
+  a._risk   = risk;
+  a._broker = Object.keys(broker).length ? broker : null;
+
+  return a;
+}
+
+// ============================================================
 // FETCH ASSETS FROM SUPABASE
 // ============================================================
 async function fetchListingsFromSupabase() {
@@ -3230,7 +3343,7 @@ async function fetchListingsFromSupabase() {
         // Preserve all raw fields for the vault display
         _raw: r,
       };
-    }); // No filter — include ALL rows even without coords
+    }).map(normalizeAsset); // ← Data Adapter: always normalize after transform
 
     const withCoords = transformed.filter(a => a._hasCoords).length;
     console.log(`[RWABidAsk] Loaded ${transformed.length} assets (${withCoords} with globe pins)`);
@@ -3249,10 +3362,9 @@ async function loadMarketData() {
     const fetched = await fetchListingsFromSupabase();
 
     // 2. Save it globally so the Globe and Dashboard can see it
-    window.ASSETS = fetched;
-    ASSETS = fetched;
-    // Keep allFiltered in sync — kills any residual ReferenceError
-    window.allFiltered = fetched;
+    window.ASSETS    = fetched;
+    ASSETS           = fetched;
+    window.allFiltered = fetched; // always in sync from first frame
 
     console.log(`[RWABidAsk] Global Ledger Sync: ${ASSETS.length} assets mapped.`);
     
@@ -3532,7 +3644,7 @@ function filterAssets(assets) {
     if (p <= 0) return sliderMinPrice <= 1; // include $0 assets at min range
     return p >= sliderMinPrice && p <= sliderMaxPrice;
   });
-  window.allFiltered = filtered; // keep global in sync
+    window.allFiltered = filtered; // always in sync
   return filtered;
 }
 
@@ -3982,31 +4094,48 @@ async function submitBid() {
 // Every 3rd row is blurred (backdrop-filter) with a lock icon.
 // Admin users and unlocked users see all rows clearly.
 // ════════════════════════════════════════════════════════════════════
+// JSONB sub-object display order — covers all 28+ known keys
+const SPECS_SECTION_ORDER = [
+  'identification','physical','location','ledger','financials',
+  'machinery','avionics','logistics','strategic','force_composition',
+  'anthro','robotics','bio','compliance','telecom','environmental',
+  'risk','broker'
+];
+
 function renderSpecs(specs, assetCat, assetRaw, isUnlockedCtx) {
   if (!specs || typeof specs !== 'object') {
     return '<div class="rrow"><span class="rk">DATA</span><span class="rv" style="color:var(--muted)">No spec data in JSONB</span></div>';
   }
 
-  const admin = isAdminUser();
+  const admin    = isAdminUser();
   const unlocked = isUnlockedCtx || admin;
-  const SKIP_KEYS = new Set(['media','gallery','photos','images','fleet','bids']);
-  let allRows = []; // flat list of {key, val, isNull} before rendering
+  // Keys that are rendered elsewhere (gallery, fleet) or are internal
+  const SKIP_KEYS = new Set(['media','gallery','photos','images','fleet','bids','broker']);
+  let allRows = [];
 
-  // ── Collect flat top-level fields ──────────────────────────
+  // ── Flat top-level fields ───────────────────────────────────
   Object.entries(specs)
     .filter(([k,v]) => !SKIP_KEYS.has(k) && typeof v !== 'object')
     .forEach(([k,v]) => allRows.push({ section: null, key: k, val: v }));
 
-  // ── Collect nested sub-object fields ──────────────────────
-  Object.entries(specs)
-    .filter(([k,v]) => !SKIP_KEYS.has(k) && typeof v === 'object' && v !== null && !Array.isArray(v))
-    .forEach(([sectionKey, sectionData]) => {
-      allRows.push({ section: sectionKey, key: null, val: null, isHeader: true });
-      Object.entries(sectionData).forEach(([k,v]) => {
-        const val = typeof v === 'object' ? JSON.stringify(v) : String(v);
-        allRows.push({ section: sectionKey, key: k, val });
-      });
+  // ── Nested sub-objects in canonical order, then any extras ──
+  const allSectionKeys = [
+    ...SPECS_SECTION_ORDER.filter(k => specs[k] && !SKIP_KEYS.has(k)),
+    ...Object.keys(specs).filter(k =>
+      !SKIP_KEYS.has(k) && !SPECS_SECTION_ORDER.includes(k) &&
+      typeof specs[k] === 'object' && specs[k] !== null && !Array.isArray(specs[k])
+    )
+  ];
+  allSectionKeys.forEach(sectionKey => {
+    const sectionData = specs[sectionKey];
+    if (!sectionData || typeof sectionData !== 'object') return;
+    allRows.push({ section: sectionKey, key: null, val: null, isHeader: true });
+    Object.entries(sectionData).forEach(([k,v]) => {
+      const val = (v === null || v === undefined) ? null
+                : typeof v === 'object' ? JSON.stringify(v) : String(v);
+      allRows.push({ section: sectionKey, key: k, val });
     });
+  });
 
   // ── Render rows with Gold Row blur on every 3rd data row ──
   let dataRowIdx = 0;
@@ -4102,23 +4231,15 @@ function extractGallery(asset) {
 
 // Geocoding fix: build city/country line from specs or raw, never default to USA
 function buildLocationLine(a) {
-  const raw   = a._raw  || {};
-  const specs = a.specs || {};
-  const phys  = specs.physical || specs.location || {};
-  // Priority: specs.physical.city / country → raw DB columns → asset fields
-  // NEVER default to 'USA', 'Global', or 'Unknown'
-  const GENERIC = new Set(['unknown','global','usa','n/a','','null','undefined']);
-  function clean(v) {
-    const s = (v || '').toString().trim();
-    return GENERIC.has(s.toLowerCase()) ? '' : s;
-  }
-  const city    = clean(phys.city    || raw.city    || a.city    || '');
-  const country = clean(phys.country || raw.country || a.country || '');
-  const port    = clean(phys.port    || raw.port_of_registry || specs.port || '');
-  // Prefer port for maritime assets, city otherwise
-  const locationPrimary = port || city;
-  const parts = [locationPrimary, country].filter(Boolean);
-  return parts.join(', ') || '—';
+  // STRICT: use only a.city + a.country (set by normalizeAsset from specs.physical)
+  // No hardcoded defaults. No USA. No Global. No Unknown.
+  const BAD = new Set(['unknown','global','usa','n/a','null','undefined','']);
+  const clean = v => { const t = (v||'').toString().trim(); return BAD.has(t.toLowerCase()) ? '' : t; };
+  const city    = clean(a.city    || '');
+  const country = clean(a.country || '');
+  const port    = clean(a.port    || '');
+  const primary = port || city;
+  return [primary, country].filter(Boolean).join(', ') || '—';
 }
 
 // ============================================================
@@ -4128,10 +4249,13 @@ function buildLocationLine(a) {
 
 function selectAsset(id) {
     console.log('[RWABidAsk] selectAsset called:', id);
-    const a = (window.ASSETS || []).find(x => x.id == id);
-    if (!a) { console.error(`[RWABidAsk] ERROR: Asset #${id} NOT FOUND in ${(window.ASSETS||[]).length} assets.`); return; }
-
-    window.currentAsset = a;
+    let a = (window.ASSETS || []).find(x => x.id == id);
+    if (!a) { console.error('[RWABidAsk] Asset #' + id + ' NOT FOUND (' + (window.ASSETS||[]).length + ' loaded)'); return; }
+    // Safety: re-normalize in case it wasn't run yet (idempotent)
+    if (!a.title || a.title.startsWith('Asset #')) a = normalizeAsset(a);
+    if (!a) return; // guard against normalizeAsset returning null
+    window.currentAsset = a; // set BEFORE any other code accesses currentAsset
+    currentAsset = a;
     activeId = a.id;
     const role = (currentUserRole || '').toLowerCase();
     const isPro = role === 'pro' || role === 'broker' || role === 'owner' || role === 'institutional';
@@ -4145,7 +4269,8 @@ function selectAsset(id) {
     const casNumber    = specs_early.cas_number || specs_early.cas || (a._raw || {}).cas_number || '';
     const isBioAsset   = (assetCatForHeader === 'bio' || assetCatForHeader === 'ecosystems') && !!(molFormula || casNumber);
 
-    const assetTitle = a.address || a.title || a.name || ('Asset #' + a.id);
+    // normalizeAsset guarantees a.title is set
+    const assetTitle = a.title || a.address || ('Asset #' + a.id);
     const assetSub   = buildLocationLine(a);
     const catLabel   = (ASSET_CATEGORIES.find(c=>c.id===assetCatForHeader)||{label:a.type||'ASSET'}).label;
 
@@ -4457,7 +4582,7 @@ function selectAsset(id) {
                     <button class="abtn-aux" onclick="showBuyLeadModal('${a.id}')">BUY LEAD</button>
                     <button id="watch-btn" class="abtn-aux" onclick="requireAuth(()=>toggleWatchlist())">WATCHLIST</button>
                 </div>
-                <button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">CLAIM THIS LISTING</button>
+                ${!a._broker ? `<button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">CLAIM THIS LISTING — NO BROKER ON RECORD</button>` : `<button class="abtn-claim-listing" style="opacity:.65;font-size:9px" onclick="requireAuth(()=>showClaimModal('${a.id}'))">CLAIM THIS LISTING</button>`}
                 <button class="abtn-sponsor-listing" onclick="requireAuth(()=>showSponsorModal('${a.id}'))">SPONSOR THIS LISTING ($99/$299)</button>
             </div>
         </div>`;
@@ -4874,10 +4999,10 @@ function onCameraChange() {
     isCameraProcessing = true;
     try {
       if (!map3dEl) return;
-      // No auth gate on marker visibility — vault data is gated, not map pins
-      // Trigger marker render if data already loaded (data-before-map scenario)
+      // Open House: no auth check on markers — vault data is separately gated
+      // Data-before-map scenario: inject markers immediately if ASSETS already loaded
       if (window.ASSETS && window.ASSETS.length > 0 && !markersRendered) {
-        console.log('[RWABidAsk] Map ready — data already loaded, injecting markers...');
+        console.log('[RWABidAsk] Map ready — data already available, rendering markers...');
         renderDOMMarkers();
         markersRendered = true;
       }
@@ -4978,32 +5103,39 @@ function renderDOMMarkers() {
   domMarkers = {};
   clusterMarkers = {};
 
-  const range  = map3dEl.range || 22000000;
+  const range = map3dEl.range || 22000000;
 
-  // ── STRICT PHYSICAL FILTER: only tangible, located assets get map pins ──
-  // Financial/intangible assets (Treasury Bills, Patents, Cash) → dashboard only
-  const physicalFiltered = filterAssets(ASSETS).filter(a => {
-    if (!a._hasCoords) return false;
-    return isMapPinAsset(a.type, a);
-  });
+  // ── Physical assets only ─────────────────────────────────────────
+  const physicalFiltered = filterAssets(ASSETS).filter(a => a._hasCoords && isMapPinAsset(a.type, a));
+  window.allFiltered = filterAssets(ASSETS); // keep global in sync
 
-  // ── Viewport culling: only process assets within camera bounds ──────
+  // ── ZOOM-TO-REVEAL (Level of Detail) ─────────────────────────────
+  // range > 8M ≈ zoom < 6: show only cluster bubbles, no individual pins
+  // This keeps the global view clean on first load
+  const LOD_CLUSTER_ONLY = 8000000;
+  if (range > LOD_CLUSTER_ONLY) {
+    const cells = buildClusters(physicalFiltered, range);
+    if (cells) {
+      let idx = 0;
+      Object.values(cells).forEach(c => {
+        addClusterMarker(String(idx++), c.lat, c.lng, c.assets);
+      });
+    }
+    requestAnimationFrame(() => reprojectMarkersWithMatrix());
+    return; // exit — no individual pins at this zoom level
+  }
+
+  // ── Viewport culling — only assets in camera bounds ──────────────
   const viewportAssets = getVisibleAssetsInViewport(physicalFiltered);
-  console.log(`[RWABidAsk] Viewport: ${viewportAssets.length}/${physicalFiltered.length} assets`);
+  console.log('[RWABidAsk] Viewport pins: ' + viewportAssets.length + '/' + physicalFiltered.length);
 
   const cells = buildClusters(viewportAssets, range);
-
   if (cells && Object.keys(cells).length > 0) {
-    for (const key of Object.keys(cells)) {
-      const c = cells[key];
-      if (c.assets.length === 1) {
-        addPriceMarker(c.assets[0]);
-      } else {
-        addClusterMarker(key, c.lat, c.lng, c.assets);
-      }
-    }
+    Object.entries(cells).forEach(([key, c]) => {
+      if (c.assets.length === 1) addPriceMarker(c.assets[0]);
+      else addClusterMarker(key, c.lat, c.lng, c.assets);
+    });
   } else {
-    // Street-level or very few assets: individual pins
     viewportAssets.forEach(a => addPriceMarker(a));
   }
 
@@ -5704,7 +5836,7 @@ let _cardElement = null;
 let _selectedTopupAmount = 0;
 let _userCredits = 0;
 
-const STRIPE_PUBLIC_KEY = 'pk_test_51TOdHT37VLYiKe0NzbAGCRkTQQupaf1l5vMwnIh945ERySnsFCvH6zwbVJYygVFcHbXde8EWh5Xzx4fLSm0rkwGq00IW38x5Ab'; // publishable key only — secret key lives in Supabase Edge Functions
+const STRIPE_PUBLIC_KEY = 'pk_test_51TOdHT37VLYiKe0NzbAGCRkTQQupaf1l5vMwnIh945ERySnsFCvH6zwbVJYygVFcHbXde8EWh5Xzx4fLSm0rkwGq00IW38x5Ab';
 
 
 
@@ -5712,13 +5844,10 @@ const STRIPE_PUBLIC_KEY = 'pk_test_51TOdHT37VLYiKe0NzbAGCRkTQQupaf1l5vMwnIh945ER
 // ADMIN BYPASS — Owner/Admin sees all data unblurred, no paywalls
 // Add admin Supabase UUIDs here
 // ════════════════════════════════════════════════════════════════════
-const ADMIN_USER_IDS = new Set([
-  // Add your admin UUID(s) here, e.g.:
-  // '00000000-0000-0000-0000-000000000000'
-]);
+const ADMIN_ID = 'd77546f2-a9a9-430b-885e-777fa106261f';
+const ADMIN_USER_IDS = new Set([ADMIN_ID]);
 
 const ADMIN_EMAILS = new Set([
-  // Add admin email(s) here — these accounts bypass all paywalls and blurs
   'admin@rwabidask.com',
   'anniegroup@rwabidask.com',
 ]);
