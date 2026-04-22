@@ -6311,61 +6311,6 @@ async function unlockPremiumData(assetId, price) {
 // ════════════════════════════════════════════════════════════════════
 // openModal helper extension — supports custom title+body
 // ════════════════════════════════════════════════════════════════════
-function openModal(type, title, bodyHtml) {
-  const modal   = document.getElementById('modal');
-  const titleEl = document.getElementById('modal-title');
-  const bodyEl  = document.getElementById('modal-body');
-  if (!modal) return;
-
-  // If custom title+body passed, use them directly
-  if (title && titleEl) titleEl.textContent = title;
-  if (bodyHtml && bodyEl) {
-    bodyEl.innerHTML = bodyHtml;
-    modal.classList.add('open');
-    modal.style.display = 'flex';
-    return;
-  }
-
-  // Route standard modal types to their content builders
-  const t = (type || '').toLowerCase();
-  if (t === 'signin' || t === 'login') {
-    if (titleEl) titleEl.textContent = 'SIGN IN';
-    if (bodyEl) bodyEl.innerHTML = `
-      <div class="mfield"><label>EMAIL</label><input type="email" id="signin-email" placeholder="your@email.com" autocomplete="email"></div>
-      <div class="mfield"><label>PASSWORD</label><input type="password" id="signin-pass" placeholder="••••••••" autocomplete="current-password"></div>
-      <div class="mfooter">
-        <button class="msub-btn" style="flex:2" onclick="signIn()">SIGN IN</button>
-        <button class="mcan-btn" style="flex:1" onclick="closeModal()">CANCEL</button>
-      </div>
-      <div style="text-align:center;margin-top:12px;font-size:10px;color:var(--muted)">No account? <a href="#" onclick="openModal('signup');return false" style="color:var(--cyan)">Create one free</a></div>`;
-  } else if (t === 'signup' || t === 'register') {
-    if (titleEl) titleEl.textContent = 'CREATE ACCOUNT';
-    if (bodyEl) bodyEl.innerHTML = `
-      <div class="mfield"><label>EMAIL</label><input type="email" id="reg-email" placeholder="your@email.com" autocomplete="email"></div>
-      <div class="mfield"><label>PASSWORD</label><input type="password" id="reg-pass" placeholder="Min 8 characters" autocomplete="new-password"></div>
-      <div class="mfield"><label>ROLE</label>
-        <select id="reg-role">
-          <option value="investor">Investor / Buyer</option>
-          <option value="broker">Broker / Agent</option>
-          <option value="owner">Asset Owner</option>
-          <option value="institutional">Institutional</option>
-        </select>
-      </div>
-      <div class="mfooter">
-        <button class="msub-btn" style="flex:2" onclick="registerUser()">CREATE ACCOUNT</button>
-        <button class="mcan-btn" style="flex:1" onclick="closeModal()">CANCEL</button>
-      </div>
-      <div style="text-align:center;margin-top:12px;font-size:10px;color:var(--muted)">Already registered? <a href="#" onclick="openModal('signin');return false" style="color:var(--cyan)">Sign In</a></div>`;
-  } else {
-    // Generic — leave existing body content if no builder matched
-    console.warn('[RWABidAsk] openModal: no builder for type:', type);
-  }
-
-  modal.classList.add('open');
-  modal.style.display = 'flex';
-  // Focus first input for UX
-  setTimeout(() => { const f = modal.querySelector('input'); if (f) f.focus(); }, 80);
-}
 
 // Hook Stripe init into the auth flow
 const _origUpdateAuthUI = typeof updateAuthUI !== 'undefined' ? updateAuthUI : null;
