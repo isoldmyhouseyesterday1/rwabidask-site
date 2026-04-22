@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>RWABidAsk — Global Asset Market | Institutional Digitization Platform</title>
-<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy, infrastructure, IP, minerals, aviation and maritime transport on the Persistent Ledger.">
+<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy, infrastructure, robotics, bio, anthro, IP, minerals, natural resources, aviation and maritime transport on the Persistent Ledger.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5431,7 +5431,9 @@ async function signInWithGoogle() {
     const { error } = await _sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + window.location.pathname
+        // Clinical fix: Redirects to https://www.rwabidask.com 
+        // and ignores any messy filenames like index-v14-3.html
+        redirectTo: window.location.origin 
       }
     });
     if (error) throw error;
