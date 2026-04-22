@@ -3356,25 +3356,23 @@ async function fetchListingsFromSupabase() {
   }
 }
 
+let _marketDataLoading = false;
 async function loadMarketData() {
+  if (_marketDataLoading) { console.log('[RWABidAsk] loadMarketData skipped — already running'); return; }
+  _marketDataLoading = true;
   try {
-    // 1. Ask the 'Specialist' function to get and clean the data
     const fetched = await fetchListingsFromSupabase();
-
-    // 2. Save it globally so the Globe and Dashboard can see it
     window.ASSETS    = fetched;
     ASSETS           = fetched;
-    window.allFiltered = fetched; // always in sync from first frame
-
-    console.log(`[RWABidAsk] Global Ledger Sync: ${ASSETS.length} assets mapped.`);
-    
-    // 3. Turn on the UI (Markers, Ticker, List)
+    window.allFiltered = fetched;
+    console.log('[RWABidAsk] Global Ledger Sync: ' + ASSETS.length + ' assets mapped.');
     onDataReady();
-
   } catch (err) {
     console.error('[RWABidAsk] Sync Error:', err);
     setStatus('OFFLINE — DATABASE CONNECTION TIMEOUT');
-    showToast("CRITICAL: DATABASE SYNC FAILED");
+    showToast('CRITICAL: DATABASE SYNC FAILED');
+  } finally {
+    _marketDataLoading = false;
   }
 }
 
@@ -4916,7 +4914,7 @@ async function initPlacesSearch() {
             const lng = place.location.lng();
             flyTo(lat, lng, 1400, 45);
             setStatus('LOCATION: ' + (place.displayName || '').toUpperCase().slice(0, 60));
-          } catch (err) { toast('Location lookup failed'); }
+          } catch (err) { showToast('Location lookup failed'); }
         });
         return;
       } catch(e) { input.style.display = ''; }
@@ -4927,7 +4925,7 @@ async function initPlacesSearch() {
       acInstance = ac;
       ac.addListener('place_changed', () => {
         const place = ac.getPlace();
-        if (!place?.geometry?.location) { toast('Location not found'); return; }
+        if (!place?.geometry?.location) { showToast('Location not found'); return; }
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
         flyTo(lat, lng, 1400, 45);
@@ -4987,7 +4985,7 @@ function toggleHeat(btn) {
       else if (asset.price > p33) el.classList.add('heat-warm'); 
     } 
   }); 
-  toast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); 
+  showToast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); 
 }
 
     // ============================================================
@@ -5445,7 +5443,7 @@ async function signInWithGoogle() {
 }
 
 async function signIn(email, password) {
-  if (!_sb) { toast('Supabase not ready'); return false; }
+  if (!_sb) { showToast('Supabase not ready'); return false; }
   try {
     const { data, error } = await _sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
@@ -5460,13 +5458,13 @@ async function signIn(email, password) {
     if (map3dEl) onCameraChange();
     return true;
   } catch (e) {
-    toast('Sign in failed: ' + e.message);
+    showToast('Sign in failed: ' + e.message);
     return false;
   }
 }
 
 async function signUp(email, password, fullName) {
-  if (!_sb) { toast('Supabase not ready'); return false; }
+  if (!_sb) { showToast('Supabase not ready'); return false; }
   try {
     const { data, error } = await _sb.auth.signUp({ 
       email, 
@@ -5475,13 +5473,13 @@ async function signUp(email, password, fullName) {
     });
     if (error) throw error;
     if (data.user) {
-      toast('Account created! Please verify your email.');
+      showToast('Account created! Please verify your email.');
       closeModal();
       return true;
     }
     return false;
   } catch (e) {
-    toast('Sign up failed: ' + e.message);
+    showToast('Sign up failed: ' + e.message);
     return false;
   }
 }
@@ -5492,7 +5490,7 @@ async function signOut() {
   isAuthenticated = false;
   updateAuthUI();
   // Open House: no auth gate auto-show on signOut
-  toast('Signed out successfully');
+  showToast('Signed out successfully');
   if (map3dEl) onCameraChange();
 }
 
@@ -5586,7 +5584,7 @@ function closeModal() {
 async function handleSignIn() {
   const email = document.getElementById('login-email')?.value;
   const password = document.getElementById('login-password')?.value;
-  if (!email || !password) { toast('Enter email and password'); return; }
+  if (!email || !password) { showToast('Enter email and password'); return; }
   await signIn(email, password);
 }
 
@@ -5594,8 +5592,8 @@ async function handleSignUp() {
   const name = document.getElementById('reg-name')?.value;
   const email = document.getElementById('reg-email')?.value;
   const password = document.getElementById('reg-password')?.value;
-  if (!name || !email || !password) { toast('All fields required'); return; }
-  if (password.length < 6) { toast('Password must be at least 6 characters'); return; }
+  if (!name || !email || !password) { showToast('All fields required'); return; }
+  if (password.length < 6) { showToast('Password must be at least 6 characters'); return; }
   await signUp(email, password, name);
 }
 
