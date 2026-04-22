@@ -2463,8 +2463,8 @@ body { min-width: 900px; overflow-x: auto; }
     <button class="tbtn wallet-btn" id="wallet-btn" onclick="openWallet()" title="Credits & Wallet" style="display:none">
       ⬡ WALLET<span class="wallet-credits-badge" id="wallet-credits-badge">0</span>
     </button>
-    <button class="tbtn" id="signin-btn">Sign In</button>
-    <button class="tbtn primary" id="join-btn">Join</button>
+    <button class="tbtn" id="signin-btn" onclick="openModal('signin')">Sign In</button>
+    <button class="tbtn primary" id="join-btn" onclick="openModal('signup')">Join Free</button>
   </div>
 </div>
 
@@ -2839,7 +2839,7 @@ let domMarkers = {};
 
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-const MARKER_VISIBLE_RANGE = 6000000;
+const MARKER_VISIBLE_RANGE = 300000; // pins appear below 300km — city zoom
 let isAuthenticated = false;
 
 // Supabase config
@@ -4822,8 +4822,8 @@ async function initMap() {
     const maps3dLib = await google.maps.importLibrary('maps3d');
     const Map3DElement = maps3dLib.Map3DElement;
     map3dEl = new Map3DElement({ 
-      center: { lat: 20, lng: 10, altitude: 0 }, 
-      range: 22000000, 
+      center: { lat: 47.6062, lng: -122.3321, altitude: 0 }, // Seattle — first city
+      range: 1800000,  // ~zoom 7 — city-region level, not orbit
       tilt: 0, 
       heading: 0 
     });
@@ -5112,7 +5112,7 @@ function renderDOMMarkers() {
   // ── ZOOM-TO-REVEAL (Level of Detail) ─────────────────────────────
   // range > 8M ≈ zoom < 6: show only cluster bubbles, no individual pins
   // This keeps the global view clean on first load
-  const LOD_CLUSTER_ONLY = 8000000;
+  const LOD_CLUSTER_ONLY = 300000; // above 300km → clusters only, no pins
   if (range > LOD_CLUSTER_ONLY) {
     const cells = buildClusters(physicalFiltered, range);
     if (cells) {
@@ -5868,12 +5868,22 @@ function applyAdminBypass() {
   const style = document.getElementById('admin-bypass-style') || document.createElement('style');
   style.id = 'admin-bypass-style';
   style.textContent = `
-    .premium-blur-content { filter: none !important; opacity: 1 !important; pointer-events: auto !important; }
+    /* Admin zero-blur policy — every possible paywall/blur class removed */
+    .premium-blur-wrap    { position: static !important; }
+    .premium-blur-content { filter: none !important; backdrop-filter: none !important;
+                            opacity: 1 !important; pointer-events: auto !important;
+                            user-select: auto !important; max-height: none !important; }
+    .premium-blur         { filter: none !important; backdrop-filter: none !important; }
+    .paywall-overlay      { display: none !important; }
     .premium-unlock-overlay { display: none !important; }
-    .spec-row-locked .spec-row-blur { filter: none !important; backdrop-filter: none !important; }
-    .spec-row-lock-icon { display: none !important; }
-    .blur-row-overlay { display: none !important; }
-    [data-blurred="true"] { filter: none !important; }
+    .spec-row-locked      { background: none !important; border-left-color: transparent !important; }
+    .spec-row-locked .spec-row-blur { filter: none !important; backdrop-filter: none !important;
+                                      pointer-events: auto !important; user-select: auto !important; }
+    .spec-row-lock-icon   { display: none !important; }
+    .blur-row-overlay     { display: none !important; }
+    [data-blurred="true"] { filter: none !important; backdrop-filter: none !important; }
+    /* Inline blur styles injected via JS */
+    [style*="blur"]       { filter: none !important; backdrop-filter: none !important; }
   `;
   document.head.appendChild(style);
 }
@@ -6230,19 +6240,54 @@ async function showSponsorModal(assetId) {
 }
 
 async function purchaseSponsor(assetId, price, days) {
-  if (_userCredits < price) {
-    showToast(`NEED $${price} IN WALLET — TOP UP NOW`);
-    closeModal();
-    openWallet();
+  if (!currentUser) { openModal('signin'); return; }
+  // If wallet has enough credits, deduct directly
+  if (_userCredits >= price) {
+    try {
+      await _sb.from('profiles')
+        .update({ user_credits: _userCredits - price })
+        .eq('id', currentUser.id);
+      await logAuditTrail('SPONSOR_PURCHASE', assetId, { amount: -price, days, price_paid: price });
+      _userCredits -= price;
+      showToast('LISTING SPONSORED FOR ' + days + ' DAYS');
+      closeModal();
+    } catch(e) { showToast('SPONSOR PURCHASE FAILED: ' + (e.message || e)); }
     return;
   }
+  // Otherwise route to Stripe Checkout (uses the live publishable key)
   try {
-    await _sb.from('profiles').update({ user_credits: _userCredits - price }).eq('id', currentUser.id);
-    await logAuditTrail('SPONSOR_PURCHASE', assetId, { amount: -price, days, price_paid: price });
-    _userCredits -= price;
-    showToast(`LISTING SPONSORED FOR ${days} DAYS`);
-    closeModal();
-  } catch(e) { showToast('SPONSOR PURCHASE FAILED: ' + e.message); }
+    showToast('REDIRECTING TO STRIPE CHECKOUT…');
+    // Call your Supabase edge function to create a checkout session
+    const resp = await fetch(
+      'https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/create-checkout-session',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + (await _sb.auth.getSession()).data.session?.access_token
+        },
+        body: JSON.stringify({
+          user_id:     currentUser.id,
+          asset_id:    String(assetId),
+          tier:        'sponsor_' + days + 'd',
+          price_usd:   price,
+          days,
+          success_url: window.location.href + '?sponsored=' + assetId,
+          cancel_url:  window.location.href
+        })
+      }
+    );
+    const data = await resp.json();
+    if (data?.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('CHECKOUT UNAVAILABLE — TOP UP WALLET TO SPONSOR');
+      openWallet();
+    }
+  } catch(e) {
+    showToast('STRIPE ERROR: ' + (e.message || e));
+    openWallet();
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════
