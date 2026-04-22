@@ -5840,18 +5840,14 @@ let _userCredits = 0;
 const STRIPE_PUBLIC_KEY = 'pk_test_51TOdHT37VLYiKe0NzbAGCRkTQQupaf1l5vMwnIh945ERySnsFCvH6zwbVJYygVFcHbXde8EWh5Xzx4fLSm0rkwGq00IW38x5Ab';
 
 
-
 // ════════════════════════════════════════════════════════════════════
-// ADMIN BYPASS — Owner/Admin sees all data unblurred, no paywalls
-// Add admin Supabase UUIDs here
+// ADMIN BYPASS — Uses UUID only (No PII/Emails in source)
 // ════════════════════════════════════════════════════════════════════
-const ADMIN_ID = 'd77546f2-a9a9-430b-885e-777fa106261f';
+const ADMIN_ID = 'd77546f2-a9a9-430b-885e-777fa106261f'; 
 const ADMIN_USER_IDS = new Set([ADMIN_ID]);
 
-const ADMIN_EMAILS = new Set([
-  'admin@rwabidask.com',
-  'anniegroup@rwabidask.com',
-]);
+// We leave this empty now. The system will rely on your ADMIN_ID above.
+const ADMIN_EMAILS = new Set([]);
 
 function isAdminUser() {
   if (!currentUser) return false;
