@@ -4566,7 +4566,10 @@ function selectAsset(id) {
 
     // ── Role-Based Action Bar ───────────────────────────────────
     // Determine broker/claim state for this asset
-    const isVerifiedBroker = !!(currentUser && (currentUserRole === 'broker' || currentUserRole === 'pro' || currentUserRole === 'institutional'));
+    const isVerifiedBroker = !!(currentUser && (
+      currentUserRole === 'broker' || currentUserRole === 'pro' || currentUserRole === 'institutional'
+      || localStorage.getItem('rwa_broker_verified') === currentUser.id
+    ));
     const rawAsset = a._raw || {};
     const claimedById = rawAsset.claimed_by || null;
     const isClaimedByMe = !!(currentUser && claimedById && claimedById === currentUser.id);
@@ -4579,10 +4582,22 @@ function selectAsset(id) {
     } else if (isClaimedByMe || isVerifiedBroker) {
       claimBtnHtml = `<button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">ASSIGN TO MY PORTFOLIO</button>`;
     } else {
-      claimBtnHtml = `<button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">${!a._broker ? 'CLAIM LISTING — NO BROKER ON RECORD' : 'CLAIM LISTING'}</button>`;
+      claimBtnHtml = `<button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">CLAIM LISTING</button>`;
     }
 
-    const actionBarHtml = isPro ? `
+    // ── Editor Mode: inject if verified broker ──────────────────
+    const editorModeHtml = isVerifiedBroker ? `
+      <div id="editor-mode-panel" style="margin-top:10px">
+        <button id="editor-mode-btn" onclick="toggleEditorMode('${a.id}')"
+          style="width:100%;padding:11px;background:none;border:1px solid rgba(113,113,122,.5);color:rgba(161,161,170,1);font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s">
+          EDITOR MODE: ACTIVE
+        </button>
+        <div id="editor-fields" style="display:none;margin-top:8px"></div>
+        <button id="ai-audit-btn" onclick="submitForAIAudit('${a.id}')"
+          style="display:none;width:100%;margin-top:8px;padding:11px;background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.3);color:var(--cyan);font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px">
+          SUBMIT FOR AI AUDIT
+        </button>
+      </div>` : '';
         <div class="action-bar">
             <div class="action-bar-pro">
                 <div class="pro-header"><span class="pro-badge">PRO</span> BROKER TOOLS</div>
@@ -4610,6 +4625,7 @@ function selectAsset(id) {
                 </div>
                 ${claimBtnHtml}
                 <button class="abtn-sponsor-listing" onclick="requireAuth(()=>showSponsorModal('${a.id}'))">SPONSOR THIS LISTING</button>
+                ${editorModeHtml}
             </div>
         </div>`;
 
@@ -5757,10 +5773,13 @@ window.handleClaim = handleClaim;
 window.showOrderbookModal = showOrderbookModal;
 window.stripeOrderbookCheckout = stripeOrderbookCheckout;
 window.showClaimModal = showClaimModal;
+window.tosGateCheck = tosGateCheck;
 window.submitPortfolioAssign = submitPortfolioAssign;
 window.submitBrokerSubscription = submitBrokerSubscription;
 window.showSponsorModal = showSponsorModal;
 window.submitSponsorSpecs = submitSponsorSpecs;
+window.toggleEditorMode = toggleEditorMode;
+window.submitForAIAudit = submitForAIAudit;
 window.handleInquiry = handleInquiry;
 window.toggleWatchlist = toggleWatchlist;
 window.submitBid = submitBid;
@@ -6136,7 +6155,7 @@ async function showOrderbookModal(assetId) {
         <button onclick="stripeOrderbookCheckout('${assetId}','bundle',${bundlePrice})" style="margin-top:12px;width:100%;padding:10px;background:rgba(226,197,90,.1);border:1px solid rgba(226,197,90,.4);color:var(--gold);font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px">PURCHASE BUNDLE</button>
       </div>
     </div>
-    <div style="font-size:8px;color:var(--muted);text-align:center;line-height:1.8;letter-spacing:.3px">All transactions final. Secured by Stripe. A 3% success fee applies to completed transactions originating from this platform.</div>`;
+    <div style="font-size:8px;color:var(--muted);text-align:center;line-height:1.8;letter-spacing:.3px">All transactions final. Secured by Stripe.</div>`;
 
   openModal('orderbook', 'ACCESS ORDERBOOK', bodyHtml);
 }
@@ -6208,14 +6227,13 @@ async function purchaseLead(assetId, price) {
       <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.15);border-radius:3px;padding:16px;font-family:monospace">
         ${Object.entries(contact).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="color:var(--muted);font-size:9px;text-transform:uppercase">${k}</span><span style="color:var(--cyan);font-size:10px">${v}</span></div>`).join('')}
       </div>
-      <div style="font-size:8px;color:var(--muted);margin-top:12px;line-height:1.8">This lead purchase has been logged. A 3% success fee applies to any completed transaction originating from this contact.</div>`);
+      <div style="font-size:8px;color:var(--muted);margin-top:12px;line-height:1.8">Contact details have been released. Secured by Stripe.</div>`);
   } catch(e) { showToast('PURCHASE FAILED: ' + e.message); }
 }
 
 // ════════════════════════════════════════════════════════════════════
 // BUTTON 7 — CLAIM LISTING / BROKER SEAT MODEL
-// Professional Entity Subscription: $20/yr (Tier 1) | $10/yr (Tier 2)
-// One subscription covers ALL listings under direct management.
+// Full-screen institutional TOS overlay with paywall gating
 // ════════════════════════════════════════════════════════════════════
 async function showClaimModal(assetId) {
   if (!currentUser) { openModal('signin'); return; }
@@ -6226,7 +6244,8 @@ async function showClaimModal(assetId) {
   const claimedById = rawAsset.claimed_by || null;
   const isClaimedByMe = !!(claimedById && claimedById === currentUser.id);
   const role = (currentUserRole || '').toLowerCase();
-  const isVerifiedBroker = role === 'broker' || role === 'pro' || role === 'institutional';
+  const isVerifiedBroker = role === 'broker' || role === 'pro' || role === 'institutional'
+    || localStorage.getItem('rwa_broker_verified') === currentUser.id;
 
   // Already a verified broker — skip payment, show portfolio assignment
   if (isVerifiedBroker || isClaimedByMe) {
@@ -6239,9 +6258,6 @@ async function showClaimModal(assetId) {
         <div class="mfield"><label>MANAGEMENT NOTE (OPTIONAL)</label><input type="text" id="portfolio-note" placeholder="e.g. Owner-listed, exclusive mandate"></div>
         <div class="mfield"><label>INTERNAL REFERENCE #</label><input type="text" id="portfolio-ref" placeholder="e.g. PROP-2026-044"></div>
       </div>
-      <div style="background:rgba(226,197,90,.05);border:1px solid rgba(226,197,90,.18);border-radius:2px;padding:12px;font-size:9px;color:var(--dim);line-height:1.9;margin-bottom:16px;letter-spacing:.2px">
-        <strong style="color:var(--gold)">3% SUCCESS FEE APPLIES</strong> — By assigning this listing, you confirm that RWABidAsk (Annie Group LLC) retains a 3% success fee on any transaction completed through a lead or introduction originating from this platform.
-      </div>
       <div class="mfooter">
         <button class="msub-btn" style="flex:2" onclick="submitPortfolioAssign('${assetId}')">ASSIGN TO PORTFOLIO</button>
         <button class="mcan-btn" style="flex:1" onclick="closeModal()">CANCEL</button>
@@ -6249,41 +6265,97 @@ async function showClaimModal(assetId) {
     return;
   }
 
-  // New subscriber flow — Verification Portal
-  openModal('claimListing', 'VERIFICATION PORTAL — BROKER SEAT', `
-    <div style="font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:14px">
-      Establish your <strong style="color:var(--text)">Professional Entity Subscription</strong> to claim and manage listings on the RWABidAsk Global Ledger.
-    </div>
+  // New subscriber flow — Full-Screen Institutional TOS Overlay
+  // Inject full-screen overlay directly into body (bypasses modal width constraints)
+  let overlay = document.getElementById('claim-tos-overlay');
+  if (overlay) overlay.remove();
+  overlay = document.createElement('div');
+  overlay.id = 'claim-tos-overlay';
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;background:#000;color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:40px 20px;overflow-y:auto;font-family:var(--font, 'IBM Plex Mono', monospace);
+  `;
+  overlay.innerHTML = `
+    <div style="max-width:560px;width:100%">
+      <div style="font-size:9px;letter-spacing:3px;color:rgba(0,255,200,.7);margin-bottom:8px;text-transform:uppercase">VERIFICATION PORTAL</div>
+      <div style="font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px">BROKER SEAT CLAIM</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:32px">Professional Entity Subscription — One fee covers all listings under your management</div>
 
-    <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.14);border-radius:2px;padding:14px;margin-bottom:14px;font-size:10px;color:var(--dim);line-height:2;letter-spacing:.2px">
-      <strong style="color:var(--cyan);font-size:9px;letter-spacing:1.2px">PROFESSIONAL ENTITY SUBSCRIPTION</strong><br>
-      This annual fee covers the <strong style="color:var(--silver)">individual broker and ALL listings under their direct management</strong>. It is not a per-listing fee. Once verified, any unclaimed listing can be added to your portfolio at no additional charge.
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:2px;padding:14px;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:var(--cyan)">$20<span style="font-size:12px;font-weight:500">/yr</span></div>
-        <div style="font-size:9px;color:var(--muted);margin-top:5px;line-height:1.7;letter-spacing:.4px">TIER 1<br>NA · EU · AU · NZ · UK</div>
-        <button onclick="submitBrokerSubscription('${assetId}','tier1',20)" style="margin-top:12px;width:100%;padding:10px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px">SUBSCRIBE — $20/YR</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px">
+        <div style="border:1px solid rgba(255,255,255,.15);padding:18px;text-align:center">
+          <div style="font-size:28px;font-weight:900;color:#fff">$20<span style="font-size:13px;font-weight:400">/yr</span></div>
+          <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:6px;letter-spacing:.6px;line-height:1.8">TIER 1<br>NA · EU · AU · NZ · UK</div>
+        </div>
+        <div style="border:1px solid rgba(255,255,255,.15);padding:18px;text-align:center">
+          <div style="font-size:28px;font-weight:900;color:#fff">$10<span style="font-size:13px;font-weight:400">/yr</span></div>
+          <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:6px;letter-spacing:.6px;line-height:1.8">TIER 2<br>Asia · ME · Africa · SA</div>
+        </div>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:2px;padding:14px;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:var(--gold)">$10<span style="font-size:12px;font-weight:500">/yr</span></div>
-        <div style="font-size:9px;color:var(--muted);margin-top:5px;line-height:1.7;letter-spacing:.4px">TIER 2<br>Asia · ME · Africa · SA</div>
-        <button onclick="submitBrokerSubscription('${assetId}','tier2',10)" style="margin-top:12px;width:100%;padding:10px;background:rgba(226,197,90,.1);border:1px solid rgba(226,197,90,.4);color:var(--gold);font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px">SUBSCRIBE — $10/YR</button>
+
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:6px">ENTITY / BROKERAGE NAME *</label>
+        <input id="tos-entity" type="text" placeholder="e.g. Meridian Capital Partners LLC"
+          oninput="tosGateCheck()"
+          style="width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;box-sizing:border-box;outline:none">
       </div>
-    </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:6px">PROFESSIONAL LICENSE # *</label>
+        <input id="tos-license" type="text" placeholder="e.g. DRE 02134881 · FINRA CRD 123456"
+          oninput="tosGateCheck()"
+          style="width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;box-sizing:border-box;outline:none">
+      </div>
+      <div style="margin-bottom:28px">
+        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:6px">COMPANY / ENTITY URL *</label>
+        <input id="tos-url" type="url" placeholder="https://yourbrokerage.com"
+          oninput="tosGateCheck()"
+          style="width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;box-sizing:border-box;outline:none">
+      </div>
 
-    <div class="mfield"><label>ENTITY / BROKERAGE NAME</label><input type="text" id="broker-entity" placeholder="e.g. Meridian Capital Group LLC"></div>
-    <div class="mfield"><label>LICENSE / REGISTRATION #</label><input type="text" id="broker-license" placeholder="e.g. DRE 02134881"></div>
+      <div style="border:1px solid rgba(255,255,255,.15);padding:18px;margin-bottom:24px">
+        <label style="display:flex;align-items:flex-start;gap:14px;cursor:pointer">
+          <input type="checkbox" id="tos-certify" onchange="tosGateCheck()"
+            style="margin-top:3px;width:16px;height:16px;accent-color:#00ffc8;flex-shrink:0">
+          <span style="font-size:11px;color:rgba(255,255,255,.75);line-height:1.8">
+            I certify that I am the authorized agent/owner for this asset. I acknowledge that all edits are audited by AI and any fraudulent entries will result in a permanent ban without refund.
+          </span>
+        </label>
+      </div>
 
-    <div style="background:rgba(226,197,90,.05);border:1px solid rgba(226,197,90,.18);border-radius:2px;padding:12px;font-size:9px;color:var(--dim);line-height:1.9;margin-bottom:14px;letter-spacing:.2px">
-      <strong style="color:var(--gold)">3% SUCCESS FEE APPLIES</strong> — All transactions completed through a lead, inquiry, bid, or introduction originating from this platform are subject to a 3% success fee payable to RWABidAsk (Annie Group LLC). This agreement is binding upon subscription and logged as a permanent audit record.
-    </div>
-    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:16px">
-      <input type="checkbox" id="tos-agree" style="margin-top:2px;accent-color:var(--cyan)">
-      <span style="font-size:10px;color:var(--muted);line-height:1.7">I agree to the 3% Success Fee Agreement, the Professional Entity Subscription Terms, and the RWABidAsk Terms of Service.</span>
-    </label>
-    <div style="font-size:8px;color:var(--muted);text-align:center;line-height:1.8;letter-spacing:.3px">Annual subscription. All sales final. Secured by Stripe.</div>`);
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:6px">SELECT TIER</label>
+        <select id="tos-tier" onchange="tosGateCheck()"
+          style="width:100%;padding:12px;background:#000;border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;box-sizing:border-box;outline:none;cursor:pointer">
+          <option value="">— Select Subscription Tier —</option>
+          <option value="tier1">Tier 1 — $20.00 / year (NA · EU · AU · NZ · UK)</option>
+          <option value="tier2">Tier 2 — $10.00 / year (Asia · ME · Africa · SA)</option>
+        </select>
+      </div>
+
+      <div id="tos-stripe-wrap" style="display:none;margin-bottom:16px">
+        <button onclick="submitBrokerSubscription('${assetId}')"
+          style="width:100%;padding:16px;background:#fff;color:#000;border:none;font-family:inherit;font-size:12px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer">
+          SUBSCRIBE &amp; CLAIM LISTING
+        </button>
+      </div>
+
+      <button onclick="document.getElementById('claim-tos-overlay').remove()"
+        style="width:100%;padding:12px;background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);font-family:inherit;font-size:10px;letter-spacing:.8px;text-transform:uppercase;cursor:pointer">
+        CANCEL
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function tosGateCheck() {
+  const entity   = document.getElementById('tos-entity')?.value?.trim();
+  const license  = document.getElementById('tos-license')?.value?.trim();
+  const url      = document.getElementById('tos-url')?.value?.trim();
+  const certify  = document.getElementById('tos-certify')?.checked;
+  const tier     = document.getElementById('tos-tier')?.value;
+  const wrap     = document.getElementById('tos-stripe-wrap');
+  if (!wrap) return;
+  wrap.style.display = (entity && license && url && certify && tier) ? 'block' : 'none';
 }
 
 async function submitPortfolioAssign(assetId) {
@@ -6295,7 +6367,7 @@ async function submitPortfolioAssign(assetId) {
       await _sb.from('partner_leads').insert({
         user_id: currentUser.id, asset_id: String(assetId),
         lead_type: 'PORTFOLIO_ASSIGN',
-        selection_data: { note, ref, tos_agreed: true, success_fee_pct: 3, assigned_at: new Date().toISOString() }
+        selection_data: { note, ref, tos_agreed: true, assigned_at: new Date().toISOString() }
       });
     }
     showToast('LISTING ASSIGNED TO YOUR PORTFOLIO');
@@ -6303,14 +6375,18 @@ async function submitPortfolioAssign(assetId) {
   } catch(e) { showToast('ASSIGNMENT FAILED: ' + e.message); }
 }
 
-async function submitBrokerSubscription(assetId, tier, price) {
-  if (!document.getElementById('tos-agree')?.checked) {
-    showToast('PLEASE AGREE TO THE TERMS TO CONTINUE');
+async function submitBrokerSubscription(assetId) {
+  const entity  = document.getElementById('tos-entity')?.value?.trim();
+  const license = document.getElementById('tos-license')?.value?.trim();
+  const url     = document.getElementById('tos-url')?.value?.trim();
+  const certify = document.getElementById('tos-certify')?.checked;
+  const tier    = document.getElementById('tos-tier')?.value;
+
+  if (!certify || !entity || !license || !url || !tier) {
+    showToast('PLEASE COMPLETE ALL FIELDS AND AGREE TO TERMS');
     return;
   }
-  const entity  = document.getElementById('broker-entity')?.value || '';
-  const license = document.getElementById('broker-license')?.value || '';
-  if (!entity) { showToast('ENTITY NAME REQUIRED'); return; }
+  const price = tier === 'tier1' ? 20 : 10;
 
   try {
     showToast('REDIRECTING TO STRIPE…');
@@ -6329,8 +6405,8 @@ async function submitBrokerSubscription(assetId, tier, price) {
           price_usd:     price,
           entity_name:   entity,
           license_num:   license,
+          company_url:   url,
           tos_agreed:    true,
-          success_fee_pct: 3,
           success_url:   window.location.href + '?broker_verified=1&asset=' + assetId,
           cancel_url:    window.location.href
         })
@@ -6347,23 +6423,131 @@ async function submitBrokerSubscription(assetId, tier, price) {
   }
 }
 
-// Check for broker_verified redirect from Stripe
-(function checkBrokerVerifiedRedirect() {
+// ════════════════════════════════════════════════════════════════════
+// STRIPE CALLBACK & PERSISTENCE
+// Detects success=true OR broker_verified=1 from URL params.
+// Immediately writes isVerifiedBroker to localStorage so capabilities
+// unlock even if DB role propagation hasn't caught up yet.
+// ════════════════════════════════════════════════════════════════════
+(function checkStripeCallbackRedirect() {
   const params = new URLSearchParams(window.location.search);
-  if (params.get('broker_verified') === '1') {
-    const assetId = params.get('asset');
+
+  // Generic success flag (all Stripe sessions can include &success=true)
+  const isSuccess = params.get('success') === 'true';
+  const isBrokerVerified = params.get('broker_verified') === '1';
+  const assetId = params.get('asset');
+
+  if (isSuccess || isBrokerVerified) {
     history.replaceState({}, '', window.location.pathname);
+
+    // Persist immediately to localStorage — survives DB lag
+    if (currentUser) {
+      localStorage.setItem('rwa_broker_verified', currentUser.id);
+    } else {
+      // Auth may not have resolved yet — wait for it then persist
+      const waitForAuth = setInterval(() => {
+        if (currentUser) {
+          localStorage.setItem('rwa_broker_verified', currentUser.id);
+          clearInterval(waitForAuth);
+        }
+      }, 300);
+      setTimeout(() => clearInterval(waitForAuth), 8000); // safety timeout
+    }
+
     setTimeout(() => {
-      showToast('BROKER SUBSCRIPTION CONFIRMED — PORTFOLIO ACCESS ACTIVE');
+      showToast('BROKER SUBSCRIPTION CONFIRMED — EDITOR MODE ACTIVE');
+      // Remove full-screen overlay if still present
+      const overlay = document.getElementById('claim-tos-overlay');
+      if (overlay) overlay.remove();
       if (assetId) selectAsset(assetId);
-    }, 1200);
+      else if (window.currentAsset) selectAsset(window.currentAsset.id);
+    }, 800);
   }
 })();
 
-// Legacy submitClaim stub — kept for any existing audit log references
-async function submitClaim(assetId) {
-  showToast('PLEASE USE THE VERIFICATION PORTAL TO CLAIM LISTINGS');
-  closeModal();
+// ════════════════════════════════════════════════════════════════════
+// EDITOR MODE — Verified Broker Specification Editing
+// ════════════════════════════════════════════════════════════════════
+function toggleEditorMode(assetId) {
+  const a = (window.ASSETS || []).find(x => x.id == assetId);
+  if (!a) return;
+  const fieldsDiv = document.getElementById('editor-fields');
+  const auditBtn  = document.getElementById('ai-audit-btn');
+  const editorBtn = document.getElementById('editor-mode-btn');
+  if (!fieldsDiv) return;
+
+  const isOpen = fieldsDiv.style.display !== 'none';
+  if (isOpen) {
+    fieldsDiv.style.display = 'none';
+    if (auditBtn) auditBtn.style.display = 'none';
+    if (editorBtn) editorBtn.style.borderColor = 'rgba(113,113,122,.5)';
+    return;
+  }
+
+  // Build editable fields from specsData keys for this asset
+  const specs = a.specs || a._raw || {};
+  const editableFields = {
+    'Title / Name':   a.title   || a.address || '',
+    'Status':         a.status  || '',
+    'Type':           a.type    || '',
+    'Description':    a.description || specs.description || '',
+    'Year Built':     specs.year_built || specs.physical?.year_built || '',
+    'Area / Size':    specs.physical?.sqft || specs.area || '',
+    'Condition':      specs.condition || '',
+    'Contact Email':  specs.contact_email || a._raw?.contact_email || '',
+    'Contact Phone':  specs.contact_phone || a._raw?.contact_phone || '',
+    'Listing URL':    specs.listing_url   || a._raw?.listing_url   || '',
+  };
+
+  fieldsDiv.innerHTML = `
+    <div style="font-size:8px;letter-spacing:1.5px;color:var(--muted);padding:8px 0 6px;border-top:1px solid var(--border)">EDITABLE SPECIFICATIONS</div>
+    ${Object.entries(editableFields).map(([k, v]) => `
+      <div style="margin-bottom:8px">
+        <label style="display:block;font-size:8px;letter-spacing:1px;color:var(--muted);margin-bottom:3px">${escapeHtml(k.toUpperCase())}</label>
+        <input data-field="${escapeHtml(k)}" type="text" value="${escapeHtml(String(v))}"
+          style="width:100%;padding:8px;background:rgba(255,255,255,.04);border:1px solid rgba(113,113,122,.4);color:var(--text);font-family:var(--font);font-size:10px;box-sizing:border-box;outline:none"
+          onfocus="this.style.borderColor='var(--cyan)'" onblur="this.style.borderColor='rgba(113,113,122,.4)'">
+      </div>`).join('')}`;
+
+  fieldsDiv.style.display = 'block';
+  if (auditBtn) auditBtn.style.display = 'block';
+  if (editorBtn) editorBtn.style.borderColor = 'var(--cyan)';
+}
+
+async function submitForAIAudit(assetId) {
+  const fieldsDiv = document.getElementById('editor-fields');
+  if (!fieldsDiv) return;
+  const inputs = fieldsDiv.querySelectorAll('input[data-field]');
+  const edits = {};
+  inputs.forEach(inp => { edits[inp.dataset.field] = inp.value.trim(); });
+
+  try {
+    showToast('SUBMITTING FOR AI AUDIT…');
+    await logAuditTrail('BROKER_EDIT_SUBMITTED', assetId, {
+      edits,
+      submitted_by: currentUser?.email,
+      submitted_at: new Date().toISOString(),
+      user_id: currentUser?.id
+    });
+    if (_sb) {
+      await _sb.from('partner_leads').insert({
+        user_id:   currentUser.id,
+        asset_id:  String(assetId),
+        lead_type: 'BROKER_EDIT_AUDIT',
+        selection_data: { edits, submitted_at: new Date().toISOString() }
+      });
+    }
+    showToast('SUBMITTED — PENDING AI AUDIT REVIEW');
+    // Collapse editor
+    const fieldsEl = document.getElementById('editor-fields');
+    const auditBtn = document.getElementById('ai-audit-btn');
+    const editorBtn = document.getElementById('editor-mode-btn');
+    if (fieldsEl)  fieldsEl.style.display = 'none';
+    if (auditBtn)  auditBtn.style.display = 'none';
+    if (editorBtn) editorBtn.style.borderColor = 'rgba(113,113,122,.5)';
+  } catch(e) {
+    showToast('SUBMISSION FAILED: ' + (e.message || e));
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════
