@@ -4578,11 +4578,11 @@ function selectAsset(id) {
     // Determine CLAIM button label and behavior
     let claimBtnHtml;
     if (isClaimedByOther) {
-      claimBtnHtml = `<button class="abtn-claim-listing" disabled style="opacity:.35;cursor:not-allowed">ALREADY CLAIMED</button>`;
+      claimBtnHtml = `<button class="abtn-claim-listing" disabled style="opacity:.28;cursor:not-allowed;filter:grayscale(.8);letter-spacing:.8px;font-size:10px">REPRESENTATION VERIFIED</button>`;
     } else if (isClaimedByMe || isVerifiedBroker) {
       claimBtnHtml = `<button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">ASSIGN TO MY PORTFOLIO</button>`;
     } else {
-      claimBtnHtml = `<button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">CLAIM LISTING</button>`;
+      claimBtnHtml = `<button class="abtn-claim-listing" onclick="requireAuth(()=>showClaimModal('${a.id}'))">REGISTER REPRESENTATION</button>`;
     }
 
     // ── Editor Mode: inject if verified broker ──────────────────
@@ -4595,7 +4595,7 @@ function selectAsset(id) {
         <div id="editor-fields" style="display:none;margin-top:8px"></div>
         <button id="ai-audit-btn" onclick="submitForAIAudit('${a.id}')"
           style="display:none;width:100%;margin-top:8px;padding:11px;background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.3);color:var(--cyan);font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px">
-          SUBMIT FOR AI AUDIT
+          SYNC TO GLOBAL LEDGER
         </button>
       </div>` : '';
 
@@ -4622,7 +4622,7 @@ function selectAsset(id) {
                     <button class="abtn-aux" onclick="requireAuth(()=>showInsuranceModal())">INSURANCE QUOTE</button>
                 </div>
                 <div class="abtn-row">
-                    <button class="abtn-aux" onclick="requireAuth(()=>showOrderbookModal('${a.id}'))">ACCESS ORDERBOOK</button>
+                    <button class="abtn-aux" onclick="requireAuth(()=>showOrderbookModal('${a.id}'))">MARKET INTELLIGENCE</button>
                     <button id="watch-btn" class="abtn-aux" onclick="requireAuth(()=>toggleWatchlist())">WATCHLIST</button>
                 </div>
                 ${claimBtnHtml}
@@ -5897,6 +5897,45 @@ let _cardElement = null;
 let _selectedTopupAmount = 0;
 let _userCredits = 0;
 
+// ════════════════════════════════════════════════════════════════════
+// REGIONAL TIER DETECTION — Silent locale-based pricing
+// Tier 1: NA, EU, AU, NZ, UK → Claim $20/yr | Intelligence $10
+// Tier 2: Global              → Claim $10/yr | Intelligence $5
+// ════════════════════════════════════════════════════════════════════
+const TIER1_ZONES = new Set([
+  'America/New_York','America/Chicago','America/Denver','America/Los_Angeles',
+  'America/Phoenix','America/Anchorage','Pacific/Honolulu','America/Toronto',
+  'America/Vancouver','America/Edmonton','America/Winnipeg','America/Halifax',
+  'America/St_Johns','Europe/London','Europe/Dublin','Europe/Lisbon',
+  'Europe/Paris','Europe/Berlin','Europe/Rome','Europe/Madrid','Europe/Amsterdam',
+  'Europe/Brussels','Europe/Vienna','Europe/Zurich','Europe/Stockholm',
+  'Europe/Oslo','Europe/Copenhagen','Europe/Helsinki','Europe/Warsaw',
+  'Europe/Prague','Europe/Budapest','Europe/Bucharest','Europe/Athens',
+  'Europe/Sofia','Europe/Zagreb','Europe/Belgrade','Europe/Bratislava',
+  'Europe/Ljubljana','Europe/Tallinn','Europe/Riga','Europe/Vilnius',
+  'Europe/Nicosia','Europe/Luxembourg','Europe/Malta','Europe/Valletta',
+  'Australia/Sydney','Australia/Melbourne','Australia/Brisbane',
+  'Australia/Perth','Australia/Adelaide','Australia/Darwin',
+  'Pacific/Auckland','Pacific/Chatham',
+]);
+
+function detectRegionalTier() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return TIER1_ZONES.has(tz) ? 'tier1' : 'tier2';
+  } catch(e) {
+    return 'tier2'; // safe fallback
+  }
+}
+
+function getIntelligencePrice() {
+  return detectRegionalTier() === 'tier1' ? 10.00 : 5.00;
+}
+
+function getClaimPrice() {
+  return detectRegionalTier() === 'tier1' ? 20 : 10;
+}
+
 const STRIPE_PUBLIC_KEY = 'pk_test_51TOdHT37VLYiKe0NzbAGCRkTQQupaf1l5vMwnIh945ERySnsFCvH6zwbVJYygVFcHbXde8EWh5Xzx4fLSm0rkwGq00IW38x5Ab';
 
 
@@ -5955,11 +5994,23 @@ function requireAuth(callback) {
 }
 
 function initStripe() {
-  if (typeof Stripe === 'undefined') {
-    console.warn('[RWABidAsk] Stripe.js not loaded');
+  if (typeof Stripe !== 'undefined') {
+    try { _stripe = Stripe(STRIPE_PUBLIC_KEY); } catch(e) {
+      console.error('[RWABidAsk] Stripe init failed:', e);
+    }
     return;
   }
-  _stripe = Stripe(STRIPE_PUBLIC_KEY);
+  // Dynamically inject Stripe.js if the script tag didn't load
+  if (document.getElementById('stripe-js-tag')) return;
+  const s = document.createElement('script');
+  s.id  = 'stripe-js-tag';
+  s.src = 'https://js.stripe.com/v3/';
+  s.onload = () => {
+    try { _stripe = Stripe(STRIPE_PUBLIC_KEY); }
+    catch(e) { console.error('[RWABidAsk] Stripe post-load init failed:', e); }
+  };
+  s.onerror = () => showToast('SYSTEM ERROR: TERMINAL CONNECTION FAILED.');
+  document.head.appendChild(s);
 }
 
 async function openWallet() {
@@ -6126,88 +6177,98 @@ async function buyInstitutionalAccess(assetId, price) {
 
 // BUY LEAD — No POF barrier. Payment IS the validation. Straight to Stripe.
 // ════════════════════════════════════════════════════════════════════
-// BUTTON 5 — ACCESS ORDERBOOK
-// Delivers a verified CSV/PDF ledger of contact specs to registered email
+// BUTTON 5 — PURCHASE MARKET INTELLIGENCE
+// Silent regional pricing. Delivers PDF Intelligence Report via email.
 // ════════════════════════════════════════════════════════════════════
 async function showOrderbookModal(assetId) {
   if (!currentUser) { openModal('signin'); return; }
   const a = (window.ASSETS || []).find(x => x.id == assetId);
   if (!a) return;
-  const rawR = a._raw || {};
-  const singlePrice = parseFloat(rawR.lead_price || 9.99);
-  const bundlePrice = 49.99;
+
+  // Silent regional pricing — no tier menu shown to user
+  const price = getIntelligencePrice();
 
   const bodyHtml = `
-    <div style="font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:16px">
-      Request verified orderbook data for <strong style="color:var(--text)">${escapeHtml((a.address||'').slice(0,48))}</strong>.
+    <div style="font-size:10px;color:var(--dim);line-height:1.9;margin-bottom:16px;letter-spacing:.3px;text-transform:uppercase">
+      Asset: <strong style="color:var(--text)">${escapeHtml((a.address||a.title||'').slice(0,52))}</strong>
     </div>
-    <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.14);border-radius:2px;padding:14px;margin-bottom:16px;font-size:10px;color:var(--dim);line-height:2">
-      <strong style="color:var(--cyan);letter-spacing:.8px;font-size:9px">FULFILLMENT PROTOCOL</strong><br>
-      Upon payment confirmation, a secure <strong style="color:var(--silver)">CSV / PDF ledger</strong> containing verified contact specifications will be delivered to your registered email address: <span style="color:var(--cyan)">${escapeHtml(currentUser.email||'')}</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:2px;padding:14px;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:var(--cyan)">$${singlePrice.toFixed(2)}</div>
-        <div style="font-size:9px;color:var(--muted);margin-top:4px;line-height:1.6;letter-spacing:.5px">SINGLE ACCESS<br>One asset ledger</div>
-        <button onclick="stripeOrderbookCheckout('${assetId}','single',${singlePrice})" style="margin-top:12px;width:100%;padding:10px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px">PURCHASE</button>
-      </div>
-      <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.22);border-radius:2px;padding:14px;text-align:center">
-        <div style="font-size:22px;font-weight:800;color:var(--gold)">$${bundlePrice.toFixed(2)}</div>
-        <div style="font-size:9px;color:var(--muted);margin-top:4px;line-height:1.6;letter-spacing:.5px">BUNDLE ACCESS<br>5 ledgers + $10 credit</div>
-        <button onclick="stripeOrderbookCheckout('${assetId}','bundle',${bundlePrice})" style="margin-top:12px;width:100%;padding:10px;background:rgba(226,197,90,.1);border:1px solid rgba(226,197,90,.4);color:var(--gold);font-size:10px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px">PURCHASE BUNDLE</button>
+    <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.15);padding:16px;margin-bottom:18px">
+      <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:2px;margin-bottom:8px">FULFILLMENT PROTOCOL</div>
+      <div style="font-size:10px;color:var(--dim);line-height:1.9;letter-spacing:.2px">
+        Upon execution, a comprehensive <strong style="color:var(--silver)">PDF Intelligence Report</strong> including verified stakeholder specifications and market depth will be delivered to <span style="color:var(--cyan);font-weight:700">${escapeHtml(currentUser.email||'')}</span>.
       </div>
     </div>
-    <div style="font-size:8px;color:var(--muted);text-align:center;line-height:1.8;letter-spacing:.3px">All transactions final. Secured by Stripe.</div>`;
+    <div style="background:var(--bg3);border:1px solid var(--border2);padding:20px;margin-bottom:18px;text-align:center">
+      <div style="font-size:32px;font-weight:900;color:var(--cyan);font-variant-numeric:tabular-nums">$${price.toFixed(2)}</div>
+      <div style="font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:1.5px;text-transform:uppercase">Market Intelligence Report · Single Asset</div>
+    </div>
+    <button onclick="stripeOrderbookCheckout('${assetId}','intelligence',${price})"
+      style="width:100%;padding:14px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-family:var(--font);font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-bottom:10px">
+      EXECUTE — $${price.toFixed(2)}
+    </button>
+    <div style="font-size:8px;color:var(--muted);text-align:center;line-height:1.8;letter-spacing:.4px;text-transform:uppercase">All transactions final · Secured by Stripe</div>`;
 
-  openModal('orderbook', 'ACCESS ORDERBOOK', bodyHtml);
+  openModal('orderbook', 'PURCHASE MARKET INTELLIGENCE', bodyHtml);
 }
 
 async function stripeOrderbookCheckout(assetId, tier, price) {
   if (!currentUser) { openModal('signin'); return; }
+  if (!_stripe) {
+    initStripe();
+    await new Promise(r => setTimeout(r, 600));
+  }
+  if (!_stripe && typeof Stripe === 'undefined') {
+    showToast('SYSTEM ERROR: TERMINAL CONNECTION FAILED.');
+    return;
+  }
   try {
-    showToast('REDIRECTING TO STRIPE…');
+    showToast('CONNECTING TO STRIPE TERMINAL…');
+    const session = await _sb.auth.getSession();
+    const token   = session?.data?.session?.access_token;
     const resp = await fetch(
       'https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/create-checkout-session',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + (await _sb.auth.getSession()).data.session?.access_token
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
         },
         body: JSON.stringify({
           user_id:     currentUser.id,
           asset_id:    String(assetId),
-          tier:        'orderbook_' + tier,
+          tier:        'intelligence_' + detectRegionalTier(),
           price_usd:   price,
-          success_url: window.location.href + '?orderbook_unlocked=' + assetId,
+          email:       currentUser.email,
+          success_url: window.location.href + '?intel_unlocked=' + assetId + '&success=true',
           cancel_url:  window.location.href
         })
       }
     );
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     if (data?.url) {
       window.location.href = data.url;
     } else {
-      showToast('CHECKOUT UNAVAILABLE — CONTACT SUPPORT');
+      showToast('SYSTEM ERROR: TERMINAL CONNECTION FAILED.');
     }
   } catch(e) {
-    showToast('CHECKOUT ERROR: ' + (e.message || e));
+    showToast('SYSTEM ERROR: TERMINAL CONNECTION FAILED.');
+    console.error('[RWABidAsk] Intelligence checkout error:', e);
   }
 }
 
-// Check URL for orderbook_unlocked param on Stripe success redirect
+// Check URL for intel_unlocked param on Stripe success redirect
 (function checkOrderbookRedirect() {
-  const params = new URLSearchParams(window.location.search);
-  const unlockId = params.get('orderbook_unlocked');
+  const params   = new URLSearchParams(window.location.search);
+  const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked');
   if (unlockId) {
     history.replaceState({}, '', window.location.pathname);
     setTimeout(() => {
-      showToast('ORDERBOOK ACCESS CONFIRMED — LEDGER DISPATCHED TO YOUR EMAIL');
+      showToast('INTELLIGENCE REPORT DISPATCHED — CHECK YOUR EMAIL');
       selectAsset(unlockId);
-    }, 1200);
+    }, 900);
   }
 })();
-
 async function purchaseLead(assetId, price) {
   if (!currentUser) { openModal('signin'); return; }
   if (_userCredits < price) {
@@ -6234,27 +6295,28 @@ async function purchaseLead(assetId, price) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// BUTTON 7 — CLAIM LISTING / BROKER SEAT MODEL
-// Full-screen institutional TOS overlay with paywall gating
+// BUTTON 7 — REGISTER REPRESENTATION
+// Full-screen institutional TOS overlay. Silent regional pricing.
+// Fields: Full Name, Authority Type, License # (optional). No Company URL.
 // ════════════════════════════════════════════════════════════════════
 async function showClaimModal(assetId) {
   if (!currentUser) { openModal('signin'); return; }
   const a = (window.ASSETS || []).find(x => x.id == assetId);
   if (!a) return;
 
-  const rawAsset = a._raw || {};
-  const claimedById = rawAsset.claimed_by || null;
+  const rawAsset   = a._raw || {};
+  const claimedById  = rawAsset.claimed_by || null;
   const isClaimedByMe = !!(claimedById && claimedById === currentUser.id);
   const role = (currentUserRole || '').toLowerCase();
   const isVerifiedBroker = role === 'broker' || role === 'pro' || role === 'institutional'
     || localStorage.getItem('rwa_broker_verified') === currentUser.id;
 
-  // Already a verified broker — skip payment, show portfolio assignment
+  // Already verified — show portfolio assignment
   if (isVerifiedBroker || isClaimedByMe) {
     openModal('claimPortfolio', 'ASSIGN TO MY PORTFOLIO', `
       <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.14);border-radius:2px;padding:14px;margin-bottom:16px">
-        <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1.5px;margin-bottom:6px">VERIFIED BROKER — NO ADDITIONAL FEE</div>
-        <div style="font-size:11px;color:var(--dim);line-height:1.8">Your Professional Entity Subscription is active. Adding <strong style="color:var(--text)">${escapeHtml(a?.address||'this asset')}</strong> to your managed portfolio requires no additional payment.</div>
+        <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1.5px;margin-bottom:6px">VERIFIED REPRESENTATIVE — NO ADDITIONAL FEE</div>
+        <div style="font-size:11px;color:var(--dim);line-height:1.8">Your subscription is active. Adding <strong style="color:var(--text)">${escapeHtml(a?.address||'this asset')}</strong> to your managed portfolio requires no additional payment.</div>
       </div>
       <div style="margin-bottom:16px">
         <div class="mfield"><label>MANAGEMENT NOTE (OPTIONAL)</label><input type="text" id="portfolio-note" placeholder="e.g. Owner-listed, exclusive mandate"></div>
@@ -6267,97 +6329,93 @@ async function showClaimModal(assetId) {
     return;
   }
 
-  // New subscriber flow — Full-Screen Institutional TOS Overlay
-  // Inject full-screen overlay directly into body (bypasses modal width constraints)
+  // Silent regional price detection
+  const claimPrice = getClaimPrice();
+  const claimTier  = detectRegionalTier();
+
+  // Full-screen institutional TOS overlay
   let overlay = document.getElementById('claim-tos-overlay');
   if (overlay) overlay.remove();
   overlay = document.createElement('div');
   overlay.id = 'claim-tos-overlay';
-  overlay.style.cssText = `
-    position:fixed;inset:0;z-index:9999;background:#000;color:#fff;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:40px 20px;overflow-y:auto;font-family:var(--font, 'IBM Plex Mono', monospace);
-  `;
+  overlay.style.cssText = [
+    'position:fixed;inset:0;z-index:9999',
+    'background:var(--bg, #080d1a)',
+    'color:var(--text, #e2e8f0)',
+    'display:flex;flex-direction:column;align-items:center;justify-content:center',
+    'padding:40px 20px;overflow-y:auto',
+    'font-family:var(--font, "IBM Plex Mono", monospace)',
+  ].join(';');
+
   overlay.innerHTML = `
-    <div style="max-width:560px;width:100%">
-      <div style="font-size:9px;letter-spacing:3px;color:rgba(0,255,200,.7);margin-bottom:8px;text-transform:uppercase">VERIFICATION PORTAL</div>
-      <div style="font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px">BROKER SEAT CLAIM</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:32px">Professional Entity Subscription — One fee covers all listings under your management</div>
+    <div style="max-width:520px;width:100%">
+      <div style="font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:6px;text-transform:uppercase">REGISTRATION PORTAL</div>
+      <div style="font-size:20px;font-weight:900;letter-spacing:-.3px;margin-bottom:4px;color:var(--text);text-transform:uppercase">Register Representation</div>
+      <div style="font-size:10px;color:var(--dim);margin-bottom:28px;letter-spacing:.3px">Professional subscription · All listings under your management · Annual</div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px">
-        <div style="border:1px solid rgba(255,255,255,.15);padding:18px;text-align:center">
-          <div style="font-size:28px;font-weight:900;color:#fff">$20<span style="font-size:13px;font-weight:400">/yr</span></div>
-          <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:6px;letter-spacing:.6px;line-height:1.8">TIER 1<br>NA · EU · AU · NZ · UK</div>
-        </div>
-        <div style="border:1px solid rgba(255,255,255,.15);padding:18px;text-align:center">
-          <div style="font-size:28px;font-weight:900;color:#fff">$10<span style="font-size:13px;font-weight:400">/yr</span></div>
-          <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:6px;letter-spacing:.6px;line-height:1.8">TIER 2<br>Asia · ME · Africa · SA</div>
-        </div>
+      <div style="background:var(--bg3, rgba(255,255,255,.04));border:1px solid var(--border2, rgba(255,255,255,.1));padding:18px;margin-bottom:24px;text-align:center">
+        <div style="font-size:30px;font-weight:900;color:var(--cyan)">$${claimPrice}<span style="font-size:13px;font-weight:400;color:var(--dim)">/yr</span></div>
+        <div style="font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:1.2px;text-transform:uppercase">Professional Entity Subscription</div>
       </div>
 
-      <div style="margin-bottom:16px">
-        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:6px">ENTITY / BROKERAGE NAME *</label>
-        <input id="tos-entity" type="text" placeholder="e.g. Meridian Capital Partners LLC"
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:var(--muted);margin-bottom:5px;text-transform:uppercase">Full Name *</label>
+        <input id="tos-name" type="text" placeholder="e.g. Alexandra Chen"
           oninput="tosGateCheck()"
-          style="width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;box-sizing:border-box;outline:none">
+          style="width:100%;padding:11px;background:rgba(255,255,255,.04);border:1px solid var(--border2, rgba(255,255,255,.12));color:var(--text);font-family:inherit;font-size:11px;box-sizing:border-box;outline:none;letter-spacing:.3px">
       </div>
-      <div style="margin-bottom:16px">
-        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:6px">PROFESSIONAL LICENSE # *</label>
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:var(--muted);margin-bottom:5px;text-transform:uppercase">Authority Type *</label>
+        <select id="tos-authority" onchange="tosGateCheck()"
+          style="width:100%;padding:11px;background:var(--bg3, rgba(0,0,0,.6));border:1px solid var(--border2, rgba(255,255,255,.12));color:var(--text);font-family:inherit;font-size:11px;box-sizing:border-box;outline:none;cursor:pointer;letter-spacing:.3px;text-transform:uppercase">
+          <option value="">— Select Authority —</option>
+          <option value="Owner">OWNER</option>
+          <option value="Broker">BROKER</option>
+          <option value="Legal Counsel">LEGAL COUNSEL</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:24px">
+        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:var(--muted);margin-bottom:5px;text-transform:uppercase">Professional License # <span style="color:var(--muted);font-weight:400">(Optional)</span></label>
         <input id="tos-license" type="text" placeholder="e.g. DRE 02134881 · FINRA CRD 123456"
           oninput="tosGateCheck()"
-          style="width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;box-sizing:border-box;outline:none">
-      </div>
-      <div style="margin-bottom:28px">
-        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:6px">COMPANY / ENTITY URL *</label>
-        <input id="tos-url" type="url" placeholder="https://yourbrokerage.com"
-          oninput="tosGateCheck()"
-          style="width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;box-sizing:border-box;outline:none">
+          style="width:100%;padding:11px;background:rgba(255,255,255,.04);border:1px solid var(--border2, rgba(255,255,255,.12));color:var(--text);font-family:inherit;font-size:11px;box-sizing:border-box;outline:none;letter-spacing:.3px">
       </div>
 
-      <div style="border:1px solid rgba(255,255,255,.15);padding:18px;margin-bottom:24px">
-        <label style="display:flex;align-items:flex-start;gap:14px;cursor:pointer">
+      <div style="border:1px solid var(--border2, rgba(255,255,255,.12));padding:16px;margin-bottom:20px">
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer">
           <input type="checkbox" id="tos-certify" onchange="tosGateCheck()"
-            style="margin-top:3px;width:16px;height:16px;accent-color:#00ffc8;flex-shrink:0">
-          <span style="font-size:11px;color:rgba(255,255,255,.75);line-height:1.8">
-            I certify that I am the authorized agent/owner for this asset. I acknowledge that all edits are audited by AI and any fraudulent entries will result in a permanent ban without refund.
+            style="margin-top:2px;width:15px;height:15px;accent-color:var(--cyan);flex-shrink:0">
+          <span style="font-size:10px;color:var(--dim);line-height:1.8;letter-spacing:.2px;text-transform:uppercase">
+            I certify I am the authorized representative for this asset. I acknowledge all entries are subject to AI audit. Fraudulent data results in immediate permanent ban.
           </span>
         </label>
       </div>
 
-      <div style="margin-bottom:16px">
-        <label style="display:block;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:6px">SELECT TIER</label>
-        <select id="tos-tier" onchange="tosGateCheck()"
-          style="width:100%;padding:12px;background:#000;border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;font-size:11px;box-sizing:border-box;outline:none;cursor:pointer">
-          <option value="">— Select Subscription Tier —</option>
-          <option value="tier1">Tier 1 — $20.00 / year (NA · EU · AU · NZ · UK)</option>
-          <option value="tier2">Tier 2 — $10.00 / year (Asia · ME · Africa · SA)</option>
-        </select>
-      </div>
-
-      <div id="tos-stripe-wrap" style="display:none;margin-bottom:16px">
+      <div id="tos-stripe-wrap" style="display:none;margin-bottom:12px">
         <button onclick="submitBrokerSubscription('${assetId}')"
-          style="width:100%;padding:16px;background:#fff;color:#000;border:none;font-family:inherit;font-size:12px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer">
-          SUBSCRIBE &amp; CLAIM LISTING
+          style="width:100%;padding:15px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-family:inherit;font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">
+          REGISTER — $${claimPrice}/YR
         </button>
       </div>
 
       <button onclick="document.getElementById('claim-tos-overlay').remove()"
-        style="width:100%;padding:12px;background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);font-family:inherit;font-size:10px;letter-spacing:.8px;text-transform:uppercase;cursor:pointer">
+        style="width:100%;padding:11px;background:none;border:1px solid var(--border2, rgba(255,255,255,.12));color:var(--muted);font-family:inherit;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer">
         CANCEL
       </button>
+      <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:10px;letter-spacing:.4px;text-transform:uppercase">Annual subscription · All sales final · Secured by Stripe</div>
     </div>`;
   document.body.appendChild(overlay);
 }
-
 function tosGateCheck() {
-  const entity   = document.getElementById('tos-entity')?.value?.trim();
-  const license  = document.getElementById('tos-license')?.value?.trim();
-  const url      = document.getElementById('tos-url')?.value?.trim();
-  const certify  = document.getElementById('tos-certify')?.checked;
-  const tier     = document.getElementById('tos-tier')?.value;
-  const wrap     = document.getElementById('tos-stripe-wrap');
+  const name      = document.getElementById('tos-name')?.value?.trim();
+  const authority = document.getElementById('tos-authority')?.value;
+  const certify   = document.getElementById('tos-certify')?.checked;
+  const wrap      = document.getElementById('tos-stripe-wrap');
   if (!wrap) return;
-  wrap.style.display = (entity && license && url && certify && tier) ? 'block' : 'none';
+  // License is optional — gate only on name, authority, and TOS checkbox
+  wrap.style.display = (name && authority && certify) ? 'block' : 'none';
 }
 
 async function submitPortfolioAssign(assetId) {
@@ -6378,53 +6436,60 @@ async function submitPortfolioAssign(assetId) {
 }
 
 async function submitBrokerSubscription(assetId) {
-  const entity  = document.getElementById('tos-entity')?.value?.trim();
-  const license = document.getElementById('tos-license')?.value?.trim();
-  const url     = document.getElementById('tos-url')?.value?.trim();
-  const certify = document.getElementById('tos-certify')?.checked;
-  const tier    = document.getElementById('tos-tier')?.value;
+  const name      = document.getElementById('tos-name')?.value?.trim();
+  const authority = document.getElementById('tos-authority')?.value;
+  const license   = document.getElementById('tos-license')?.value?.trim() || '';
+  const certify   = document.getElementById('tos-certify')?.checked;
 
-  if (!certify || !entity || !license || !url || !tier) {
-    showToast('PLEASE COMPLETE ALL FIELDS AND AGREE TO TERMS');
+  if (!certify || !name || !authority) {
+    showToast('PLEASE COMPLETE ALL REQUIRED FIELDS AND AGREE TO TERMS');
     return;
   }
-  const price = tier === 'tier1' ? 20 : 10;
+
+  // Silent regional pricing
+  const price     = getClaimPrice();
+  const tier      = detectRegionalTier();
+
+  if (!_stripe) { initStripe(); await new Promise(r => setTimeout(r, 600)); }
 
   try {
-    showToast('REDIRECTING TO STRIPE…');
+    showToast('CONNECTING TO STRIPE TERMINAL…');
+    const session = await _sb.auth.getSession();
+    const token   = session?.data?.session?.access_token;
     const resp = await fetch(
       'https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/create-checkout-session',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + (await _sb.auth.getSession()).data.session?.access_token
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
         },
         body: JSON.stringify({
-          user_id:       currentUser.id,
-          asset_id:      String(assetId),
-          tier:          'broker_sub_' + tier,
-          price_usd:     price,
-          entity_name:   entity,
-          license_num:   license,
-          company_url:   url,
-          tos_agreed:    true,
-          success_url:   window.location.href + '?broker_verified=1&asset=' + assetId,
-          cancel_url:    window.location.href
+          user_id:        currentUser.id,
+          asset_id:       String(assetId),
+          tier:           'broker_sub_' + tier,
+          price_usd:      price,
+          rep_name:       name,
+          authority_type: authority,
+          license_num:    license,
+          tos_agreed:     true,
+          success_url:    window.location.href + '?broker_verified=1&asset=' + assetId + '&success=true',
+          cancel_url:     window.location.href
         })
       }
     );
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     if (data?.url) {
       window.location.href = data.url;
     } else {
-      showToast('CHECKOUT UNAVAILABLE — CONTACT SUPPORT');
+      showToast('SYSTEM ERROR: TERMINAL CONNECTION FAILED.');
     }
   } catch(e) {
-    showToast('STRIPE ERROR: ' + (e.message || e));
+    showToast('SYSTEM ERROR: TERMINAL CONNECTION FAILED.');
+    console.error('[RWABidAsk] Claim checkout error:', e);
   }
 }
-
 // ════════════════════════════════════════════════════════════════════
 // STRIPE CALLBACK & PERSISTENCE
 // Detects success=true OR broker_verified=1 from URL params.
