@@ -302,7 +302,7 @@ body { min-width: 900px; overflow-x: auto; }
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: .8px;
-  color: var(--dim);
+  color: var(--silver);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all .15s;
@@ -312,7 +312,7 @@ body { min-width: 900px; overflow-x: auto; }
   border-right: none;
 }
 .ptab.on { color: var(--cyan); border-bottom-color: var(--cyan); font-weight: 700; }
-.ptab:hover:not(.on) { color: var(--silver); }
+.ptab:hover:not(.on) { color: var(--text); }
 .frow {
   display: flex;
   gap: 5px;
@@ -2460,9 +2460,6 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="tstat-l">Bids 24h</div>
       <div class="tstat-v" id="s-bids">—</div>
     </div>
-    <button class="tbtn wallet-btn" id="wallet-btn" onclick="openWallet()" title="Credits & Wallet" style="display:none">
-      ⬡ WALLET<span class="wallet-credits-badge" id="wallet-credits-badge">0</span>
-    </button>
     <button class="tbtn" id="signin-btn" onclick="openModal('signin')">Sign In</button>
     <button class="tbtn primary" id="join-btn" onclick="openModal('signup')">Join Free</button>
   </div>
@@ -2485,7 +2482,7 @@ body { min-width: 900px; overflow-x: auto; }
           <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="resetPriceSlider()">RESET</button>
         </div>
         <div style="text-align:center;margin-bottom:7px;">
-          <span id="price-readout" style="font-size:12px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 10px rgba(0,255,200,.4)">$1 — $1T</span>
+          <span id="price-readout" style="font-size:12px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 10px rgba(0,255,200,.4)">$1 — $25T</span>
         </div>
         <div id="dual-slider" style="position:relative;height:20px;margin:0 8px;user-select:none;">
           <div id="slider-track" style="position:absolute;top:50%;left:0;right:0;height:2px;background:var(--border2);transform:translateY(-50%);border-radius:1px;"></div>
@@ -2496,7 +2493,7 @@ body { min-width: 900px; overflow-x: auto; }
         <div style="display:flex;justify-content:space-between;margin-top:5px;">
           <span style="font-size:8px;color:var(--muted)">$1</span>
           <span id="price-fine-tune" style="font-size:8px;color:var(--muted);letter-spacing:.3px;text-align:center;flex:1"></span>
-          <span style="font-size:8px;color:var(--muted)">$1T</span>
+          <span style="font-size:8px;color:var(--muted)">$25T</span>
         </div>
       </div>
     </div>
@@ -2667,44 +2664,44 @@ let markersRendered = false;
 // ASSET CATEGORIES - Castle/Estates mapped to Real Estate
 // ============================================================
 const ASSET_CATEGORIES = [
-  // ── Tab ribbon (ordered left to right) ──────────────────────────
-  { id: 'all',            label: 'ALL',           physical: false, mapPin: false },
-  { id: 'maritime',       label: 'MARITIME',      physical: true,  mapPin: true  },
-  { id: 'aviation',       label: 'AVIATION',      physical: true,  mapPin: true  },
-  { id: 'robotics',       label: 'ROBOTICS',      physical: true,  mapPin: true  },
-  { id: 'anthro',         label: 'ANTHRO',        physical: true,  mapPin: true  },
-  { id: 'bio',            label: 'BIO',           physical: true,  mapPin: true  },
-  { id: 'energy',         label: 'ENERGY',        physical: true,  mapPin: true  },
-  // ── Dashboard-only (no globe pins) ──────────────────────────────
-  { id: 'realestate',     label: 'REAL ESTATE',   physical: false, mapPin: false },
-  { id: 'infrastructure', label: 'INFRASTRUCTURE',physical: false, mapPin: false },
-  { id: 'financial',      label: 'FINANCIALS',    physical: false, mapPin: false },
-  { id: 'equities',       label: 'EQUITIES',      physical: false, mapPin: false },
+  // ── Global Ledger — 10 Sectors (ALL tab + alphabetical order) ──
+  { id: 'all',            label: 'ALL',            physical: false, mapPin: false },
+  { id: 'anthro',         label: 'ANTHRO',         physical: true,  mapPin: true  },
+  { id: 'bio',            label: 'BIO',            physical: true,  mapPin: true  },
+  { id: 'financial',      label: 'CAPITAL',        physical: false, mapPin: false },
+  { id: 'energy',         label: 'ENERGY',         physical: true,  mapPin: true  },
+  { id: 'healthcare',     label: 'HEALTHCARE',     physical: true,  mapPin: true  },
+  { id: 'infrastructure', label: 'INFRASTRUCTURE', physical: false, mapPin: false },
+  { id: 'realestate',     label: 'REAL ESTATE',    physical: false, mapPin: false },
+  { id: 'robotics',       label: 'ROBOTICS',       physical: true,  mapPin: true  },
+  { id: 'technology',     label: 'TECHNOLOGY',     physical: false, mapPin: false },
+  { id: 'transport',      label: 'TRANSPORT',      physical: true,  mapPin: true  },
 ];
 
 // Categories that render globe pins (physical, tangible, locatable)
-const MAP_PIN_CATEGORIES = new Set(['maritime','aviation','robotics','anthro','bio','energy']);
+const MAP_PIN_CATEGORIES = new Set(['anthro','bio','energy','healthcare','robotics','transport']);
 // Categories that are dashboard-only (intangible / no fixed location)
-const DASHBOARD_ONLY_CATEGORIES = new Set(['financial','equities','realestate','infrastructure']);
+const DASHBOARD_ONLY_CATEGORIES = new Set(['financial','infrastructure','realestate','technology']);
 
 function getAssetCategory(type) {
   const t = (type || '').toLowerCase().trim();
   const map = {
     // ── MARITIME — physical vessels ───────────────────────────────
-    maritime:'maritime', vessel:'maritime', ship:'maritime', boat:'maritime',
-    yacht:'maritime', tanker:'maritime', ferry:'maritime', cargo:'maritime',
-    submarine:'maritime', barge:'maritime', trawler:'maritime',
-    'cargo ship':'maritime', 'oil tanker':'maritime', cruiser:'maritime',
-    // ── AVIATION — physical aircraft ────────────────────────────
-    aviation:'aviation', aircraft:'aviation', airplane:'aviation',
-    jet:'aviation', helicopter:'aviation', drone:'aviation', hangar:'aviation',
-    'private jet':'aviation', turboprop:'aviation', rotorcraft:'aviation',
+    // ── TRANSPORT — maritime + aviation consolidated ──────────────
+    maritime:'transport', vessel:'transport', ship:'transport', boat:'transport',
+    yacht:'transport', tanker:'transport', ferry:'transport', cargo:'transport',
+    submarine:'transport', barge:'transport', trawler:'transport',
+    'cargo ship':'transport', 'oil tanker':'transport', cruiser:'transport',
+    aviation:'transport', aircraft:'transport', airplane:'transport',
+    jet:'transport', helicopter:'transport', hangar:'transport',
+    'private jet':'transport', turboprop:'transport', rotorcraft:'transport',
+    transport:'transport', shipping:'transport', logistics:'transport',
     // ── ROBOTICS — automated physical infrastructure ─────────────
     robotics:'robotics', robot:'robotics', autonomous:'robotics',
     'automated system':'robotics', automation:'robotics', uav:'robotics',
     ugv:'robotics', usv:'robotics', 'robotic fleet':'robotics',
     'autonomous vehicle':'robotics', 'drone fleet':'robotics',
-    'industrial robot':'robotics', exoskeleton:'robotics',
+    'industrial robot':'robotics', exoskeleton:'robotics', drone:'robotics',
     // ── ANTHRO — Human Operating Capital ────────────────────────
     anthro:'anthro', 'human capital':'anthro', labor:'anthro',
     labour:'anthro', workforce:'anthro', personnel:'anthro',
@@ -2715,8 +2712,6 @@ function getAssetCategory(type) {
     unit:'anthro', team:'anthro', crew:'anthro', squad:'anthro',
     'operating capital':'anthro', 'human ecosystem':'anthro',
     // ── BIO — physical biological production/facilities ──────────
-    // Rule: must have a physical location (farm/lab/facility)
-    // Intangible bio IP (patent-only) → financial
     bio:'bio', biological:'bio', biotech:'bio',
     'bio-manufacturing':'bio', biomanufacturing:'bio',
     'bio facility':'bio', 'research facility':'bio',
@@ -2727,8 +2722,11 @@ function getAssetCategory(type) {
     'plant extract':'bio', phytochemical:'bio', terpene:'bio',
     'pharma facility':'bio', 'bioprocessing':'bio',
     agriculture:'bio', agri:'bio', aquafarm:'bio',
-    // Note: patents/IP/molecules without a facility → financial (see physicality test)
     compound:'bio', molecule:'bio', pharmaceutical:'bio',
+    // ── HEALTHCARE ───────────────────────────────────────────────
+    healthcare:'healthcare', hospital:'healthcare', clinic:'healthcare',
+    medical:'healthcare', health:'healthcare', 'medical facility':'healthcare',
+    'care facility':'healthcare', 'nursing home':'healthcare',
     // ── ENERGY — physical generation assets ─────────────────────
     energy:'energy', solar:'energy', wind:'energy', 'power plant':'energy',
     nuclear:'energy', hydro:'energy', geothermal:'energy', battery:'energy',
@@ -2748,15 +2746,17 @@ function getAssetCategory(type) {
     pipeline:'infrastructure', rail:'infrastructure', road:'infrastructure',
     datacenter:'infrastructure', 'data center':'infrastructure', tower:'infrastructure',
     cable:'infrastructure', dam:'infrastructure', desalination:'infrastructure',
-    // ── EQUITIES — business/stock (dashboard-only) ───────────────
-    equities:'equities', equity:'equities', stock:'equities',
-    stocks:'equities', share:'equities', shares:'equities',
-    business:'equities', 'business brokerage':'equities',
-    'private equity':'equities', 'pe fund':'equities', reit:'equities',
-    etf:'equities', fund:'equities', 'venture capital':'equities',
-    'tokenized stock':'equities', spac:'equities', ipo:'equities',
-    'hedge fund':'equities',
-    // ── FINANCIALS — intangibles, debt, cash, IP (dashboard-only) ─
+    // ── TECHNOLOGY — software, IP, digital (dashboard-only) ──────
+    technology:'technology', tech:'technology', software:'technology',
+    saas:'technology', platform:'technology', app:'technology',
+    equities:'technology', equity:'technology', stock:'technology',
+    stocks:'technology', share:'technology', shares:'technology',
+    business:'technology', 'business brokerage':'technology',
+    'private equity':'technology', 'pe fund':'technology', reit:'technology',
+    etf:'technology', fund:'technology', 'venture capital':'technology',
+    'tokenized stock':'technology', spac:'technology', ipo:'technology',
+    'hedge fund':'technology',
+    // ── CAPITAL — intangibles, debt, cash, IP (dashboard-only) ───
     financial:'financial', financials:'financial', debt:'financial',
     bond:'financial', bonds:'financial', 'treasury bill':'financial',
     treasury:'financial', ip:'financial', patent:'financial',
@@ -2769,7 +2769,6 @@ function getAssetCategory(type) {
     gold:'financial', silver:'financial', copper:'financial',
     oil:'financial', gas:'financial', 'crude oil':'financial',
     wheat:'financial', corn:'financial', lithium:'financial',
-    // molecular compounds without facility → financial
     peptide:'financial', enzyme:'financial', alkaloid:'financial',
     flavonoid:'financial', cannabinoid:'financial',
     'clinical candidate':'financial', 'research compound':'financial',
@@ -2781,13 +2780,14 @@ function getAssetCategory(type) {
   if (t.includes('robot') || t.includes('autonom') || t.includes('ugv') || t.includes('uav')) return 'robotics';
   if (t.includes('anthro') || t.includes('labor') || t.includes('personn') || t.includes('crew') || t.includes('task force')) return 'anthro';
   if (t.includes('farm') || t.includes('lab') || t.includes('bio') || t.includes('agri') || t.includes('aqua')) return 'bio';
-  if (t.includes('mar') || t.includes('vessel') || t.includes('ship') || t.includes('yacht') || t.includes('boat')) return 'maritime';
-  if (t.includes('avi') || t.includes('air') || t.includes('jet') || t.includes('plane') || t.includes('heli')) return 'aviation';
+  if (t.includes('mar') || t.includes('vessel') || t.includes('ship') || t.includes('yacht') || t.includes('boat')) return 'transport';
+  if (t.includes('avi') || t.includes('air') || t.includes('jet') || t.includes('plane') || t.includes('heli')) return 'transport';
   if (t.includes('solar') || t.includes('wind') || t.includes('power') || t.includes('nuclear') || t.includes('hydro')) return 'energy';
+  if (t.includes('health') || t.includes('medic') || t.includes('clinic') || t.includes('hospital')) return 'healthcare';
   if (t.includes('real') || t.includes('estat') || t.includes('propert')) return 'realestate';
   if (t.includes('infra') || t.includes('satell') || t.includes('bridge') || t.includes('port')) return 'infrastructure';
-  if (t.includes('busi') || t.includes('equit') || t.includes('stock') || t.includes('fund')) return 'equities';
-  return 'financial'; // default: all intangibles
+  if (t.includes('tech') || t.includes('soft') || t.includes('digit') || t.includes('busi') || t.includes('equit') || t.includes('stock') || t.includes('fund')) return 'technology';
+  return 'financial'; // default: all intangibles → Capital
 }
 
 function isPhysicalAsset(type) {
@@ -3411,7 +3411,8 @@ function onDataReady() {
 
 function fmtPrice(n) {
   if (!n || n === 0) return '—';
-  if (n >= 1e12) return '$' + (n / 1e12).toFixed(3) + 'T';
+  if (n >= 1e13) return '$' + (n / 1e12).toFixed(0) + 'T';
+  if (n >= 1e12) return '$' + (n / 1e12).toFixed(1) + 'T';
   if (n >= 1e9)  return '$' + (n / 1e9).toFixed(2) + 'B';
   if (n >= 1e6)  return '$' + (n / 1e6).toFixed(2) + 'M';
   if (n >= 1e3)  return '$' + (n / 1e3).toFixed(0) + 'K';
@@ -3494,23 +3495,24 @@ function setCategory(catId, btn) {
 }
 
 // ── LOG SLIDER ENGINE (Custom drag — fully independent handles) ──
-const SLIDER_STEPS = 48; // 48 steps: $1 (10^0) → $1T (10^12)
+const SLIDER_STEPS = 48; // 48 steps: $1 (10^0) → $25T
 let sliderMinStep = 0;
 let sliderMaxStep = SLIDER_STEPS; // default: full range visible
 let sliderMinPrice = 1;
-let sliderMaxPrice = 1e12; // $1T — $250B (2.5e11) is well within this range
+let sliderMaxPrice = 25e12; // $25T
 
 function logSliderToPrice(step) {
   if (step <= 0) return 1;
-  if (step >= SLIDER_STEPS) return 1e12;
-  // 10^(step/SLIDER_STEPS * 12) gives true log scale
-  // step 41 ≈ $250B, step 48 = $1T
-  return Math.round(Math.pow(10, (step / SLIDER_STEPS) * 12));
+  if (step >= SLIDER_STEPS) return 25e12;
+  // Log scale: 10^0 → 10^(log10(25T)) across 48 steps
+  const MAX_LOG = Math.log10(25e12); // ~13.398
+  return Math.round(Math.pow(10, (step / SLIDER_STEPS) * MAX_LOG));
 }
 
 function fmtSliderPrice(step) {
   const p = logSliderToPrice(step);
-  if (p >= 1e12) return '$1T';
+  if (p >= 25e12) return '$25T';
+  if (p >= 1e12) return '$' + (p/1e12).toFixed(p >= 10e12 ? 0 : 1) + 'T';
   if (p >= 1e9) return '$' + (p/1e9).toFixed(p >= 1e11 ? 0 : p >= 1e10 ? 0 : 1) + 'B';
   if (p >= 1e6) return '$' + (p/1e6).toFixed(p >= 1e8 ? 0 : 1) + 'M';
   if (p >= 1e3) return '$' + (p/1e3).toFixed(0) + 'K';
@@ -3548,7 +3550,7 @@ function resetPriceSlider() {
   sliderMinStep = 0;
   sliderMaxStep = SLIDER_STEPS;
   sliderMinPrice = 1;
-  sliderMaxPrice = 1e12;
+  sliderMaxPrice = 25e12;
   updateSliderUI();
   applySliderFilter();
 }
@@ -3635,8 +3637,7 @@ function filterAssets(assets) {
       return getAssetCategory(typeStr) === activeTab;
     });
   }
-  // Price filter — compare as float; ensure $250B (2.5e11) is never clipped
-  // sliderMaxPrice defaults to 1e12 ($1T), so $250B passes unless user moved the slider
+  // Price filter — compare as float; full range up to $25T
   filtered = filtered.filter(a => {
     const p = parseFloat(a.price) || 0;
     if (p <= 0) return sliderMinPrice <= 1; // include $0 assets at min range
@@ -6322,8 +6323,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof origUpdateAuth === 'function') {
       window.updateAuthUI = async function() {
         await origUpdateAuth();
-        const walletBtn = document.getElementById('wallet-btn');
-        if (walletBtn) walletBtn.style.display = currentUser ? 'flex' : 'none';
         if (currentUser) { loadWalletBalance(); }
       };
     }
