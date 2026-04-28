@@ -3186,6 +3186,11 @@ function normalizeAsset(a) {
   a._risk   = risk;
   a._broker = Object.keys(broker).length ? broker : null;
 
+  // ── 4D Infrastructure Data ───────────────────────────────────
+  const infra = s.infrastructure || s.infrastructure_stats || {};
+  a.apn       = id.apn || s.apn || a.apn || a._raw?.apn || null;
+  a._infra    = Object.keys(infra).length ? infra : null;
+
   return a;
 }
 
@@ -4201,7 +4206,27 @@ function renderSpecs(specs, assetCat, assetRaw, isUnlockedCtx) {
       });
     });
 
-  return rendered.join('') || '<div style="font-size:10px;color:var(--muted);padding:6px 0">No structured data available</div>';
+  // ── 4D Infrastructure Overlays + Market Intelligence Report ──
+  const apn = (assetRaw && assetRaw.apn) ? assetRaw.apn : '';
+  const infrastructureButtons = `
+  <div class="rrow" style="border-top:1px solid #333; margin-top:10px; padding-top:10px;">
+    <span class="rk">4D INFRASTRUCTURE OVERLAYS</span>
+  </div>
+  <div style="display:flex; gap:5px; padding:5px 0;">
+    <button class="a-bid" onclick="toggle3DLayer('topo', '${apn}')" style="flex:1; font-size:10px;">TOPO</button>
+    <button class="a-bid" onclick="toggle3DLayer('flood', '${apn}')" style="flex:1; font-size:10px;">FLOOD</button>
+    <button class="a-bid" onclick="toggle3DLayer('grid', '${apn}')" style="flex:1; font-size:10px;">GRID</button>
+  </div>
+  <div style="margin-top:15px;">
+    <button id="buy-report-btn" class="a-bid"
+            style="width:100%; background:#f39c12; color:white; border:none; padding:12px; font-weight:bold; cursor:pointer;"
+            onclick="initiateStripeSandbox('${apn}')">
+      BUY MARKET INTELLIGENCE REPORT — $20
+    </button>
+  </div>
+`;
+
+  return (rendered.join('') || '<div style="font-size:10px;color:var(--muted);padding:6px 0">No structured data available</div>') + infrastructureButtons;
 }
 
 // Extract gallery images from the polymorphic specs.media JSONB
@@ -6860,6 +6885,35 @@ async function fetchMarketActivity(assetId) {
 async function requestHandshake(inquiryId) {
   showToast('HANDSHAKE REQUEST SENT — AWAITING CONFIRMATION');
   await logAuditTrail('HANDSHAKE_REQUEST', null, { inquiry_id: inquiryId });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4D INFRASTRUCTURE LAYER TOGGLE
+// ════════════════════════════════════════════════════════════════════
+async function toggle3DLayer(type, apn) {
+  const map3d = document.querySelector('gmp-map-3d');
+  document.querySelectorAll('.rwa-overlay').forEach(el => el.remove());
+  // Check Supabase for the specific layer data
+  const { data } = await supabase.from('active_ledger').select('infrastructure_stats').eq('apn', apn).single();
+  if (!data?.infrastructure_stats) return alert("Deep data not yet indexed for this APN.");
+  if (type === 'flood') {
+    const zone = document.createElement('gmp-polygon-3d');
+    zone.classList.add('rwa-overlay');
+    zone.altitudeMode = 'CLAMP_TO_GROUND';
+    zone.fillColor = 'rgba(255, 0, 0, 0.4)';
+    zone.coordinates = data.infrastructure_stats.flood_coords;
+    map3d.append(zone);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// STRIPE SANDBOX — MARKET INTELLIGENCE REPORT CHECKOUT
+// ════════════════════════════════════════════════════════════════════
+async function initiateStripeSandbox(apn) {
+  const { data: session } = await supabase.functions.invoke('create-checkout', {
+    body: { apn: apn, priceId: 'YOUR_STRIPE_TEST_PRICE_ID' }
+  });
+  if (session?.url) window.location.href = session.url;
 }
 
 // ════════════════════════════════════════════════════════════════════
