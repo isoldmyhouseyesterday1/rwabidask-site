@@ -2560,6 +2560,280 @@ body { min-width: 900px; overflow-x: auto; }
 .auth-gate { display: none !important; }
 .auth-gate.force-show { display: flex !important; }
 
+/* ════════════════════════════════════════════════════════════════
+   INSTITUTIONAL LEDGER — Bloomberg-style market cap ticker
+   ════════════════════════════════════════════════════════════════ */
+#ledger-cap-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  padding: 0 18px;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  cursor: default;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ledger-cap-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.ledger-cap-value {
+  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .5px;
+  text-shadow: 0 0 12px rgba(226,197,90,.35);
+}
+.ledger-cap-sub {
+  font-size: 8px;
+  color: rgba(226,197,90,.5);
+  letter-spacing: 1px;
+  margin-top: 1px;
+  font-family: 'Courier New', monospace;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PANEL SPACING — "Older Eyes" fix
+   Increased padding, line-height, no text touching borders
+   ════════════════════════════════════════════════════════════════ */
+.rrow {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 16px;        /* was: 6px 0 — now has horizontal padding */
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  gap: 16px;
+  line-height: 1.5;
+}
+.rk {
+  color: var(--dim);
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.rv {
+  color: var(--silver);
+  font-size: 11px;
+  text-align: right;
+  word-break: break-word;
+  line-height: 1.5;
+}
+.rv.hl { color: var(--cyan); font-weight: 600; }
+.basics-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 9px 18px;        /* increased from 6px 16px */
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 16px;
+  line-height: 1.55;
+}
+.basics-key {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  line-height: 1.55;
+}
+.basics-val {
+  font-size: 11px;
+  color: var(--silver);
+  text-align: right;
+  word-break: break-word;
+  max-width: 58%;
+  line-height: 1.55;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   METADATA BLOCK — clean ledger footer in panel
+   ════════════════════════════════════════════════════════════════ */
+.meta-block {
+  margin: 0;
+  padding: 14px 18px 20px;
+  border-top: 1px solid rgba(0,255,200,.1);
+  background: rgba(0,255,200,.015);
+}
+.meta-block-title {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: rgba(0,255,200,.45);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  gap: 12px;
+}
+.meta-key {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  opacity: .7;
+}
+.meta-val {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  color: rgba(0,255,200,.6);
+  text-align: right;
+  word-break: break-all;
+}
+.meta-val.hl { color: var(--cyan); }
+
+/* ════════════════════════════════════════════════════════════════
+   REVENUE BUTTONS — Sponsor, Claim, Market Intel (Broker)
+   ════════════════════════════════════════════════════════════════ */
+/* Sponsor — purple, partnership signal */
+.abtn-sponsor-parcel {
+  width: 100%;
+  padding: 11px 16px;
+  background: rgba(147,51,234,.08);
+  border: 1px solid rgba(147,51,234,.35);
+  color: #c084fc;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+  text-align: center;
+}
+.abtn-sponsor-parcel:hover { background: rgba(147,51,234,.16); border-color: #a855f7; }
+
+/* Claim — gold, ownership signal */
+.abtn-claim-parcel {
+  width: 100%;
+  padding: 11px 16px;
+  background: rgba(226,197,90,.07);
+  border: 1px solid rgba(226,197,90,.3);
+  color: var(--gold);
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+  text-align: center;
+}
+.abtn-claim-parcel:hover { background: rgba(226,197,90,.14); border-color: var(--gold); }
+
+/* Broker Intel Buy — amber, commerce signal (matches Intel Report CTA hue family) */
+.abtn-broker-intel {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255,153,0,.08);
+  border: 1px solid rgba(255,153,0,.35);
+  color: #ff9900;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+  text-align: center;
+  position: relative;
+}
+.abtn-broker-intel::before {
+  content: '⬡ BROKER TOOL';
+  display: block;
+  font-size: 7px;
+  letter-spacing: 2px;
+  color: rgba(255,153,0,.55);
+  margin-bottom: 3px;
+  font-weight: 700;
+}
+.abtn-broker-intel:hover { background: rgba(255,153,0,.15); border-color: #ff9900; }
+
+/* ════════════════════════════════════════════════════════════════
+   SIDEBAR RECENTLY VIEWED — on-demand model list state
+   ════════════════════════════════════════════════════════════════ */
+.sidebar-section-head {
+  padding: 10px 16px 6px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sidebar-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  gap: 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-empty-glyph {
+  font-size: 24px;
+  opacity: .08;
+}
+.sidebar-empty-txt {
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 2;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+}
+.sidebar-hint {
+  font-size: 9px;
+  color: rgba(0,255,200,.5);
+  line-height: 1.8;
+  letter-spacing: .3px;
+  text-align: center;
+  padding: 10px 16px;
+}
+
+/* Double-click hint overlay on the map */
+#dblclick-hint {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,14,28,.85);
+  border: 1px solid rgba(0,255,200,.25);
+  color: var(--cyan);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .4s;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  z-index: 50;
+}
+#dblclick-hint.visible { opacity: 1; }
+
 </style>
 
 <script src="https://js.stripe.com/v3/"></script>
@@ -2582,12 +2856,19 @@ body { min-width: 900px; overflow-x: auto; }
     </div>
   </div>
   <div class="search-wrap">
-    <input id="search-input" type="text" placeholder="Global Asset Navigation — search any address, city, or region…" autocomplete="off">
+    <input id="search-input" type="text" placeholder="Global Asset Navigation — search any APN, address, city, or region…" autocomplete="off">
     <button class="search-icon" onclick="performSearch()" title="Global Asset Navigation" aria-label="Search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
     </button>
+  </div>
+
+  <!-- ── Institutional Ledger Market Cap — Bloomberg ticker ──────── -->
+  <div id="ledger-cap-block">
+    <div class="ledger-cap-label">WA LEDGER MARKET CAP</div>
+    <div class="ledger-cap-value" id="ledger-cap-val">CALCULATING…</div>
+    <div class="ledger-cap-sub" id="ledger-cap-sub">WASHINGTON STATE · ON-DEMAND</div>
   </div>
   <div class="topbar-right">
     <div class="tstat" title="Total value of all assets registered on RWABidAsk Permanent Ledger">
@@ -2616,7 +2897,7 @@ body { min-width: 900px; overflow-x: auto; }
   <div id="left">
     <div class="left-head">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 6px;">
-        <div class="left-title" style="margin:0">Global Directory</div>
+        <div class="left-title" style="margin:0">WA Parcel Directory</div>
         <div style="font-size:8px;color:var(--muted);letter-spacing:1px" id="left-live-badge"><span class="live-dot"></span>LIVE</div>
       </div>
 <!-- dashboard summary removed — data in header topbar -->
@@ -2644,10 +2925,33 @@ body { min-width: 900px; overflow-x: auto; }
       </div>
     </div>
     <div class="list-scroll" id="list-scroll">
-      <div class="sync-state" id="sync-state">
+      <!-- On-demand model: sidebar shows recently viewed parcels and sponsored listings -->
+      <div id="recently-viewed-section">
+        <div class="sidebar-section-head">
+          <span>Recently Viewed</span>
+          <span id="rv-count" style="color:var(--cyan);font-size:9px">0</span>
+        </div>
+        <div id="recently-viewed-list">
+          <div class="sidebar-empty-state">
+            <div class="sidebar-empty-glyph">◎</div>
+            <div class="sidebar-empty-txt">No parcels viewed yet</div>
+            <div class="sidebar-hint">Double-click any parcel on the<br>map to identify it instantly</div>
+          </div>
+        </div>
+      </div>
+      <div id="sponsored-section" style="display:none">
+        <div class="sidebar-section-head">
+          <span>Sponsored Listings</span>
+          <span style="color:rgba(147,51,234,.7);font-size:8px;letter-spacing:1px">SPONSORED</span>
+        </div>
+        <div id="sponsored-list"></div>
+      </div>
+      <div class="sync-state" id="sync-state" style="display:none">
         <div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div>
         <div class="sync-label">SYNCHRONIZING<br>GLOBAL DIRECTORY…</div>
       </div>
+      <!-- Full asset list injected here by renderList() when search results exist -->
+      <div id="asset-list-wrap"></div>
     </div>
   </div>
 
@@ -2680,6 +2984,8 @@ body { min-width: 900px; overflow-x: auto; }
       </div>
     </div>
     <div id="mobile-list-view" style="display:none;position:absolute;inset:0;background:var(--bg);z-index:300;overflow-y:auto;flex-direction:column;"></div>
+    <!-- Double-click instruction hint -->
+    <div id="dblclick-hint">DOUBLE-CLICK ANY PARCEL TO IDENTIFY</div>
   </div><!-- /#map-col -->
 
   <div id="right">
@@ -3523,13 +3829,16 @@ async function loadMarketData() {
 
 function onDataReady() {
   // On-Demand model: no assets to list or pin at boot.
-  // Status bar shows "ready" state. Pins/panel populate on click.
-  setStatus('CLICK ANY PARCEL TO IDENTIFY');
+  // Status bar shows "ready" state. Pins/panel populate on double-click.
+  setStatus('DOUBLE-CLICK ANY PARCEL TO IDENTIFY');
   const sAssets = document.getElementById('s-assets');
   const sStatus = document.getElementById('s-status');
   if (sAssets) sAssets.textContent = '—';
   if (sStatus) sStatus.textContent = 'LIVE';
   if (typeof buildTicker === 'function') buildTicker([]);
+  // Boot ledger cap ticker and empty sidebar state
+  renderLedgerCap();
+  renderRecentlyViewed();
   window.dispatchEvent(new CustomEvent('rwa:assetsLoaded'));
 }
 
@@ -4989,6 +5298,7 @@ async function performSearch() {
                 setStatus(`PARCEL IDENTIFIED: ${hit.apn || hit.address}`);
                 if (asset.lat && asset.lng) flyTo(asset.lat, asset.lng, 400, 65);
                 renderBasicsPanel(asset);
+                addToRecentlyViewed(asset);
             }
         } catch(e) {
             console.warn('[RWABidAsk] WA active_ledger search error:', e);
@@ -5084,82 +5394,96 @@ async function initMap() {
     map3dEl.addEventListener('gmp-tiltchange', _onCam);
     map3dEl.addEventListener('gmp-headingchange', _onCam);
 
-    // ── On-Demand Parcel Identification — gmp-click ──────────────
-    // Reads directly from map features (parcel layer) on every click.
-    // No pre-loaded pin array. Supabase only for sessions/leads/transactions.
-    map3dEl.addEventListener('gmp-click', async (evt) => {
-      const clickLat = evt.position?.lat ?? evt.detail?.lat;
-      const clickLng = evt.position?.lng ?? evt.detail?.lng;
-      if (clickLat == null || clickLng == null) return;
+    // ── On-Demand Parcel Identification — DOUBLE-CLICK REQUIRED ─────
+    // Single clicks are left free for pan/rotate. Double-click selects.
+    // Reads directly from map parcel layer features — zero Supabase for property data.
+    let _clickAccum = 0;
+    let _clickTimer  = null;
 
-      // ── 1. Read parcel feature data from the map click event ──
-      // gmp-click on Map3D exposes placeId and featureType
-      const placeId   = evt.placeId   || evt.detail?.placeId   || null;
-      const featureType = evt.featureType || evt.detail?.featureType || null;
-
-      // ── 2. Extract parcel attributes from map features ────────
-      // Map3D surfaces feature properties directly on the event
-      const featureProps = evt.features?.[0]?.getData?.() || evt.detail?.feature || {};
-
-      // Build a "Basics" record from whatever the map provides + coordinates
-      const apn     = featureProps.apn || featureProps.parcelId || featureProps.parcel_id
-                    || placeId || `${clickLat.toFixed(6)},${clickLng.toFixed(6)}`;
-      const address = featureProps.address || featureProps.formatted_address
-                    || featureProps.streetAddress || featureProps.name || null;
-      const acreage = featureProps.acreage || featureProps.lotSize || featureProps.lot_size || null;
-      const zoning  = featureProps.zoning  || featureProps.zoningCode || null;
-      const owner   = featureProps.owner   || featureProps.ownerName  || null;
-      const landUse = featureProps.landUse || featureProps.land_use   || featureProps.useCode || null;
-      const yearBlt = featureProps.yearBuilt || featureProps.year_built || null;
-
-      // ── 3. Merge into runtime ASSETS cache (idempotent by APN) ─
-      let asset = (window.ASSETS || []).find(a => a.apn === apn);
-      if (!asset) {
-        asset = normalizeAsset({
-          id:      apn,          // APN is the canonical ID in on-demand mode
-          apn:     apn,
-          address: address || `Parcel @ ${clickLat.toFixed(4)}, ${clickLng.toFixed(4)}`,
-          lat:     clickLat,
-          lng:     clickLng,
-          _hasCoords: true,
-          price:   0,
-          type:    'realestate',
-          status:  'Active',
-          specs:   {
-            physical: {
-              apn:        apn,
-              address:    address,
-              acreage:    acreage,
-              zoning:     zoning,
-              land_use:   landUse,
-              year_built: yearBlt,
-              lat:        clickLat,
-              lng:        clickLng,
-            }
-          },
-          _raw: { apn, address, acreage, zoning, owner, landUse, yearBlt, lat: clickLat, lng: clickLng, placeId }
-        });
-        (window.ASSETS = window.ASSETS || []).push(asset);
-        ASSETS = window.ASSETS;
+    map3dEl.addEventListener('gmp-click', (evt) => {
+      // Show dblclick hint on first single click
+      const hint = document.getElementById('dblclick-hint');
+      if (hint) {
+        hint.classList.add('visible');
+        clearTimeout(hint._t);
+        hint._t = setTimeout(() => hint.classList.remove('visible'), 2200);
       }
+      _clickAccum++;
+      clearTimeout(_clickTimer);
+      _clickTimer = setTimeout(async () => {
+        if (_clickAccum < 2) { _clickAccum = 0; return; } // single click — ignore
+        _clickAccum = 0;
 
-      // ── 4. Render the Basics panel immediately (no auth required) ──
-      renderBasicsPanel(asset);
+        const clickLat = evt.position?.lat ?? evt.detail?.lat;
+        const clickLng = evt.position?.lng ?? evt.detail?.lng;
+        if (clickLat == null || clickLng == null) return;
 
-      // ── 5. Log view lead (fire-and-forget, no block) ──────────
-      if (_sb && currentUser) {
-        _sb.from('leads').insert({
-          apn:        apn,
-          action:     'PARCEL_VIEW',
-          user_id:    currentUser.id,
-          lat:        clickLat,
-          lng:        clickLng,
-          created_at: new Date().toISOString()
-        }).then(() => {}).catch(() => {});
-      }
+        // ── 1. Read parcel feature data from the map event ─────────
+        const placeId     = evt.placeId || evt.detail?.placeId || null;
+        const featureProps = evt.features?.[0]?.getData?.() || evt.detail?.feature || {};
 
-      setStatus(`PARCEL IDENTIFIED: ${apn}`);
-      if (typeof flyTo === 'function') flyTo(clickLat, clickLng, 400, 65);
+        // ── 2. Extract surface fields from the parcel tile layer ───
+        // Washington County parcel tiles expose these field names:
+        const apn     = featureProps.APN       || featureProps.apn
+                      || featureProps.PARCELID  || featureProps.parcelId
+                      || featureProps.parcel_id || featureProps.ParcelId
+                      || placeId
+                      || `${clickLat.toFixed(6)},${clickLng.toFixed(6)}`;
+        const address = featureProps.SITEADDRESS || featureProps.SiteAddress
+                      || featureProps.address     || featureProps.formatted_address
+                      || featureProps.streetAddress || featureProps.ADDR
+                      || featureProps.name || null;
+        const acreage = featureProps.TOTALACRES || featureProps.GrossAcres
+                      || featureProps.acreage    || featureProps.lotSize
+                      || featureProps.ACREAGE    || null;
+        const zoning  = featureProps.ZONING     || featureProps.ZoningCode
+                      || featureProps.zoning     || featureProps.ZONE || null;
+        const owner   = featureProps.OWNER      || featureProps.OwnerName
+                      || featureProps.owner      || featureProps.OWNERNAME || null;
+        const landUse = featureProps.USECODE    || featureProps.LANDUSE
+                      || featureProps.landUse    || featureProps.PRESENTUSE
+                      || featureProps.useCode    || null;
+        const yearBlt = featureProps.YRBUILT    || featureProps.YearBuilt
+                      || featureProps.year_built || featureProps.YEARBUILT || null;
+        const county  = featureProps.COUNTYNAME || featureProps.County
+                      || featureProps.county     || 'Washington State' ;
+
+        // ── 3. Merge into runtime ASSETS cache (idempotent by APN) ─
+        let asset = (window.ASSETS || []).find(a => a.apn === apn);
+        if (!asset) {
+          asset = normalizeAsset({
+            id:      apn,
+            apn:     apn,
+            address: address || `Parcel @ ${clickLat.toFixed(5)}, ${clickLng.toFixed(5)}`,
+            lat:     clickLat,
+            lng:     clickLng,
+            _hasCoords: true,
+            price:   0,
+            type:    'realestate',
+            status:  'Active',
+            specs:   { physical: { apn, address, acreage, zoning, land_use: landUse, year_built: yearBlt, lat: clickLat, lng: clickLng } },
+            _raw:    { apn, address, acreage, zoning, owner, landUse, yearBlt, county, lat: clickLat, lng: clickLng, placeId }
+          });
+          (window.ASSETS = window.ASSETS || []).push(asset);
+          ASSETS = window.ASSETS;
+        }
+
+        // ── 4. Render Basics panel (no auth required) ─────────────
+        renderBasicsPanel(asset);
+
+        // ── 5. Update sidebar Recently Viewed ─────────────────────
+        addToRecentlyViewed(asset);
+
+        // ── 6. Log lead (fire-and-forget) ─────────────────────────
+        if (_sb && currentUser) {
+          _sb.from('leads').insert({ apn, action: 'PARCEL_VIEW', user_id: currentUser.id,
+            lat: clickLat, lng: clickLng, created_at: new Date().toISOString()
+          }).catch(() => {});
+        }
+
+        setStatus(`PARCEL IDENTIFIED: ${apn}`);
+        if (typeof flyTo === 'function') flyTo(clickLat, clickLng, 350, 68);
+      }, 280); // 280ms window for double-click detection
     });
     
     requestAnimationFrame(() => { 
@@ -5169,7 +5493,7 @@ async function initMap() {
     });
     
     // On-Demand model: no bulk fetch. Boot auth session only.
-    setStatus('CLICK ANY PARCEL TO IDENTIFY');
+    setStatus('DOUBLE-CLICK ANY PARCEL TO IDENTIFY');
     await loadMarketData(); // sets up empty ASSETS cache + fires rwa:assetsLoaded
     
     initPlacesSearch();
@@ -7131,130 +7455,200 @@ async function toggle3DLayer(type, apn) {
 // ════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════
 // BASICS PANEL — On-Demand Parcel View (Free / No Auth Required)
-// Populates the right panel with surface-level parcel data from the
-// map click event. Deep Data and action buttons gate on membership.
+// Double-click on map → JIT parcel data from tile layer → this panel.
+// Supabase scope: sessions, leads, transactions only.
 // ════════════════════════════════════════════════════════════════════
 function renderBasicsPanel(asset) {
-  const a   = asset;
-  const apn = a.apn || a.id || '—';
-  const raw = a._raw || {};
+  const a    = asset;
+  const apn  = a.apn  || a.id || '—';
+  const raw  = a._raw || {};
   const phys = (a.specs && a.specs.physical) || {};
 
-  const address  = a.address  || phys.address  || raw.address  || '—';
-  const acreage  = phys.acreage  || raw.acreage  || '—';
-  const zoning   = phys.zoning   || raw.zoning   || '—';
-  const landUse  = phys.land_use || raw.landUse  || '—';
-  const yearBlt  = phys.year_built || raw.yearBlt || '—';
-  const lat      = (a.lat  || phys.lat  || raw.lat  || '').toString().substring(0, 10);
-  const lng      = (a.lng  || phys.lng  || raw.lng  || '').toString().substring(0, 10);
+  const address  = a.address        || phys.address    || raw.address  || '—';
+  const acreage  = phys.acreage     || raw.acreage     || '—';
+  const zoning   = phys.zoning      || raw.zoning      || '—';
+  const landUse  = phys.land_use    || raw.landUse     || '—';
+  const yearBlt  = phys.year_built  || raw.yearBlt     || '—';
+  const county   = raw.county       || 'Washington State';
+  const owner    = raw.owner        || null; // only shown to members
+  const latStr   = (a.lat  || phys.lat  || raw.lat  || '').toString().substring(0, 11);
+  const lngStr   = (a.lng  || phys.lng  || raw.lng  || '').toString().substring(0, 12);
+  const coordStr = (latStr && lngStr) ? `${latStr}, ${lngStr}` : '—';
 
-  // ── Header ───────────────────────────────────────────────────
+  const isMember = !!currentUser;
+  const safeApn  = escapeHtml(apn);
+
+  // ── Header ─────────────────────────────────────────────────────
   document.getElementById('rhead').innerHTML = `
-    <div class="rtype">PARCEL RECORD // BASICS</div>
-    <div class="rname" style="font-size:13px;line-height:1.4;word-break:break-word">${escapeHtml(address)}</div>
-    <div class="rcity" style="font-family:monospace;font-size:10px;color:var(--cyan);letter-spacing:.3px">APN: ${escapeHtml(apn)}</div>
-    <div class="rprice-row">
-      <div class="rprice" style="font-size:13px">—</div>
-      <div class="rprice-psf">ASSESSED VALUE LOCKED · DEEP DATA</div>
+    <div class="rtype" style="letter-spacing:2px">PARCEL RECORD &nbsp;//&nbsp; BASICS</div>
+    <div class="rname" style="font-size:14px;line-height:1.5;word-break:break-word;margin-bottom:6px">${escapeHtml(address)}</div>
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:var(--cyan);letter-spacing:.4px;margin-bottom:4px">APN: ${safeApn}</div>
+    <div style="font-size:9px;color:var(--muted);letter-spacing:.5px">${escapeHtml(county)}</div>
+    <div class="rprice-row" style="margin-top:10px">
+      <div class="rprice" style="font-size:12px;color:var(--muted);font-weight:600;letter-spacing:1px">ASSESSED VALUE</div>
+      <div class="rprice-psf" style="color:rgba(255,153,0,.6);font-size:9px;font-weight:700;letter-spacing:.5px">LOCKED · DEEP DATA ↓</div>
     </div>
   `;
 
-  // ── Membership check for gated actions ───────────────────────
-  const isMember = !!currentUser;
+  // ── Free tier rows ──────────────────────────────────────────────
+  const freeRows = [
+    ['APN',        apn,     'Courier New, monospace'],
+    ['ADDRESS',    address, ''],
+    ['ACREAGE',    acreage !== '—' ? `${acreage} ac` : '—', ''],
+    ['ZONING',     zoning,  ''],
+    ['LAND USE',   landUse, ''],
+    ['YEAR BUILT', yearBlt, ''],
+    ['COUNTY',     county,  ''],
+    ['COORDINATES',coordStr,'Courier New, monospace'],
+  ];
 
-  // ── Basics rows (free, always visible) ───────────────────────
-  const basicsRows = [
-    ['APN',        apn,     false],
-    ['ADDRESS',    address, false],
-    ['ACREAGE',    acreage, false],
-    ['ZONING',     zoning,  false],
-    ['LAND USE',   landUse, false],
-    ['YEAR BUILT', yearBlt, false],
-    ['LATITUDE',   lat,     false],
-    ['LONGITUDE',  lng,     false],
-    // Gated fields — value shown as lock, member sees after sign-up
-    ['ASSESSED VALUE',  '—', true],
-    ['MARKET VALUE',    '—', true],
-    ['OWNER OF RECORD', '—', true],
-    ['LIENS / ENCUMB.', '—', true],
-    ['SALE HISTORY',    '—', true],
+  // ── Gated member rows ───────────────────────────────────────────
+  const gatedRows = [
+    ['ASSESSED VALUE',  '—'],
+    ['MARKET VALUE',    '—'],
+    ['OWNER OF RECORD', owner || '—'],
+    ['LAST SALE PRICE', '—'],
+    ['LAST SALE DATE',  '—'],
+    ['LIENS / ENCUMB.', '—'],
+    ['TAX STATUS',      '—'],
   ];
 
   const basicsHtml = `
     <div class="basics-panel">
-      <div class="basics-apn">PARCEL BASICS &nbsp;·&nbsp; <span class="basics-badge basics-badge-free">FREE</span></div>
-      ${basicsRows.filter(([,,g]) => !g).map(([k, v]) => `
+      <div class="basics-apn" style="padding:10px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase">Parcel Basics</span>
+        <span class="basics-badge basics-badge-free">FREE ACCESS</span>
+      </div>
+      ${freeRows.map(([k, v, ff]) => `
         <div class="basics-row">
           <span class="basics-key">${escapeHtml(k)}</span>
-          <span class="basics-val">${escapeHtml(String(v))}</span>
+          <span class="basics-val"${ff ? ` style="font-family:${ff};font-size:9px"` : ''}>${escapeHtml(String(v))}</span>
         </div>`).join('')}
 
       <div class="basics-gate-bar">
-        <span class="basics-gate-txt"><span class="basics-badge basics-badge-gated">MEMBERS</span> &nbsp;Deep Data</span>
+        <span class="basics-gate-txt">
+          <span class="basics-badge basics-badge-gated">MEMBERS</span>
+          &nbsp;Deep Data — Owner, Valuation, Liens, History
+        </span>
         ${isMember
-          ? '<span class="basics-gate-txt" style="color:var(--cyan)">✓ UNLOCKED</span>'
-          : `<button class="basics-gate-btn" onclick="openModal('register')">CREATE ACCOUNT</button>`}
+          ? '<span class="basics-gate-txt" style="color:var(--cyan);font-size:10px">✓ UNLOCKED</span>'
+          : `<button class="basics-gate-btn" onclick="openModal('signup')">CREATE FREE ACCOUNT</button>`}
       </div>
 
-      ${basicsRows.filter(([,,g]) => g).map(([k, v]) => `
-        <div class="basics-row" style="${isMember ? '' : 'opacity:.28;pointer-events:none;filter:blur(2.5px)'}">
+      ${gatedRows.map(([k, v]) => `
+        <div class="basics-row" style="${isMember ? '' : 'opacity:.22;pointer-events:none;'}">
           <span class="basics-key">${escapeHtml(k)}</span>
-          <span class="basics-val">${isMember ? escapeHtml(String(v)) : '████████'}</span>
+          <span class="basics-val" style="${isMember ? '' : 'filter:blur(3px);user-select:none'}">
+            ${isMember ? escapeHtml(String(v)) : '████████████'}
+          </span>
         </div>`).join('')}
     </div>
   `;
 
-  // ── Lead-gen action buttons (require membership) ──────────────
+  // ── Revenue Buttons — Financing, Insurance, Inquire ────────────
   const actionHtml = `
-    <div style="padding:12px 16px 6px">
+    <div style="padding:14px 16px 6px;border-top:1px solid var(--border)">
+      <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Actions</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <button class="abtn a-bid"
-          onclick="${isMember ? `requireAuth(()=>showLendingModal())` : `openModal('register')`}">
-          ${isMember ? 'FINANCING' : '🔒 FINANCING'}
+          onclick="${isMember
+            ? `requireAuth(()=>showLendingModal())`
+            : `openModal('signup')`}"
+          style="padding:11px 6px">
+          ${isMember ? '' : '🔒 '}FINANCING
         </button>
         <button class="abtn a-bid"
-          onclick="${isMember ? `requireAuth(()=>showInsuranceModal())` : `openModal('register')`}">
-          ${isMember ? 'INSURANCE' : '🔒 INSURANCE'}
+          onclick="${isMember
+            ? `requireAuth(()=>showInsuranceModal())`
+            : `openModal('signup')`}"
+          style="padding:11px 6px">
+          ${isMember ? '' : '🔒 '}INSURANCE
         </button>
       </div>
-      <button class="abtn a-bid" style="width:100%;margin-bottom:8px"
-        onclick="${isMember ? `requireAuth(()=>{ logPartnerLead('${escapeHtml(apn)}','ACQUIRE'); showToast('INQUIRY TRANSMITTED'); })` : `openModal('register')`}">
-        ${isMember ? 'INQUIRE / ACQUIRE' : '🔒 INQUIRE / ACQUIRE'}
+      <button class="abtn a-bid" style="width:100%;margin-bottom:8px;padding:11px"
+        onclick="${isMember
+          ? `requireAuth(()=>{ logPartnerLead('${safeApn}','ACQUIRE'); showToast('ACQUISITION INQUIRY TRANSMITTED'); })`
+          : `openModal('signup')`}">
+        ${isMember ? '' : '🔒 '}INQUIRE &amp; ACQUIRE
       </button>
     </div>
   `;
 
-  // ── Intel Report CTA — always visible, wired to Stripe ───────
+  // ── Sponsor + Claim — Revenue / Lead-Gen Buttons ───────────────
+  const revenueHtml = `
+    <div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;padding-top:4px">Parcel Engagement</div>
+      <button class="abtn-sponsor-parcel"
+        onclick="requireAuth(()=>{ logPartnerLead('${safeApn}','SPONSOR'); showToast('SPONSORSHIP INTENT LOGGED'); })">
+        SPONSOR THIS PARCEL
+      </button>
+      <button class="abtn-claim-parcel"
+        onclick="requireAuth(()=>{ logPartnerLead('${safeApn}','CLAIM'); showToast('OWNERSHIP CLAIM INITIATED'); })">
+        CLAIM &amp; REGISTER REPRESENTATION
+      </button>
+    </div>
+  `;
+
+  // ── Broker Market Intel Buy ────────────────────────────────────
+  const brokerHtml = `
+    <div style="padding:0 16px 14px">
+      <button class="abtn-broker-intel"
+        onclick="requireAuth(()=>{ logPartnerLead('${safeApn}','BROKER_INTEL'); showToast('BROKER SIGNAL LOGGED — INTEL PACKAGE PENDING'); })">
+        PURCHASE MARKET SIGNALS — BROKER INTEL
+      </button>
+    </div>
+  `;
+
+  // ── Intel Report CTA — Primary Commerce / Stripe ───────────────
   const intelHtml = `
-    <div class="intel-report-wrap">
-      <div class="intel-report-label">⬡ Market Intelligence</div>
-      <button class="btn-intel-report" onclick="initiateStripeSandbox('${escapeHtml(apn)}')">
-        PURCHASE FULL INTEL REPORT &nbsp;—&nbsp; $20
+    <div class="intel-report-wrap" style="margin:0 0 4px">
+      <div class="intel-report-label">⬡ &nbsp;FULL MARKET INTELLIGENCE REPORT</div>
+      <button class="btn-intel-report" onclick="initiateStripeSandbox('${safeApn}')">
+        PURCHASE INTEL REPORT &nbsp;—&nbsp; $20
       </button>
-      <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:7px;letter-spacing:.5px">
-        COMP SALES · LIENS · OWNER CHAIN · ZONING ANALYSIS · FLOOD / TOPO
+      <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.6px;line-height:2">
+        COMP SALES &nbsp;·&nbsp; LIENS &nbsp;·&nbsp; OWNER CHAIN &nbsp;·&nbsp; ZONING ANALYSIS &nbsp;·&nbsp; FLOOD &amp; TOPO
       </div>
     </div>
   `;
 
-  // ── Ledger footer ────────────────────────────────────────────
-  const ledgerHtml = `
-    <div class="rinner" style="padding:8px 0 0">
-      <div class="rsect">
-        <div class="rsect-title">LEDGER</div>
-        <div class="rrow"><span class="rk">APN</span><span class="rv" style="font-family:monospace;font-size:9px">${escapeHtml(apn)}</span></div>
-        <div class="rrow"><span class="rk">SOURCE</span><span class="rv">MAP PARCEL LAYER</span></div>
-        <div class="rrow"><span class="rk">DATA MODEL</span><span class="rv hl">ON-DEMAND JIT ✓</span></div>
+  // ── Metadata Block — clean ledger footer ───────────────────────
+  const metaHtml = `
+    <div class="meta-block">
+      <div class="meta-block-title">⬡ &nbsp;Ledger Record</div>
+      <div class="meta-row">
+        <span class="meta-key">APN</span>
+        <span class="meta-val">${safeApn}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Coordinates</span>
+        <span class="meta-val">${escapeHtml(coordStr)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Source</span>
+        <span class="meta-val hl">MAP PARCEL LAYER</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Data Model</span>
+        <span class="meta-val hl">ON-DEMAND JIT ✓</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Ledger Status</span>
+        <span class="meta-val hl">IDENTIFIED &amp; CACHED</span>
       </div>
     </div>
   `;
 
-  document.getElementById('rbody').innerHTML = basicsHtml + actionHtml + intelHtml + ledgerHtml;
+  document.getElementById('rbody').innerHTML =
+    basicsHtml + actionHtml + revenueHtml + brokerHtml + intelHtml + metaHtml;
 
-  // Mobile drawer
-  if (window.innerWidth <= 767) document.getElementById('right').classList.add('open-drawer');
+  // Mobile: open drawer
+  if (window.innerWidth <= 767) {
+    const rPanel = document.getElementById('right');
+    if (rPanel) rPanel.classList.add('open-drawer');
+  }
 
-  // Store as currentAsset for Stripe / lead functions
+  // Set as current asset for Stripe / lead callbacks
   window.currentAsset = a;
   currentAsset = a;
   activeId = a.id;
@@ -7293,6 +7687,143 @@ async function initiateStripeSandbox(apn) {
     console.error("Stripe Error:", err);
     showToast("PAYMENT ENGINE OFFLINE");
   }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// RECENTLY VIEWED — Sidebar list of on-demand identified parcels
+// ════════════════════════════════════════════════════════════════════
+const _recentlyViewed = []; // ordered newest-first, max 25
+
+function addToRecentlyViewed(asset) {
+  // Deduplicate by APN
+  const idx = _recentlyViewed.findIndex(a => a.apn === asset.apn);
+  if (idx !== -1) _recentlyViewed.splice(idx, 1);
+  _recentlyViewed.unshift(asset);
+  if (_recentlyViewed.length > 25) _recentlyViewed.pop();
+  renderRecentlyViewed();
+}
+
+function renderRecentlyViewed() {
+  const listEl  = document.getElementById('recently-viewed-list');
+  const countEl = document.getElementById('rv-count');
+  if (!listEl) return;
+
+  const n = _recentlyViewed.length;
+  if (countEl) countEl.textContent = n;
+
+  if (!n) {
+    listEl.innerHTML = `
+      <div class="sidebar-empty-state">
+        <div class="sidebar-empty-glyph">◎</div>
+        <div class="sidebar-empty-txt">No parcels viewed yet</div>
+        <div class="sidebar-hint">Double-click any parcel on the<br>map to identify it instantly</div>
+      </div>`;
+    return;
+  }
+
+  listEl.innerHTML = _recentlyViewed.map(a => {
+    const apn     = escapeHtml(a.apn  || a.id || '—');
+    const address = escapeHtml(a.address || `Parcel @ ${(a.lat||'').toString().substring(0,8)}`);
+    const acreage = a._raw?.acreage || (a.specs?.physical?.acreage) || null;
+    const zoning  = a._raw?.zoning  || (a.specs?.physical?.zoning)  || null;
+    return `
+      <div class="pcard" style="cursor:pointer;padding:12px 16px;border-bottom:1px solid var(--border)"
+           onclick="renderBasicsPanel(window.ASSETS.find(x=>x.apn==='${apn}')||window.ASSETS[0])">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px">
+          <div style="font-size:10px;font-weight:700;color:var(--silver);line-height:1.4;word-break:break-word;flex:1">${address}</div>
+          <div style="font-size:8px;font-weight:700;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);padding:2px 6px;border-radius:2px;flex-shrink:0;font-family:monospace;white-space:nowrap">PARCEL</div>
+        </div>
+        <div style="font-family:'Courier New',monospace;font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:.3px">APN: ${apn}</div>
+        <div style="display:flex;gap:8px">
+          ${acreage ? `<span style="font-size:8px;color:var(--dim)">${escapeHtml(String(acreage))} ac</span>` : ''}
+          ${zoning  ? `<span style="font-size:8px;color:var(--dim)">${escapeHtml(String(zoning))}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INSTITUTIONAL LEDGER MARKET CAP — Bloomberg-style ticker
+// Washington State: ~3.2M taxable parcels × median assessed $385K
+// Source basis: WA DOR 2023 Property Tax Statistics
+// ════════════════════════════════════════════════════════════════════
+function renderLedgerCap() {
+  const WA_PARCEL_COUNT  = 3_200_000;   // WA DOR: total taxable parcels
+  const MEDIAN_ASSESSED  = 385_000;     // WA median assessed value 2023
+  const totalCap         = WA_PARCEL_COUNT * MEDIAN_ASSESSED; // ~$1.232T
+
+  const valEl = document.getElementById('ledger-cap-val');
+  const subEl = document.getElementById('ledger-cap-sub');
+  if (!valEl) return;
+
+  // Format as institutional shorthand: $1.232T
+  function fmtCap(n) {
+    if (n >= 1e12) return `$${(n / 1e12).toFixed(3)}T`;
+    if (n >= 1e9)  return `$${(n / 1e9).toFixed(1)}B`;
+    return `$${n.toLocaleString()}`;
+  }
+
+  // Animate counter up over 1.8s — Bloomberg terminal feel
+  const target  = totalCap;
+  const dur     = 1800;
+  const steps   = 60;
+  const inc     = target / steps;
+  let   current = 0;
+  let   step    = 0;
+
+  const tick = () => {
+    step++;
+    current = step >= steps ? target : step * inc;
+    valEl.textContent = fmtCap(Math.round(current));
+    if (step < steps) setTimeout(tick, dur / steps);
+    else {
+      valEl.textContent = fmtCap(target);
+      if (subEl) subEl.textContent = `${WA_PARCEL_COUNT.toLocaleString()} PARCELS · WA STATE`;
+    }
+  };
+  setTimeout(tick, 800); // slight delay after page load
+}
+
+// ════════════════════════════════════════════════════════════════════
+// RENDER LIST — targets #asset-list-wrap for search results
+// Sidebar shows Recently Viewed at rest; search results appear below
+// ════════════════════════════════════════════════════════════════════
+function renderList(assets) {
+  const wrap = document.getElementById('asset-list-wrap');
+  if (!wrap) return;
+
+  if (!assets || !assets.length) {
+    wrap.innerHTML = '';
+    return;
+  }
+
+  // Show search results section header
+  wrap.innerHTML = `
+    <div class="sidebar-section-head" style="margin-top:4px">
+      <span>Search Results</span>
+      <span style="color:var(--cyan);font-size:9px">${assets.length}</span>
+    </div>
+    ${assets.map(a => {
+      const apn     = escapeHtml(a.apn  || a.id || '—');
+      const address = escapeHtml(a.address || `Parcel ${apn}`);
+      const price   = a.price ? `$${Number(a.price).toLocaleString()}` : '—';
+      const type    = escapeHtml(a.type  || 'PARCEL');
+      const status  = escapeHtml(a.status || 'ACTIVE');
+      return `
+        <div class="pcard" style="cursor:pointer;padding:12px 16px;border-bottom:1px solid var(--border)"
+             onclick="renderBasicsPanel(window.ASSETS.find(x=>(x.apn||x.id)==='${apn}')||{apn:'${apn}',address:'${address}',id:'${apn}'})">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px">
+            <div style="font-size:10px;font-weight:700;color:var(--silver);line-height:1.4;word-break:break-word;flex:1">${address}</div>
+            <div style="font-size:8px;font-weight:700;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);padding:2px 6px;border-radius:2px;flex-shrink:0">${type.toUpperCase()}</div>
+          </div>
+          <div style="font-family:'Courier New',monospace;font-size:9px;color:var(--muted);margin-bottom:4px">APN: ${apn}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;font-weight:700;color:var(--gold)">${price}</span>
+            <span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(0,255,200,.07);color:var(--cyan);border:1px solid rgba(0,255,200,.18)">${status}</span>
+          </div>
+        </div>`;
+    }).join('')}
+  `;
 }
 
 // ════════════════════════════════════════════════════════════════════
