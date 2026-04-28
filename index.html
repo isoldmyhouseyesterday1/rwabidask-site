@@ -4807,9 +4807,13 @@ async function syncWatchlistButton(assetId) {
 
 /* --- SEARCH & GEOSPATIAL FILTERING ENGINE (AUTH-LOCKED) --- */
 
-function performSearch() {
-    const query = document.getElementById('search-input')?.value.trim().toLowerCase();
-    
+// Debounce timer for Washington DB lookups
+let _waSearchTimer = null;
+
+async function performSearch() {
+    const query = document.getElementById('search-input')?.value.trim();
+    const q     = query.toLowerCase();
+
     // 1. Handle Empty Search (Reset to Global view)
     if (!query) {
         SEARCH_ACTIVE = false;
@@ -4818,18 +4822,64 @@ function performSearch() {
         return;
     }
 
-    // 2. Execute Deep Search
+    // 2. Local ASSETS scan first (instant)
     SEARCH_ACTIVE = true;
-    SEARCH_RESULTS = window.ASSETS.filter(a => 
-        (a.address?.toLowerCase().includes(query)) ||
-        (a.city?.toLowerCase().includes(query)) ||
-        (a.type?.toLowerCase().includes(query)) ||
-        (a.country?.toLowerCase().includes(query)) ||
-        (a.id?.toString() === query) 
+    SEARCH_RESULTS = window.ASSETS.filter(a =>
+        (a.address?.toLowerCase().includes(q)) ||
+        (a.city?.toLowerCase().includes(q))    ||
+        (a.type?.toLowerCase().includes(q))    ||
+        (a.country?.toLowerCase().includes(q)) ||
+        (a.apn?.toLowerCase().includes(q))     ||
+        (a.id?.toString() === q)
     );
-
     const filteredResults = typeof filterAssets === 'function' ? filterAssets(SEARCH_RESULTS) : SEARCH_RESULTS;
     updateSearchUI(filteredResults, `SEARCH: ${SEARCH_RESULTS.length} ASSETS IDENTIFIED`);
+
+    // 3. Washington active_ledger deep lookup (debounced 400ms)
+    if (!_sb) return;
+    if (_waSearchTimer) clearTimeout(_waSearchTimer);
+    _waSearchTimer = setTimeout(async () => {
+        try {
+            // Query by APN exact match OR address partial match
+            const isApn = /^\d[\d\-]+$/.test(query.trim());
+            let dbQuery = _sb.from('active_ledger').select('*').limit(5);
+            if (isApn) {
+                dbQuery = dbQuery.eq('apn', query.trim());
+            } else {
+                dbQuery = dbQuery.ilike('address', `%${query.trim()}%`);
+            }
+            const { data, error } = await dbQuery;
+            if (error || !data || !data.length) return;
+
+            // Merge any new hits into ASSETS if not already present
+            data.forEach(row => {
+                const exists = (window.ASSETS || []).find(a =>
+                    a.apn === row.apn || String(a.id) === String(row.id)
+                );
+                if (!exists) {
+                    const normed = normalizeAsset({
+                        ...row,
+                        specs: row.specs || {},
+                        _raw:  row
+                    });
+                    (window.ASSETS = window.ASSETS || []).push(normed);
+                }
+            });
+
+            // Select and fly to the top hit
+            const hit   = data[0];
+            const asset = (window.ASSETS || []).find(a =>
+                a.apn === hit.apn || String(a.id) === String(hit.id)
+            );
+            if (asset) {
+                setStatus(`WASHINGTON DB HIT: ${hit.apn || hit.address}`);
+                if (asset.lat && asset.lng) flyTo(asset.lat, asset.lng, 800, 60);
+                selectAsset(asset.id);
+            }
+        } catch(e) {
+            console.warn('[RWABidAsk] WA active_ledger search error:', e);
+        }
+    }, 400);
 }
 
 /**
@@ -4919,6 +4969,63 @@ async function initMap() {
     map3dEl.addEventListener('gmp-rangechange', _onCam);
     map3dEl.addEventListener('gmp-tiltchange', _onCam);
     map3dEl.addEventListener('gmp-headingchange', _onCam);
+
+    // ── Washington DB: select nearest asset on map click ─────────
+    map3dEl.addEventListener('gmp-click', async (evt) => {
+      const clickLat = evt.position?.lat ?? evt.detail?.lat;
+      const clickLng = evt.position?.lng ?? evt.detail?.lng;
+      if (clickLat == null || clickLng == null) return;
+
+      // 1. Check local ASSETS first (instant, no network)
+      const localAssets = (window.ASSETS || []).filter(a => a.lat && a.lng);
+      if (localAssets.length) {
+        let closest = null, minDist = Infinity;
+        localAssets.forEach(a => {
+          const d = Math.hypot(a.lat - clickLat, a.lng - clickLng);
+          if (d < minDist) { minDist = d; closest = a; }
+        });
+        // Only snap if within ~0.05° (~5km) — ignores far-off globe clicks
+        if (closest && minDist < 0.05) {
+          selectAsset(closest.id);
+          return;
+        }
+      }
+
+      // 2. Fallback: query active_ledger for nearest Washington property
+      if (!_sb) return;
+      try {
+        // Bounding box ±0.05° around click
+        const latMin = clickLat - 0.05, latMax = clickLat + 0.05;
+        const lngMin = clickLng - 0.05, lngMax = clickLng + 0.05;
+        const { data, error } = await _sb
+          .from('active_ledger')
+          .select('*')
+          .gte('lat', latMin).lte('lat', latMax)
+          .gte('lng', lngMin).lte('lng', lngMax)
+          .limit(10);
+        if (error || !data || !data.length) return;
+
+        // Find the mathematically closest row
+        let closest = data[0], minD = Infinity;
+        data.forEach(row => {
+          const d = Math.hypot((row.lat || 0) - clickLat, (row.lng || 0) - clickLng);
+          if (d < minD) { minD = d; closest = row; }
+        });
+
+        // Merge into ASSETS if new, then select
+        let asset = (window.ASSETS || []).find(a =>
+          a.apn === closest.apn || String(a.id) === String(closest.id)
+        );
+        if (!asset) {
+          asset = normalizeAsset({ ...closest, specs: closest.specs || {}, _raw: closest });
+          (window.ASSETS = window.ASSETS || []).push(asset);
+        }
+        setStatus(`WASHINGTON PROPERTY: ${closest.apn || closest.address || 'SELECTED'}`);
+        selectAsset(asset.id);
+      } catch(e) {
+        console.warn('[RWABidAsk] Map click WA lookup error:', e);
+      }
+    });
     
     requestAnimationFrame(() => { 
       setTimeout(() => { 
@@ -6908,10 +7015,7 @@ async function initiateStripeSandbox(apn) {
   showToast(`INITIATING INTEL REPORT FOR APN: ${apn}...`);
   try {
     const { data, error } = await _sb.functions.invoke('swift-api', {
-      body: {
-        apn: apn,
-        action: 'create-checkout-session'
-      }
+      body: { apn: apn, action: 'create-checkout-session' }
     });
     if (error) throw error;
     if (data?.url) {
@@ -6921,7 +7025,7 @@ async function initiateStripeSandbox(apn) {
     }
   } catch (err) {
     console.error("Stripe Error:", err);
-    showToast("PAYMENT ENGINE OFFLINE - CHECK EDGE FUNCTION LOGS");
+    showToast("PAYMENT ENGINE OFFLINE");
   }
 }
 
