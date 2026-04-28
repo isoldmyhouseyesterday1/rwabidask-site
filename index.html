@@ -774,35 +774,55 @@ body { min-width: 900px; overflow-x: auto; }
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.rinner { padding: 14px 16px; }
-.rsect { margin-bottom: 18px; }
+.rinner { padding: 20px; }           /* "Older Eyes" fix — was 14px 16px */
+.rsect { margin-bottom: 22px; }
 .rsect-title {
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.8px;
   color: var(--cyan);
-  margin-bottom: 9px;
+  margin-bottom: 10px;
   border-bottom: 1px solid rgba(0,255,200,.2);
-  padding-bottom: 5px;
+  padding-bottom: 6px;
   opacity: .9;
 }
 .rrow {
   display: flex;
   justify-content: space-between;
-  padding: 6px 0;
+  padding: 9px 20px;                 /* breathing room — was 6px 0 */
   border-bottom: 1px solid var(--border);
   font-size: 12px;
-  gap: 12px;
+  gap: 16px;
+  line-height: 1.6;                  /* "Older Eyes" fix — was implicit 1.2 */
 }
-.rk { color: var(--dim); flex-shrink: 0; font-size: 11px; }
+.rk { color: var(--dim); flex-shrink: 0; font-size: 11px; line-height: 1.6; }
 .rv {
   color: var(--silver);
   font-size: 11px;
   text-align: right;
   word-break: break-word;
+  line-height: 1.6;
 }
 .rv.hl { color: var(--cyan); font-weight: 600; }
+
+/* Parcel single-click highlight pulse */
+@keyframes parcel-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0,255,200,.5); }
+  60%  { box-shadow: 0 0 0 8px rgba(0,255,200,.0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,255,200,.0); }
+}
+.parcel-highlight-ring {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--cyan);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: parcel-pulse .8s ease-out forwards;
+  z-index: 500;
+}
 .act-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1272,29 +1292,65 @@ body { min-width: 900px; overflow-x: auto; }
     right: 0 !important;
     top: auto !important;
     width: 100% !important;
-    height: 75vh !important;
-    max-height: 75vh !important;
+    height: 52vh !important;          /* 50% of screen — readable, not overwhelming */
+    max-height: 52vh !important;
     border-left: none !important;
-    border-top: 2px solid rgba(0,255,200,.3) !important;
-    border-radius: 16px 16px 0 0 !important;
+    border-top: 2px solid rgba(0,255,200,.35) !important;
+    border-radius: 18px 18px 0 0 !important;
     transform: translateY(100%) !important;
-    transition: transform .3s cubic-bezier(.4,0,.2,1) !important;
+    transition: transform .32s cubic-bezier(.32,0,.18,1) !important;
     z-index: 2000 !important;
     background: var(--bg1) !important;
-    overflow-y: auto !important;
-    display: block !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
   #right.open-drawer {
     transform: translateY(0) !important;
   }
+  /* Drag handle pill */
   #right::before {
     content: '';
     display: block;
-    width: 40px;
+    width: 44px;
     height: 4px;
-    background: rgba(255,255,255,.2);
+    background: rgba(255,255,255,.22);
     border-radius: 2px;
-    margin: 10px auto 6px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+  /* Sheet close button — injected by JS into #right on mobile open */
+  .sheet-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: var(--font);
+    z-index: 10;
+    transition: all .15s;
+  }
+  .sheet-close-btn:hover { color: var(--text); background: rgba(255,255,255,.14); }
+
+  /* rbody scrolls within the fixed 52vh sheet */
+  #right .rbody,
+  #right .rhead + div {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(52vh - 100px) !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+  /* rhead stays fixed at top of sheet */
+  #right .rhead {
+    flex-shrink: 0 !important;
   }
 }
 
@@ -2563,7 +2619,7 @@ body { min-width: 900px; overflow-x: auto; }
 /* ════════════════════════════════════════════════════════════════
    INSTITUTIONAL LEDGER — Bloomberg-style market cap ticker
    ════════════════════════════════════════════════════════════════ */
-#ledger-cap-block {
+#unified-ledger-block {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -2864,11 +2920,11 @@ body { min-width: 900px; overflow-x: auto; }
     </button>
   </div>
 
-  <!-- ── Institutional Ledger Market Cap — Bloomberg ticker ──────── -->
-  <div id="ledger-cap-block">
-    <div class="ledger-cap-label">WA LEDGER MARKET CAP</div>
-    <div class="ledger-cap-value" id="ledger-cap-val">CALCULATING…</div>
-    <div class="ledger-cap-sub" id="ledger-cap-sub">WASHINGTON STATE · ON-DEMAND</div>
+  <!-- ── Unified Persistent Ledger Value — single Bloomberg ticker ── -->
+  <div id="unified-ledger-block">
+    <div class="ledger-cap-label">TOTAL PERSISTENT LEDGER VALUE</div>
+    <div class="ledger-cap-value" id="unified-ledger-val">CALCULATING…</div>
+    <div class="ledger-cap-sub" id="unified-ledger-sub">WA PARCELS + LIVE ASSETS</div>
   </div>
   <div class="topbar-right">
     <div class="tstat" title="Total value of all assets registered on RWABidAsk Permanent Ledger">
@@ -3828,16 +3884,14 @@ async function loadMarketData() {
 }
 
 function onDataReady() {
-  // On-Demand model: no assets to list or pin at boot.
-  // Status bar shows "ready" state. Pins/panel populate on double-click.
-  setStatus('DOUBLE-CLICK ANY PARCEL TO IDENTIFY');
+  setStatus('CLICK ANY PARCEL TO IDENTIFY');
   const sAssets = document.getElementById('s-assets');
   const sStatus = document.getElementById('s-status');
   if (sAssets) sAssets.textContent = '—';
   if (sStatus) sStatus.textContent = 'LIVE';
   if (typeof buildTicker === 'function') buildTicker([]);
-  // Boot ledger cap ticker and empty sidebar state
-  renderLedgerCap();
+  // Unified ledger ticker — animated on first boot
+  updateUnifiedLedger(true);
   renderRecentlyViewed();
   window.dispatchEvent(new CustomEvent('rwa:assetsLoaded'));
 }
@@ -5394,97 +5448,216 @@ async function initMap() {
     map3dEl.addEventListener('gmp-tiltchange', _onCam);
     map3dEl.addEventListener('gmp-headingchange', _onCam);
 
-    // ── On-Demand Parcel Identification — DOUBLE-CLICK REQUIRED ─────
-    // Single clicks are left free for pan/rotate. Double-click selects.
-    // Reads directly from map parcel layer features — zero Supabase for property data.
-    let _clickAccum = 0;
-    let _clickTimer  = null;
+    // ── Interaction Overhaul — Selection Hierarchy ────────────────
+    // Single tap/click  → highlight parcel + Basics panel (no camera fly)
+    // Double-click      → lock selection + Intel Audit View (full panel, fly)
+    // Long press 700ms  → same as double-click (mobile touch)
+    // Native dblclick zoom disabled by swallowing the second gmp-click before Maps acts.
 
-    map3dEl.addEventListener('gmp-click', (evt) => {
-      // Show dblclick hint on first single click
-      const hint = document.getElementById('dblclick-hint');
-      if (hint) {
-        hint.classList.add('visible');
-        clearTimeout(hint._t);
-        hint._t = setTimeout(() => hint.classList.remove('visible'), 2200);
+    let _clickAccum    = 0;
+    let _clickTimer    = null;
+    let _longPressTimer = null;
+    let _lockedApn     = null;          // APN of the currently locked (double-clicked) parcel
+
+    // Shared parcel extraction — called by both single and double click paths
+    function extractParcelFromEvt(evt, clickLat, clickLng) {
+      const placeId      = evt.placeId || evt.detail?.placeId || null;
+      const featureProps = evt.features?.[0]?.getData?.() || evt.detail?.feature || {};
+
+      // Address: add FULL_ADDR and SITUS_ADDR per prompt spec, plus all prior mappings
+      const address =
+        featureProps.FULL_ADDR     || featureProps.SITUS_ADDR   ||
+        featureProps.SITEADDRESS   || featureProps.SiteAddress   ||
+        featureProps.SITE_ADDRESS  || featureProps.address       ||
+        featureProps.formatted_address || featureProps.streetAddress ||
+        featureProps.ADDR          || featureProps.name          || null;
+
+      const apn =
+        featureProps.APN           || featureProps.apn           ||
+        featureProps.PARCELID      || featureProps.parcelId      ||
+        featureProps.PARCEL_ID     || featureProps.parcel_id     ||
+        featureProps.PIN           || placeId                    ||
+        `${clickLat.toFixed(6)},${clickLng.toFixed(6)}`;
+
+      const acreage =
+        featureProps.TOTALACRES    || featureProps.GrossAcres    ||
+        featureProps.CALCULATED_ACREAGE || featureProps.acreage  ||
+        featureProps.lotSize       || featureProps.ACREAGE       || null;
+
+      const zoning  =
+        featureProps.ZONING        || featureProps.ZoningCode    ||
+        featureProps.zoning        || featureProps.ZONE          || null;
+
+      const owner   =
+        featureProps.OWNER         || featureProps.OwnerName     ||
+        featureProps.TAXPAYER_NAME || featureProps.owner         ||
+        featureProps.OWNERNAME     || null;
+
+      const landUse =
+        featureProps.USECODE       || featureProps.LANDUSE       ||
+        featureProps.landUse       || featureProps.PRESENTUSE    ||
+        featureProps.useCode       || featureProps.CURRENT_ZONING || null;
+
+      const yearBlt =
+        featureProps.YRBUILT       || featureProps.YearBuilt     ||
+        featureProps.year_built    || featureProps.YEARBUILT     || null;
+
+      const county  =
+        featureProps.COUNTYNAME    || featureProps.County        ||
+        featureProps.COUNTY        || featureProps.county        || 'Washington State';
+
+      return { apn, address, acreage, zoning, owner, landUse, yearBlt, county, placeId };
+    }
+
+    // Build or retrieve asset from runtime cache
+    function getOrBuildAsset(fields, clickLat, clickLng) {
+      const { apn, address, acreage, zoning, owner, landUse, yearBlt, county, placeId } = fields;
+      let asset = (window.ASSETS || []).find(a => a.apn === apn);
+      if (!asset) {
+        asset = normalizeAsset({
+          id: apn, apn,
+          address: address || `Parcel @ ${clickLat.toFixed(5)}, ${clickLng.toFixed(5)}`,
+          lat: clickLat, lng: clickLng,
+          _hasCoords: true, price: 0, type: 'realestate', status: 'Active',
+          specs: { physical: { apn, address, acreage, zoning, land_use: landUse, year_built: yearBlt, lat: clickLat, lng: clickLng } },
+          _raw: { apn, address, acreage, zoning, owner, landUse, yearBlt, county, lat: clickLat, lng: clickLng, placeId }
+        });
+        (window.ASSETS = window.ASSETS || []).push(asset);
+        ASSETS = window.ASSETS;
       }
+      return asset;
+    }
+
+    // Show a brief pulse ring on the map at click coordinates
+    function showParcelHighlight(clickLat, clickLng) {
+      const mapCol = document.getElementById('map-col');
+      if (!mapCol || !map3dEl) return;
+      const rect = mapCol.getBoundingClientRect();
+      const W = rect.width, H = rect.height;
+      const camCenter = map3dEl.center || { lat: 20, lng: 10 };
+      const camRange  = map3dEl.range  || 12e6;
+      const ppd = (W / 2) / Math.max(1, camRange / 111320);
+      const cosLat = Math.cos(camCenter.lat * Math.PI / 180);
+      const dLat = clickLat - camCenter.lat;
+      const dLng = clickLng - camCenter.lng;
+      const sx = W / 2 + dLng * cosLat * ppd;
+      const sy = H / 2 - dLat * ppd;
+      const ring = document.createElement('div');
+      ring.className = 'parcel-highlight-ring';
+      ring.style.left = sx + 'px';
+      ring.style.top  = sy + 'px';
+      mapCol.appendChild(ring);
+      setTimeout(() => ring.remove(), 900);
+    }
+
+    // Single-click handler: highlight + Basics panel, NO camera fly
+    function handleSingleClick(evt, clickLat, clickLng) {
+      showParcelHighlight(clickLat, clickLng);
+      const fields = extractParcelFromEvt(evt, clickLat, clickLng);
+      const asset  = getOrBuildAsset(fields, clickLat, clickLng);
+
+      // Show Basics panel immediately — no fly, no lock
+      renderBasicsPanel(asset);
+      addToRecentlyViewed(asset);
+      setStatus(`PARCEL: ${fields.apn}`);
+
+      // Inject mobile close button if needed
+      if (window.innerWidth <= 767) {
+        injectSheetCloseBtn();
+      }
+
+      // Log lead (fire-and-forget)
+      if (_sb && currentUser) {
+        _sb.from('leads').insert({ apn: fields.apn, action: 'PARCEL_VIEW',
+          user_id: currentUser.id, lat: clickLat, lng: clickLng,
+          created_at: new Date().toISOString()
+        }).catch(() => {});
+      }
+    }
+
+    // Double-click / long-press handler: lock selection + Intel Audit View + fly
+    function handleDoubleClick(evt, clickLat, clickLng) {
+      const fields = extractParcelFromEvt(evt, clickLat, clickLng);
+      const asset  = getOrBuildAsset(fields, clickLat, clickLng);
+      _lockedApn   = fields.apn;
+
+      renderBasicsPanel(asset);
+      addToRecentlyViewed(asset);
+
+      // Fly camera to parcel
+      if (typeof flyTo === 'function') flyTo(clickLat, clickLng, 350, 68);
+
+      setStatus(`LOCKED: ${fields.apn}`);
+      showToast(`PARCEL LOCKED — ${fields.apn}`);
+
+      if (window.innerWidth <= 767) injectSheetCloseBtn();
+
+      if (_sb && currentUser) {
+        _sb.from('leads').insert({ apn: fields.apn, action: 'INTEL_AUDIT_VIEW',
+          user_id: currentUser.id, lat: clickLat, lng: clickLng,
+          created_at: new Date().toISOString()
+        }).catch(() => {});
+      }
+    }
+
+    // Mobile close button injection into the bottom sheet
+    function injectSheetCloseBtn() {
+      const rPanel = document.getElementById('right');
+      if (!rPanel) return;
+      rPanel.classList.add('open-drawer');
+      // Remove existing close btn if any
+      rPanel.querySelector('.sheet-close-btn')?.remove();
+      const btn = document.createElement('button');
+      btn.className = 'sheet-close-btn';
+      btn.textContent = '✕ CLOSE';
+      btn.onclick = () => {
+        rPanel.classList.remove('open-drawer');
+        document.body.style.overflow = '';
+      };
+      rPanel.appendChild(btn);
+    }
+
+    // gmp-click: accumulate, dispatch to single or double handler
+    map3dEl.addEventListener('gmp-click', (evt) => {
+      // Dismiss the hint
+      const hint = document.getElementById('dblclick-hint');
+      if (hint) { hint.classList.remove('visible'); clearTimeout(hint._t); }
+
+      const clickLat = evt.position?.lat ?? evt.detail?.lat;
+      const clickLng = evt.position?.lng ?? evt.detail?.lng;
+      if (clickLat == null || clickLng == null) return;
+
       _clickAccum++;
       clearTimeout(_clickTimer);
-      _clickTimer = setTimeout(async () => {
-        if (_clickAccum < 2) { _clickAccum = 0; return; } // single click — ignore
+
+      if (_clickAccum === 1) {
+        // Immediate single-click Basics (fast feedback)
+        handleSingleClick(evt, clickLat, clickLng);
+      }
+
+      _clickTimer = setTimeout(() => {
+        if (_clickAccum >= 2) {
+          // Double-click: Intel Audit View + prevent native zoom
+          evt.stopPropagation?.();
+          handleDoubleClick(evt, clickLat, clickLng);
+        }
         _clickAccum = 0;
-
-        const clickLat = evt.position?.lat ?? evt.detail?.lat;
-        const clickLng = evt.position?.lng ?? evt.detail?.lng;
-        if (clickLat == null || clickLng == null) return;
-
-        // ── 1. Read parcel feature data from the map event ─────────
-        const placeId     = evt.placeId || evt.detail?.placeId || null;
-        const featureProps = evt.features?.[0]?.getData?.() || evt.detail?.feature || {};
-
-        // ── 2. Extract surface fields from the parcel tile layer ───
-        // Washington County parcel tiles expose these field names:
-        const apn     = featureProps.APN       || featureProps.apn
-                      || featureProps.PARCELID  || featureProps.parcelId
-                      || featureProps.parcel_id || featureProps.ParcelId
-                      || placeId
-                      || `${clickLat.toFixed(6)},${clickLng.toFixed(6)}`;
-        const address = featureProps.SITEADDRESS || featureProps.SiteAddress
-                      || featureProps.address     || featureProps.formatted_address
-                      || featureProps.streetAddress || featureProps.ADDR
-                      || featureProps.name || null;
-        const acreage = featureProps.TOTALACRES || featureProps.GrossAcres
-                      || featureProps.acreage    || featureProps.lotSize
-                      || featureProps.ACREAGE    || null;
-        const zoning  = featureProps.ZONING     || featureProps.ZoningCode
-                      || featureProps.zoning     || featureProps.ZONE || null;
-        const owner   = featureProps.OWNER      || featureProps.OwnerName
-                      || featureProps.owner      || featureProps.OWNERNAME || null;
-        const landUse = featureProps.USECODE    || featureProps.LANDUSE
-                      || featureProps.landUse    || featureProps.PRESENTUSE
-                      || featureProps.useCode    || null;
-        const yearBlt = featureProps.YRBUILT    || featureProps.YearBuilt
-                      || featureProps.year_built || featureProps.YEARBUILT || null;
-        const county  = featureProps.COUNTYNAME || featureProps.County
-                      || featureProps.county     || 'Washington State' ;
-
-        // ── 3. Merge into runtime ASSETS cache (idempotent by APN) ─
-        let asset = (window.ASSETS || []).find(a => a.apn === apn);
-        if (!asset) {
-          asset = normalizeAsset({
-            id:      apn,
-            apn:     apn,
-            address: address || `Parcel @ ${clickLat.toFixed(5)}, ${clickLng.toFixed(5)}`,
-            lat:     clickLat,
-            lng:     clickLng,
-            _hasCoords: true,
-            price:   0,
-            type:    'realestate',
-            status:  'Active',
-            specs:   { physical: { apn, address, acreage, zoning, land_use: landUse, year_built: yearBlt, lat: clickLat, lng: clickLng } },
-            _raw:    { apn, address, acreage, zoning, owner, landUse, yearBlt, county, lat: clickLat, lng: clickLng, placeId }
-          });
-          (window.ASSETS = window.ASSETS || []).push(asset);
-          ASSETS = window.ASSETS;
-        }
-
-        // ── 4. Render Basics panel (no auth required) ─────────────
-        renderBasicsPanel(asset);
-
-        // ── 5. Update sidebar Recently Viewed ─────────────────────
-        addToRecentlyViewed(asset);
-
-        // ── 6. Log lead (fire-and-forget) ─────────────────────────
-        if (_sb && currentUser) {
-          _sb.from('leads').insert({ apn, action: 'PARCEL_VIEW', user_id: currentUser.id,
-            lat: clickLat, lng: clickLng, created_at: new Date().toISOString()
-          }).catch(() => {});
-        }
-
-        setStatus(`PARCEL IDENTIFIED: ${apn}`);
-        if (typeof flyTo === 'function') flyTo(clickLat, clickLng, 350, 68);
-      }, 280); // 280ms window for double-click detection
+      }, 300); // 300ms window — tight enough to feel snappy
     });
+
+    // Long-press (mobile): 700ms hold = Intel Audit View
+    map3dEl.addEventListener('pointerdown', (evt) => {
+      const clickLat = evt.position?.lat ?? null;
+      const clickLng = evt.position?.lng ?? null;
+      clearTimeout(_longPressTimer);
+      _longPressTimer = setTimeout(() => {
+        if (clickLat != null && clickLng != null) {
+          handleDoubleClick(evt, clickLat, clickLng);
+        }
+      }, 700);
+    });
+    map3dEl.addEventListener('pointerup',   () => clearTimeout(_longPressTimer));
+    map3dEl.addEventListener('pointermove', () => clearTimeout(_longPressTimer));
     
     requestAnimationFrame(() => { 
       setTimeout(() => { 
@@ -5493,7 +5666,7 @@ async function initMap() {
     });
     
     // On-Demand model: no bulk fetch. Boot auth session only.
-    setStatus('DOUBLE-CLICK ANY PARCEL TO IDENTIFY');
+    setStatus('CLICK ANY PARCEL TO IDENTIFY');
     await loadMarketData(); // sets up empty ASSETS cache + fires rwa:assetsLoaded
     
     initPlacesSearch();
@@ -5969,13 +6142,67 @@ function buildTicker(assets) {
   }
 }
 
+// ════════════════════════════════════════════════════════════════════
+// UNIFIED PERSISTENT LEDGER VALUE — single Bloomberg-style ticker
+// Sums: (1) live window.ASSETS from Supabase + (2) WA parcel dataset estimate
+// Called on boot and whenever ASSETS change.
+// ════════════════════════════════════════════════════════════════════
+const WA_PARCEL_COUNT  = 3_200_000;   // WA DOR 2023: total taxable parcels
+const WA_MEDIAN_VALUE  = 385_000;     // WA median assessed value 2023
+const WA_BASE_VALUE    = WA_PARCEL_COUNT * WA_MEDIAN_VALUE; // $1.232T baseline
+
+function updateUnifiedLedger(animate = false) {
+  const liveAssetValue = (window.ASSETS || [])
+    .reduce((sum, a) => sum + (Number(a.price) || 0), 0);
+
+  const totalLedger = WA_BASE_VALUE + liveAssetValue;
+  const liveCount   = (window.ASSETS || []).length;
+
+  const valEl = document.getElementById('unified-ledger-val');
+  const subEl = document.getElementById('unified-ledger-sub');
+  if (!valEl) return;
+
+  function fmtLedger(n) {
+    if (n >= 1e12) return '$' + (n / 1e12).toFixed(3) + 'T';
+    if (n >= 1e9)  return '$' + (n / 1e9).toFixed(2)  + 'B';
+    return '$' + n.toLocaleString();
+  }
+
+  if (animate) {
+    // Animated counter — Bloomberg terminal feel (1.8s)
+    const dur = 1800, steps = 60;
+    let step = 0;
+    const tick = () => {
+      step++;
+      const current = step >= steps ? totalLedger : (step / steps) * totalLedger;
+      valEl.textContent = fmtLedger(Math.round(current));
+      if (step < steps) setTimeout(tick, dur / steps);
+      else {
+        valEl.textContent = fmtLedger(totalLedger);
+        if (subEl) subEl.textContent =
+          `${WA_PARCEL_COUNT.toLocaleString()} WA PARCELS` +
+          (liveCount ? ` + ${liveCount} LIVE ASSETS` : '');
+      }
+    };
+    setTimeout(tick, 600);
+  } else {
+    valEl.textContent = fmtLedger(totalLedger);
+    if (subEl) subEl.textContent =
+      `${WA_PARCEL_COUNT.toLocaleString()} WA PARCELS` +
+      (liveCount ? ` + ${liveCount} LIVE ASSETS` : '');
+  }
+}
+
+// Legacy alias — keep updateGMC working for any existing calls
 function updateGMC(assets) {
-  const total = assets.reduce((sum, a) => sum + (a.price || 0), 0);
+  updateUnifiedLedger(false);
+  // Also update the old s-gmc element if present
+  const total = (assets || []).reduce((sum, a) => sum + (a.price || 0), 0);
   const el = document.getElementById('s-gmc');
   if (!el) return;
   if (total >= 1e12) el.textContent = '$' + (total / 1e12).toFixed(2) + 'T';
-  else if (total >= 1e9) el.textContent = '$' + (total / 1e9).toFixed(1) + 'B';
-  else if (total >= 1e6) el.textContent = '$' + (total / 1e6).toFixed(1) + 'M';
+  else if (total >= 1e9)  el.textContent = '$' + (total / 1e9).toFixed(1) + 'B';
+  else if (total >= 1e6)  el.textContent = '$' + (total / 1e6).toFixed(1) + 'M';
   else el.textContent = '$' + total.toLocaleString();
 }
 
@@ -6020,21 +6247,63 @@ function closeDrawer() {
 window.closeDrawer = closeDrawer;
 window.bootSupabase = bootSupabase;
 
-async function restoreSession() { 
-  if (!_sb) return; 
-  const { data } = await _sb.auth.getSession(); 
-  if (data?.session?.user) { 
-    currentUser = data.session.user; 
-    currentUserRole = currentUser.user_metadata?.role || null;
-    await updateAuthUI();
-    applyAdminBypass(); 
-    isAuthenticated = true; 
-    document.getElementById('auth-gate')?.classList.add('hidden'); 
-    if (map3dEl) onCameraChange(); 
-  } else { 
-    isAuthenticated = false; 
-    // Open House: no auth gate auto-show 
-  } 
+async function restoreSession() {
+  if (!_sb) return;
+  try {
+    // Attempt to restore existing session
+    const { data, error } = await _sb.auth.getSession();
+    if (error) throw error;
+
+    if (data?.session?.user) {
+      currentUser     = data.session.user;
+      currentUserRole = currentUser.user_metadata?.role || null;
+      await updateAuthUI();
+      applyAdminBypass();
+      isAuthenticated = true;
+      document.getElementById('auth-gate')?.classList.add('hidden');
+      if (map3dEl) onCameraChange();
+    } else {
+      // No session — attempt silent token refresh
+      try {
+        const { data: refreshed, error: refreshErr } = await _sb.auth.refreshSession();
+        if (refreshErr) throw refreshErr;
+        if (refreshed?.session?.user) {
+          currentUser     = refreshed.session.user;
+          currentUserRole = currentUser.user_metadata?.role || null;
+          await updateAuthUI();
+          applyAdminBypass();
+          isAuthenticated = true;
+          document.getElementById('auth-gate')?.classList.add('hidden');
+          if (map3dEl) onCameraChange();
+          return;
+        }
+      } catch (refreshErr) {
+        // refresh_token expired or invalid — silent fail, fall to Public View
+        console.warn('[RWABidAsk] Session refresh failed — defaulting to Public View:', refreshErr?.message || refreshErr);
+      }
+      // Public View fallback
+      isAuthenticated = false;
+      currentUser     = null;
+      _publicViewFallback();
+    }
+  } catch (err) {
+    // Network error, CORS, or any auth crash — never let it break the app
+    console.warn('[RWABidAsk] restoreSession error — defaulting to Public View:', err?.message || err);
+    isAuthenticated = false;
+    currentUser     = null;
+    _publicViewFallback();
+  }
+}
+
+function _publicViewFallback() {
+  // Ensure Sign In button is visible; do not show auth gate modal automatically
+  const signinBtn = document.getElementById('signin-btn');
+  const joinBtn   = document.getElementById('join-btn');
+  if (signinBtn) { signinBtn.style.display = ''; signinBtn.textContent = 'SIGN IN'; }
+  if (joinBtn)   { joinBtn.style.display   = ''; }
+  // Open House: map and Basics panel fully accessible in Public View
+  setStatus && setStatus('PUBLIC VIEW — SIGN IN FOR DEEP DATA');
+  console.log('[RWABidAsk] Public View active.');
 }
 
 async function signInWithGoogle() {
@@ -6410,6 +6679,10 @@ window.addEventListener('load', () => {
 // Utility functions
 window.fmtPrice = fmtPrice;
 window.escapeHtml = escapeHtml;
+window.updateUnifiedLedger = updateUnifiedLedger;
+window.renderBasicsPanel = renderBasicsPanel;
+window.addToRecentlyViewed = addToRecentlyViewed;
+window.initiateStripeSandbox = initiateStripeSandbox;
 
 // ════════════════════════════════════════════════════════════════════
 // LIVE DASHBOARD STATS
@@ -7656,6 +7929,8 @@ function renderBasicsPanel(asset) {
 
 // ════════════════════════════════════════════════════════════════════
 // STRIPE SANDBOX — MARKET INTELLIGENCE REPORT CHECKOUT
+// On success: removes orange "Blackout" overlays for Admin ID,
+// logs transaction to Supabase leads table, updates unified ledger.
 // ════════════════════════════════════════════════════════════════════
 async function initiateStripeSandbox(apn) {
   if (!apn) {
@@ -7664,10 +7939,10 @@ async function initiateStripeSandbox(apn) {
   }
   showToast(`INITIATING INTEL REPORT FOR APN: ${apn}...`);
 
-  // Log the transaction intent to Supabase (sessions/transactions scope only)
+  // Log transaction intent (Supabase — sessions/transactions scope)
   if (_sb && currentUser) {
     _sb.from('leads').insert({
-      apn, action: 'INTEL_REPORT_INTENT',
+      apn, action: 'INTEL_REPORT_PURCHASE',
       user_id: currentUser.id,
       created_at: new Date().toISOString()
     }).catch(() => {});
@@ -7678,10 +7953,28 @@ async function initiateStripeSandbox(apn) {
       body: { apn: apn, action: 'create-checkout-session' }
     });
     if (error) throw error;
+
     if (data?.url) {
+      // Admin bypass: remove all orange blackout overlays immediately
+      // (admin sees full data without completing Stripe flow)
+      if (isAdminUser && typeof isAdminUser === 'function' && isAdminUser()) {
+        document.querySelectorAll('.basics-gate-bar, .intel-blackout, [data-gated="true"]')
+          .forEach(el => {
+            el.style.filter = '';
+            el.style.opacity = '1';
+            el.style.pointerEvents = '';
+            el.removeAttribute('data-gated');
+          });
+        // Un-blur all blurred gated rows in the current panel
+        document.querySelectorAll('.basics-row [style*="blur"]')
+          .forEach(el => el.style.filter = '');
+        showToast('ADMIN — INTEL REPORT UNLOCKED');
+        updateUnifiedLedger(false);
+        return;
+      }
       window.location.href = data.url;
     } else {
-      throw new Error("No checkout URL returned");
+      throw new Error("No checkout URL returned from Edge Function");
     }
   } catch (err) {
     console.error("Stripe Error:", err);
@@ -7747,42 +8040,7 @@ function renderRecentlyViewed() {
 // Washington State: ~3.2M taxable parcels × median assessed $385K
 // Source basis: WA DOR 2023 Property Tax Statistics
 // ════════════════════════════════════════════════════════════════════
-function renderLedgerCap() {
-  const WA_PARCEL_COUNT  = 3_200_000;   // WA DOR: total taxable parcels
-  const MEDIAN_ASSESSED  = 385_000;     // WA median assessed value 2023
-  const totalCap         = WA_PARCEL_COUNT * MEDIAN_ASSESSED; // ~$1.232T
-
-  const valEl = document.getElementById('ledger-cap-val');
-  const subEl = document.getElementById('ledger-cap-sub');
-  if (!valEl) return;
-
-  // Format as institutional shorthand: $1.232T
-  function fmtCap(n) {
-    if (n >= 1e12) return `$${(n / 1e12).toFixed(3)}T`;
-    if (n >= 1e9)  return `$${(n / 1e9).toFixed(1)}B`;
-    return `$${n.toLocaleString()}`;
-  }
-
-  // Animate counter up over 1.8s — Bloomberg terminal feel
-  const target  = totalCap;
-  const dur     = 1800;
-  const steps   = 60;
-  const inc     = target / steps;
-  let   current = 0;
-  let   step    = 0;
-
-  const tick = () => {
-    step++;
-    current = step >= steps ? target : step * inc;
-    valEl.textContent = fmtCap(Math.round(current));
-    if (step < steps) setTimeout(tick, dur / steps);
-    else {
-      valEl.textContent = fmtCap(target);
-      if (subEl) subEl.textContent = `${WA_PARCEL_COUNT.toLocaleString()} PARCELS · WA STATE`;
-    }
-  };
-  setTimeout(tick, 800); // slight delay after page load
-}
+// renderLedgerCap removed — replaced by updateUnifiedLedger() above.
 
 // ════════════════════════════════════════════════════════════════════
 // RENDER LIST — targets #asset-list-wrap for search results
