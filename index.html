@@ -2922,9 +2922,9 @@ body { min-width: 900px; overflow-x: auto; }
 
   <!-- ── Unified Persistent Ledger Value — single Bloomberg ticker ── -->
   <div id="unified-ledger-block">
-    <div class="ledger-cap-label">TOTAL PERSISTENT LEDGER VALUE</div>
+    <div class="ledger-cap-label">TOTAL DATABASE VALUE</div>
     <div class="ledger-cap-value" id="unified-ledger-val">CALCULATING…</div>
-    <div class="ledger-cap-sub" id="unified-ledger-sub">WA PARCELS + LIVE ASSETS</div>
+    <div class="ledger-cap-sub" id="unified-ledger-sub">GLOBAL ASSET DATABASE</div>
   </div>
   <div class="topbar-right">
     <div class="tstat" title="Total value of all assets registered on RWABidAsk Permanent Ledger">
@@ -2953,7 +2953,7 @@ body { min-width: 900px; overflow-x: auto; }
   <div id="left">
     <div class="left-head">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 6px;">
-        <div class="left-title" style="margin:0">WA Parcel Directory</div>
+        <div class="left-title" style="margin:0">GLOBAL ASSET DATABASE</div>
         <div style="font-size:8px;color:var(--muted);letter-spacing:1px" id="left-live-badge"><span class="live-dot"></span>LIVE</div>
       </div>
 <!-- dashboard summary removed — data in header topbar -->
@@ -3085,7 +3085,7 @@ body { min-width: 900px; overflow-x: auto; }
     SYSTEM: OPERATIONAL &nbsp;|&nbsp; PERMANENT LEDGER™: ACTIVE
   </div>
   <div class="footer-center">
-    RWABIDASK™ &nbsp;—&nbsp; GLOBAL ASSET MARKET
+    RWABIDASK™ &nbsp;—&nbsp; GLOBAL ASSET DATABASE
   </div>
   <div class="footer-right">
     © 2026 ANNIE GROUP LLC &nbsp;|&nbsp; ALL RIGHTS RESERVED
@@ -5245,7 +5245,7 @@ function selectAsset(id) {
     `;
 
     // ── Map fly-to & mobile drawer ──────────────────────────────
-    if (typeof flyTo === 'function') flyTo(a.lat, a.lng, 1400, 45);
+    if (typeof flyTo === 'function') flyTo(a.lat, a.lng, 1400, 0);
     if (window.innerWidth <= 767) document.getElementById('right').classList.add('open-drawer');
 
     // ── Update list selection highlight ────────────────────────
@@ -5350,7 +5350,7 @@ async function performSearch() {
             );
             if (asset) {
                 setStatus(`PARCEL IDENTIFIED: ${hit.apn || hit.address}`);
-                if (asset.lat && asset.lng) flyTo(asset.lat, asset.lng, 400, 65);
+                if (asset.lat && asset.lng) flyTo(asset.lat, asset.lng, 400, 0);
                 renderBasicsPanel(asset);
                 addToRecentlyViewed(asset);
             }
@@ -5528,7 +5528,7 @@ async function initMap() {
       return asset;
     }
 
-    // Show a brief pulse ring on the map at click coordinates
+    // Pulse ring fallback (used when parcel geometry unavailable)
     function showParcelHighlight(clickLat, clickLng) {
       const mapCol = document.getElementById('map-col');
       if (!mapCol || !map3dEl) return;
@@ -5538,10 +5538,8 @@ async function initMap() {
       const camRange  = map3dEl.range  || 12e6;
       const ppd = (W / 2) / Math.max(1, camRange / 111320);
       const cosLat = Math.cos(camCenter.lat * Math.PI / 180);
-      const dLat = clickLat - camCenter.lat;
-      const dLng = clickLng - camCenter.lng;
-      const sx = W / 2 + dLng * cosLat * ppd;
-      const sy = H / 2 - dLat * ppd;
+      const sx = W / 2 + (clickLng - camCenter.lng) * cosLat * ppd;
+      const sy = H / 2 - (clickLat - camCenter.lat) * ppd;
       const ring = document.createElement('div');
       ring.className = 'parcel-highlight-ring';
       ring.style.left = sx + 'px';
@@ -5550,23 +5548,52 @@ async function initMap() {
       setTimeout(() => ring.remove(), 900);
     }
 
-    // Single-click handler: highlight + Basics panel, NO camera fly
+    // Active selection polygon border — clinical cyan outline
+    let _activeSelectionOverlay = null;
+
+    function drawSelectionBorder(featureProps, clickLat, clickLng) {
+      // Remove prior overlay
+      if (_activeSelectionOverlay) {
+        try { _activeSelectionOverlay.remove(); } catch(e) {}
+        _activeSelectionOverlay = null;
+      }
+      const coords = featureProps?.geometry?.coordinates?.[0]
+                  || featureProps?.coordinates
+                  || featureProps?.shape?.coordinates?.[0]
+                  || null;
+      if (coords && map3dEl) {
+        try {
+          const poly = document.createElement('gmp-polygon-3d');
+          poly.classList.add('rwa-selection-overlay');
+          poly.setAttribute('altitude-mode',              'CLAMP_TO_GROUND');
+          poly.setAttribute('fill-color',                 'rgba(0,255,200,0.07)');
+          poly.setAttribute('stroke-color',               '#00ffc8');
+          poly.setAttribute('stroke-width',               '3');
+          poly.setAttribute('draws-occluded-segments',    'true');
+          poly.outerPolygon = coords.map(([lng, lat]) => ({ lat, lng }));
+          map3dEl.append(poly);
+          _activeSelectionOverlay = poly;
+        } catch(e) { showParcelHighlight(clickLat, clickLng); }
+      } else {
+        showParcelHighlight(clickLat, clickLng);
+      }
+    }
+
+    // ONE-TAP selection: border + Basics panel + fly (plan view, tilt=0)
     function handleSingleClick(evt, clickLat, clickLng) {
-      showParcelHighlight(clickLat, clickLng);
+      const featureProps = evt.features?.[0]?.getData?.() || evt.detail?.feature || {};
       const fields = extractParcelFromEvt(evt, clickLat, clickLng);
       const asset  = getOrBuildAsset(fields, clickLat, clickLng);
 
-      // Show Basics panel immediately — no fly, no lock
+      drawSelectionBorder(featureProps, clickLat, clickLng);
+      if (typeof flyTo === 'function') flyTo(clickLat, clickLng, 350, 0);
+
       renderBasicsPanel(asset);
       addToRecentlyViewed(asset);
       setStatus(`PARCEL: ${fields.apn}`);
 
-      // Inject mobile close button if needed
-      if (window.innerWidth <= 767) {
-        injectSheetCloseBtn();
-      }
+      if (window.innerWidth <= 767) injectSheetCloseBtn();
 
-      // Log lead (fire-and-forget)
       if (_sb && currentUser) {
         _sb.from('leads').insert({ apn: fields.apn, action: 'PARCEL_VIEW',
           user_id: currentUser.id, lat: clickLat, lng: clickLng,
@@ -5575,18 +5602,13 @@ async function initMap() {
       }
     }
 
-    // Double-click / long-press handler: lock selection + Intel Audit View + fly
+    // Double-click / long-press: lock + Intel Audit lead log (panel already shown by single-click)
     function handleDoubleClick(evt, clickLat, clickLng) {
       const fields = extractParcelFromEvt(evt, clickLat, clickLng);
       const asset  = getOrBuildAsset(fields, clickLat, clickLng);
       _lockedApn   = fields.apn;
 
       renderBasicsPanel(asset);
-      addToRecentlyViewed(asset);
-
-      // Fly camera to parcel
-      if (typeof flyTo === 'function') flyTo(clickLat, clickLng, 350, 68);
-
       setStatus(`LOCKED: ${fields.apn}`);
       showToast(`PARCEL LOCKED — ${fields.apn}`);
 
@@ -5661,7 +5683,7 @@ async function initMap() {
     
     requestAnimationFrame(() => { 
       setTimeout(() => { 
-        try { map3dEl.tilt = 15; } catch(e){} 
+        try { map3dEl.tilt = 0; } catch(e){} // Plan View — no auto-spin
       }, 1200); 
     });
     
@@ -5697,7 +5719,7 @@ async function initPlacesSearch() {
             await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress'] });
             const lat = place.location.lat();
             const lng = place.location.lng();
-            flyTo(lat, lng, 1400, 45);
+            flyTo(lat, lng, 1400, 0);
             setStatus('LOCATION: ' + (place.displayName || '').toUpperCase().slice(0, 60));
           } catch (err) { showToast('Location lookup failed'); }
         });
@@ -5713,7 +5735,7 @@ async function initPlacesSearch() {
         if (!place?.geometry?.location) { showToast('Location not found'); return; }
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        flyTo(lat, lng, 1400, 45);
+        flyTo(lat, lng, 1400, 0);
         setStatus('LOCATION: ' + (place.name || '').toUpperCase().slice(0, 60));
       });
     }
@@ -5722,15 +5744,18 @@ async function initPlacesSearch() {
 
 function flyTo(lat, lng, range, tilt) { 
   if (!map3dEl) return; 
+  const t = tilt ?? 0;   // Plan View default — no auto-tilt/spin
+  const r = range ?? 1400;
   try { 
     map3dEl.flyCameraTo({ 
-      endCamera: { center: { lat, lng, altitude: 45 }, tilt: tilt ?? 45, range: range ?? 1400, heading: 0 }, 
-      durationMillis: 1800 
+      endCamera: { center: { lat, lng, altitude: 0 }, tilt: t, range: r, heading: 0 }, 
+      durationMillis: 1400 
     }); 
   } catch(e) { 
-    map3dEl.center = { lat, lng, altitude: 45 }; 
-    map3dEl.range = range ?? 1400; 
-    map3dEl.tilt = tilt ?? 45; 
+    map3dEl.center  = { lat, lng, altitude: 0 }; 
+    map3dEl.range   = r; 
+    map3dEl.tilt    = t;
+    map3dEl.heading = 0;
   } 
 }
 
@@ -5955,7 +5980,7 @@ function addClusterMarker(key, lat, lng, assets) {
     // Zoom into cluster center
     const spread = assets.reduce((acc,a)=>Math.max(acc,Math.abs(a.lat-lat),Math.abs(a.lng-lng)),0);
     const newRange = Math.max(50000, spread * 111000 * 3);
-    flyTo(lat, lng, newRange, 45);
+    flyTo(lat, lng, newRange, 0);
     // Show these assets in list
     renderList(assets);
     showToast(`${n} ASSETS IN CLUSTER — ZOOMING IN`);
@@ -6180,16 +6205,14 @@ function updateUnifiedLedger(animate = false) {
       else {
         valEl.textContent = fmtLedger(totalLedger);
         if (subEl) subEl.textContent =
-          `${WA_PARCEL_COUNT.toLocaleString()} WA PARCELS` +
-          (liveCount ? ` + ${liveCount} LIVE ASSETS` : '');
+          liveCount ? `+ ${liveCount} LIVE ASSETS` : 'GLOBAL ASSET DATABASE';
       }
     };
     setTimeout(tick, 600);
   } else {
     valEl.textContent = fmtLedger(totalLedger);
     if (subEl) subEl.textContent =
-      `${WA_PARCEL_COUNT.toLocaleString()} WA PARCELS` +
-      (liveCount ? ` + ${liveCount} LIVE ASSETS` : '');
+      liveCount ? `+ ${liveCount} LIVE ASSETS` : 'GLOBAL ASSET DATABASE';
   }
 }
 
