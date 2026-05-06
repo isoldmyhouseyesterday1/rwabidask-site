@@ -5583,11 +5583,6 @@ async function initMap() {
     function handleSingleClick(evt, clickLat, clickLng) {
       const featureProps = evt.features?.[0]?.getData?.() || evt.detail?.feature || {};
       const fields = extractParcelFromEvt(evt, clickLat, clickLng);
-
-      // Guard: if APN is just a coordinate fallback, no real parcel data — skip
-      const apnIsCoord = /^-?\d+\.\d+,-?\d+\.\d+$/.test(fields.apn);
-      if (apnIsCoord && !featureProps.PARCELID && !featureProps.APN && !featureProps.PIN) return;
-
       const asset  = getOrBuildAsset(fields, clickLat, clickLng);
 
       drawSelectionBorder(featureProps, clickLat, clickLng);
