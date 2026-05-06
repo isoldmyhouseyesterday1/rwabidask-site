@@ -5583,12 +5583,17 @@ async function initMap() {
     function handleSingleClick(evt, clickLat, clickLng) {
       const featureProps = evt.features?.[0]?.getData?.() || evt.detail?.feature || {};
       const fields = extractParcelFromEvt(evt, clickLat, clickLng);
+
+      // Guard: if APN is just a coordinate fallback, no real parcel data — skip
+      const apnIsCoord = /^-?\d+\.\d+,-?\d+\.\d+$/.test(fields.apn);
+      if (apnIsCoord && !featureProps.PARCELID && !featureProps.APN && !featureProps.PIN) return;
+
       const asset  = getOrBuildAsset(fields, clickLat, clickLng);
 
       drawSelectionBorder(featureProps, clickLat, clickLng);
       if (typeof flyTo === 'function') flyTo(clickLat, clickLng, 350, 0);
 
-      renderBasicsPanel(asset);
+      window.renderBasicsPanel(asset);
       addToRecentlyViewed(asset);
       setStatus(`PARCEL: ${fields.apn}`);
 
@@ -5608,7 +5613,7 @@ async function initMap() {
       const asset  = getOrBuildAsset(fields, clickLat, clickLng);
       _lockedApn   = fields.apn;
 
-      renderBasicsPanel(asset);
+      window.renderBasicsPanel(asset);
       setStatus(`LOCKED: ${fields.apn}`);
       showToast(`PARCEL LOCKED — ${fields.apn}`);
 
@@ -5618,7 +5623,7 @@ async function initMap() {
         _sb.from('leads').insert({ apn: fields.apn, action: 'INTEL_AUDIT_VIEW',
           user_id: currentUser.id, lat: clickLat, lng: clickLng,
           created_at: new Date().toISOString()
-        }).catch(() => {});
+        }).then(() => {}).catch(() => {});
       }
     }
 
