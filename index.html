@@ -7127,8 +7127,9 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
 // Check URL for intel_unlocked param on Stripe success redirect
 (function checkOrderbookRedirect() {
   const params   = new URLSearchParams(window.location.search);
-  const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked') || localStorage.getItem('pending_intel_apn');
-  if (unlockId) localStorage.removeItem('pending_intel_apn');
+  const hashMatch = window.location.hash.match(/intel=([^&]+)/);
+  const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked') || (hashMatch && decodeURIComponent(hashMatch[1]));
+  if (hashMatch) history.replaceState({}, '', window.location.pathname);
   // Restore map position after Stripe redirect
   try {
     const saved = sessionStorage.getItem('map_center');
@@ -8011,7 +8012,7 @@ async function initiateStripeSandbox(apn) {
     const resp = await fetch('https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/create-checkout-session', {
       method: 'POST',
       headers: {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+tok},
-      body: JSON.stringify({user_id:currentUser.id,asset_id:String(apn),email:currentUser.email,success_url:window.location.href+'?intel_unlocked='+encodeURIComponent(apn)+'&success=true',cancel_url:window.location.href})
+      body: JSON.stringify({user_id:currentUser.id,asset_id:String(apn),email:currentUser.email,success_url:window.location.origin+'/#intel='+encodeURIComponent(apn),cancel_url:window.location.href})
     });
     if (!resp.ok) { showToast('PAYMENT ENGINE OFFLINE'); return; }
     const data = await resp.json();
