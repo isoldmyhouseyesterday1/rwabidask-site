@@ -7130,13 +7130,17 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
   const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked');
   if (unlockId) {
     history.replaceState({}, '', window.location.pathname);
-    setTimeout(async () => {
+    const loadPaidReport = async () => {
+      if (typeof fetchParcelData !== 'function' || typeof _renderFull !== 'function') {
+        setTimeout(loadPaidReport, 500);
+        return;
+      }
       showToast('✓ PAYMENT CONFIRMED — LOADING INTEL REPORT…');
       try {
         const bq = await fetchParcelData({pin: unlockId, paid: true});
         if (bq) {
           const asset = {id: unlockId, apn: unlockId, type: 'real_estate'};
-          if (typeof _renderFull === 'function') _renderFull(asset, bq);
+          _renderFull(asset, bq);
           showToast('✓ INTEL REPORT UNLOCKED');
         } else {
           showToast('PAYMENT CONFIRMED — CONTACT SUPPORT IF ISSUE PERSISTS');
@@ -7144,7 +7148,8 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
       } catch(e) {
         showToast('PAYMENT CONFIRMED — REPORT LOADING SHORTLY');
       }
-    }, 1200);
+    };
+    setTimeout(loadPaidReport, 3000);
   }
 })();
 async function purchaseLead(assetId, price) {
