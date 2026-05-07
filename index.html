@@ -7127,7 +7127,25 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
 // Check URL for intel_unlocked param on Stripe success redirect
 (function checkOrderbookRedirect() {
   const params   = new URLSearchParams(window.location.search);
-  const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked');
+  const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked') || sessionStorage.getItem('pending_intel_apn');
+  if (unlockId) sessionStorage.removeItem('pending_intel_apn');
+  // Restore map position after Stripe redirect
+  try {
+    const saved = sessionStorage.getItem('map_center');
+    if (saved) {
+      const pos = JSON.parse(saved);
+      sessionStorage.removeItem('map_center');
+      setTimeout(() => {
+        const map3d = document.querySelector('gmp-map-3d');
+        if (map3d && pos.lat && pos.lng) {
+          map3d.center = {lat: pos.lat, lng: pos.lng, altitude: pos.altitude || 300};
+          if (pos.heading !== undefined) map3d.heading = pos.heading;
+          if (pos.tilt !== undefined) map3d.tilt = pos.tilt;
+          if (pos.range) map3d.range = pos.range;
+        }
+      }, 1500);
+    }
+  } catch(e) {}
   if (unlockId) {
     history.replaceState({}, '', window.location.pathname);
     const loadPaidReport = async () => {
