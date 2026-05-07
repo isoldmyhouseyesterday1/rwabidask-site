@@ -5431,8 +5431,8 @@ async function initMap() {
     const maps3dLib = await google.maps.importLibrary('maps3d');
     const Map3DElement = maps3dLib.Map3DElement;
     map3dEl = new Map3DElement({ 
-      center: { lat: 20, lng: 15, altitude: 0 }, // Europe/Africa centroid
-      range: 12000000, // ~zoom 4 — sees Europe + Africa, zoomed out but not orbit
+      center: { lat: 40, lng: -98, altitude: 0 }, // North America centroid
+      range: 16000000, // zoomed out to see full continent
       tilt: 0, 
       heading: 0 
     });
