@@ -2917,6 +2917,7 @@ body { min-width: 900px; overflow-x: auto; }
 </style>
 
 <script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -8424,7 +8425,7 @@ if(noData){
     </div>`;
 }
 
-window.currentAsset=asset;window.activeId=asset?.id||pin;
+window.currentAsset=asset;window.activeId=asset?.id||pin;window._lastBqData=bq;
 // Update recently viewed and status with real resolved data
 if(bq&&pin&&pin!=='—'){
   const realAsset={...asset,apn:pin,id:pin,address:addr||asset?.address};
