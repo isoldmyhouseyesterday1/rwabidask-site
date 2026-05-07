@@ -7130,10 +7130,21 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
   const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked');
   if (unlockId) {
     history.replaceState({}, '', window.location.pathname);
-    setTimeout(() => {
-      showToast('INTELLIGENCE REPORT DISPATCHED — CHECK YOUR EMAIL');
-      selectAsset(unlockId);
-    }, 900);
+    setTimeout(async () => {
+      showToast('✓ PAYMENT CONFIRMED — LOADING INTEL REPORT…');
+      try {
+        const bq = await fetchParcelData({pin: unlockId, paid: true});
+        if (bq) {
+          const asset = {id: unlockId, apn: unlockId, type: 'real_estate'};
+          if (typeof _renderFull === 'function') _renderFull(asset, bq);
+          showToast('✓ INTEL REPORT UNLOCKED');
+        } else {
+          showToast('PAYMENT CONFIRMED — CONTACT SUPPORT IF ISSUE PERSISTS');
+        }
+      } catch(e) {
+        showToast('PAYMENT CONFIRMED — REPORT LOADING SHORTLY');
+      }
+    }, 1200);
   }
 })();
 async function purchaseLead(assetId, price) {
@@ -7968,7 +7979,7 @@ async function initiateStripeSandbox(apn) {
       apn, action: 'INTEL_REPORT_PURCHASE',
       user_id: currentUser.id,
       created_at: new Date().toISOString()
-    }).catch(() => {});
+    }).then(()=>{}).catch(() => {});
   }
 
   try {
