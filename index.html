@@ -7127,8 +7127,8 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
 // Check URL for intel_unlocked param on Stripe success redirect
 (function checkOrderbookRedirect() {
   const params   = new URLSearchParams(window.location.search);
-  const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked') || sessionStorage.getItem('pending_intel_apn');
-  if (unlockId) sessionStorage.removeItem('pending_intel_apn');
+  const unlockId = params.get('intel_unlocked') || params.get('orderbook_unlocked') || localStorage.getItem('pending_intel_apn');
+  if (unlockId) localStorage.removeItem('pending_intel_apn');
   // Restore map position after Stripe redirect
   try {
     const saved = sessionStorage.getItem('map_center');
@@ -8016,7 +8016,7 @@ async function initiateStripeSandbox(apn) {
     if (!resp.ok) { showToast('PAYMENT ENGINE OFFLINE'); return; }
     const data = await resp.json();
     if (data?.url) {
-      sessionStorage.setItem('pending_intel_apn', apn);
+      localStorage.setItem('pending_intel_apn', apn);
       // Save map position before leaving
       try {
         const map3d = document.querySelector('gmp-map-3d');
