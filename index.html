@@ -22,6 +22,30 @@
 
 <script>
   window.__mapReady = function() { window.__googleMapsLoaded = true; window.__initRWA && window.__initRWA(); };
+
+// Check for recent intel report purchase on page load (post-Stripe redirect)
+(async function checkRecentIntelPurchase() {
+  try {
+    await new Promise(r => setTimeout(r, 4000));
+    if (!window._sb || !window.currentUser) return;
+    const { data } = await window._sb
+      .from('intel_reports')
+      .select('apn, created_at')
+      .eq('user_id', window.currentUser.id)
+      .gte('created_at', new Date(Date.now() - 5 * 60 * 1000).toISOString())
+      .order('created_at', {ascending: false})
+      .limit(1)
+      .single();
+    if (data?.apn) {
+      if (typeof showToast === 'function') showToast('✓ PAYMENT CONFIRMED — LOADING INTEL REPORT…');
+      const bq = await fetchParcelData({pin: data.apn, paid: true});
+      if (bq && typeof _renderFull === 'function') {
+        _renderFull({id: data.apn, apn: data.apn, type: 'real_estate'}, bq);
+        if (typeof showToast === 'function') showToast('✓ INTEL REPORT UNLOCKED');
+      }
+    }
+  } catch(e) { console.log('[intel check]', e); }
+})();
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6W8KQJR8D4mtltdsYkUJlvdzCMjygknw&v=alpha&libraries=maps3d,places&callback=__mapReady&loading=async" async defer></script>
 <style>
