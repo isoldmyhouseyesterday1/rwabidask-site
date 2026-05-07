@@ -8227,9 +8227,9 @@ async function generateIntelPDF(bq) {
   if (!bq) { if(typeof showToast==='function') showToast('NO REPORT DATA'); return; }
   if(typeof showToast==='function') showToast('GENERATING PDF…');
   // Always fetch paid version for PDF
-  const pin = bq.PIN || bq.apn;
-  if (pin) {
-    const paidData = await fetchParcelData({pin, paid: true});
+  const pdfPin = bq.PIN || bq.apn;
+  if (pdfPin) {
+    const paidData = await fetchParcelData({pin: pdfPin, paid: true});
     if (paidData) bq = paidData;
   }
   const pin=bq.PIN||'—',addr=bq.address||'—',assessed=bq.current_assessed_total||0;
