@@ -8226,17 +8226,34 @@ window.renderBasicsPanel=async function(asset,bqData){if(bqData){_renderFull(ass
 async function generateIntelPDF(bq) {
   if (!bq) { if(typeof showToast==='function') showToast('NO REPORT DATA'); return; }
   if(typeof showToast==='function') showToast('GENERATING PDF…');
-  // Always fetch paid version for PDF
+  // Fetch raw paid data directly
   const pdfPin = bq.PIN || bq.apn;
   if (pdfPin) {
-    const paidData = await fetchParcelData({pin: pdfPin, paid: true});
-    if (paidData) bq = paidData;
+    try {
+      const sess = await _sb?.auth?.getSession();
+      const tok = sess?.data?.session?.access_token || SB_KEY;
+      const r = await fetch(PARCEL_API+'?pin='+encodeURIComponent(pdfPin)+'&paid=true',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tok}});
+      const d = await r.json();
+      if (d?.parcel) bq = d.parcel;
+    } catch(e) { console.warn('[PDF fetch]',e); }
   }
-  const pin=bq.PIN||'—',addr=bq.address||'—',assessed=bq.current_assessed_total||0;
-  const land=bq.current_assessed_land||0,imps=bq.current_assessed_improvements||0;
-  const bldg=bq.building||{},lastSale=bq.last_sale||{};
-  const apprHist=bq.appraisal_history||[],permits=bq.permit_history||[];
-  const tsunami=bq.tsunami_hazard||'',hazards=bq.hazards||{},sc=bq.seismic_site_class||'';
+  const pin=bq.PIN||pdfPin||'—';
+  const addr=bq.address||(bq.account_history||[])[0]?.address_line||'—';
+  const assessed=Number(bq.current_assessed_total||0);
+  const land=Number(bq.current_assessed_land||0),imps=Number(bq.current_assessed_improvements||0);
+  const bldgRaw=(bq.residential_buildings||[])[0]||{};
+  const bldg={bedrooms:bldgRaw.bedrooms,sqft_total:bldgRaw.sqft_total_living,year_built:bldgRaw.year_built,stories:bldgRaw.stories,building_grade:bldgRaw.building_grade,condition_rating:bldgRaw.condition_rating,sqft_garage:bldgRaw.sqft_garage_attached};
+  const saleHist=(bq.sale_history||[]).filter(s=>parseInt(s.sale_price)>0);
+  const lastSale={price:saleHist[0]?.sale_price,date:saleHist[0]?.document_date,instrument:saleHist[0]?.sale_instrument};
+  const apprHist=bq.appraisal_history||bq.value_trend_2yr||[];
+  const permits=bq.permit_history||[];
+  const tsunami=bq.tsunami_hazard||'';
+  const hazards=bq.hazards||{};
+  const sgr=(bq.seismic_ground_response||[])[0]||{};
+  const sc=sgr.site_class||bq.seismic_site_class||'';
+  const flat=bq.flat||{};
+  const lot=flat.SqFtLot?Number(flat.SqFtLot).toLocaleString()+' sqft':'—';
+  const zoning=flat.CurrentZoning||'—';
   const el=document.createElement('div');
   el.innerHTML=`<div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;padding:32px;color:#111;font-size:11px;line-height:1.6">
 <div style="border-top:3px solid #111;border-bottom:1px solid #111;padding:12px 0;margin-bottom:20px">
