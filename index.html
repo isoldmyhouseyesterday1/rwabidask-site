@@ -7997,7 +7997,24 @@ async function initiateStripeSandbox(apn) {
     });
     if (!resp.ok) { showToast('PAYMENT ENGINE OFFLINE'); return; }
     const data = await resp.json();
-    if (data?.url) window.location.href = data.url;
+    if (data?.url) {
+      sessionStorage.setItem('pending_intel_apn', apn);
+      // Save map position before leaving
+      try {
+        const map3d = document.querySelector('gmp-map-3d');
+        if (map3d) {
+          sessionStorage.setItem('map_center', JSON.stringify({
+            lat: map3d.center?.lat,
+            lng: map3d.center?.lng,
+            altitude: map3d.center?.altitude,
+            heading: map3d.heading,
+            tilt: map3d.tilt,
+            range: map3d.range
+          }));
+        }
+      } catch(e) {}
+      window.location.href = data.url;
+    }
     else showToast('CHECKOUT ERROR — TRY AGAIN');
   } catch (err) {
     console.error("Stripe Error:", err);
