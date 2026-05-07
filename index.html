@@ -7983,33 +7983,17 @@ async function initiateStripeSandbox(apn) {
   }
 
   try {
-    const { data, error } = await _sb.functions.invoke('swift-api', {
-      body: { apn: apn, action: 'create-checkout-session' }
+    const sess = await _sb.auth.getSession();
+    const tok = sess?.data?.session?.access_token || SB_KEY;
+    const resp = await fetch('https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/create-checkout-session', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+tok},
+      body: JSON.stringify({user_id:currentUser.id,asset_id:String(apn),email:currentUser.email,success_url:window.location.href+'?intel_unlocked='+encodeURIComponent(apn)+'&success=true',cancel_url:window.location.href})
     });
-    if (error) throw error;
-
-    if (data?.url) {
-      // Admin bypass: remove all orange blackout overlays immediately
-      // (admin sees full data without completing Stripe flow)
-      if (isAdminUser && typeof isAdminUser === 'function' && isAdminUser()) {
-        document.querySelectorAll('.basics-gate-bar, .intel-blackout, [data-gated="true"]')
-          .forEach(el => {
-            el.style.filter = '';
-            el.style.opacity = '1';
-            el.style.pointerEvents = '';
-            el.removeAttribute('data-gated');
-          });
-        // Un-blur all blurred gated rows in the current panel
-        document.querySelectorAll('.basics-row [style*="blur"]')
-          .forEach(el => el.style.filter = '');
-        showToast('ADMIN — INTEL REPORT UNLOCKED');
-        updateUnifiedLedger(false);
-        return;
-      }
-      window.location.href = data.url;
-    } else {
-      throw new Error("No checkout URL returned from Edge Function");
-    }
+    if (!resp.ok) { showToast('PAYMENT ENGINE OFFLINE'); return; }
+    const data = await resp.json();
+    if (data?.url) window.location.href = data.url;
+    else showToast('CHECKOUT ERROR — TRY AGAIN');
   } catch (err) {
     console.error("Stripe Error:", err);
     showToast("PAYMENT ENGINE OFFLINE");
