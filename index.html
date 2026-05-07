@@ -8238,9 +8238,22 @@ async function generateIntelPDF(bq) {
     } catch(e) { console.warn('[PDF fetch]',e); }
   }
   const pin=bq.PIN||pdfPin||'—';
-  const addr=bq.address||(bq.account_history||[])[0]?.address_line||'—';
-  const assessed=Number(bq.current_assessed_total||0);
-  const land=Number(bq.current_assessed_land||0),imps=Number(bq.current_assessed_improvements||0);
+  const acct=(bq.account_history||[])[0]||{};
+  const addr=bq.flat?.Address?.trim()||acct.address_line||bq.address||'—';
+  const cityState=acct.city_state||bq.city_state||'';
+  // Compute assessed from appraisal history if not directly available
+  const apprFirst=(bq.appraisal_history||[])[0]||{};
+  const assessed=Number(bq.current_assessed_total||0)||
+    (parseInt(apprFirst.appraisal_land_value||0)+parseInt(apprFirst.appraisal_improvements_value||0));
+  const land=Number(bq.current_assessed_land||0)||parseInt(apprFirst.appraisal_land_value||0);
+  const imps=Number(bq.current_assessed_improvements||0)||parseInt(apprFirst.appraisal_improvements_value||0);
+  const apprYear=apprFirst.appraisal_roll_year||'2026';
+  // Compute CAGR if enough history
+  const apprAll=bq.appraisal_history||[];
+  const apprLast=apprAll[apprAll.length-1]||{};
+  const oldVal=parseInt(apprLast.appraisal_land_value||0)+parseInt(apprLast.appraisal_improvements_value||0);
+  const years=apprAll.length>1?parseInt(apprFirst.appraisal_roll_year||2026)-parseInt(apprLast.appraisal_roll_year||2000):0;
+  const cagr=years>0&&oldVal>0?((Math.pow(assessed/oldVal,1/years)-1)*100).toFixed(1):null;
   const bldgRaw=(bq.residential_buildings||[])[0]||{};
   const bldg={bedrooms:bldgRaw.bedrooms,sqft_total:bldgRaw.sqft_total_living,year_built:bldgRaw.year_built,stories:bldgRaw.stories,building_grade:bldgRaw.building_grade,condition_rating:bldgRaw.condition_rating,sqft_garage:bldgRaw.sqft_garage_attached};
   const saleHist=(bq.sale_history||[]).filter(s=>parseInt(s.sale_price)>0);
@@ -8259,10 +8272,10 @@ async function generateIntelPDF(bq) {
 <div style="border-top:3px solid #111;border-bottom:1px solid #111;padding:12px 0;margin-bottom:20px">
 <div style="font-size:9px;letter-spacing:3px;color:#666">RWABIDASK — PROPERTY INTELLIGENCE REPORT</div>
 <div style="font-size:18px;font-weight:700;margin:6px 0">${addr}</div>
-<div style="font-size:10px;color:#666">PIN ${pin} · King County WA · ${new Date().toLocaleDateString()}</div>
+<div style="font-size:10px;color:#666">PIN ${pin} · King County WA · ${new Date().toLocaleDateString()}</div>${cityState?`<div style="font-size:10px;color:#666">${cityState}</div>`:""}
 </div>
 <div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">01 — ASSESSED VALUE</div>
-${[['Total (2026)','$'+Number(assessed).toLocaleString()],['Land','$'+Number(land).toLocaleString()],['Building','$'+Number(imps).toLocaleString()]].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${k}</span><span style="font-weight:600">${v}</span></div>`).join('')}</div>
+${[['Total ('+apprYear+')','$'+assessed.toLocaleString()+(cagr?' · '+cagr+'%/yr CAGR':'')],['Land','$'+Number(land).toLocaleString()],['Building','$'+Number(imps).toLocaleString()]].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${k}</span><span style="font-weight:600">${v}</span></div>`).join('')}</div>
 <div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">02 — BUILDING</div>
 ${[['Bedrooms',bldg.bedrooms],['Living area',bldg.sqft_total?Number(bldg.sqft_total).toLocaleString()+' sqft':''],['Year built',bldg.year_built],['Stories',bldg.stories],['Grade',bldg.building_grade],['Condition',bldg.condition_rating],['Garage',bldg.sqft_garage?Number(bldg.sqft_garage).toLocaleString()+' sqft':'']].filter(r=>r[1]).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${k}</span><span>${v}</span></div>`).join('')}</div>
 <div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">03 — APPRAISAL HISTORY</div>
