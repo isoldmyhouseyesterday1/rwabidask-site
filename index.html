@@ -8162,26 +8162,208 @@ function renderList(assets) {
 const PARCEL_API='https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/parcel-proxy';
 async function fetchParcelData({lat,lng,address,pin}={}){let url=PARCEL_API+'?';const pinIsCoord=pin&&/^-?\d+\.\d+,-?\d+\.\d+$/.test(pin);if(pin&&!pinIsCoord)url+=`pin=${encodeURIComponent(pin)}`;else if(lat&&lng)url+=`lat=${lat}&lng=${lng}`;else if(address)url+=`address=${encodeURIComponent(address)}`;else return null;try{const r=await fetch(url,{signal:AbortSignal.timeout(60000),headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}});if(!r.ok){console.warn('[RWA] proxy',r.status);return null;}const d=await r.json();return d?.parcel||null;}catch(e){console.warn('[RWA]',e.message);return null;}}
 window.renderBasicsPanel=async function(asset,bqData){if(bqData){_renderFull(asset,bqData);return;}const rhead=document.getElementById('rhead'),rbody=document.getElementById('rbody');if(rhead)rhead.innerHTML=`<div class="rtype">PARCEL RECORD // QUERYING</div><div class="rname">${asset?.address||asset?.apn||'Parcel'}</div><div style="margin-top:14px;display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid rgba(0,255,200,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin360 .7s linear infinite"></div><span style="font-size:10px;color:var(--muted);letter-spacing:1px">QUERYING LEDGER…</span></div>`;if(rbody)rbody.innerHTML='';const data=await fetchParcelData({lat:asset?.lat,lng:asset?.lng,pin:asset?.apn||asset?.id});_renderFull(asset,data);};
-function _renderFull(asset,bq){const a=asset||{},pin=bq?.PIN||a.apn||a.id||'—',addr=bq?.address||a.address||'—',cityState=[bq?.city_state,bq?.zip_code].filter(Boolean).join(' ')||'',assessed=bq?.current_assessed_total||0,assessedLand=bq?.current_assessed_land||0,assessedImps=bq?.current_assessed_improvements||0,assessedYear=bq?.appraisal_year||'',bldg=bq?.building||{},beds=bldg.bedrooms||'—',sqft=bldg.sqft_total?Number(bldg.sqft_total).toLocaleString():'—',built=bldg.year_built||'—',reno=bldg.year_renovated&&bldg.year_renovated!=='0'?` · Reno ${bldg.year_renovated}`:'',lastSale=bq?.last_sale||{},salePrice=lastSale.price?`$${Number(lastSale.price).toLocaleString()}`:'—',saleDate=lastSale.date?lastSale.date.substring(0,10):'—',permits=bq?.permit_snapshot||{},trend=bq?.value_trend_2yr||[],isMember=!!window.currentUser,safePin=(pin||'').replace(/'/g,''),
+function _renderFull(asset,bq){
+const a=asset||{},pin=bq?.PIN||a.apn||a.id||'—',addr=bq?.address||a.address||'—',
+cityState=[bq?.city_state,bq?.zip_code].filter(Boolean).join(' ')||'',
+assessed=bq?.current_assessed_total||0,assessedLand=bq?.current_assessed_land||0,
+assessedImps=bq?.current_assessed_improvements||0,assessedYear=bq?.appraisal_year||'',
+bldg=bq?.building||{},lastSale=bq?.last_sale||{},
+salePrice=lastSale.price?`$${Number(lastSale.price).toLocaleString()}`:'—',
+saleDate=lastSale.date?lastSale.date.substring(0,10):'—',
+permits=bq?.permit_snapshot||{},trend=bq?.value_trend_2yr||[],
+safePin=(pin||'').replace(/'/g,''),
 sqftLot=bq?.sqft_lot?Number(bq.sqft_lot).toLocaleString():null,
 lotAcres=bq?.sqft_lot?(Number(bq.sqft_lot)/43560).toFixed(2):null,
 zoning=bq?.current_zoning||null,
 hazards=bq?.hazards||{},
 hasHazard=hazards.seismic||hazards.landslide||hazards.erosion||hazards.coal_mine||hazards.flood_100yr;
-const spark=trend.length>1?(()=>{const vals=[...trend].reverse().map(t=>t.total),mn=Math.min(...vals),mx=Math.max(...vals),rng=mx-mn||1,W=200,H=32,pct=(((vals[vals.length-1]-vals[0])/(vals[0]||1))*100).toFixed(1),col=pct>=0?'var(--green)':'var(--red)',pts=vals.map((v,i)=>`${(i/(vals.length-1))*W},${H-((v-mn)/rng)*H}`).join(' ');return `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">Assessed value ${trend[trend.length-1]?.year}→${trend[0]?.year} <span style="color:${col};font-weight:700">${pct>=0?'+':''}${pct}%</span></div><svg width="${W}" height="${H}"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linecap="round"/></svg><div style="font-size:8px;color:var(--muted);margin-top:3px">Land + improvements · county assessor</div>`;})():'';
+
+// ── Property type detection from PresentUse code ──
+const pu=parseInt(bq?.PresentUse||a.PresentUse||bq?.use_description||0)||0;
+function getPropCategory(code){
+  if(code===0)return'unknown';
+  if([2,3].includes(code))return'sfr';
+  if(code===6)return'condo';
+  if([4,29].includes(code))return'townhouse';
+  if([19,20,21].includes(code))return'small_multi';
+  if([11,12].includes(code))return'apartment';
+  if(code>=30&&code<=39)return'commercial';
+  if(code>=40&&code<=49)return'industrial';
+  if(code>=50&&code<=59)return'agricultural';
+  if(code>=60&&code<=69)return'government';
+  if(code>=70&&code<=79)return'park';
+  if(code>=80&&code<=89)return'utility';
+  if(code>=90&&code<=99)return'vacant';
+  if(code>=300)return'special';
+  return'sfr';
+}
+const propCat=getPropCategory(pu);
+const propLabel={sfr:'Single Family',condo:'Condominium',townhouse:'Townhouse',small_multi:'Multi-Family',apartment:'Apartment Complex',commercial:'Commercial',industrial:'Industrial',agricultural:'Agricultural',government:'Government / Institutional',park:'Park / Open Space',utility:'Utility',vacant:'Vacant Land',special:'Special Use',unknown:'Parcel'}[propCat]||'Parcel';
+const propIcon={sfr:'🏠',condo:'🏢',townhouse:'🏘',small_multi:'🏘',apartment:'🏢',commercial:'🏬',industrial:'🏭',agricultural:'🌾',government:'🏛',park:'🌳',utility:'⚡',vacant:'📍',special:'🔒',unknown:'📍'}[propCat]||'📍';
+
+// ── Build rows based on property type ──
+const hasBuilding=bldg&&(bldg.year_built||bldg.sqft_total||bldg.bedrooms);
+let rows=[];
+
+if(['sfr','condo','townhouse'].includes(propCat)){
+  const baths=[bldg.bath_full&&`${bldg.bath_full} full`,bldg.bath_3qtr&&`${bldg.bath_3qtr} ¾`,bldg.bath_half&&`${bldg.bath_half} ½`].filter(Boolean).join(' · ')||'—';
+  rows=[
+    ['BEDS',bldg.bedrooms||'—'],
+    ['BATHS',baths],
+    ['LIVING AREA',bldg.sqft_total?`${Number(bldg.sqft_total).toLocaleString()} sqft`:'—'],
+    ['YEAR BUILT',bldg.year_built||(bldg.year_renovated&&bldg.year_renovated!=='0'?`Reno ${bldg.year_renovated}`:'—')],
+    ['STORIES',bldg.stories||'—'],
+    ['GRADE',bldg.building_grade||'—'],
+    ['GARAGE',bldg.sqft_garage?`${Number(bldg.sqft_garage).toLocaleString()} sqft`:''],
+    ['DECK',bldg.sqft_deck?`${Number(bldg.sqft_deck).toLocaleString()} sqft`:''],
+    ['LOT SIZE',sqftLot?`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`:''],
+  ];
+} else if(propCat==='small_multi'){
+  const unitMap={19:'2 units (Duplex)',20:'3 units (Triplex)',21:'4 units (Four-plex)',29:'Multi-family'};
+  rows=[
+    ['TYPE',unitMap[pu]||'Multi-family'],
+    ['TOTAL AREA',bldg.sqft_total?`${Number(bldg.sqft_total).toLocaleString()} sqft`:'—'],
+    ['YEAR BUILT',bldg.year_built||'—'],
+    ['STORIES',bldg.stories||'—'],
+    ['LOT SIZE',sqftLot?`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`:''],
+    ['ZONING',zoning||''],
+  ];
+} else if(propCat==='apartment'){
+  rows=[
+    ['TOTAL AREA',bldg.sqft_total?`${Number(bldg.sqft_total).toLocaleString()} sqft`:'—'],
+    ['YEAR BUILT',bldg.year_built||'—'],
+    ['STORIES',bldg.stories||'—'],
+    ['GRADE',bldg.building_grade||'—'],
+    ['LOT SIZE',sqftLot?`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`:''],
+    ['ZONING',zoning||''],
+  ];
+} else if(propCat==='commercial'){
+  rows=[
+    ['USE TYPE',bq?.use_description||'Commercial'],
+    ['TOTAL AREA',bldg.sqft_total?`${Number(bldg.sqft_total).toLocaleString()} sqft`:'—'],
+    ['YEAR BUILT',bldg.year_built||'—'],
+    ['STORIES',bldg.stories||'—'],
+    ['LOT SIZE',sqftLot?`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`:''],
+    ['ZONING',zoning||''],
+  ];
+} else if(propCat==='industrial'){
+  rows=[
+    ['USE TYPE',bq?.use_description||'Industrial'],
+    ['TOTAL AREA',bldg.sqft_total?`${Number(bldg.sqft_total).toLocaleString()} sqft`:'—'],
+    ['YEAR BUILT',bldg.year_built||'—'],
+    ['LOT SIZE',sqftLot?`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`:''],
+    ['ZONING',zoning||''],
+  ];
+} else if(['government','park','utility','special'].includes(propCat)){
+  rows=[
+    ['USE TYPE',bq?.use_description||propLabel],
+    ['LOT SIZE',sqftLot?`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`:'—'],
+    ['ZONING',zoning||'—'],
+    ['LEVY CODE',bq?.LevyCode||'—'],
+  ];
+} else if(propCat==='vacant'||propCat==='agricultural'){
+  rows=[
+    ['USE TYPE',bq?.use_description||propLabel],
+    ['LOT SIZE',sqftLot?`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`:'—'],
+    ['ZONING',zoning||'—'],
+  ];
+} else {
+  // Unknown / fallback — show whatever we have
+  const baths=[bldg.bath_full&&`${bldg.bath_full} full`,bldg.bath_3qtr&&`${bldg.bath_3qtr} ¾`,bldg.bath_half&&`${bldg.bath_half} ½`].filter(Boolean).join(' · ')||null;
+  rows=[
+    hasBuilding&&['AREA',bldg.sqft_total?`${Number(bldg.sqft_total).toLocaleString()} sqft`:null],
+    hasBuilding&&baths&&['BATHS',baths],
+    hasBuilding&&['YEAR BUILT',bldg.year_built||null],
+    ['LOT SIZE',sqftLot?`${sqftLot} sqft`:null],
+    ['ZONING',zoning||null],
+  ].filter(r=>r&&r[1]);
+}
+
+// Always add value + sale + permits to all types
+rows=[...rows,
+  ['LAND VALUE',assessedLand?`$${Number(assessedLand).toLocaleString()}`:''],
+  ['STRUCTURE',assessedImps&&assessedImps>0?`$${Number(assessedImps).toLocaleString()}`:''],
+  ['LAST SALE',salePrice!=='—'?salePrice:''],
+  ['SALE DATE',saleDate!=='—'?saleDate:''],
+  ['PERMITS',permits.total_count?`${permits.total_count} on record`:''],
+].filter(r=>r[1]);
+
+// ── No data fallback ──
+const noData=!bq&&!hasBuilding&&!assessed;
+
+// ── Spark chart ──
+const spark=trend.length>1?(()=>{
+  const vals=[...trend].reverse().map(t=>t.total),mn=Math.min(...vals),mx=Math.max(...vals),rng=mx-mn||1,W=200,H=32;
+  const pct=(((vals[vals.length-1]-vals[0])/(vals[0]||1))*100).toFixed(1);
+  const col=pct>=0?'var(--green)':'var(--red)';
+  const pts=vals.map((v,i)=>`${(i/(vals.length-1))*W},${H-((v-mn)/rng)*H}`).join(' ');
+  return `<div style="font-size:9px;color:var(--muted);margin-bottom:5px">Assessed value ${trend[trend.length-1]?.year}→${trend[0]?.year} <span style="color:${col};font-weight:700">${pct>=0?'+':''}${pct}%</span></div><svg width="${W}" height="${H}"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linecap="round"/></svg><div style="font-size:8px;color:var(--muted);margin-top:3px">Land + improvements · county assessor</div>`;
+})():'';
+
+// ── Seismic/tsunami badges ──
 const sgr=bq?.seismic_ground_response||[],sc=sgr[0]?.site_class||bq?.seismic_site_class||'',sr=parseInt(sgr[0]?.seismic_risk_score||bq?.seismic_risk_score||0),tsunami=bq?.tsunami_hazard||'';
-document.getElementById('rhead').innerHTML=`<div class="rtype">PARCEL RECORD // ${bq?'LIVE DATA':'CACHED'}</div><div class="rname" style="font-size:14px;word-break:break-word">${addr}</div>${cityState?`<div style="font-size:11px;color:var(--dim);margin-bottom:4px">${cityState}</div>`:''}<div style="font-family:monospace;font-size:9px;color:var(--cyan);margin-bottom:10px">APN: ${pin}</div><div class="rprice-row"><div class="rprice">${assessed?`$${Number(assessed).toLocaleString()}`:'—'}</div>${assessed?`<div class="rprice-psf" style="font-size:9px;color:var(--muted)">${assessedYear} roll year</div>`:''}</div>`;
-const baths=[bldg.bath_full&&`${bldg.bath_full} full`,bldg.bath_3qtr&&`${bldg.bath_3qtr} ¾`,bldg.bath_half&&`${bldg.bath_half} ½`].filter(Boolean).join(' · ')||'—';
-document.getElementById('rbody').innerHTML=`<div style="padding:10px 18px 6px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted)">PARCEL BASICS</span><span style="font-size:8px;font-weight:700;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.25);padding:2px 7px;border-radius:2px">FREE</span></div>${[['BEDS',beds],['BATHS',baths],['SQ FT',sqft],['BUILT',`${built}${reno}`],['STORIES',bldg.stories||''],['GRADE',bldg.building_grade||''],['GARAGE',bldg.sqft_garage?`${Number(bldg.sqft_garage).toLocaleString()} sqft`:''],['DECK',bldg.sqft_deck?`${Number(bldg.sqft_deck).toLocaleString()} sqft`:''],['LOT SIZE',sqftLot?`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}` :''],['ZONING',zoning?`<a href="https://www.kingcounty.gov/depts/local-services/permits-building-inspections/codes-land-use/zoning/zones.aspx" target="_blank" style="color:var(--cyan);text-decoration:none">${zoning} ↗</a>`:''],['LAND VALUE',assessedLand?`$${Number(assessedLand).toLocaleString()}`:''],['STRUCTURE',assessedImps?`$${Number(assessedImps).toLocaleString()}`:''],['LAST SALE',salePrice],['SALE DATE',saleDate],['PERMITS',permits.total_count?`${permits.total_count} on record`:'']].filter(r=>r[1]).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 18px;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--dim)">${k}</span><span style="color:var(--text);font-weight:500">${v}</span></div>`).join('')}${spark?`<div style="padding:12px 18px;border-top:1px solid var(--border)">${spark}</div>`:''}<div style="padding:8px 18px;display:flex;gap:6px;flex-wrap:wrap">${sc?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(${sr>=4?'255,107,107':sr>=2?'255,180,0':'62,230,136'},.08);color:var(--${sr>=4?'red':sr>=2?'gold':'green'});border:1px solid rgba(${sr>=4?'255,107,107':sr>=2?'255,180,0':'62,230,136'},.25)">Site ${sc} · ${sr>=4?'HIGH':sr>=2?'MOD':'LOW'} SEISMIC</span>`:''}${tsunami&&!tsunami.toLowerCase().includes('null')?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,107,107,.08);color:var(--red);border:1px solid rgba(255,107,107,.25)">TSUNAMI ZONE</span>`:''}${hazards.flood_100yr?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,107,107,.08);color:var(--red);border:1px solid rgba(255,107,107,.25)">100YR FLOOD</span>`:''}${hazards.landslide?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">LANDSLIDE ZONE</span>`:''}${hazards.erosion?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">EROSION ZONE</span>`:''}${hazards.coal_mine?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">COAL MINE HAZARD</span>`:''}${!hasHazard&&!sc&&(!tsunami||tsunami.toLowerCase().includes('null'))?`<span style="font-size:8px;padding:3px 8px;border-radius:3px;background:rgba(62,230,136,.08);color:var(--green);border:1px solid rgba(62,230,136,.25)">NO HAZARDS ON RECORD</span>`:''}</div><div style="margin:8px 16px;padding:14px;background:linear-gradient(135deg,rgba(0,40,28,.7),rgba(0,20,40,.7));border:1px solid rgba(0,255,200,.18);border-radius:4px"><div style="font-size:12px;font-weight:600;color:var(--cyan);margin-bottom:6px">⧡ Full Intel Report — $20</div><div style="font-size:11px;color:rgba(0,255,200,.45);margin-bottom:12px">30yr history · all permits · geo-risk · tax appeals · formulas</div><button style="width:100%;background:var(--cyan);color:#000;border:none;border-radius:4px;padding:10px;font-size:13px;font-weight:700;cursor:pointer" onclick="initiateStripeSandbox('${safePin}')">PURCHASE INTEL REPORT · $20</button></div>
-<div style="margin:0 16px 8px;display:flex;flex-direction:column;gap:7px">
-  <button style="width:100%;padding:10px;border:1px solid rgba(0,255,200,.3);background:rgba(0,255,200,.05);color:var(--cyan);border-radius:4px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showBidModal())">⬆ PLACE OFFER</button>
-  <div style="display:flex;gap:6px">
-    <button style="flex:1;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showLendingModal())">🏦 FINANCING</button>
-    <button style="flex:1;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showInsuranceModal())">🛡 INSURANCE</button>
-  </div>
-  <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','CONTACT_BROKER'); showToast('BROKER INQUIRY TRANSMITTED'); })">📋 CONTACT BROKER</button>
-  <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','MAKE_OFFER'); showToast('OFFER SYSTEM COMING SOON'); })">💬 MAKE OFFER TO OWNER</button>
-</div>`;
+
+// ── Zoning link ──
+const zoningHtml=zoning?`<a href="https://www.kingcounty.gov/depts/local-services/permits-building-inspections/codes-land-use/zoning/zones.aspx" target="_blank" style="color:var(--cyan);text-decoration:none">${zoning} ↗</a>`:null;
+rows=rows.map(([k,v])=>k==='ZONING'&&zoningHtml?[k,zoningHtml]:[k,v]);
+
+// ── Render header ──
+document.getElementById('rhead').innerHTML=`
+  <div class="rtype">PARCEL RECORD // ${bq?'LIVE DATA':'CACHED'}</div>
+  <div style="font-size:10px;color:var(--cyan);letter-spacing:1px;margin-bottom:4px">${propIcon} ${propLabel.toUpperCase()}</div>
+  <div class="rname" style="font-size:14px;word-break:break-word">${addr}</div>
+  ${cityState?`<div style="font-size:11px;color:var(--dim);margin-bottom:4px">${cityState}</div>`:''}
+  <div style="font-family:monospace;font-size:9px;color:var(--cyan);margin-bottom:10px">APN: ${pin}</div>
+  <div class="rprice-row">
+    <div class="rprice">${assessed?`$${Number(assessed).toLocaleString()}`:'—'}</div>
+    ${assessed?`<div class="rprice-psf" style="font-size:9px;color:var(--muted)">${assessedYear} roll year</div>`:''}
+  </div>`;
+
+// ── Render body ──
+if(noData){
+  document.getElementById('rbody').innerHTML=`
+    <div style="padding:24px 18px;text-align:center">
+      <div style="font-size:24px;margin-bottom:8px">📍</div>
+      <div style="font-size:12px;color:var(--dim);margin-bottom:4px">No parcel record at this location</div>
+      <div style="font-size:10px;color:var(--muted);line-height:1.6">This may be water, a road right-of-way, open space, federal land, or a location outside King County coverage.</div>
+    </div>`;
+} else {
+  document.getElementById('rbody').innerHTML=`
+    <div style="padding:10px 18px 6px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <span style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted)">${propLabel.toUpperCase()} DATA</span>
+      <span style="font-size:8px;font-weight:700;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.25);padding:2px 7px;border-radius:2px">FREE</span>
+    </div>
+    ${rows.filter(r=>r[1]).map(([k,v])=>`
+      <div style="display:flex;justify-content:space-between;padding:7px 18px;border-bottom:1px solid var(--border);font-size:12px">
+        <span style="color:var(--dim)">${k}</span>
+        <span style="color:var(--text);font-weight:500">${v}</span>
+      </div>`).join('')}
+    ${spark?`<div style="padding:12px 18px;border-top:1px solid var(--border)">${spark}</div>`:''}
+    <div style="padding:8px 18px;display:flex;gap:6px;flex-wrap:wrap">
+      ${sc?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(${sr>=4?'255,107,107':sr>=2?'255,180,0':'62,230,136'},.08);color:var(--${sr>=4?'red':sr>=2?'gold':'green'});border:1px solid rgba(${sr>=4?'255,107,107':sr>=2?'255,180,0':'62,230,136'},.25)">Site ${sc} · ${sr>=4?'HIGH':sr>=2?'MOD':'LOW'} SEISMIC</span>`:''}
+      ${tsunami&&!tsunami.toLowerCase().includes('null')?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,107,107,.08);color:var(--red);border:1px solid rgba(255,107,107,.25)">TSUNAMI ZONE</span>`:''}
+      ${hazards.flood_100yr?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,107,107,.08);color:var(--red);border:1px solid rgba(255,107,107,.25)">100YR FLOOD</span>`:''}
+      ${hazards.landslide?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">LANDSLIDE ZONE</span>`:''}
+      ${hazards.erosion?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">EROSION ZONE</span>`:''}
+      ${hazards.coal_mine?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">COAL MINE HAZARD</span>`:''}
+      ${!hasHazard&&!sc&&(!tsunami||tsunami.toLowerCase().includes('null'))?`<span style="font-size:8px;padding:3px 8px;border-radius:3px;background:rgba(62,230,136,.08);color:var(--green);border:1px solid rgba(62,230,136,.25)">NO HAZARDS ON RECORD</span>`:''}
+    </div>
+    <div style="margin:8px 16px;padding:14px;background:linear-gradient(135deg,rgba(0,40,28,.7),rgba(0,20,40,.7));border:1px solid rgba(0,255,200,.18);border-radius:4px">
+      <div style="font-size:12px;font-weight:600;color:var(--cyan);margin-bottom:6px">⧡ Full Intel Report — $20</div>
+      <div style="font-size:11px;color:rgba(0,255,200,.45);margin-bottom:12px">30yr history · all permits · geo-risk · tax appeals · formulas</div>
+      <button style="width:100%;background:var(--cyan);color:#000;border:none;border-radius:4px;padding:10px;font-size:13px;font-weight:700;cursor:pointer" onclick="initiateStripeSandbox('${safePin}')">PURCHASE INTEL REPORT · $20</button>
+    </div>
+    <div style="margin:0 16px 8px;display:flex;flex-direction:column;gap:7px">
+      <button style="width:100%;padding:10px;border:1px solid rgba(0,255,200,.3);background:rgba(0,255,200,.05);color:var(--cyan);border-radius:4px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showBidModal())">⬆ PLACE OFFER</button>
+      <div style="display:flex;gap:6px">
+        <button style="flex:1;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showLendingModal())">🏦 FINANCING</button>
+        <button style="flex:1;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showInsuranceModal())">🛡 INSURANCE</button>
+      </div>
+      <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','CONTACT_BROKER'); showToast('BROKER INQUIRY TRANSMITTED'); })">📋 CONTACT BROKER</button>
+      <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','MAKE_OFFER'); showToast('OFFER SYSTEM COMING SOON'); })">💬 MAKE OFFER TO OWNER</button>
+    </div>`;
+}
+
 window.currentAsset=asset;window.activeId=asset?.id||pin;
 // Update recently viewed and status with real resolved data
 if(bq&&pin&&pin!=='—'){
