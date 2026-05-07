@@ -8223,6 +8223,43 @@ function renderList(assets) {
 const PARCEL_API='https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/parcel-proxy';
 async function fetchParcelData({lat,lng,address,pin}={}){let url=PARCEL_API+'?';const pinIsCoord=pin&&/^-?\d+\.\d+,-?\d+\.\d+$/.test(pin);if(pin&&!pinIsCoord)url+=`pin=${encodeURIComponent(pin)}`;else if(lat&&lng)url+=`lat=${lat}&lng=${lng}`;else if(address)url+=`address=${encodeURIComponent(address)}`;else return null;try{const r=await fetch(url,{signal:AbortSignal.timeout(60000),headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}});if(!r.ok){console.warn('[RWA] proxy',r.status);return null;}const d=await r.json();return d?.parcel||null;}catch(e){console.warn('[RWA]',e.message);return null;}}
 window.renderBasicsPanel=async function(asset,bqData){if(bqData){_renderFull(asset,bqData);return;}const rhead=document.getElementById('rhead'),rbody=document.getElementById('rbody');if(rhead)rhead.innerHTML=`<div class="rtype">PARCEL RECORD // QUERYING</div><div class="rname">${asset?.address||asset?.apn||'Parcel'}</div><div style="margin-top:14px;display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid rgba(0,255,200,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin360 .7s linear infinite"></div><span style="font-size:10px;color:var(--muted);letter-spacing:1px">QUERYING LEDGER…</span></div>`;if(rbody)rbody.innerHTML='';const data=await fetchParcelData({lat:asset?.lat,lng:asset?.lng,pin:asset?.apn||asset?.id});_renderFull(asset,data);};
+async function generateIntelPDF(bq) {
+  if (!bq) { if(typeof showToast==='function') showToast('NO REPORT DATA'); return; }
+  if(typeof showToast==='function') showToast('GENERATING PDF…');
+  const pin=bq.PIN||'—',addr=bq.address||'—',assessed=bq.current_assessed_total||0;
+  const land=bq.current_assessed_land||0,imps=bq.current_assessed_improvements||0;
+  const bldg=bq.building||{},lastSale=bq.last_sale||{};
+  const apprHist=bq.appraisal_history||[],permits=bq.permit_history||[];
+  const tsunami=bq.tsunami_hazard||'',hazards=bq.hazards||{},sc=bq.seismic_site_class||'';
+  const el=document.createElement('div');
+  el.innerHTML=`<div style="font-family:Courier New,monospace;max-width:680px;margin:0 auto;padding:32px;color:#111;font-size:11px;line-height:1.6">
+<div style="border-top:3px solid #111;border-bottom:1px solid #111;padding:12px 0;margin-bottom:20px">
+<div style="font-size:9px;letter-spacing:3px;color:#666">RWABIDASK — PROPERTY INTELLIGENCE REPORT</div>
+<div style="font-size:18px;font-weight:700;margin:6px 0">${addr}</div>
+<div style="font-size:10px;color:#666">PIN ${pin} · King County WA · ${new Date().toLocaleDateString()}</div>
+</div>
+<div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">01 — ASSESSED VALUE</div>
+${[['Total (2026)','$'+Number(assessed).toLocaleString()],['Land','$'+Number(land).toLocaleString()],['Building','$'+Number(imps).toLocaleString()]].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${k}</span><span style="font-weight:600">${v}</span></div>`).join('')}</div>
+<div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">02 — BUILDING</div>
+${[['Bedrooms',bldg.bedrooms],['Living area',bldg.sqft_total?Number(bldg.sqft_total).toLocaleString()+' sqft':''],['Year built',bldg.year_built],['Stories',bldg.stories],['Grade',bldg.building_grade],['Condition',bldg.condition_rating],['Garage',bldg.sqft_garage?Number(bldg.sqft_garage).toLocaleString()+' sqft':'']].filter(r=>r[1]).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${k}</span><span>${v}</span></div>`).join('')}</div>
+<div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">03 — APPRAISAL HISTORY</div>
+${apprHist.slice(0,15).map(a=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${a.appraisal_roll_year}</span><span>$${Number((parseInt(a.appraisal_land_value||0)+parseInt(a.appraisal_improvements_value||0))).toLocaleString()}</span></div>`).join('')}</div>
+<div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">04 — LAST SALE</div>
+${[['Price',lastSale.price?'$'+Number(lastSale.price).toLocaleString():'—'],['Date',lastSale.date?.substring(0,10)||'—'],['Instrument',lastSale.instrument||'—']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${k}</span><span>${v}</span></div>`).join('')}</div>
+<div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">05 — PERMITS (${permits.length})</div>
+${permits.slice(0,8).map(p=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${p.permit_issue_date?.substring(0,10)||'—'} · ${p.permit_type||'—'}</span><span>$${Number(p.permit_value||0).toLocaleString()}</span></div>`).join('')}</div>
+<div style="margin-bottom:14px"><div style="font-size:9px;letter-spacing:2px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:6px;color:#666">06 — HAZARDS</div>
+${[['Tsunami zone',tsunami&&!tsunami.includes('null')?'⚠ YES':'No'],['Seismic site class',sc||'—'],['100yr flood',hazards.flood_100yr?'⚠ YES':'No'],['Landslide',hazards.landslide?'⚠ YES':'No'],['Erosion',hazards.erosion?'⚠ YES':'No']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0"><span>${k}</span><span style="color:${v.includes('YES')?'#c00':'#090'}">${v}</span></div>`).join('')}</div>
+<div style="border-top:1px solid #111;margin-top:20px;padding-top:8px;font-size:9px;color:#666;display:flex;justify-content:space-between">
+<span>RWABIDASK INTEL REPORT · NOT FOR REDISTRIBUTION</span><span>rwabidask.com · ${new Date().getFullYear()}</span></div></div>`;
+  document.body.appendChild(el);
+  try {
+    await html2pdf().set({margin:0.5,filename:`RWABidAsk_Intel_${pin.replace(/[^a-z0-9]/gi,'_')}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'letter',orientation:'portrait'}}).from(el).save();
+    if(typeof showToast==='function') showToast('✓ INTEL REPORT DOWNLOADED');
+  } catch(e) { console.error(e); if(typeof showToast==='function') showToast('PDF ERROR — TRY AGAIN'); }
+  document.body.removeChild(el);
+}
+
 function _renderFull(asset,bq,isPaidReport=false){
 const a=asset||{},pin=bq?.PIN||a.apn||a.id||'—',addr=bq?.address||a.address||'—',
 cityState=[bq?.city_state,bq?.zip_code].filter(Boolean).join(' ')||'',
