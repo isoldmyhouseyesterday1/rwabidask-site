@@ -42,6 +42,7 @@
       if (bq && typeof _renderFull === 'function') {
         _renderFull({id: data.apn, apn: data.apn, type: 'real_estate'}, bq);
         if (typeof showToast === 'function') showToast('✓ INTEL REPORT UNLOCKED');
+        setTimeout(() => generateIntelPDF(bq), 1500);
       }
     }
   } catch(e) { console.log('[intel check]', e); }
@@ -7186,6 +7187,7 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
           const asset = {id: unlockId, apn: unlockId, type: 'real_estate'};
           _renderFull(asset, bq);
           showToast('✓ INTEL REPORT UNLOCKED');
+          setTimeout(() => generateIntelPDF(bq), 1500);
         } else {
           showToast('PAYMENT CONFIRMED — CONTACT SUPPORT IF ISSUE PERSISTS');
         }
