@@ -8226,13 +8226,19 @@ window.renderBasicsPanel=async function(asset,bqData){if(bqData){_renderFull(ass
 async function generateIntelPDF(bq) {
   if (!bq) { if(typeof showToast==='function') showToast('NO REPORT DATA'); return; }
   if(typeof showToast==='function') showToast('GENERATING PDF…');
+  // Always fetch paid version for PDF
+  const pin = bq.PIN || bq.apn;
+  if (pin) {
+    const paidData = await fetchParcelData({pin, paid: true});
+    if (paidData) bq = paidData;
+  }
   const pin=bq.PIN||'—',addr=bq.address||'—',assessed=bq.current_assessed_total||0;
   const land=bq.current_assessed_land||0,imps=bq.current_assessed_improvements||0;
   const bldg=bq.building||{},lastSale=bq.last_sale||{};
   const apprHist=bq.appraisal_history||[],permits=bq.permit_history||[];
   const tsunami=bq.tsunami_hazard||'',hazards=bq.hazards||{},sc=bq.seismic_site_class||'';
   const el=document.createElement('div');
-  el.innerHTML=`<div style="font-family:Courier New,monospace;max-width:680px;margin:0 auto;padding:32px;color:#111;font-size:11px;line-height:1.6">
+  el.innerHTML=`<div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;padding:32px;color:#111;font-size:11px;line-height:1.6">
 <div style="border-top:3px solid #111;border-bottom:1px solid #111;padding:12px 0;margin-bottom:20px">
 <div style="font-size:9px;letter-spacing:3px;color:#666">RWABIDASK — PROPERTY INTELLIGENCE REPORT</div>
 <div style="font-size:18px;font-weight:700;margin:6px 0">${addr}</div>
