@@ -7816,8 +7816,11 @@ async function toggle3DLayer(type, apn) {
 // Double-click on map → JIT parcel data from tile layer → this panel.
 // Supabase scope: sessions, leads, transactions only.
 // ════════════════════════════════════════════════════════════════════
-function renderBasicsPanel(asset) {
-  const a    = asset;
+function renderBasicsPanel(asset, bqData) {
+  if (window.renderBasicsPanel && window.renderBasicsPanel !== renderBasicsPanel) {
+    window.renderBasicsPanel(asset, bqData);
+    return;
+  }
   const apn  = a.apn  || a.id || '—';
   const raw  = a._raw || {};
   const phys = (a.specs && a.specs.physical) || {};
