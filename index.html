@@ -5377,7 +5377,7 @@ async function performSearch() {
             if (asset) {
                 setStatus(`PARCEL IDENTIFIED: ${hit.apn || hit.address}`);
                 if (asset.lat && asset.lng) flyTo(asset.lat, asset.lng, 400, 0);
-                renderBasicsPanel(asset);
+                window.renderBasicsPanel(asset);
                 addToRecentlyViewed(asset);
             }
         } catch(e) {
@@ -8929,7 +8929,7 @@ function _renderFull(asset,bq,isPaidReport=false){
         + row('Condition',         fmt(b.condition),      '#5cd68a')
         + row('Heat System',       fmt(b.heat_system))
         + row('Heat Source',       fmt(b.heat_source))
-        + row('Fireplaces',        fmt(b.total_fireplaces, '0'))
+        + row('Fireplaces',        fmt(b.fireplaces, '0'))
       )
 
     + section('Views', '<div style="padding:4px 0;">' + viewPills + '</div>')
