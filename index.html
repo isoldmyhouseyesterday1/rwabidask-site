@@ -8230,7 +8230,6 @@ async function generateIntelPDF(bq) {
   if(typeof showToast==='function') showToast('GENERATING INTEL REPORT…');
   (async () => {
   try {
-    // Fetch full paid data from proxy
     const pin = bq.PIN || bq.apn || '';
     let d = bq;
     if (pin) {
@@ -8244,310 +8243,564 @@ async function generateIntelPDF(bq) {
       } catch(e) { console.warn('[PDF fetch]',e); }
     }
 
-    // Helpers
-    const $ = v => (v===null||v===undefined||v===''||v==='null'||v==='false'||v===false||v===0)?null:v;
+    const $    = v => (v===null||v===undefined||v===''||v==='null'||v==='false'||v===false||v===0||v==='0')?null:v;
     const bool = v => v===true||v==='true'||v===1||v==='1';
-    const fmt$ = v => { const n=parseInt(v||0); return n>0?'$'+n.toLocaleString():null; };
-    const fmtM = v => { const n=parseFloat(v||0); return n>0?(n>=1000?(n/1000).toFixed(1)+'km':Math.round(n)+'m'):null; };
-    const row = (k,v,flag=false) => v!=null?`<div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:11px"><span style="color:#555;flex:1">${k}</span><span style="font-weight:500;text-align:right;margin-left:16px;${flag?'color:#c00':''}">${v}</span></div>`:'';
-    const sec = (n,t) => `<div style="font-size:9px;letter-spacing:2px;border-bottom:2px solid #111;padding-bottom:3px;margin:18px 0 8px;color:#333">${n} — ${t}</div>`;
-    const insight = (q,a,note='') => `<div style="border-left:3px solid #ccc;padding:6px 10px;margin:8px 0;background:#fafafa"><div style="font-size:10px;color:#888;margin-bottom:2px">${q}</div><div style="font-size:12px;font-weight:600">${a}</div>${note?`<div style="font-size:10px;color:#666;margin-top:2px;font-style:italic">${note}</div>`:''}</div>`;
+    const si   = v => parseInt(v||0)||0;
+    const sf   = v => parseFloat(v||0)||0;
+    const fmt$ = v => { const n=si(v); return n>0?'$'+n.toLocaleString():null; };
+    const fmtM = v => { const n=sf(v); return n>0?(n>=1000?(n/1000).toFixed(1)+'km':Math.round(n)+'m'):null; };
+    const pct  = (a,b) => b>0?((a/b-1)*100).toFixed(1)+'%':null;
 
-    // Data
-    const p    = d;
-    const v    = p.valuation || {};
-    const b    = p.building  || {};
-    const geo  = p.geo       || {};
-    const inf  = p.infrastructure || {};
-    const mw   = p.mineral_water  || {};
-    const mn   = p.mines          || {};
-    const rts  = p.rights         || {};
-    const nus  = p.nuisances      || {};
-    const vws  = p.views          || {};
-    const haz  = p.hazard_flags   || {};
-    const apprHist = p.appraisal_history || [];
-    const salesHist = p.sales_history    || [];
-    const permits   = p.permits          || [];
-    const appeals   = p.appeals          || [];
+    const p   = d;
+    const v   = p.valuation      || {};
+    const b   = p.building       || {};
+    const geo = p.geo            || {};
+    const inf = p.infrastructure || {};
+    const mw  = p.mineral_water  || {};
+    const mn  = p.mines          || {};
+    const rts = p.rights         || {};
+    const nus = p.nuisances      || {};
+    const vws = p.views          || {};
+    const haz = p.hazard_flags   || {};
+    const apprHist  = p.appraisal_history || [];
+    const salesHist = p.sales_history     || [];
+    const permits   = p.permits           || [];
+    const appeals   = p.appeals           || [];
 
-    const addr    = String(p.address||'').trim() || '—';
-    const pin2    = p.PIN || '—';
-    const assessed= parseInt(v.latest_total_val||0);
-    const land    = parseInt(v.latest_land_val||0);
-    const imps    = parseInt(v.latest_imps_val||0);
-    const apprYr  = v.appraisal_year || '2026';
+    const addr     = String(p.address||'').trim() || '—';
+    const pin2     = p.PIN || '—';
+    const assessed = si(v.latest_total_val);
+    const land     = si(v.latest_land_val);
+    const imps     = si(v.latest_imps_val);
+    const apprYr   = v.appraisal_year || new Date().getFullYear();
+    const sqft     = si(b.sqft_total_living);
+    const ppsf     = sqft>0&&assessed>0 ? Math.round(assessed/sqft) : null;
 
     // CAGR
     const oldest = apprHist[apprHist.length-1];
-    const oldVal = oldest ? parseInt(oldest.TotalVal||0) : 0;
-    const yrs    = apprHist.length > 1 ? (parseInt(apprHist[0].RollYr||2026) - parseInt(oldest.RollYr||2000)) : 0;
+    const oldVal = oldest ? si(oldest.TotalVal) : 0;
+    const yrs    = apprHist.length>1 ? si(apprHist[0].RollYr)-si(oldest.RollYr) : 0;
     const cagr   = yrs>0&&oldVal>0 ? ((Math.pow(assessed/oldVal,1/yrs)-1)*100).toFixed(1) : null;
 
-    // Intelligence Score
+    // Year-over-year changes for appraisal history
+    const apprWithChange = apprHist.slice(0,20).map((a,i)=>{
+      const curr = si(a.TotalVal);
+      const prev = apprHist[i+1] ? si(apprHist[i+1].TotalVal) : 0;
+      const chg  = prev>0 ? ((curr/prev-1)*100).toFixed(1) : null;
+      return {...a, total:curr, change:chg};
+    });
+
+    // Estimated annual property tax (~1% effective rate for King County)
+    const estTax = assessed>0 ? Math.round(assessed*0.0095) : 0;
+
+    // Last arms-length sale
+    const armSales     = salesHist.filter(s=>si(s.SalePrice)>0);
+    const lastSale     = armSales[0]||null;
+    const lastSalePrice= lastSale ? si(lastSale.SalePrice) : 0;
+    const lastSaleDate = lastSale ? String(lastSale.DocumentDate||'').substring(0,10) : null;
+    const salePpsf     = sqft>0&&lastSalePrice>0 ? Math.round(lastSalePrice/sqft) : null;
+    const priceGap     = lastSalePrice>0&&assessed>0 ? Math.round((assessed/lastSalePrice-1)*100) : null;
+
+    // Days held
+    const daysSinceSale = lastSaleDate ? Math.round((Date.now()-new Date(lastSaleDate).getTime())/(1000*60*60*24)) : null;
+    const yearsSinceSale = daysSinceSale ? (daysSinceSale/365).toFixed(1) : null;
+
+    // Permit investment rate
+    const permitTotal = si(p.permit_total_value);
+    const permitRate  = assessed>0&&permitTotal>0 ? Math.round(permitTotal/assessed*100) : null;
+
+    // Score
     let score = 50;
-    if (cagr && parseFloat(cagr) > 5) score += 15;
-    if (cagr && parseFloat(cagr) > 10) score += 10;
-    if (permits.length > 0) score += 10;
-    if (!bool(haz.flood_100yr) && !bool(haz.seismic) && !bool(haz.landslide)) score += 10;
-    if (bool(geo.in_tsunami_zone)) score -= 15;
-    if (bool(haz.flood_100yr)) score -= 10;
-    if (bool(haz.landslide)) score -= 8;
-    if (salesHist.filter(s=>parseInt(s.SalePrice||0)>0).length > 0) score += 5;
-    if (appeals.length === 0) score += 5;
-    score = Math.max(10, Math.min(99, score));
+    if (cagr&&sf(cagr)>5)  score+=15;
+    if (cagr&&sf(cagr)>10) score+=10;
+    if (permits.length>0)  score+=10;
+    if (!bool(haz.flood_100yr)&&!bool(haz.seismic)&&!bool(haz.landslide)) score+=10;
+    if (bool(geo.in_tsunami_zone)) score-=15;
+    if (bool(haz.flood_100yr))     score-=10;
+    if (bool(haz.landslide))       score-=8;
+    if (armSales.length>0)         score+=5;
+    if (appeals.length===0)        score+=5;
+    score = Math.max(10,Math.min(99,score));
     const scoreLabel = score>=80?'Prime Grade':score>=65?'Investment Grade':score>=50?'Standard Grade':'Elevated Risk';
 
-    const html = `
-<div style="font-family:'Courier New',monospace;max-width:700px;margin:0 auto;padding:32px;color:#111;font-size:11px;line-height:1.6;background:#fff">
+    // Helpers
+    const row = (k,rv,cls='') => rv!=null&&rv!==''
+      ? `<div class="row"><span class="rk">${k}</span><span class="rv ${cls}">${rv}</span></div>` : '';
+    const insight = (q,a,note) =>
+      `<div class="insight"><div class="ins-q">${q}</div><div class="ins-a">${a}</div>${note?'<div class="ins-p">'+note+'</div>':''}</div>`;
+    const math = (q,a,note) =>
+      `<div class="math-row"><div class="math-q">${q}</div><div class="math-a">${a}</div>${note?'<div class="math-p">'+note+'</div>':''}</div>`;
+
+    // SVG bar chart — appraisal history
+    const chartData = apprWithChange.filter(a=>a.total>0).slice().reverse();
+    const maxV = Math.max(...chartData.map(a=>a.total));
+    const chartSVG = chartData.length>2 ? `
+      <div style="margin:12px 0 4px;page-break-inside:avoid">
+        <div style="font-size:9px;font-family:'Courier New',monospace;color:#888;letter-spacing:1px;margin-bottom:6px">ASSESSED VALUE — ${chartData[0].RollYr} TO ${chartData[chartData.length-1].RollYr}</div>
+        <svg width="100%" height="110" viewBox="0 0 640 110" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="100" x2="640" y2="100" stroke="#ddd" stroke-width="1"/>
+          ${chartData.map((a,i)=>{
+            const bw = Math.floor(580/chartData.length)-2;
+            const x  = 20 + i*(580/chartData.length);
+            const h  = Math.max(2, Math.round((a.total/maxV)*90));
+            const y  = 100-h;
+            const clr= a.change&&sf(a.change)>0?'#185FA5':'#E24B4A';
+            return `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${clr}" opacity="0.85"/>`;
+          }).join('')}
+          <text x="20" y="110" font-size="8" fill="#888" font-family="monospace">${chartData[0].RollYr}</text>
+          <text x="600" y="110" font-size="8" fill="#888" font-family="monospace" text-anchor="end">${chartData[chartData.length-1].RollYr}</text>
+          <text x="620" y="14" font-size="9" fill="#185FA5" font-family="monospace" text-anchor="end">$${Math.round(maxV/1e6*10)/10}M</text>
+        </svg>
+        <div style="font-size:8px;color:#888;font-family:'Courier New',monospace;margin-top:2px">Blue = value increased that year · Red = value decreased</div>
+      </div>` : '';
+
+    // Year-over-year tax estimate chart
+    const taxChartData = apprWithChange.filter(a=>a.total>0).slice().reverse();
+    const maxTax = Math.max(...taxChartData.map(a=>Math.round(a.total*0.0095)));
+    const taxSVG = taxChartData.length>2 ? `
+      <div style="margin:12px 0 4px;page-break-inside:avoid">
+        <div style="font-size:9px;font-family:'Courier New',monospace;color:#888;letter-spacing:1px;margin-bottom:6px">ESTIMATED ANNUAL PROPERTY TAX TREND (based on ~0.95% effective rate)</div>
+        <svg width="100%" height="80" viewBox="0 0 640 80" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="72" x2="640" y2="72" stroke="#ddd" stroke-width="1"/>
+          ${taxChartData.map((a,i)=>{
+            const tax = Math.round(a.total*0.0095);
+            const bw  = Math.floor(580/taxChartData.length)-2;
+            const x   = 20+i*(580/taxChartData.length);
+            const h   = Math.max(2,Math.round((tax/maxTax)*65));
+            const y   = 72-h;
+            return `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="#639922" opacity="0.8"/>`;
+          }).join('')}
+          <text x="20" y="80" font-size="8" fill="#888" font-family="monospace">${taxChartData[0].RollYr}</text>
+          <text x="600" y="80" font-size="8" fill="#888" font-family="monospace" text-anchor="end">${taxChartData[taxChartData.length-1].RollYr}</text>
+          <text x="620" y="12" font-size="9" fill="#639922" font-family="monospace" text-anchor="end">~$${Math.round(maxTax/1000)}k/yr</text>
+        </svg>
+      </div>` : '';
+
+    const CSS = `
+      *{box-sizing:border-box;margin:0;padding:0}
+      .rpt{font-family:Georgia,serif;color:#111;padding:40px;max-width:720px;font-size:12px;line-height:1.7;background:#fff}
+      .masthead{border-top:3px solid #111;border-bottom:1px solid #111;padding:14px 0;margin-bottom:24px;page-break-inside:avoid}
+      .mast-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+      .pub{font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:#666;margin-bottom:6px}
+      .prop-name{font-size:22px;font-weight:600;font-family:Arial,sans-serif;letter-spacing:-0.3px;line-height:1.2}
+      .prop-sub{font-size:11px;color:#666;font-family:'Courier New',monospace;margin-top:4px}
+      .score-block{text-align:right;flex-shrink:0}
+      .score-n{font-size:52px;font-weight:700;font-family:Arial,sans-serif;line-height:1}
+      .score-label{font-size:11px;font-weight:600;margin-top:2px}
+      .score-sub{font-size:9px;letter-spacing:1px;color:#666;margin-top:1px;font-family:'Courier New',monospace}
+      .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+      .tag{font-size:8px;letter-spacing:1.5px;border:1px solid #ccc;padding:2px 7px;color:#666;font-family:'Courier New',monospace}
+      .tag.alert{border-color:#c00;color:#c00}
+      .ch{margin-bottom:0}
+      .ch-hd{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:2px solid #111;margin-top:22px;page-break-after:avoid;page-break-inside:avoid}
+      .ch-n{font-family:'Courier New',monospace;font-size:10px;color:#666;width:24px;flex-shrink:0}
+      .ch-t{font-size:11px;font-weight:600;flex:1;letter-spacing:1px;font-family:'Courier New',monospace}
+      .ch-s{font-size:8px;letter-spacing:1px;padding:2px 6px;border:1px solid;font-family:'Courier New',monospace;flex-shrink:0}
+      .ch-s.ok{border-color:#3B6D11;color:#3B6D11}
+      .ch-s.warn{border-color:#c00;color:#c00}
+      .ch-s.partial{border-color:#854F0B;color:#854F0B}
+      .ch-s.none{border-color:#aaa;color:#aaa}
+      .ch-body{padding:6px 0 10px 0}
+      .row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid #f0f0f0;gap:16px;font-size:12px;page-break-inside:avoid}
+      .row:last-child{border-bottom:none}
+      .rk{color:#444;flex:1;line-height:1.4}
+      .rv{text-align:right;font-family:'Courier New',monospace;font-size:11px;font-weight:600;color:#111;flex-shrink:0;max-width:58%}
+      .rv.bad{color:#c00}
+      .rv.good{color:#3B6D11}
+      .rv.muted{color:#888;font-weight:400;font-style:italic;font-family:Georgia,serif;font-size:11px}
+      .insight{border-left:3px solid #bbb;padding:8px 12px;margin:10px 0;background:#fafafa;page-break-inside:avoid}
+      .ins-q{font-size:9px;color:#888;margin-bottom:3px;font-family:'Courier New',monospace;letter-spacing:0.5px}
+      .ins-a{font-size:13px;font-weight:600;line-height:1.3}
+      .ins-p{font-size:10px;color:#555;margin-top:4px;line-height:1.6}
+      .math-row{background:#f4f4f4;padding:10px 14px;margin:8px 0;border-left:3px solid #111;page-break-inside:avoid}
+      .math-q{font-size:9px;color:#666;margin-bottom:3px;font-family:'Courier New',monospace;letter-spacing:0.5px}
+      .math-a{font-size:16px;font-weight:700;font-family:'Courier New',monospace;color:#111}
+      .math-p{font-size:10px;color:#666;margin-top:3px;font-style:italic;line-height:1.5}
+      .bar-row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:10px;page-break-inside:avoid}
+      .bl{width:190px;flex-shrink:0;color:#444;line-height:1.3}
+      .bt{flex:1;height:4px;background:#eee;border-radius:2px}
+      .bf{height:4px;border-radius:2px}
+      .bv{width:34px;text-align:right;font-weight:600;font-family:'Courier New',monospace;font-size:10px}
+      .score-main{display:flex;align-items:baseline;gap:16px;margin-bottom:14px;page-break-inside:avoid}
+      .score-note{font-size:10px;color:#555;line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:8px;font-style:italic}
+      .legal{border-top:2px solid #111;margin-top:28px;padding-top:10px;font-size:9px;color:#666;letter-spacing:0.5px;line-height:1.8;font-family:'Courier New',monospace;page-break-inside:avoid}
+      .legal-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+      .glossary{margin-top:16px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#777;line-height:1.8;font-family:Georgia,serif;font-style:italic}
+    `;
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+    <style>${CSS}</style></head><body><div class="rpt">
 
 <!-- MASTHEAD -->
-<div style="border-top:3px solid #111;border-bottom:2px solid #111;padding:14px 0;margin-bottom:4px">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+<div class="masthead">
+  <div class="mast-top">
     <div>
-      <div style="font-size:9px;letter-spacing:3px;color:#666;margin-bottom:4px">RWABIDASK — PROPERTY INTELLIGENCE REPORT</div>
-      <div style="font-size:20px;font-weight:700;letter-spacing:-0.5px;font-family:Arial,sans-serif">${addr}</div>
-      <div style="font-size:10px;color:#666;margin-top:4px">PIN ${pin2} · King County WA · ${new Date().toLocaleDateString()}</div>
+      <div class="pub">RWABIDASK — PROPERTY INTELLIGENCE REPORT</div>
+      <div class="prop-name">${addr}</div>
+      <div class="prop-sub">PIN ${pin2} &nbsp;·&nbsp; King County WA &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>
     </div>
-    <div style="text-align:right;flex-shrink:0;margin-left:20px">
-      <div style="font-size:48px;font-weight:700;line-height:1;font-family:Arial,sans-serif">${score}</div>
-      <div style="font-size:9px;letter-spacing:1px;color:#666">${scoreLabel}</div>
-      <div style="font-size:9px;color:#999;margin-top:2px">INTEL SCORE / 100</div>
+    <div class="score-block">
+      <div class="score-n">${score}<span style="font-size:20px;font-weight:400">/100</span></div>
+      <div class="score-label">${scoreLabel}</div>
+      <div class="score-sub">PROPERTY INTELLIGENCE SCORE</div>
     </div>
   </div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
-    <span style="font-size:8px;letter-spacing:1px;border:1px solid #ccc;padding:2px 6px;color:#666">GENERATED ${new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()}</span>
-    <span style="font-size:8px;letter-spacing:1px;border:1px solid #ccc;padding:2px 6px;color:#666">LEVY ${$(p.levy_code)||'—'}</span>
-    <span style="font-size:8px;letter-spacing:1px;border:1px solid #ccc;padding:2px 6px;color:#666">KING COUNTY ASSESSOR</span>
-    ${bool(geo.in_tsunami_zone)?'<span style="font-size:8px;letter-spacing:1px;border:1px solid #c00;padding:2px 6px;color:#c00">⚠ TSUNAMI INUNDATION ZONE</span>':''}
-    ${bool(haz.flood_100yr)?'<span style="font-size:8px;letter-spacing:1px;border:1px solid #c00;padding:2px 6px;color:#c00">⚠ 100YR FLOOD PLAIN</span>':''}
-    ${bool(haz.landslide)?'<span style="font-size:8px;letter-spacing:1px;border:1px solid #c00;padding:2px 6px;color:#c00">⚠ LANDSLIDE HAZARD</span>':''}
-    ${bool(geo.in_landslide_zone)?'<span style="font-size:8px;letter-spacing:1px;border:1px solid #e80;padding:2px 6px;color:#e80">⚠ LANDSLIDE ZONE</span>':''}
+  <div class="tags">
+    <span class="tag">GENERATED ${new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()}</span>
+    <span class="tag">LEVY ${$(p.levy_code)||'—'}</span>
+    <span class="tag">KING COUNTY ASSESSOR</span>
+    <span class="tag">RWABIDASK STANDARD v2.0</span>
+    ${bool(geo.in_tsunami_zone)?'<span class="tag alert">TSUNAMI INUNDATION ZONE</span>':''}
+    ${bool(haz.flood_100yr)?'<span class="tag alert">100YR FLOOD PLAIN</span>':''}
+    ${bool(haz.landslide)?'<span class="tag alert">LANDSLIDE HAZARD</span>':''}
   </div>
 </div>
 
 <!-- CH 01: PROPERTY IDENTITY -->
-${sec('01','PROPERTY IDENTITY')}
-${row('Parcel identification number (PIN)', pin2)}
-${row('Assessor district', $(p.district))}
-${row('Zoning designation', $(p.zoning))}
-${row('Property type', $(p.prop_type)==='R'?'Residential':$(p.prop_type)==='C'?'Commercial':$(p.prop_type)||null)}
-${row('Lot size', p.sqft_lot?Number(p.sqft_lot).toLocaleString()+' sq ft':null)}
-${row('Tax levy code', $(p.levy_code))}
-${row('Plat name', $(p.plat_name))}
-${row('Plat lot / block', [$(p.plat_lot),$(p.plat_lot)].filter(Boolean).join(' / ')||null)}
-${row('Legal description', p.legal_description?p.legal_description.substring(0,80)+'…':null)}
-${row('Water system code', $(p.water_system_code))}
-${row('Sewer system code', $(p.sewer_system_code))}
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">01</span><span class="ch-t">PROPERTY IDENTITY</span><span class="ch-s ok">COMPLETE</span></div>
+  <div class="ch-body">
+    ${row('Parcel identification number (PIN)', pin2)}
+    ${row('Assessor district', $(p.district))}
+    ${row('Zoning designation', $(p.zoning))}
+    ${row('Property type', $(p.prop_type)==='R'?'Residential':$(p.prop_type)==='C'?'Commercial':$(p.prop_type))}
+    ${row('Lot size', p.sqft_lot?Number(p.sqft_lot).toLocaleString()+' sq ft':null)}
+    ${row('Tax levy code', $(p.levy_code))}
+    ${row('Plat name', $(p.plat_name))}
+    ${row('Legal description', p.legal_description?p.legal_description.substring(0,100)+'…':null)}
+    ${row('Water system code', $(p.water_system_code))}
+    ${row('Sewer system code', $(p.sewer_system_code))}
+  </div>
+</div>
 
 <!-- CH 02: BUILDING FACTS -->
-${$(b.year_built) ? sec('02','BUILDING FACTS') : ''}
-${row('Year built', $(b.year_built))}
-${row('Year renovated', b.year_renovated&&b.year_renovated!='0'?b.year_renovated:null)}
-${row('Total living area', b.sqft_total_living?Number(b.sqft_total_living).toLocaleString()+' sq ft':null)}
-${row('Stories', $(b.stories))}
-${row('Building grade', $(b.building_grade))}
-${row('Condition rating', $(b.condition))}
-${row('Bedrooms', $(b.bedrooms))}
-${row('Full baths', $(b.bath_full))}
-${row('¾ baths', $(b.bath_3qtr))}
-${row('½ baths', $(b.bath_half))}
-${row('Garage (attached)', b.sqft_garage_attached&&b.sqft_garage_attached!='0'?Number(b.sqft_garage_attached).toLocaleString()+' sq ft':null)}
-${row('Finished basement', b.sqft_basement_finished&&b.sqft_basement_finished!='0'?Number(b.sqft_basement_finished).toLocaleString()+' sq ft':null)}
-${row('Deck', b.sqft_deck&&b.sqft_deck!='0'?Number(b.sqft_deck).toLocaleString()+' sq ft':null)}
-${row('Fireplaces', b.fireplaces_single&&b.fireplaces_single!='0'?b.fireplaces_single:null)}
-${row('Heat system', $(b.heat_system))}
-${row('Living units', b.living_units&&b.living_units!='1'?b.living_units:null)}
+${$(b.year_built)?`
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">02</span><span class="ch-t">BUILDING & PHYSICAL FACTS</span><span class="ch-s ok">COMPLETE</span></div>
+  <div class="ch-body">
+    ${row('Year built', $(b.year_built))}
+    ${b.year_renovated&&b.year_renovated!='0'?row('Year renovated',b.year_renovated):''}
+    ${row('Total living area', sqft>0?sqft.toLocaleString()+' sq ft':null)}
+    ${row('Number of stories', $(b.stories))}
+    ${row('Building grade (1–13 scale)', $(b.building_grade))}
+    ${row('Condition rating (1–5 scale)', $(b.condition))}
+    ${row('Bedrooms', $(b.bedrooms))}
+    ${row('Full bathrooms', $(b.bath_full))}
+    ${b.bath_3qtr&&b.bath_3qtr!='0'?row('Three-quarter bathrooms',b.bath_3qtr):''}
+    ${b.bath_half&&b.bath_half!='0'?row('Half bathrooms',b.bath_half):''}
+    ${b.sqft_garage_attached&&b.sqft_garage_attached!='0'?row('Attached garage',Number(b.sqft_garage_attached).toLocaleString()+' sq ft'):''}
+    ${b.sqft_basement_finished&&b.sqft_basement_finished!='0'?row('Finished basement',Number(b.sqft_basement_finished).toLocaleString()+' sq ft'):''}
+    ${b.sqft_deck&&b.sqft_deck!='0'?row('Deck / outdoor structure',Number(b.sqft_deck).toLocaleString()+' sq ft'):''}
+    ${b.fireplaces_single&&b.fireplaces_single!='0'?row('Fireplaces',b.fireplaces_single):''}
+    ${b.living_units&&b.living_units!='1'?row('Living units on parcel',b.living_units):''}
+  </div>
+</div>`:''}
 
 <!-- CH 03: ASSESSED VALUE & TAX -->
-${sec('03','ASSESSED VALUE & TAX')}
-${row('Total assessed ('+apprYr+')', '$'+assessed.toLocaleString()+(cagr?' · '+cagr+'%/yr CAGR':''), false)}
-${row('Land value', fmt$(land))}
-${row('Improvements value', fmt$(imps))}
-${row('Taxable land', fmt$(v.taxable_land))}
-${row('Taxable improvements', fmt$(v.taxable_imps))}
-${row('Tax status', $(v.tax_status)==='T'?'Taxable':$(v.tax_status))}
-${row('Bill year', $(v.tax_bill_year))}
-${$(v.tax_assessed_total)&&parseInt(v.tax_assessed_total)>0?row('Tax assessed total', fmt$(v.tax_assessed_total)):''}
-${$(v.new_construction)?row('New construction flag','Yes'):''}
-${cagr?insight(
-  'What does the '+cagr+'%/yr growth rate mean?',
-  assessed>10000000?'Institutional-grade appreciation':'Strong residential appreciation',
-  'Calculated from '+apprHist.length+' years of assessor roll data. Not an appraisal.'
-):''}
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">03</span><span class="ch-t">ASSESSED VALUE & TAX</span><span class="ch-s ok">COMPLETE</span></div>
+  <div class="ch-body">
+    ${row('Total assessed value ('+apprYr+')', '$'+assessed.toLocaleString())}
+    ${row('Land value', fmt$(land))}
+    ${row('Improvements value (structure)', fmt$(imps))}
+    ${row('Taxable land value', fmt$(v.taxable_land))}
+    ${row('Taxable improvements value', fmt$(v.taxable_imps))}
+    ${row('Tax status', $(v.tax_status)==='T'?'Taxable':$(v.tax_status))}
+    ${row('Current tax bill year', $(v.tax_bill_year))}
+    ${estTax>0?row('Estimated annual property tax','~$'+estTax.toLocaleString()+'/yr'):''}
+    ${ppsf?math(
+      'ASSESSED VALUE PER SQUARE FOOT OF LIVING AREA',
+      '$'+ppsf.toLocaleString()+' per sq ft',
+      '$'+assessed.toLocaleString()+' total assessed value ÷ '+sqft.toLocaleString()+' sq ft of living area'
+    ):''}
+    ${cagr?math(
+      'AVERAGE YEARLY VALUE INCREASE — Compound Annual Growth Rate (CAGR) over '+yrs+' years',
+      cagr+'% per year',
+      'From $'+oldVal.toLocaleString()+' in '+oldest?.RollYr+' to $'+assessed.toLocaleString()+' in '+apprHist[0]?.RollYr+'. The stock market has averaged about 7% per year over the same period. This is the assessor\'s valuation — not a certified appraisal.'
+    ):''}
+    ${estTax>0?insight(
+      'RWABidAsk Research: Estimated annual property tax',
+      '~$'+estTax.toLocaleString()+' per year / ~$'+Math.round(estTax/12).toLocaleString()+' per month',
+      'Based on King County\'s approximate effective tax rate of 0.95% of assessed value. Actual bills vary by levy district. Contact King County Treasury for the exact figure.'
+    ):''}
+  </div>
+</div>
 
 <!-- CH 04: APPRAISAL HISTORY -->
-${apprHist.length ? sec('04','APPRAISAL HISTORY') : ''}
-${apprHist.slice(0,20).map(a=>{
-  const total=parseInt(a.TotalVal||0);
-  return total>0?row(String(a.RollYr), '$'+total.toLocaleString()):'';
-}).join('')}
+${apprHist.length?`
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">04</span><span class="ch-t">APPRAISAL HISTORY</span><span class="ch-s ok">${apprHist.length} YEARS OF ASSESSOR DATA</span></div>
+  <div class="ch-body">
+    ${chartSVG}
+    ${taxSVG}
+    <div style="height:8px"></div>
+    ${apprWithChange.map(a=>{
+      const chgStr = a.change?(' · '+(sf(a.change)>0?'+':'')+a.change+'%'):'';
+      return a.total>0?row(String(a.RollYr),'$'+a.total.toLocaleString()+chgStr):'';
+    }).join('')}
+    ${cagr?insight(
+      'RWABidAsk Research: What this growth rate tells buyers, lenders, and investors',
+      'This property has grown at '+cagr+'% per year on the assessor\'s record over '+yrs+' years.',
+      'A property growing faster than inflation (typically 2–3%/yr) is holding and building real value. A rate above 7%/yr outperforms the average stock market return. This data comes directly from the King County Assessor — it is what the county uses to calculate your tax bill each year.'
+    ):''}
+  </div>
+</div>`:''}
 
 <!-- CH 05: SALES HISTORY -->
-${sec('05','SALES & TRANSACTION HISTORY')}
-${salesHist.length===0?row('Recorded market sales','None on record'):''}
-${salesHist.slice(0,8).map(s=>{
-  const price=parseInt(s.SalePrice||0);
-  const date=String(s.DocumentDate||'').substring(0,10);
-  const warn=$(s.SaleWarning);
-  return price>0?row(date,'$'+price.toLocaleString()+(warn?' ⚠':'')):'';
-}).join('')}
-${p.last_sale?row('Most recent arms-length sale', p.last_sale.price?'$'+parseInt(p.last_sale.price).toLocaleString()+' · '+String(p.last_sale.date||'').substring(0,10):null):''}
-${insight('Why does sale history matter?','Transaction record establishes market value baseline','Arms-length sales are the most reliable valuation signal. $0 transfers are family conveyances or trust changes — not market prices.')}
-
-<!-- CH 06: PERMIT HISTORY -->
-${permits.length ? sec('06','PERMIT HISTORY ('+permits.length+' permits · $'+parseInt(p.permit_total_value||0).toLocaleString()+' total value)') : ''}
-${permits.slice(0,10).map(pm=>{
-  const dt=String(pm.IssueDate||'').substring(0,10);
-  const val=parseInt(pm.PermitVal||0);
-  return row(dt+' · '+($(pm.PermitType)||'—'), val>0?'$'+val.toLocaleString():$(pm.PermitStatus)||'—');
-}).join('')}
-
-<!-- CH 07: PROPERTY RIGHTS & DESIGNATIONS -->
-${sec('07','PROPERTY RIGHTS & DESIGNATIONS')}
-${row('Easements on record', bool(rts.easements)?'Yes — verify title':null)}
-${row('Deed restrictions', bool(rts.deed_restrictions)?'Yes — review required':null)}
-${row('Native growth protection easement', bool(rts.native_growth_protection)?'Yes':null)}
-${row('Development rights purchased', bool(rts.development_rights_purchased)?'Yes':null)}
-${row('DNR lease', bool(rts.dnr_lease)?'Yes':null)}
-${row('Historic site designation', rts.historic_site&&rts.historic_site!='0'?'Yes':null)}
-${row('Current use designation', rts.current_use_designation&&rts.current_use_designation!='0'?String(rts.current_use_designation):null)}
-${row('Tidelands / shoreland', rts.tidelands_shoreland&&rts.tidelands_shoreland!='0'?'Yes — code '+rts.tidelands_shoreland:null)}
-${row('Waterfront location code', rts.waterfront_location&&rts.waterfront_location!='0'?'Code '+rts.waterfront_location:null)}
-${row('Waterfront footage', rts.waterfront_footage&&rts.waterfront_footage!='0'?rts.waterfront_footage+' ft':null)}
-${row('Waterfront access rights', bool(rts.waterfront_access_rights)?'Yes':null)}
-${row('Species of concern', bool(rts.species_of_concern)?'⚠ Yes — may restrict development':null, bool(rts.species_of_concern))}
-${row('Sensitive area tract', bool(rts.sensitive_area_tract)?'Yes':null)}
-${(() => {
-  const activeViews = Object.entries(vws).filter(([k,v2])=>v2&&v2!='0'&&v2!='false'&&v2!==false&&v2!==0);
-  return activeViews.length ? row('View classifications', activeViews.map(([k,v2])=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())+' ('+v2+')').join(', ')) : '';
-})()}
-${(() => {
-  const activeNus = Object.entries(nus).filter(([k,v2])=>v2&&v2!='0'&&v2!='false'&&v2!==false&&v2!==0);
-  return activeNus.length ? row('Nuisances on record', activeNus.map(([k])=>k.replace(/_/g,' ')).join(', '), true) : '';
-})()}
-${insight('Rights are value. Gaps are risk.','Verify easements, tidelands, and species designations via title search','Absence of a right in this report does not mean absence in reality. This data reflects the assessor record only.')}
-
-<!-- CH 08: ASSESSMENT APPEALS -->
-${sec('08','ASSESSMENT APPEALS')}
-${row('Total appeals filed', p.appeal_count>0?String(p.appeal_count):'None on record')}
-${appeals.slice(0,5).map(a=>row(
-  'Appeal '+$(a.AppealNbr)+' · '+$(a.BillYr),
-  $(a.HearingResult)?'Result: '+a.HearingResult:$(a.AppealRecommended)?'Recommended':'Filed'
-)).join('')}
-${p.appeal_count===0?insight(
-  'Could the owner appeal their '+fmt$(assessed)+' assessment?',
-  'Possibly — no prior appeal on record',
-  'A successful appeal could reduce assessed value and lower the annual tax bill. Requires comparable sales data from a licensed appraiser.'
-):''}
-
-<!-- CH 09: NATURAL HAZARD & GEOGRAPHIC RISK -->
-${sec('09','NATURAL HAZARD & GEOGRAPHIC RISK')}
-${row('Tsunami inundation zone', bool(geo.in_tsunami_zone)?'⚠ YES — modeled wave inundation confirmed':'No', bool(geo.in_tsunami_zone))}
-${row('100-year flood plain (assessor)', bool(haz.flood_100yr)?'⚠ YES':'No', bool(haz.flood_100yr))}
-${row('Seismic site class', $(geo.seismic_site_class), geo.seismic_site_class&&geo.seismic_site_class.includes('D')||geo.seismic_site_class&&geo.seismic_site_class.includes('E'))}
-${geo.seismic_site_class_desc?row('Seismic class description', geo.seismic_site_class_desc.substring(0,80)):''}
-${row('Geology / soil unit', $(geo.geology_label))}
-${row('Geology notes', $(geo.geology_notes))}
-${row('Nearest active fault', $(geo.nearest_fault_name))}
-${row('Fault system', $(geo.fault_system))}
-${row('Fault type', $(geo.nearest_fault_type))}
-${row('Fault distance', fmtM(geo.fault_distance_m))}
-${row('Fault slip rate', $(geo.fault_slip_rate))}
-${row('Fault age', $(geo.fault_age))}
-${row('Fault confidence', $(geo.fault_confidence))}
-${row('VS30 shear wave velocity', geo.vs30_mps?parseFloat(geo.vs30_mps).toFixed(0)+' m/s':null)}
-${row('Soil description', $(geo.shear_unit_description))}
-${row('Landslide zone (assessor)', bool(haz.landslide)?'⚠ YES':'No', bool(haz.landslide))}
-${row('Landslide zone (geo model)', bool(geo.in_landslide_zone)?'⚠ YES — confirmed polygon':'No', bool(geo.in_landslide_zone))}
-${geo.landslide_material?row('Landslide material', $(geo.landslide_material)):''} 
-${geo.landslide_slope_deg?row('Landslide slope', geo.landslide_slope_deg+'°'):''}
-${row('Erosion hazard', bool(haz.erosion)?'⚠ YES':'No', bool(haz.erosion))}
-${row('Steep slope hazard', bool(haz.steep_slope)?'⚠ YES':'No', bool(haz.steep_slope))}
-${row('Wetland', bool(haz.wetland)?'Yes':null)}
-${row('Stream on parcel', bool(haz.stream)?'Yes':null)}
-${row('Critical drainage', bool(haz.critical_drainage)?'Yes':null)}
-${row('Landfill buffer', bool(haz.landfill_buffer)?'⚠ Yes':null, bool(haz.landfill_buffer))}
-${row('Coal mine hazard', bool(haz.coal_mine)?'⚠ YES':'No', bool(haz.coal_mine))}
-${row('Contamination code', haz.contamination&&haz.contamination!='0'?'Code '+haz.contamination:null, true)}
-${mn.abandoned?row('Nearest abandoned mine', mn.abandoned.name+' · '+fmtM(mn.abandoned.distance_m)+(mn.abandoned.hazard==='yes'?' ⚠ HAZARD':''), mn.abandoned.hazard==='yes'):''}
-${mn.active?row('Nearest active mine', mn.active.name+' · '+mn.active.commodity+' · '+fmtM(mn.active.distance_m)):''}
-
-<!-- CH 10: INFRASTRUCTURE & SERVICES -->
-${sec('10','INFRASTRUCTURE & SERVICES')}
-${row('EMS / fire response', inf.ems_agency?inf.ems_agency+' · '+fmtM(inf.ems_distance_m):null)}
-${row('Water system', inf.water_system_name?inf.water_system_name+(inf.water_system_type?' ('+inf.water_system_type+')':''):null)}
-${row('Water system ownership', $(inf.water_system_ownership))}
-${row('Water system connections', inf.water_system_connections?Number(inf.water_system_connections).toLocaleString()+' connections':null)}
-${row('Water system status', $(inf.water_system_status))}
-${row('Water system contact', $(inf.water_system_phone))}
-${mw.nearest_well?row('On-parcel well', mw.nearest_well.depth_ft?mw.nearest_well.depth_ft+'ft depth · '+mw.nearest_well.gpm+' GPM · '+fmtM(mw.nearest_well.distance_m):'On record · '+fmtM(mw.nearest_well.distance_m)):''}
-
-<!-- MINERAL & WATER RIGHTS -->
-${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||mw.thermal_spring)?sec('11','MINERAL & SUBSURFACE RIGHTS'):''}
-${mw.oil_gas_well?row('Nearest oil/gas well', mw.oil_gas_well.name+' · '+mw.oil_gas_well.status+' · '+fmtM(mw.oil_gas_well.distance_m)+(mw.oil_gas_well.hydrocarbon_show?' · Hydrocarbons: '+mw.oil_gas_well.hydrocarbon_show:'')):''}
-${mw.metallic_mineral?row('Nearest mineral site', mw.metallic_mineral.name+' · '+mw.metallic_mineral.primary_commodity+' · '+fmtM(mw.metallic_mineral.distance_m)):''}
-${mw.aggregate_resource?row('Aggregate resource area', 'Parcel is within a mapped aggregate resource area'+(mw.aggregate_resource.commodity?' · '+mw.aggregate_resource.commodity:'')):''}
-${mw.geothermal?row('Geothermal well nearby', mw.geothermal.site+' · '+parseFloat(mw.geothermal.temp_celsius).toFixed(1)+'°C · '+fmtM(mw.geothermal.distance_m)):''}
-${mw.thermal_spring?row('Thermal spring nearby', mw.thermal_spring.name+' · '+parseFloat(mw.thermal_spring.temp_celsius).toFixed(1)+'°C · '+fmtM(mw.thermal_spring.distance_m)):''}
-
-<!-- INTEL SCORE BREAKDOWN -->
-${sec('12','RWABIDASK PROPERTY INTELLIGENCE SCORE')}
-<div style="display:flex;align-items:baseline;gap:16px;margin:12px 0 8px">
-  <div style="font-size:52px;font-weight:700;font-family:Arial,sans-serif;line-height:1">${score}</div>
-  <div>
-    <div style="font-size:14px;font-weight:600">${scoreLabel}</div>
-    <div style="font-size:10px;color:#666;margin-top:2px">Out of 100 · Higher = more stable, lower risk, cleaner record</div>
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">05</span><span class="ch-t">SALES & TRANSACTION HISTORY</span><span class="ch-s ${armSales.length?'ok':'none'}">${armSales.length?armSales.length+' RECORDED SALE'+(armSales.length>1?'S':''):'NO MARKET SALES ON RECORD'}</span></div>
+  <div class="ch-body">
+    ${armSales.length===0?row('Recorded market sales','None found in assessor record — check county records directly','muted'):''}
+    ${armSales.slice(0,8).map(s=>{
+      const price=si(s.SalePrice);
+      const date=String(s.DocumentDate||'').substring(0,10);
+      return price>0?row(date,'$'+price.toLocaleString()):'';
+    }).join('')}
+    ${yearsSinceSale?row('Current owner holding period',yearsSinceSale+' years (since '+lastSaleDate+')'):''}
+    ${salePpsf?math(
+      'LAST MARKET SALE — PRICE PER SQUARE FOOT',
+      '$'+salePpsf.toLocaleString()+' per sq ft',
+      '$'+lastSalePrice.toLocaleString()+' sale price on '+lastSaleDate+' ÷ '+sqft.toLocaleString()+' sq ft living area'
+    ):''}
+    ${priceGap!==null?math(
+      'CURRENT ASSESSED VALUE vs. LAST SALE PRICE',
+      (priceGap>0?'+':'')+priceGap+'% '+(priceGap>0?'above':'below')+' last sale',
+      'Assessed at $'+assessed.toLocaleString()+' today vs. $'+lastSalePrice.toLocaleString()+' when last sold in '+lastSaleDate+'. A large positive gap may mean the market has outpaced the assessment — or it may signal an appeal opportunity for the owner.'
+    ):''}
+    ${insight(
+      'RWABidAsk Research: Why sale history matters to every party in a transaction',
+      'The sale record is the most reliable signal of what the market actually paid.',
+      'A $0 transfer means the property changed hands within a family or trust — not a real market sale. Lenders, insurers, and buyers should look at arms-length sales only. A long time since the last sale may mean the current owner bought before a major appreciation cycle — and may not realize how much the value has moved.'
+    )}
   </div>
 </div>
-${[
-  ['Value growth rate (30%)', cagr?Math.min(100,Math.round(parseFloat(cagr)*5)):0, '#185FA5'],
-  ['Permit compliance (20%)', permits.length>0?100:50, '#3B6D11'],
-  ['Transaction clarity (20%)', salesHist.filter(s=>parseInt(s.SalePrice||0)>0).length>0?75:40, '#EF9F27'],
-  ['Geographic risk (15%)', bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?20:bool(haz.landslide)?50:80, bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?'#E24B4A':'#639922'],
-  ['Appeal history (15%)', p.appeal_count===0?100:60, '#185FA5'],
-].map(([label, pct, color])=>`
-  <div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:10px">
-    <span style="width:200px;flex-shrink:0;color:#555">${label}</span>
-    <div style="flex:1;height:4px;background:#eee;border-radius:2px">
-      <div style="width:${pct}%;height:4px;background:${color};border-radius:2px"></div>
+
+<!-- CH 06: PERMITS -->
+${permits.length?`
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">06</span><span class="ch-t">PERMIT HISTORY</span><span class="ch-s ok">${permits.length} PERMITS ON RECORD</span></div>
+  <div class="ch-body">
+    ${permits.slice(0,12).map(pm=>{
+      const dt=String(pm.IssueDate||'').substring(0,10);
+      const val=si(pm.PermitVal);
+      return row(dt+' · '+($(pm.PermitType)||'—'),val>0?'$'+val.toLocaleString():$(pm.PermitStatus)||'—');
+    }).join('')}
+    ${permitTotal>0?math(
+      'TOTAL PERMITTED INVESTMENT IN THIS PROPERTY',
+      '$'+permitTotal.toLocaleString(),
+      permitRate?'That is '+permitRate+'% of the current assessed value of $'+assessed.toLocaleString()+'. Permitted work was inspected and approved by the county — unpermitted work is not counted here and is a liability in any transaction.':''
+    ):''}
+    ${insight(
+      'RWABidAsk Research: What permits tell a lender, buyer, or insurer',
+      'Every permit on record is a verified, county-approved improvement.',
+      'Work done without a permit does not appear here. If a seller claims renovations that are not on the permit record, those improvements were either unpermitted or done before the county began tracking. Unpermitted work can affect loan approval, insurance, and resale value.'
+    )}
+  </div>
+</div>`:''}
+
+<!-- CH 07: PROPERTY RIGHTS -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">07</span><span class="ch-t">PROPERTY RIGHTS & DESIGNATIONS</span><span class="ch-s ${bool(rts.easements)||bool(rts.deed_restrictions)?'warn':'ok'}">${bool(rts.easements)||bool(rts.deed_restrictions)?'REVIEW REQUIRED':'CLEAN'}</span></div>
+  <div class="ch-body">
+    ${row('Easements on record', bool(rts.easements)?'Yes — verify via title search':'None on record',bool(rts.easements)?'bad':'')}
+    ${row('Deed restrictions', bool(rts.deed_restrictions)?'Yes — review required':'None on record',bool(rts.deed_restrictions)?'bad':'')}
+    ${bool(rts.native_growth_protection)?row('Native growth protection easement','Yes — clearing and grading may be restricted','bad'):''}
+    ${bool(rts.development_rights_purchased)?row('Development rights purchased','Yes'):''}
+    ${bool(rts.dnr_lease)?row('Department of Natural Resources lease','Yes'):''}
+    ${rts.historic_site&&rts.historic_site!='0'?row('Historic site designation','Yes — alterations may require approval'):''}
+    ${rts.current_use_designation&&rts.current_use_designation!='0'?row('Current use designation','Code '+rts.current_use_designation+' — reduced tax rate may apply'):''}
+    ${rts.tidelands_shoreland&&rts.tidelands_shoreland!='0'?row('Tidelands / shoreland','Yes — code '+rts.tidelands_shoreland+' (may have special water rights)'):''}
+    ${rts.waterfront_location&&rts.waterfront_location!='0'?row('Waterfront location','Code '+rts.waterfront_location):''}
+    ${rts.waterfront_footage&&rts.waterfront_footage!='0'?row('Waterfront footage',rts.waterfront_footage+' linear feet'):''}
+    ${bool(rts.waterfront_access_rights)?row('Waterfront access rights','Yes — deeded access on record'):''}
+    ${(()=>{const active=Object.entries(vws).filter(([k,v2])=>v2&&v2!='0'&&v2!='false'&&v2!==false&&v2!==0);return active.length?row('View classifications recorded',active.map(([k,v2])=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())+' (score: '+v2+')').join(', ')):''})()}
+    ${bool(rts.species_of_concern)?row('Species of concern on parcel','Yes — development may be restricted by state/federal law','bad'):''}
+    ${bool(rts.sensitive_area_tract)?row('Sensitive area tract','Yes — additional regulations may apply'):''}
+    ${(()=>{const active=Object.entries(nus).filter(([k,v2])=>v2&&v2!='0'&&v2!='false'&&v2!==false&&v2!==0);return active.length?row('Nuisances on record',active.map(([k])=>k.replace(/_/g,' ')).join(', '),'bad'):''})()}
+    ${insight(
+      'RWABidAsk Research: Rights are value. Restrictions are risk.',
+      'What is — and is not — in this section matters equally.',
+      'A water right can be worth hundreds of thousands of dollars. An easement reduces usable area. Tidelands give the owner rights to the land below the water line. This report shows what the assessor has on record. It does not replace a full title search — always verify before any purchase, loan, or insurance decision.'
+    )}
+  </div>
+</div>
+
+<!-- CH 08: APPEALS -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">08</span><span class="ch-t">ASSESSMENT APPEALS</span><span class="ch-s ok">COMPLETE</span></div>
+  <div class="ch-body">
+    ${row('Total appeals filed against this assessment', p.appeal_count>0?String(p.appeal_count)+' appeals on record':'None on record')}
+    ${appeals.slice(0,5).map(a=>row('Appeal '+$(a.AppealNbr)+' · Year '+$(a.BillYr),$(a.HearingResult)?'Hearing result: '+a.HearingResult:'Filed')).join('')}
+    ${p.appeal_count===0?insight(
+      'RWABidAsk Research: Could the current owner challenge this assessment?',
+      'Possibly. No prior appeal means no prior attempt — the door is open.',
+      'Property owners in Washington State can appeal their assessed value each year. A successful appeal can reduce the taxable value and lower the annual tax bill. This requires a licensed appraiser to document comparable sales. The absence of any appeal does not mean the assessment is accurate — it may simply mean no one has challenged it yet.'
+    ):''}
+  </div>
+</div>
+
+<!-- CH 09: HAZARDS -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">09</span><span class="ch-t">NATURAL HAZARD & GEOGRAPHIC RISK</span><span class="ch-s ${bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)||bool(haz.landslide)?'warn':'ok'}">${bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)||bool(haz.landslide)?'HAZARDS PRESENT':'LOW RISK PROFILE'}</span></div>
+  <div class="ch-body">
+    ${row('Tsunami inundation zone',bool(geo.in_tsunami_zone)?'YES — modeled wave inundation confirmed for this parcel':'No — not within the modeled tsunami zone',bool(geo.in_tsunami_zone)?'bad':'good')}
+    ${row('100-year flood plain',bool(haz.flood_100yr)?'YES — flood insurance likely required by lenders':'No',bool(haz.flood_100yr)?'bad':'good')}
+    ${row('Seismic site class',$(geo.seismic_site_class))}
+    ${geo.seismic_site_class_desc?`<div class="row"><span class="rk">What seismic class means</span><span class="rv" style="font-size:10px;max-width:65%">${geo.seismic_site_class_desc.substring(0,80)}…</span></div>`:''}
+    ${row('Geology and soil type', $(geo.geology_label))}
+    ${geo.shear_unit_description?row('Soil description',$(geo.shear_unit_description)):''}
+    ${geo.vs30_mps?math(
+      'SHEAR WAVE VELOCITY (VS30) — How fast sound travels through the ground, used to measure earthquake risk',
+      sf(geo.vs30_mps).toFixed(0)+' meters per second',
+      'Higher numbers = stiffer, more stable ground. Below 180 m/s is soft soil with high earthquake amplification. Above 760 m/s is rock.'
+    ):''}
+    ${row('Nearest recorded active fault',$(geo.nearest_fault_name))}
+    ${row('Fault system',$(geo.fault_system))}
+    ${row('Fault type',$(geo.nearest_fault_type))}
+    ${row('Distance to nearest active fault',fmtM(geo.fault_distance_m))}
+    ${row('Fault movement rate',geo.fault_slip_rate?geo.fault_slip_rate+' (millimeters per year)':null)}
+    ${row('Fault age classification',$(geo.fault_age))}
+    ${row('Data confidence',$(geo.fault_confidence))}
+    ${row('Landslide hazard (county assessor flag)',bool(haz.landslide)?'YES — flagged in assessor record':'No',bool(haz.landslide)?'bad':'good')}
+    ${row('Landslide zone (geologic model)',bool(geo.in_landslide_zone)?'YES — parcel overlaps a mapped landslide polygon':'No',bool(geo.in_landslide_zone)?'bad':'good')}
+    ${row('Erosion hazard',bool(haz.erosion)?'YES':'No',bool(haz.erosion)?'bad':'')}
+    ${row('Steep slope hazard',bool(haz.steep_slope)?'YES':'No',bool(haz.steep_slope)?'bad':'')}
+    ${bool(haz.wetland)?row('Wetland on parcel','Yes — development and clearing restrictions apply','bad'):''}
+    ${bool(haz.stream)?row('Stream on or adjacent to parcel','Yes — buffer setbacks may apply','bad'):''}
+    ${bool(haz.critical_drainage)?row('Critical drainage area','Yes'):''}
+    ${bool(haz.coal_mine)?row('Coal mine hazard','YES — historic mine may be present below ground','bad'):''}
+    ${bool(haz.landfill_buffer)?row('Landfill buffer zone','Yes — proximity to a landfill','bad'):''}
+    ${haz.contamination&&haz.contamination!='0'?row('Contamination flag','Code '+haz.contamination+' — verify with county environmental records','bad'):''}
+    ${mn.abandoned?row('Nearest abandoned mine',mn.abandoned.name+' · '+fmtM(mn.abandoned.distance_m)+(mn.abandoned.hazard==='yes'?' — Hazardous materials on site':''),mn.abandoned.hazard==='yes'?'bad':''):''}
+    ${mn.active?row('Nearest active mining operation',mn.active.name+' · '+mn.active.commodity+' · '+fmtM(mn.active.distance_m)):''}
+    <div style="margin-top:14px;page-break-inside:avoid">
+      <div style="font-size:9px;font-family:'Courier New',monospace;color:#888;letter-spacing:1px;margin-bottom:8px">RISK INDICATOR SUMMARY — Higher bar = higher risk or cost pressure</div>
+      ${[
+        ['Earthquake ground shaking', bool(haz.seismic)?70:geo.seismic_site_class&&geo.seismic_site_class.includes('D')?60:40, bool(haz.seismic)?'#E24B4A':'#639922'],
+        ['Tsunami and wave flooding', bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?85:15, bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?'#E24B4A':'#639922'],
+        ['Landslide and slope risk', bool(haz.landslide)||bool(geo.in_landslide_zone)?75:bool(haz.steep_slope)?45:20, bool(haz.landslide)?'#E24B4A':bool(haz.steep_slope)?'#EF9F27':'#639922'],
+        ['Insurance cost pressure', bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?85:bool(haz.landslide)?60:25, bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?'#E24B4A':'#EF9F27'],
+        ['Fault line proximity risk', sf(geo.fault_distance_m||99999)<5000?70:sf(geo.fault_distance_m||99999)<15000?40:15, sf(geo.fault_distance_m||99999)<5000?'#EF9F27':'#639922'],
+      ].map(([label,pct,color])=>`
+        <div class="bar-row">
+          <span class="bl">${label}</span>
+          <div class="bt"><div class="bf" style="width:${pct}%;background:${color}"></div></div>
+          <span class="bv">${pct}</span>
+        </div>`).join('')}
     </div>
-    <span style="width:30px;text-align:right;font-weight:600">${pct}</span>
-  </div>`).join('')}
-<div style="margin-top:10px;font-size:10px;color:#666;line-height:1.7;font-style:italic;border-top:1px solid #eee;padding-top:8px">
-  ${bool(geo.in_tsunami_zone)?'This parcel is within a modeled tsunami inundation zone — a material risk not disclosed on consumer listing platforms. Any lender, insurer, or buyer should treat this as a primary underwriting factor. ':''}
-  ${bool(haz.flood_100yr)?'Located within the 100-year flood plain. Flood insurance likely required by lenders. ':''}
-  ${cagr&&parseFloat(cagr)>8?'Strong '+cagr+'%/yr assessed value growth over '+yrs+' years indicates premium location. ':''}
-  Score reflects publicly available assessor and geospatial data only. Not an appraisal, credit rating, or legal opinion.
-</div>
-
-<!-- FOOTER -->
-<div style="border-top:2px solid #111;margin-top:24px;padding-top:10px;display:flex;justify-content:space-between;font-size:8px;color:#666;letter-spacing:0.5px;line-height:1.8">
-  <div>
-    RWABIDASK PROPERTY INTELLIGENCE REPORT — STANDARD v2.0<br>
-    DATA: KING COUNTY ASSESSOR · BIGQUERY PARCEL PIPELINE · USGS · WA DNR<br>
-    FOR USE IN: LENDING · INSURANCE UNDERWRITING · ACQUISITION DUE DILIGENCE
-  </div>
-  <div style="text-align:right">
-    PIN ${pin2}<br>
-    NOT A TITLE REPORT · NOT LEGAL ADVICE · NOT AN APPRAISAL<br>
-    © RWABIDASK — NOT FOR REDISTRIBUTION · RWABIDASK.COM
   </div>
 </div>
-<div style="margin-top:8px;font-size:8px;color:#aaa;line-height:1.6">
-  Generated from publicly available assessor and geospatial data. RWABidAsk LLC makes no warranties as to completeness or accuracy of third-party government datasets. Fields marked absent reflect gaps in source data, not absence in reality. Conduct independent title searches, appraisals, and inspections before any financial transaction. Property Intelligence Scores are proprietary computed metrics and do not constitute a credit rating, appraisal, or investment recommendation.
+
+<!-- CH 10: INFRASTRUCTURE -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">10</span><span class="ch-t">INFRASTRUCTURE & SERVICES</span><span class="ch-s ok">COMPLETE</span></div>
+  <div class="ch-body">
+    ${row('Nearest EMS / fire station', inf.ems_agency?inf.ems_agency+' · '+fmtM(inf.ems_distance_m)+' away':null)}
+    ${row('Municipal water system', inf.water_system_name?inf.water_system_name+(inf.water_system_type?' ('+inf.water_system_type+')':''):null)}
+    ${row('Water system ownership', $(inf.water_system_ownership))}
+    ${row('Number of connections served', inf.water_system_connections?Number(inf.water_system_connections).toLocaleString()+' properties connected':null)}
+    ${row('Water system operational status', $(inf.water_system_status))}
+    ${row('Water utility contact', $(inf.water_system_phone))}
+    ${mw.nearest_well?row('Private well on or near parcel',mw.nearest_well.depth_ft?mw.nearest_well.depth_ft+' ft deep · '+mw.nearest_well.gpm+' gallons per minute · '+fmtM(mw.nearest_well.distance_m)+' away':fmtM(mw.nearest_well.distance_m)+' away'):''}
+  </div>
 </div>
 
-</div>`;
+<!-- CH 11: MINERAL & SUBSURFACE -->
+${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||mw.thermal_spring)?`
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">11</span><span class="ch-t">MINERAL & SUBSURFACE RIGHTS</span><span class="ch-s partial">DATA PRESENT</span></div>
+  <div class="ch-body">
+    ${mw.oil_gas_well?row('Nearest oil or gas well',mw.oil_gas_well.name+' · Status: '+mw.oil_gas_well.status+' · '+fmtM(mw.oil_gas_well.distance_m)+' away'+(mw.oil_gas_well.hydrocarbon_show?' · Hydrocarbons detected: '+mw.oil_gas_well.hydrocarbon_show:'')):''}
+    ${mw.metallic_mineral?row('Nearest recorded mineral site',mw.metallic_mineral.name+' · Primary material: '+mw.metallic_mineral.primary_commodity+' · '+fmtM(mw.metallic_mineral.distance_m)+' away'):''}
+    ${mw.aggregate_resource?row('Aggregate resource area','This parcel falls within a mapped aggregate (gravel/sand) resource area'+(mw.aggregate_resource.commodity?' · Material: '+mw.aggregate_resource.commodity:'')):''}
+    ${mw.geothermal?row('Geothermal well nearby',mw.geothermal.site+' · '+sf(mw.geothermal.temp_celsius).toFixed(1)+'°C ground temperature · '+fmtM(mw.geothermal.distance_m)+' away'):''}
+    ${mw.thermal_spring?row('Thermal spring nearby',mw.thermal_spring.name+' · '+sf(mw.thermal_spring.temp_celsius).toFixed(1)+'°C · Flow: '+sf(mw.thermal_spring.flow_lpm).toFixed(1)+' liters/min · '+fmtM(mw.thermal_spring.distance_m)+' away'):''}
+    ${insight(
+      'RWABidAsk Research: Subsurface rights are separate from what you see on the surface.',
+      'In Washington State, mineral rights can be owned independently of the land above them.',
+      'If mineral rights were severed from this parcel at any point in its history, a new buyer may not own what is underground. Proximity to oil, gas, or mineral extraction sites can affect insurance costs, development potential, and collateral value for lenders. Verify subsurface rights through a full title search.'
+    )}
+  </div>
+</div>`:''}
+
+<!-- CH 12: INTEL SCORE -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">12</span><span class="ch-t">RWABIDASK PROPERTY INTELLIGENCE SCORE</span><span class="ch-s ok">COMPUTED</span></div>
+  <div class="ch-body">
+    <div class="score-main">
+      <div style="font-size:56px;font-weight:700;font-family:Arial,sans-serif;line-height:1">${score}</div>
+      <div>
+        <div style="font-size:15px;font-weight:600">${scoreLabel}</div>
+        <div style="font-size:11px;color:#666;margin-top:3px">Out of 100 &nbsp;·&nbsp; Higher score = more stable value, lower risk, cleaner record</div>
+      </div>
+    </div>
+    ${[
+      ['Average yearly value increase (30% weight)', cagr?Math.min(100,Math.round(sf(cagr)*5)):0, '#185FA5'],
+      ['Value consistency over time (20% weight)', apprHist.length>5?80:50, '#185FA5'],
+      ['Permitted improvement record (20% weight)', permits.length>0?100:50, '#3B6D11'],
+      ['Transaction clarity — real market sales (15%)', armSales.length>0?75:40, '#EF9F27'],
+      ['Geographic risk reduction (15% weight)', bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?15:bool(haz.landslide)?40:80, bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?'#E24B4A':'#639922'],
+    ].map(([label,pct,color])=>`
+      <div class="bar-row">
+        <span class="bl">${label}</span>
+        <div class="bt"><div class="bf" style="width:${pct}%;background:${color}"></div></div>
+        <span class="bv">${pct}</span>
+      </div>`).join('')}
+    <div class="score-note">
+      ${bool(geo.in_tsunami_zone)?'This parcel sits within a modeled tsunami inundation zone. This fact does not appear on Zillow, Redfin, or most MLS listings. It is a material risk that affects insurance availability, loan underwriting, and resale liquidity in a stress scenario. ':''}
+      ${bool(haz.flood_100yr)?'This parcel is within the 100-year flood plain. Federal flood insurance will likely be required by any mortgage lender. ':''}
+      ${cagr&&sf(cagr)>8?'The '+cagr+'%/yr growth rate over '+yrs+' years significantly outperforms the average stock market return of ~7%/yr — indicating a premium, high-demand market location. ':''}
+      This score is computed from publicly available county assessor and government geospatial data. It is a proprietary RWABidAsk metric. It is not an appraisal, a credit rating, or a legal opinion.
+    </div>
+  </div>
+</div>
+
+<!-- GLOSSARY -->
+<div class="glossary">
+  <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;color:#888;margin-bottom:6px;font-style:normal">GLOSSARY OF TERMS USED IN THIS REPORT</div>
+  <b>Assessed value:</b> The dollar value assigned to a property by the county assessor each year, used to calculate property taxes. Not the same as market value or appraised value.<br>
+  <b>CAGR (Compound Annual Growth Rate):</b> The average rate at which a value grows each year over a multi-year period, accounting for compounding. A 10% CAGR means the value roughly doubles every 7 years.<br>
+  <b>Arms-length sale:</b> A sale between two unrelated parties, each acting in their own interest. The most reliable indicator of true market value.<br>
+  <b>Seismic site class:</b> A letter grade (A through F) that describes how the soil at a location responds to an earthquake. Class A is bedrock (safest). Class E and F are soft soils that amplify shaking significantly.<br>
+  <b>VS30:</b> The average speed at which seismic waves travel through the top 30 meters of soil. Higher numbers mean stiffer, more stable ground. Used by engineers to predict earthquake damage.<br>
+  <b>Fault slip rate:</b> How fast two sides of a fault are moving relative to each other, measured in millimeters per year. Higher slip rate = more frequent earthquake potential.<br>
+  <b>Easement:</b> A legal right for someone other than the owner to use part of the property — for example, a utility company's right to run power lines across it.<br>
+  <b>Tidelands:</b> Land between the high-water and low-water marks on a shoreline. In Washington State, tidelands can be privately owned and carry separate water access rights.<br>
+  <b>Levy code:</b> The tax district code that determines which combination of taxing authorities (school district, fire district, city, county, etc.) apply to a property — and therefore what the total tax rate is.<br>
+  <b>Property Intelligence Score:</b> RWABidAsk's proprietary score combining value growth, permit history, transaction clarity, geographic risk, and assessor data quality into a single 0–100 number.
+</div>
+
+<!-- LEGAL FOOTER -->
+<div class="legal">
+  <div class="legal-row">
+    <div>
+      RWABIDASK PROPERTY INTELLIGENCE REPORT — STANDARD v2.0<br>
+      DATA: KING COUNTY ASSESSOR · BIGQUERY PIPELINE · USGS · WA DNR · ${new Date().toLocaleDateString()}<br>
+      FOR USE IN: LENDING · INSURANCE UNDERWRITING · ACQUISITION DUE DILIGENCE
+    </div>
+    <div style="text-align:right">
+      PIN ${pin2}<br>
+      NOT A TITLE REPORT · NOT LEGAL ADVICE · NOT AN APPRAISAL<br>
+      © RWABIDASK LLC — NOT FOR REDISTRIBUTION · RWABIDASK.COM
+    </div>
+  </div>
+  <div style="margin-top:8px;font-size:8px;color:#aaa;line-height:1.6;font-family:Georgia,serif;font-style:italic">
+    Generated from publicly available assessor and geospatial data. RWABidAsk LLC makes no warranties as to completeness or accuracy of third-party government datasets. Fields marked absent reflect gaps in source data, not absence in reality. Conduct independent title searches, appraisals, and inspections before any financial transaction. Property Intelligence Scores are proprietary computed metrics and do not constitute a credit rating, appraisal, or investment recommendation. © RWABidAsk LLC. All rights reserved.
+  </div>
+</div>
+
+</div></body></html>`;
 
     const el = document.createElement('div');
     el.innerHTML = html;
     document.body.appendChild(el);
     await html2pdf().set({
-      margin: 0.5,
+      margin: [0.5,0.5,0.5,0.5],
       filename: `RWABidAsk_Intel_${pin2.replace(/[^a-z0-9]/gi,'_')}.pdf`,
-      image: {type:'jpeg', quality:0.98},
-      html2canvas: {scale:2, useCORS:true},
-      jsPDF: {unit:'in', format:'letter', orientation:'portrait'}
+      image: {type:'jpeg',quality:0.98},
+      html2canvas: {scale:2,useCORS:true,letterRendering:true},
+      jsPDF: {unit:'in',format:'letter',orientation:'portrait'},
+      pagebreak: {mode:['avoid-all','css','legacy']}
     }).from(el).save();
     if(typeof showToast==='function') showToast('✓ INTEL REPORT DOWNLOADED');
     document.body.removeChild(el);
