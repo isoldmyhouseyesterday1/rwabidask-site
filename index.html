@@ -8853,25 +8853,26 @@ const wfnt=bq?.waterfront||null;
 let rows=[];
 
 if(['sfr','condo','townhouse','small_multi'].includes(propCat)){
-  const baths=[bldg.bath_full&&`${bldg.bath_full} full`,bldg.bath_3qtr&&`${bldg.bath_3qtr} ¾`,bldg.bath_half&&`${bldg.bath_half} ½`].filter(Boolean).join(' · ')||'—';
+  const baths=[bldg.bath_full&&parseInt(bldg.bath_full)>0&&`${bldg.bath_full} full`,bldg.bath_3qtr&&parseInt(bldg.bath_3qtr)>0&&`${bldg.bath_3qtr} ¾`,bldg.bath_half&&parseInt(bldg.bath_half)>0&&`${bldg.bath_half} ½`].filter(Boolean).join(' · ')||null;
+  const fp=parseInt(bldg.total_fireplaces||bldg.fireplaces||0)||null;
   rows=[
-    bldg.bedrooms&&['BEDS',bldg.bedrooms],
-    bldg.bath_full&&['BATHS',baths],
-    bldg.sqft_total&&['AREA',`${Number(bldg.sqft_total).toLocaleString()} sqft`],
-    bldg.year_built&&['YEAR BUILT',bldg.year_renovated&&bldg.year_renovated!=='0'?`${bldg.year_built} · Reno ${bldg.year_renovated}`:bldg.year_built],
-    bldg.stories&&['STORIES',bldg.stories],
+    parseInt(bldg.bedrooms||0)>0&&['BEDS',bldg.bedrooms],
+    baths&&['BATHS',baths],
+    parseInt(bldg.sqft_total||0)>0&&['AREA',`${Number(bldg.sqft_total).toLocaleString()} sqft`],
+    bldg.year_built&&parseInt(bldg.year_built)>0&&['YEAR BUILT',bldg.year_renovated&&bldg.year_renovated!=='0'?`${bldg.year_built} · Reno ${bldg.year_renovated}`:String(bldg.year_built)],
+    bldg.stories&&parseFloat(bldg.stories)>0&&['STORIES',bldg.stories],
     bldg.building_grade&&['GRADE',bldg.building_grade],
     bldg.condition&&['CONDITION',bldg.condition],
     bldg.heat_system&&['HEAT',bldg.heat_source?`${bldg.heat_system} / ${bldg.heat_source}`:bldg.heat_system],
-    bldg.total_fireplaces&&bldg.total_fireplaces>0&&['FIREPLACES',bldg.total_fireplaces],
-    bldg.sqft_garage&&bldg.sqft_garage!='0'&&['GARAGE',`${Number(bldg.sqft_garage).toLocaleString()} sqft`],
-    bldg.sqft_basement_finished&&bldg.sqft_basement_finished!='0'&&['BASEMENT',`${Number(bldg.sqft_basement_finished).toLocaleString()} sqft finished`],
-    bldg.sqft_deck&&bldg.sqft_deck!='0'&&['DECK',`${Number(bldg.sqft_deck).toLocaleString()} sqft`],
+    fp&&fp>0&&['FIREPLACES',fp],
+    parseInt(bldg.sqft_garage||0)>0&&['GARAGE',`${Number(bldg.sqft_garage).toLocaleString()} sqft`],
+    parseInt(bldg.sqft_basement_finished||0)>0&&['BASEMENT',`${Number(bldg.sqft_basement_finished).toLocaleString()} sqft finished`],
+    parseInt(bldg.sqft_deck||0)>0&&['DECK',`${Number(bldg.sqft_deck).toLocaleString()} sqft`],
     sqftLot&&['LOT SIZE',`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`],
-    wfnt&&['WATERFRONT',`${wfnt.body_of_water||'Yes'} · ${wfnt.footage?wfnt.footage+' ft':''}${wfnt.tidelands?' · '+wfnt.tidelands:''}`],
-    views.length>0&&['VIEWS',views.slice(0,2).join(' · ')],
+    wfnt&&['WATERFRONT',`${wfnt.body_of_water||'Waterfront'} · ${wfnt.footage&&wfnt.footage>0?wfnt.footage+' ft·':''} ${wfnt.tidelands||''}`],
+    views.length>0&&['VIEWS',views.slice(0,3).join(', ')],
     bq?.water_system_name&&['WATER',bq.water_system_name],
-    bq?.ems_agency&&['EMS',`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(bq.ems_distance_m)+'m':''}`],
+    bq?.ems_agency&&['EMS',`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
   ].filter(Boolean).filter(r=>r&&r[1]);
 } else if(propCat==='apartment'){
   rows=[
@@ -8911,9 +8912,10 @@ if(['sfr','condo','townhouse','small_multi'].includes(propCat)){
 rows=[...rows,
   assessedLand&&['LAND VALUE',`$${Number(assessedLand).toLocaleString()}`],
   assessedImps&&assessedImps>0&&['STRUCTURE',`$${Number(assessedImps).toLocaleString()}`],
-  salePrice!=='—'&&['LAST SALE',salePrice],
-  saleDate!=='—'&&lastSale.instrument&&['SALE TYPE',lastSale.instrument],
-  saleDate!=='—'&&['SALE DATE',saleDate],
+  lastSale.price&&lastSale.price>10000&&['LAST SALE',salePrice],
+  lastSale.price&&lastSale.price>10000&&lastSale.instrument&&['SALE TYPE',lastSale.instrument],
+  lastSale.price&&lastSale.price>10000&&saleDate!=='—'&&['SALE DATE',saleDate],
+  lastSale.price&&lastSale.price>10000&&lastSale.warnings&&lastSale.warnings.length>0&&['SALE FLAGS',lastSale.warnings.slice(0,2).join(' · ')],
   permitCount>0&&['PERMITS',`${permitCount} on record`],
 ].filter(Boolean).filter(r=>r&&r[1]);
 
@@ -8929,7 +8931,7 @@ const spark=trend.length>1?(()=>{
 
 const sc=bq?.seismic_site_class||'';
 const tsunami=bool(hazards.tsunami)||bool(bq?.geo?.in_tsunami_zone);
-const zoningHtml=zoning?`<a href="https://www.kingcounty.gov/depts/local-services/permits-building-inspections/codes-land-use/zoning/zones.aspx" target="_blank" style="color:var(--cyan);text-decoration:none">${zoning} ↗</a>`:null;
+const zoningHtml=zoning?`${zoning} <a href="https://www.kingcounty.gov/depts/local-services/permits-building-inspections/codes-land-use/zoning/zones.aspx" target="_blank" style="color:var(--cyan);text-decoration:none;font-size:9px">↗ code</a>`:null;
 rows=rows.map(([k,v])=>k==='ZONING'&&zoningHtml?[k,zoningHtml]:[k,v]);
 
 document.getElementById('rhead').innerHTML=`
@@ -8957,8 +8959,8 @@ if(noData){
     </div>
     ${rows.filter(r=>r[1]).map(([k,v])=>`
       <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 18px;border-bottom:1px solid var(--border);font-size:12px;gap:8px">
-        <span style="color:var(--dim);flex-shrink:0">${k}</span>
-        <span style="color:var(--text);font-weight:500;text-align:right;font-size:11px">${v}</span>
+        <span style="color:var(--dim);flex-shrink:0;font-size:11px">${k}</span>
+        <span style="color:var(--text);font-weight:500;text-align:right;font-size:11px;max-width:60%">${v}</span>
       </div>`).join('')}
     ${spark?`<div style="padding:12px 18px;border-top:1px solid var(--border)">${spark}</div>`:''}
     <div style="padding:8px 18px;display:flex;gap:6px;flex-wrap:wrap">
