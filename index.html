@@ -8852,7 +8852,7 @@ const views=bq?.views||[];
 const wfnt=bq?.waterfront||null;
 let rows=[];
 
-if(['sfr','condo','townhouse','small_multi'].includes(propCat)){
+if(['sfr','condo','townhouse','small_multi','unknown'].includes(propCat)||hasBuilding){
   const baths=[bldg.bath_full&&parseInt(bldg.bath_full)>0&&`${bldg.bath_full} full`,bldg.bath_3qtr&&parseInt(bldg.bath_3qtr)>0&&`${bldg.bath_3qtr} ¾`,bldg.bath_half&&parseInt(bldg.bath_half)>0&&`${bldg.bath_half} ½`].filter(Boolean).join(' · ')||null;
   const fp=parseInt(bldg.total_fireplaces||bldg.fireplaces||0)||null;
   rows=[
