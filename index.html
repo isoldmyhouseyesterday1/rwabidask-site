@@ -8961,7 +8961,34 @@ function _renderFull(asset,bq,isPaidReport=false){
       )
 
     + '</div>';
-}function _hookMap(){const m=document.querySelector('gmp-map-3d');if(!m){setTimeout(_hookMap,800);return;}let cd=false;m.addEventListener('dblclick',async e=>{if(cd)return;cd=true;setTimeout(()=>cd=false,1500);const lat=e.detail?.latLng?.lat??e.latLng?.lat(),lng=e.detail?.latLng?.lng??e.latLng?.lng();if(!lat||!lng)return;renderBasicsPanel({id:`COORD_${lat}_${lng}`,apn:'Resolving…',address:`${lat.toFixed(6)},${lng.toFixed(6)}`,lat,lng,type:'real_estate'});if(typeof showToast==='function')showToast('QUERYING PARCEL LEDGER…');});}
+}function _renderPanelActions(apn, isPaid) {
+  const isMember = !!(typeof currentUser !== 'undefined' && currentUser);
+  const sa = (apn||'').replace(/'/g,"\'");
+  const el = document.getElementById('rbody');
+  if (!el) return;
+  el.innerHTML += '<div style="padding:14px 16px 6px;border-top:1px solid var(--border)">'
+    + '<div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Actions</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    + '<button class="abtn a-bid" style="padding:11px 6px" onclick="' + (isMember ? 'requireAuth(()=>showLendingModal())' : "openModal('signup')") + '">' + (isMember ? '' : '🔒 ') + 'FINANCING</button>'
+    + '<button class="abtn a-bid" style="padding:11px 6px" onclick="' + (isMember ? 'requireAuth(()=>showInsuranceModal())' : "openModal('signup')") + '">' + (isMember ? '' : '🔒 ') + 'INSURANCE</button>'
+    + '</div>'
+    + '<button class="abtn a-bid" style="width:100%;margin-bottom:8px;padding:11px" onclick="' + (isMember ? "requireAuth(()=>{ logPartnerLead('" + sa + "','ACQUIRE'); showToast('ACQUISITION INQUIRY TRANSMITTED'); })" : "openModal('signup')") + '">' + (isMember ? '' : '🔒 ') + 'INQUIRE &amp; ACQUIRE</button>'
+    + '</div>'
+    + '<div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:8px">'
+    + '<div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;padding-top:4px">Parcel Engagement</div>'
+    + '<button class="abtn-sponsor-parcel" onclick="requireAuth(()=>{ logPartnerLead(\'' + sa + "','SPONSOR'); showToast('SPONSORSHIP INTENT LOGGED'); })">SPONSOR THIS PARCEL</button>"
+    + '<button class="abtn-claim-parcel" onclick="requireAuth(()=>{ logPartnerLead(\'' + sa + "','CLAIM'); showToast('OWNERSHIP CLAIM INITIATED'); })">CLAIM &amp; REGISTER REPRESENTATION</button>"
+    + '</div>'
+    + '<div style="padding:0 16px 14px">'
+    + '<button class="abtn-broker-intel" onclick="requireAuth(()=>{ logPartnerLead(\'' + sa + "','BROKER_INTEL'); showToast('BROKER SIGNAL LOGGED'); })">PURCHASE MARKET SIGNALS — BROKER INTEL</button>"
+    + '</div>'
+    + '<div class="intel-report-wrap" style="margin:0 0 4px">'
+    + '<div class="intel-report-label">&#x2B21; &nbsp;FULL MARKET INTELLIGENCE REPORT</div>'
+    + '<button class="btn-intel-report" onclick="' + (isPaid ? 'generateIntelPDF(window._lastBqData)' : "initiateStripeSandbox('" + sa + "')") + '">' + (isPaid ? 'DOWNLOAD INTEL REPORT PDF &#x2B07;' : 'PURCHASE INTEL REPORT &nbsp;&mdash;&nbsp; $20') + '</button>'
+    + '<div style="font-size:8px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.6px;line-height:2">COMP SALES &nbsp;&middot;&nbsp; LIENS &nbsp;&middot;&nbsp; OWNER CHAIN &nbsp;&middot;&nbsp; ZONING ANALYSIS &nbsp;&middot;&nbsp; FLOOD &amp; TOPO</div>'
+    + '</div>';
+}
+function _hookMap(){const m=document.querySelector('gmp-map-3d');if(!m){setTimeout(_hookMap,800);return;}let cd=false;m.addEventListener('dblclick',async e=>{if(cd)return;cd=true;setTimeout(()=>cd=false,1500);const lat=e.detail?.latLng?.lat??e.latLng?.lat(),lng=e.detail?.latLng?.lng??e.latLng?.lng();if(!lat||!lng)return;renderBasicsPanel({id:`COORD_${lat}_${lng}`,apn:'Resolving…',address:`${lat.toFixed(6)},${lng.toFixed(6)}`,lat,lng,type:'real_estate'});if(typeof showToast==='function')showToast('QUERYING PARCEL LEDGER…');});}
 function _hookSearch(){const inp=document.getElementById('search-input');if(!inp){setTimeout(_hookSearch,600);return;}async function go(q){q=(q||inp.value||'').trim();if(!q||q.length<4)return;const cm=q.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);if(cm){renderBasicsPanel({id:`COORD_${cm[1]}_${cm[2]}`,apn:'Resolving…',address:q,lat:parseFloat(cm[1]),lng:parseFloat(cm[2]),type:'real_estate'});return;}if(typeof showToast==='function')showToast('SEARCHING…');const ex=(window.ASSETS||[]).filter(a=>(a.address||'').toLowerCase().includes(q.toLowerCase())||(a.apn||'').includes(q));if(ex.length===1){renderBasicsPanel(ex[0]);return;}const d=await fetchParcelData({address:q});if(!d){if(typeof showToast==='function')showToast('NOT FOUND IN LEDGER');return;}renderBasicsPanel({id:`ADDR_${Date.now()}`,apn:d.PIN||'',address:d.address||q,type:'real_estate'},d);if(typeof showToast==='function')showToast(`FOUND: ${d.PIN||q}`);}inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});const btn=document.querySelector('.search-icon');if(btn)btn.addEventListener('click',()=>go());}
 if(!document.getElementById('rwa-css')){const s=document.createElement('style');s.id='rwa-css';s.textContent='@keyframes spin360{to{transform:rotate(360deg)}}';document.head.appendChild(s);}
 window.addEventListener('load',()=>{setTimeout(_hookMap,1200);setTimeout(_hookSearch,800);});
