@@ -8811,6 +8811,154 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
   })();
 }
 function _renderFull(asset,bq,isPaidReport=false){
+  const d = bq || {};
+  const b = d.building || {};
+  const wf = d.waterfront || {};
+  const ls = d.last_sale || {};
+  const hz = d.hazards || {};
+  const views = Array.isArray(d.views) ? d.views : [];
+
+  const fmt = (v, fallback) => {
+    fallback = fallback !== undefined ? fallback : '—';
+    return (v !== undefined && v !== null && v !== '') ? v : fallback;
+  };
+  const fmtNum = (v, fallback) => {
+    fallback = fallback !== undefined ? fallback : '—';
+    return (v !== undefined && v !== null && v !== '') ? Number(v).toLocaleString() : fallback;
+  };
+  const fmtMoney = (v, fallback) => {
+    fallback = fallback !== undefined ? fallback : '—';
+    return (v !== undefined && v !== null && v !== '') ? '$' + Number(v).toLocaleString() : fallback;
+  };
+  const fmtDate = (v) => {
+    if (!v) return '—';
+    const dt = new Date(v);
+    return isNaN(dt) ? v : dt.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  };
+
+  const section = (title, content) =>
+    '<div style="margin-bottom:18px;">' +
+      '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#1a7fa8;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #0d2a3a;">' + title + '</div>' +
+      content +
+    '</div>';
+
+  const row = (label, value, accent) =>
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid #0d1e2a;">' +
+      '<span style="font-size:11px;color:#6688aa;">' + label + '</span>' +
+      '<span style="font-size:12px;font-weight:600;color:' + (accent || '#c8dded') + ';text-align:right;max-width:60%;">' + value + '</span>' +
+    '</div>';
+
+  const HAZARDS = [
+    ['seismic','Seismic'],['landslide','Landslide'],['erosion','Erosion'],
+    ['coal_mine','Coal Mine'],['flood_100yr','100-yr Flood'],['tsunami','Tsunami'],
+    ['steep_slope','Steep Slope'],['wetland','Wetland']
+  ];
+  const hazardCells = HAZARDS.map(([key, label]) => {
+    const val = hz[key];
+    const present = val && val !== '0' && val !== 'None' && val !== false && val !== 'false';
+    const color = present ? '#e05c5c' : '#3a4a5a';
+    const dot   = present ? '●' : '○';
+    const extra = (present && typeof val === 'string' && val.length > 1) ? ' · ' + val : '';
+    return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;">' +
+      '<span style="color:' + color + ';font-size:14px;">' + dot + '</span>' +
+      '<span style="color:' + (present ? '#e05c5c' : '#8899aa') + ';font-size:12px;">' + label + extra + '</span>' +
+    '</div>';
+  }).join('');
+
+  const viewPills = views.length
+    ? views.map(v => '<span style="display:inline-block;background:#0d2a3a;border:1px solid #1a7fa8;border-radius:20px;padding:3px 10px;font-size:11px;color:#7fd4f7;margin:3px 3px 3px 0;">' + v + '</span>').join('')
+    : '<span style="color:#556677;font-size:12px;">No notable views</span>';
+
+  const lsWarnings = (Array.isArray(ls.warnings) && ls.warnings.length)
+    ? ls.warnings.map(w => '<span style="display:inline-block;background:#2a1a0a;border:1px solid #c87820;border-radius:4px;padding:2px 8px;font-size:11px;color:#f0a040;margin:2px;">' + w + '</span>').join('')
+    : '';
+
+  const baths = [
+    b.bath_full ? b.bath_full + ' full' : '',
+    b.bath_3qtr ? b.bath_3qtr + ' ¾' : '',
+    b.bath_half ? b.bath_half + ' half' : ''
+  ].filter(Boolean).join(' · ') || '—';
+
+  const wfBlock = wf.body_of_water
+    ? row('Body of Water', fmt(wf.body_of_water), '#7fd4f7')
+      + (wf.footage       ? row('Frontage',      fmtNum(wf.footage) + ' ft') : '')
+      + (wf.tidelands     ? row('Tidelands',     fmt(wf.tidelands))           : '')
+      + (wf.access_rights ? row('Access Rights', fmt(wf.access_rights))       : '')
+    : '<div style="color:#556677;font-size:12px;padding:4px 0;">No waterfront</div>';
+
+  const trendColor = d.value_trend === 'Increasing' ? '#5cd68a'
+                   : d.value_trend === 'Decreasing' ? '#e05c5c' : '#c8dded';
+
+  const rhead = document.getElementById('rhead');
+  const rbody = document.getElementById('rbody');
+
+  if (rhead) rhead.innerHTML =
+    '<div class="rtype">PARCEL RECORD // ' + (isPaidReport ? 'FULL REPORT' : 'INTEL BRIEF') + '</div>' +
+    '<div class="rname">' + fmt(d.address || asset?.address) + '</div>' +
+    '<div style="font-size:12px;color:#7fd4f7;margin-top:4px;">' + fmt(d.city) + ', ' + fmt(d.state) + ' ' + fmt(d.zip_code) + '</div>';
+
+  if (!rbody) return;
+
+  rbody.innerHTML =
+    '<div style="font-family:Inter,sans-serif;color:#c8dded;padding:4px 0;">'
+
+    + section('Location',
+        (d.use_description ? '<div style="margin-bottom:8px;display:inline-block;background:#0a1e2a;border:1px solid #1a7fa8;border-radius:4px;padding:2px 8px;font-size:11px;color:#1a7fa8;">' + d.use_description + '</div>' : '')
+        + (d.district ? row('District', fmt(d.district)) : '')
+        + (d.zone_code ? '<div style="font-size:11px;color:#556677;padding:4px 0;">Zone: ' + d.zone_code + '</div>' : '')
+      )
+
+    + section('Assessment',
+        row('Total Assessed Value', fmtMoney(d.current_assessed_total), '#f0c060')
+        + row('Land Value',           fmtMoney(d.current_assessed_land))
+        + row('Improvements',         fmtMoney(d.current_assessed_improvements))
+        + row('Appraisal Year',       fmt(d.appraisal_year))
+        + (d.value_trend ? row('Value Trend', fmt(d.value_trend), trendColor) : '')
+      )
+
+    + section('Building',
+        row('Year Built',        fmt(b.year_built))
+        + row('Total Sqft',        fmtNum(b.sqft_total))
+        + row('Bedrooms',          fmt(b.bedrooms))
+        + row('Bathrooms',         baths)
+        + row('Stories',           fmt(b.stories))
+        + row('Garage Sqft',       fmtNum(b.sqft_garage))
+        + row('Deck Sqft',         fmtNum(b.sqft_deck))
+        + row('Finished Basement', fmtNum(b.sqft_basement_finished))
+        + row('Grade',             fmt(b.building_grade), '#f0c060')
+        + row('Condition',         fmt(b.condition),      '#5cd68a')
+        + row('Heat System',       fmt(b.heat_system))
+        + row('Heat Source',       fmt(b.heat_source))
+        + row('Fireplaces',        fmt(b.total_fireplaces, '0'))
+      )
+
+    + section('Views', '<div style="padding:4px 0;">' + viewPills + '</div>')
+
+    + section('Waterfront', wfBlock)
+
+    + section('Last Sale',
+        row('Sale Price', fmtMoney(ls.price), '#f0c060')
+        + row('Sale Date',  fmtDate(ls.date))
+        + row('Instrument', fmt(ls.instrument))
+        + (lsWarnings ? '<div style="margin-top:6px;">' + lsWarnings + '</div>' : '')
+      )
+
+    + section('Hazards',
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">' + hazardCells + '</div>'
+      )
+
+    + section('Infrastructure',
+        row('EMS Agency',         fmt(d.ems_agency))
+        + ((d.ems_distance_m !== undefined && d.ems_distance_m !== null) ? row('EMS Distance', (d.ems_distance_m / 1609.34).toFixed(1) + ' mi') : '')
+        + row('Seismic Site Class', fmt(d.seismic_site_class))
+        + row('Nearest Fault',      fmt(d.nearest_fault))
+        + row('Water System',       fmt(d.water_system_name || d.water_system))
+        + row('Sewer System',       fmt(d.sewer_system))
+        + (d.permit_count !== undefined ? row('Permits on Record', fmtNum(d.permit_count)) : '')
+      )
+
+    + '</div>';
+}function _renderFull(asset,bq,isPaidReport=false){
 const a=asset||{},pin=bq?.PIN||a.apn||a.id||'—',addr=bq?.address||a.address||'—',
 cityState=bq?.city?`${bq.city} ${bq.state||'WA'} ${bq.zip_code||''}`.trim():(bq?.zip_code||''),
 assessed=bq?.current_assessed_total||0,assessedLand=bq?.current_assessed_land||0,
