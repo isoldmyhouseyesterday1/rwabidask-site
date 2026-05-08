@@ -8961,6 +8961,8 @@ function _renderFull(asset,bq,isPaidReport=false){
       )
 
     + '</div>';
+  const _apn2 = d.PIN || asset?.apn || asset?.id || '';
+  _renderPanelActions(_apn2, isPaidReport);
 }function _renderPanelActions(apn, isPaid) {
   const isMember = !!(typeof currentUser !== 'undefined' && currentUser);
   const sa = (apn||'').replace(/'/g,"\'");
