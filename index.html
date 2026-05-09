@@ -9017,10 +9017,10 @@ function showListingModal(apn) {
   m.innerHTML = `
     <div style="background:#0d1e2e;border:1px solid #1a7fa8;border-radius:12px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:24px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#1a7fa8;text-transform:uppercase;">List This Parcel</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#1a7fa8;text-transform:uppercase;">List This Property</div>
         <button onclick="document.getElementById('listing-modal').remove()" style="background:none;border:none;color:#556677;font-size:18px;cursor:pointer;">✕</button>
       </div>
-      <div style="font-size:10px;color:#556677;margin-bottom:16px;font-family:monospace;">APN: ${apn}</div>
+      <div style="font-size:10px;color:#556677;margin-bottom:16px;font-family:monospace;">APN: ' + apn + '</div>
 
       <div style="display:flex;flex-direction:column;gap:12px;">
 
@@ -9158,7 +9158,7 @@ function showListingModal(apn) {
           </div>
         </div>
 
-        <button onclick="submitListing('${apn}')" style="width:100%;background:linear-gradient(135deg,#1a7fa8,#0d5a7a);border:none;color:#fff;padding:12px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:4px;">
+        <button onclick="submitListing('" + apn + "')" style="width:100%;background:linear-gradient(135deg,#1a7fa8,#0d5a7a);border:none;color:#fff;padding:12px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:4px;">
           SUBMIT LISTING →
         </button>
         <div style="font-size:9px;color:#556677;text-align:center;line-height:1.6;">
