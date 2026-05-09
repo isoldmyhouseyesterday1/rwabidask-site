@@ -8990,6 +8990,47 @@ if(noData){
       <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','CONTACT_BROKER'); showToast('BROKER INQUIRY TRANSMITTED'); })">CONTACT BROKER</button>
       <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','MAKE_OFFER'); showToast('OFFER SYSTEM COMING SOON'); })">MAKE OFFER TO OWNER</button>
     </div>`;
+
+  // ── Listing display — injected at TOP of rbody ─────────────────
+  if (listing && listing.asking_price) {
+    const lt = listing.listing_type || 'for_sale';
+    const badge = lt==='for_rent'?'FOR RENT':lt==='for_lease'?'FOR LEASE':lt==='auction'?'AUCTION':'FOR SALE';
+    const badgeColor = lt==='for_rent'?'#7c3aed':'#1a7fa8';
+    const price = listing.asking_price ? '$'+Number(listing.asking_price).toLocaleString() : '';
+    let videoHtml = '';
+    if (listing.video_url) {
+      const ytMatch = listing.video_url.match(/(?:v=|youtu\.be\/|embed\/)([^&?/]+)/);
+      const vmMatch = listing.video_url.match(/vimeo\.com\/(\d+)/);
+      if (ytMatch) videoHtml = `<iframe width="100%" height="180" src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen style="border-radius:4px;display:block;margin-bottom:8px;"></iframe>`;
+      else if (vmMatch) videoHtml = `<iframe width="100%" height="180" src="https://player.vimeo.com/video/${vmMatch[1]}" frameborder="0" allowfullscreen style="border-radius:4px;display:block;margin-bottom:8px;"></iframe>`;
+      else if (listing.video_url.match(/\.(mp4|webm|mov)/i)) videoHtml = `<video width="100%" height="180" controls style="border-radius:4px;display:block;margin-bottom:8px;"><source src="${listing.video_url}"></video>`;
+    }
+    const listingCard = `<div style="border:1px solid #1a7fa8;border-radius:8px;margin:8px 0 12px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#0d2a3a,#0a1e2a);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:9px;font-weight:700;letter-spacing:2px;color:#fff;background:${badgeColor};padding:2px 8px;border-radius:3px;">${badge}</span>
+          ${price?`<span style="font-size:18px;font-weight:700;color:#f0c060;">${price}</span>`:''}
+        </div>
+        ${listing.brokerage?`<span style="font-size:9px;color:#7fd4f7;">${listing.brokerage}</span>`:''}
+      </div>
+      ${videoHtml?`<div style="padding:10px 14px 0;">${videoHtml}</div>`:''}
+      ${listing.description?`<div style="padding:10px 14px;font-size:11px;color:#8899aa;line-height:1.6;">${listing.description}</div>`:''}
+      ${listing.tour_url?`<div style="padding:6px 14px;border-top:1px solid #0d2a3a;"><a href="${listing.tour_url}" target="_blank" style="font-size:10px;color:#1a7fa8;text-decoration:none;font-weight:700;">⬡ 3D / GAUSSIAN SPLATTING TOUR →</a></div>`:''}
+      <div style="padding:10px 14px;display:flex;align-items:center;gap:10px;border-top:1px solid #0d2a3a;">
+        ${listing.agent_photo_url?`<img src="${listing.agent_photo_url}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #1a7fa8;flex-shrink:0;">`:
+          `<div style="width:44px;height:44px;border-radius:50%;background:#0d2a3a;border:2px solid #1a4a5a;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">👤</div>`}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:700;color:#c8dded;">${listing.contact_name||'Agent / Owner'}</div>
+          ${listing.brokerage?`<div style="font-size:9px;color:#556677;">${listing.brokerage}</div>`:''}
+          ${listing.license_number?`<div style="font-size:9px;color:#3a4a5a;">Lic: ${listing.license_number}</div>`:''}
+        </div>
+        ${listing.contact_phone?`<a href="tel:${listing.contact_phone}" style="font-size:10px;color:#1a7fa8;font-weight:700;text-decoration:none;flex-shrink:0;">📞 CALL</a>`:''}
+      </div>
+      ${listing.contact_email?`<div style="padding:0 14px 12px;"><a href="mailto:${listing.contact_email}?subject=Property Inquiry: ${addr}" style="display:block;text-align:center;background:linear-gradient(135deg,#1a7fa8,#0d5a7a);color:#fff;padding:9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;text-decoration:none;">CONTACT LISTING AGENT</a></div>`:''}
+    </div>`;
+    const rbody = document.getElementById('rbody');
+    if (rbody) rbody.insertAdjacentHTML('afterbegin', listingCard);
+  }
 }
 
 window.currentAsset=asset;window.activeId=asset?.id||pin;window._lastBqData=bq;
