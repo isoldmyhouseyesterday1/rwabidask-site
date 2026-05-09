@@ -8985,6 +8985,7 @@ if(noData){
       <button style="width:100%;padding:10px;border:1px solid rgba(0,255,200,.3);background:rgba(0,255,200,.05);color:var(--cyan);border-radius:4px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showBidModal())">PLACE OFFER</button>
       <div style="display:flex;gap:6px">
         <button style="flex:1;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showLendingModal())">FINANCING</button>
+        <button style="width:100%;padding:9px;border:1px solid #1a7fa8;background:linear-gradient(135deg,#0d5a7a,#1a7fa8);color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-bottom:4px;margin-top:8px;" onclick="showListingModal('"+safePin+"')">\u29c1 LIST THIS PROPERTY</button
         <button style="flex:1;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showInsuranceModal())">INSURANCE</button>
       </div>
       <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','CONTACT_BROKER'); showToast('BROKER INQUIRY TRANSMITTED'); })">CONTACT BROKER</button>
