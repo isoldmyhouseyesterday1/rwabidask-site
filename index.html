@@ -9004,6 +9004,10 @@ if(!document.getElementById('rwa-css')){const s=document.createElement('style');
 
 // ── LISTING UPLOAD ────────────────────────────────────────────────────────
 function showListingModal(apn) {
+  if (!apn || apn.includes('.') || apn.includes(',')) {
+    showToast('CLICK A SPECIFIC PARCEL TO LIST');
+    return;
+  }
   const existing = document.getElementById('listing-modal');
   if (existing) existing.remove();
 
@@ -9019,50 +9023,93 @@ function showListingModal(apn) {
       <div style="font-size:10px;color:#556677;margin-bottom:16px;font-family:monospace;">APN: ${apn}</div>
 
       <div style="display:flex;flex-direction:column;gap:12px;">
-        <div>
-          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">LISTING TYPE</label>
-          <select id="lt-type" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;">
-            <option value="for_sale">For Sale</option>
-            <option value="for_rent">For Rent</option>
-            <option value="for_lease">For Lease</option>
-            <option value="off_market">Off Market / Private</option>
-          </select>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">I AM A</label>
+            <select id="lt-role" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;">
+              <option value="owner">Property Owner</option>
+              <option value="broker">Licensed Broker</option>
+              <option value="agent">Real Estate Agent</option>
+              <option value="pm">Property Manager</option>
+              <option value="developer">Developer</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">LISTING TYPE</label>
+            <select id="lt-type" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;">
+              <option value="for_sale">For Sale</option>
+              <option value="for_rent">For Rent</option>
+              <option value="for_lease">For Lease</option>
+              <option value="off_market">Off Market</option>
+              <option value="auction">Auction</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">ASKING PRICE</label>
-          <input id="lt-price" type="number" placeholder="e.g. 4500000" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">ASKING PRICE</label>
+            <input id="lt-price" type="number" placeholder="4500000" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">LICENSE # <span style="color:#3a4a5a;">(brokers)</span></label>
+            <input id="lt-license" type="text" placeholder="WA DOL #" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
+          </div>
         </div>
+
         <div>
-          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">VIDEO TOUR URL <span style="color:#556677;">(YouTube, Vimeo, or Gaussian Splatting)</span></label>
-          <input id="lt-video" type="url" placeholder="https://youtube.com/watch?v=..." style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
+          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">BROKERAGE / COMPANY <span style="color:#3a4a5a;">(optional)</span></label>
+          <input id="lt-brokerage" type="text" placeholder="e.g. Windermere Real Estate" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
         </div>
-        <div>
-          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">3D TOUR URL <span style="color:#556677;">(Matterport, PlayCanvas, etc.)</span></label>
-          <input id="lt-tour" type="url" placeholder="https://my.matterport.com/show/?m=..." style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
-        </div>
+
         <div>
           <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">DESCRIPTION</label>
           <textarea id="lt-desc" rows="3" placeholder="Describe the property..." style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;resize:vertical;"></textarea>
         </div>
+
+        <div>
+          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">VIDEO TOUR URL <span style="color:#3a4a5a;">YouTube · Vimeo · or direct MP4 link</span></label>
+          <input id="lt-video" type="url" placeholder="https://youtube.com/watch?v=..." style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
+        </div>
+
+        <div>
+          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">3D / GAUSSIAN SPLATTING TOUR URL <span style="color:#3a4a5a;">Matterport · PlayCanvas · Luma AI</span></label>
+          <input id="lt-tour" type="url" placeholder="https://lumalabs.ai/capture/... or matterport.com/..." style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
+        </div>
+
+        <div>
+          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">UPLOAD PHOTOS / VIDEO <span style="color:#3a4a5a;">stored in RWABidAsk cloud · max 50MB per file</span></label>
+          <input id="lt-files" type="file" multiple accept="image/*,video/*" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:11px;box-sizing:border-box;">
+          <div id="lt-upload-status" style="font-size:9px;color:#556677;margin-top:4px;"></div>
+        </div>
+
+        <div>
+          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">YOUR PHOTO URL <span style="color:#3a4a5a;">shows on your agent card (paid feature)</span></label>
+          <input id="lt-photo" type="url" placeholder="https://yoursite.com/headshot.jpg" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
+        </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div>
-            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">CONTACT NAME</label>
-            <input id="lt-name" type="text" placeholder="Your name" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
+            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">YOUR NAME</label>
+            <input id="lt-name" type="text" placeholder="Full name" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
           </div>
           <div>
-            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">CONTACT PHONE</label>
+            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">PHONE</label>
             <input id="lt-phone" type="tel" placeholder="(206) 555-0100" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
           </div>
         </div>
+
         <div>
-          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">CONTACT EMAIL</label>
+          <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">EMAIL</label>
           <input id="lt-email" type="email" placeholder="you@example.com" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;">
         </div>
+
         <button onclick="submitListing('${apn}')" style="width:100%;background:linear-gradient(135deg,#1a7fa8,#0d5a7a);border:none;color:#fff;padding:12px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:4px;">
           SUBMIT LISTING →
         </button>
         <div style="font-size:9px;color:#556677;text-align:center;line-height:1.6;">
-          Free during beta · Your listing appears on this parcel immediately
+          Free during beta · Media stored in RWABidAsk cloud · Becomes part of parcel intel record
         </div>
       </div>
     </div>`;
@@ -9076,24 +9123,52 @@ document.addEventListener('click', function(e) {
 });
 
 async function submitListing(apn) {
-  const type    = document.getElementById('lt-type')?.value || 'for_sale';
-  const price   = parseFloat(document.getElementById('lt-price')?.value || '0');
-  const video   = document.getElementById('lt-video')?.value || '';
-  const tour    = document.getElementById('lt-tour')?.value || '';
-  const desc    = (document.getElementById('lt-desc')?.value || '').replace(/'/g, "\'").substring(0,1000);
-  const name    = (document.getElementById('lt-name')?.value || '').replace(/'/g, "\'");
-  const phone   = document.getElementById('lt-phone')?.value || '';
-  const email   = document.getElementById('lt-email')?.value || '';
-  const userId  = (typeof currentUser !== 'undefined' && currentUser?.email) || 'anonymous';
+  const type      = document.getElementById('lt-type')?.value || 'for_sale';
+  const role      = document.getElementById('lt-role')?.value || 'owner';
+  const price     = parseFloat(document.getElementById('lt-price')?.value || '0');
+  const license   = document.getElementById('lt-license')?.value || '';
+  const brokerage = document.getElementById('lt-brokerage')?.value || '';
+  const video     = document.getElementById('lt-video')?.value || '';
+  const tour      = document.getElementById('lt-tour')?.value || '';
+  const photo     = document.getElementById('lt-photo')?.value || '';
+  const desc      = (document.getElementById('lt-desc')?.value || '').substring(0,1000);
+  const name      = document.getElementById('lt-name')?.value || '';
+  const phone     = document.getElementById('lt-phone')?.value || '';
+  const email     = document.getElementById('lt-email')?.value || '';
+  const userId    = (typeof currentUser !== 'undefined' && currentUser?.email) || 'anonymous';
+  const files     = document.getElementById('lt-files')?.files || [];
+  const statusEl  = document.getElementById('lt-upload-status');
 
   if (!email) { showToast('EMAIL REQUIRED'); return; }
+
+  // Upload files to GCS first
+  const uploadedUrls = [];
+  for (const file of files) {
+    if (file.size > 50 * 1024 * 1024) { showToast('FILE TOO LARGE — MAX 50MB'); continue; }
+    if (statusEl) statusEl.textContent = 'Uploading ' + file.name + '...';
+    try {
+      const sigRes = await fetch(PARCEL_API + '?action=upload_url&apn=' + apn +
+        '&filename=' + encodeURIComponent(file.name) +
+        '&content_type=' + encodeURIComponent(file.type) +
+        '&folder=' + (file.type.startsWith('video') ? 'videos' : 'photos'),
+        {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+      if (sigRes.ok) {
+        const {upload_url, public_url} = await sigRes.json();
+        await fetch(upload_url, {method:'PUT', headers:{'Content-Type':file.type,'x-goog-content-sha256':'UNSIGNED-PAYLOAD'}, body:file});
+        uploadedUrls.push(public_url);
+      }
+    } catch(e) { console.warn('Upload failed:', e); }
+  }
+  if (statusEl) statusEl.textContent = uploadedUrls.length ? uploadedUrls.length + ' file(s) uploaded' : '';
 
   try {
     const res = await fetch(PARCEL_API + '?action=list', {
       method: 'POST',
       headers: {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
-      body: JSON.stringify({apn, type, price, video_url:video, tour_url:tour, description:desc,
-        contact_name:name, contact_phone:phone, contact_email:email, created_by:userId})
+      body: JSON.stringify({apn, type, role, price, license_number:license, brokerage,
+        video_url:video, tour_url:tour, agent_photo_url:photo,
+        description:desc, contact_name:name, contact_phone:phone,
+        contact_email:email, media_urls:uploadedUrls, created_by:userId})
     });
     if (res.ok) {
       document.getElementById('listing-modal')?.remove();
