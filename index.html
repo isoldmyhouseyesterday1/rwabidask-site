@@ -7936,6 +7936,7 @@ function renderBasicsPanel(asset) {
   const revenueHtml = `
     <div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:8px">
       <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;padding-top:4px">Parcel Engagement</div>
+      <button style="width:100%;background:linear-gradient(135deg,#0d5a7a,#1a7fa8);border:1px solid #1a7fa8;color:#fff;padding:11px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-bottom:4px;" onclick="showListingModal('${safeApn}')">⬡ LIST THIS PARCEL — FREE BETA</button>
       <button class="abtn-sponsor-parcel"
         onclick="requireAuth(()=>{ logPartnerLead('${safeApn}','SPONSOR'); showToast('SPONSORSHIP INTENT LOGGED'); })">
         SPONSOR THIS PARCEL
@@ -8873,7 +8874,7 @@ if(['sfr','condo','townhouse','small_multi','unknown'].includes(propCat)||hasBui
     views.length>0&&['VIEWS',views.slice(0,3).join(', ')],
     bq?.water_system_name&&['WATER',bq.water_system_name],
     bq?.ems_agency&&['EMS',`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
-    zoning&&['ZONING',zoning],
+    zoning&&['ZONING',`<a href="https://gismaps.kingcounty.gov/arcgis/rest/services/Districts/KingCo_Electoral_Districts/MapServer" target="_blank" style="color:#1a7fa8;text-decoration:none;">${(zoning||'').replace(/\[.*?\]\(.*?\)/g,'').replace(/\s*\[.*$/,'').trim()} ↗</a>`],
   ].filter(Boolean).filter(r=>r&&r[1]);
 } else if(propCat==='apartment'){
   rows=[
