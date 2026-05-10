@@ -235,6 +235,9 @@ body { min-width: 900px; overflow-x: auto; }
   min-width: 0;
 }
 #search-input::placeholder { color: var(--muted); }
+.search-wrap > * { flex-shrink: 0; }
+.search-wrap input { flex: 1 !important; width: 100% !important; min-width: 0 !important; }
+.search-wrap div { flex: 1 !important; display: flex !important; min-width: 0 !important; }
 #search-input::-webkit-search-decoration,
 #search-input::-webkit-search-cancel-button,
 #search-input::-webkit-search-results-button,
