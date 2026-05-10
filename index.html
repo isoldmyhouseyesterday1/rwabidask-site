@@ -9057,6 +9057,10 @@ if(noData){
               <div style="font-size:9px;color:var(--muted)">Rate: \${rate.toFixed(2)}% · <span id="rate-src" style="color:var(--muted)">loading…</span></div>
             </div>
           </div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,255,200,0.1);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:9px;color:var(--muted)">Need financing?</span>
+            <button onclick="requireAuth(()=>showLendingModal())" style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--cyan);background:rgba(0,255,200,0.08);border:1px solid rgba(0,255,200,0.25);padding:4px 10px;border-radius:3px;cursor:pointer">CONNECT WITH A LENDER →</button>
+          </div>
         </div>\`;
       }
       return '';
