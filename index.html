@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>RWABidAsk — Global Asset Market | Institutional Digitization Platform</title>
+<title>RWABidAsk™ | Global Asset Database</title>
 <meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy, infrastructure, robotics, bio, anthro, IP, minerals, natural resources, aviation and maritime transport on the Persistent Ledger.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1053,7 +1053,7 @@ body { min-width: 900px; overflow-x: auto; }
     background-position: right 10px center;
     padding-right: 32px !important;
 }
-#market-ribbon {
+#market-ribbon { display:none !important; /* hidden until live data */ 
   background: #0d1526;
   border-bottom: 1px solid rgba(0,255,200,.1);
   overflow: hidden;
@@ -1099,7 +1099,7 @@ body { min-width: 900px; overflow-x: auto; }
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-#ticker-bar {
+#ticker-bar { display:none !important; /* hidden until live data */ 
   background: var(--bg1);
   border-top: 1px solid var(--border);
   overflow: hidden;
@@ -2938,7 +2938,7 @@ body { min-width: 900px; overflow-x: auto; }
     </div>
   </div>
   <div class="search-wrap">
-    <input id="search-input" type="text" placeholder="Global Asset Navigation — search any APN, address, city, or region…" autocomplete="off">
+    <input id="search-input" type="text" placeholder="Search any address, APN, or city…" autocomplete="off" style="-webkit-appearance:none;appearance:none;">
     <button class="search-icon" onclick="performSearch()" title="Global Asset Navigation" aria-label="Search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -2946,18 +2946,10 @@ body { min-width: 900px; overflow-x: auto; }
     </button>
   </div>
 
-  <!-- ── Unified Persistent Ledger Value — single Bloomberg ticker ── -->
-  <div id="unified-ledger-block">
-    <div class="ledger-cap-label">TOTAL DATABASE VALUE</div>
-    <div class="ledger-cap-value" id="unified-ledger-val">CALCULATING…</div>
-    <div class="ledger-cap-sub" id="unified-ledger-sub">GLOBAL ASSET DATABASE</div>
-  </div>
+  <div id="unified-ledger-block" style="display:none"></div>
   <div class="topbar-right">
-    <div class="tstat" title="Total value of all assets registered on RWABidAsk Permanent Ledger">
-      <div class="tstat-l">GMC</div>
-      <div class="tstat-v" id="s-gmc" style="color:var(--gold);font-size:12px">—</div>
-    </div>
-    <div class="tstat">
+    <div class="tstat" style="display:none"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc">—</div></div>
+    <div class="tstat" style="display:none">
       <div class="tstat-l">Assets</div>
       <div class="tstat-v live" id="s-assets">—</div>
     </div>
@@ -2979,7 +2971,7 @@ body { min-width: 900px; overflow-x: auto; }
   <div id="left">
     <div class="left-head">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 6px;">
-        <div class="left-title" style="margin:0">GLOBAL ASSET DATABASE</div>
+        <div class="left-title" style="margin:0;display:none">GLOBAL ASSET DATABASE</div>
         <div style="font-size:8px;color:var(--muted);letter-spacing:1px" id="left-live-badge"><span class="live-dot"></span>LIVE</div>
       </div>
 <!-- dashboard summary removed — data in header topbar -->
@@ -3106,16 +3098,9 @@ body { min-width: 900px; overflow-x: auto; }
 </div>
 
 <footer id="footer">
-  <div class="footer-left">
-    <span class="status-dot"></span>
-    SYSTEM: OPERATIONAL &nbsp;|&nbsp; PERMANENT LEDGER™: ACTIVE
-  </div>
-  <div class="footer-center">
-    RWABIDASK™ &nbsp;—&nbsp; GLOBAL ASSET DATABASE
-  </div>
-  <div class="footer-right">
-    © 2026 ANNIE GROUP LLC &nbsp;|&nbsp; ALL RIGHTS RESERVED
-  </div>
+  <div class="footer-left" style="font-size:9px;color:var(--muted);">© 2026 ANNIE GROUP LLC</div>
+  <div class="footer-center" style="font-size:9px;font-weight:700;letter-spacing:2px;">RWABIDASK™ — GLOBAL ASSET DATABASE</div>
+  <div class="footer-right" style="font-size:9px;color:var(--muted);">SYSTEM: OPERATIONAL</div>
 </footer>
 
 
