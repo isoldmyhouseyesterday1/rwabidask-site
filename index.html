@@ -5577,7 +5577,7 @@ async function initMap() {
     // Active selection polygon border — clinical cyan outline
     let _activeSelectionOverlay = null;
 
-    function drawSelectionBorder(featureProps, clickLat, clickLng) {
+    window.drawSelectionBorder = function drawSelectionBorder(featureProps, clickLat, clickLng) {
       // Remove prior overlay
       if (_activeSelectionOverlay) {
         try { _activeSelectionOverlay.remove(); } catch(e) {}
