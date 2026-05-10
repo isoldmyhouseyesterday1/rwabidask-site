@@ -5652,6 +5652,7 @@ async function initMap() {
     function injectSheetCloseBtn() {
       const rPanel = document.getElementById('right');
       if (!rPanel) return;
+      if (window.innerWidth > 768) { rPanel.classList.add('open-drawer'); return; }
       rPanel.classList.add('open-drawer');
       // Remove existing close btn if any
       rPanel.querySelector('.sheet-close-btn')?.remove();
