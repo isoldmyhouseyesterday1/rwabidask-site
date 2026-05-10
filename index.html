@@ -8848,11 +8848,30 @@ const propLabel={sfr:'Single Family',condo:'Condominium',townhouse:'Townhouse',s
 const propIcon={sfr:'',condo:'',townhouse:'',small_multi:'',apartment:'',commercial:'',industrial:'',agricultural:'',vacant:'',unknown:''}[propCat]||'';
 
 const hasBuilding=bldg&&(bldg.year_built||bldg.sqft_total||bldg.bedrooms);
+const hasComm=bq?.commercial&&bq.commercial.gross_sqft&&parseInt(bq.commercial.gross_sqft)>0;
 const views=bq?.views||[];
 const wfnt=bq?.waterfront||null;
 let rows=[];
 
-if(['sfr','condo','townhouse','small_multi','unknown'].includes(propCat)||hasBuilding){
+if(hasComm){
+  const comm=bq.commercial;
+  rows=[
+    comm.description&&['BLDG TYPE',comm.description.trim()],
+    comm.gross_sqft&&parseInt(comm.gross_sqft)>0&&['GROSS AREA',`${Number(comm.gross_sqft).toLocaleString()} sqft`],
+    comm.net_sqft&&parseInt(comm.net_sqft)>0&&['NET RENTABLE',`${Number(comm.net_sqft).toLocaleString()} sqft`],
+    comm.stories&&parseInt(comm.stories)>0&&['STORIES',comm.stories],
+    comm.year_built&&parseInt(comm.year_built)>0&&['YEAR BUILT',comm.year_built],
+    comm.nbr_bldgs&&parseInt(comm.nbr_bldgs)>1&&['BUILDINGS',comm.nbr_bldgs],
+    comm.sprinklers&&comm.sprinklers!=='N'&&['SPRINKLERS','Yes'],
+    comm.elevators&&comm.elevators!=='Y'?null:['ELEVATORS','Yes'],
+    sqftLot&&['LOT SIZE',`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`],
+    bq?.water_system_name&&['WATER',bq.water_system_name],
+    bq?.ems_agency&&['EMS',`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
+    bq?.power?.nearest_transmission_voltage&&['POWER LINE',`${bq.power.nearest_transmission_voltage}kV ${bq.power.nearest_transmission_class||''} · ${bq.power.nearest_transmission_owner||''}`],
+    bq?.power?.substation_name&&['SUBSTATION',`${bq.power.substation_name} · ${Math.round(bq.power.substation_distance_m||0)}m`],
+    zoning&&['ZONING',zoning],
+  ].filter(Boolean).filter(r=>r&&r[1]);
+} else if(['sfr','condo','townhouse','small_multi','unknown'].includes(propCat)||hasBuilding){
   const baths=[bldg.bath_full&&parseInt(bldg.bath_full)>0&&`${bldg.bath_full} full`,bldg.bath_3qtr&&parseInt(bldg.bath_3qtr)>0&&`${bldg.bath_3qtr} ¾`,bldg.bath_half&&parseInt(bldg.bath_half)>0&&`${bldg.bath_half} ½`].filter(Boolean).join(' · ')||null;
   const fp=parseInt(bldg.total_fireplaces||bldg.fireplaces||0)||null;
   rows=[
