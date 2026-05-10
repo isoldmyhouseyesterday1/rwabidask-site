@@ -215,6 +215,8 @@ body { min-width: 900px; overflow-x: auto; }
   height: 100%;
   position: relative;
   border-right: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  width: 100%;
 }
 #search-input {
   width: 100%;
@@ -2956,7 +2958,7 @@ body { min-width: 900px; overflow-x: auto; }
     </button>
   </div>
 
-  <div id="unified-ledger-block" style="display:none"></div>
+  <div id="unified-ledger-block" style="display:none;position:absolute;"></div>
   <div class="topbar-right">
     <div class="tstat" style="display:none"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc">—</div></div>
     <div class="tstat" style="display:none">
