@@ -8538,6 +8538,36 @@ ${$(b.year_built)?`
   </div>
 </div>
 
+<!-- CH 03b: MORTGAGE ESTIMATE -->
+${assessed > 50000 ? `
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">03b</span><span class="ch-t">MORTGAGE ESTIMATE</span><span class="ch-s ok">COMPUTED</span></div>
+  <div class="ch-body">
+    ${(()=>{
+      const rate = window._currentMortgageRate || 6.82;
+      const rateDate = window._currentMortgageRateDate || 'recent';
+      const down20 = 0.20; const down10 = 0.10;
+      const calc = (pct) => {
+        const principal = assessed * (1-pct);
+        const mr = rate/100/12;
+        const n = 360;
+        return Math.round(principal * (mr * Math.pow(1+mr,n)) / (Math.pow(1+mr,n)-1));
+      };
+      const m20 = calc(down20); const m10 = calc(down10);
+      const down20amt = Math.round(assessed*0.20); const down10amt = Math.round(assessed*0.10);
+      return row('Interest rate (30yr fixed · FRED '+rateDate+')', rate.toFixed(2)+'%')
+        + row('Monthly payment · 20% down ($'+down20amt.toLocaleString()+')', '~$'+m20.toLocaleString()+'/mo')
+        + row('Monthly payment · 10% down ($'+down10amt.toLocaleString()+')', '~$'+m10.toLocaleString()+'/mo')
+        + math(
+          'RWABidAsk Research: Estimated monthly cost of ownership',
+          '~$'+m20.toLocaleString()+'/mo (20% down) + ~$'+Math.round(estTax/12).toLocaleString()+'/mo taxes = ~$'+(m20+Math.round(estTax/12)).toLocaleString()+'/mo total',
+          'Mortgage estimate based on current 30-year fixed rate from the Federal Reserve (FRED). Does not include insurance, HOA, or maintenance. Rate: '+rate.toFixed(2)+'% as of '+rateDate+'. For illustration only — contact a licensed lender for actual terms.'
+        );
+    })()}
+  </div>
+</div>
+` : ''}
+
 <!-- CH 04: APPRAISAL HISTORY -->
 ${apprHist.length?`
 <div class="ch">
