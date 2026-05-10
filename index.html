@@ -7920,11 +7920,12 @@ function renderBasicsPanel(asset) {
   `;
 
   // ── Intel Report CTA — Primary Commerce / Stripe ───────────────
-  const intelHtml = `
+  const _isPaid = isPaidReport || false;
+const intelHtml = `
     <div class="intel-report-wrap" style="margin:0 0 4px">
       <div class="intel-report-label">⬡ &nbsp;FULL MARKET INTELLIGENCE REPORT</div>
       <button class="btn-intel-report" onclick="${isPaidReport ? 'generateIntelPDF(window._lastBqData)' : 'initiateStripeSandbox(\'' + safeApn + '\')'}">
-        ${isPaidReport ? 'DOWNLOAD INTEL REPORT PDF ⬇' : 'PURCHASE INTEL REPORT &nbsp;—&nbsp; $20'}
+        ${_isPaid ? 'DOWNLOAD INTEL REPORT PDF ⬇' : 'PURCHASE INTEL REPORT &nbsp;—&nbsp; $20'}
       </button>
       <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.6px;line-height:2">
         COMP SALES &nbsp;·&nbsp; LIENS &nbsp;·&nbsp; OWNER CHAIN &nbsp;·&nbsp; ZONING ANALYSIS &nbsp;·&nbsp; FLOOD &amp; TOPO
@@ -9036,7 +9037,7 @@ if(noData){
       <span style="font-size:8px;font-weight:700;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.25);padding:2px 7px;border-radius:2px">FREE</span>
     </div>
     ${(()=>{
-      const mortgageVal = assessed || lastSale?.price || 0;
+      const mortgageVal = assessed || (lastSale&&lastSale.price) || 0;
       if(mortgageVal > 50000) {
         const rate = window._currentMortgageRate || 6.82;
         const down = 0.20;
@@ -9045,23 +9046,19 @@ if(noData){
         const n = 360;
         const monthly = Math.round(principal * (monthlyRate * Math.pow(1+monthlyRate,n)) / (Math.pow(1+monthlyRate,n)-1));
         const downAmt = Math.round(mortgageVal * down);
-        return \`<div style="padding:12px 18px;border-bottom:1px solid var(--border);background:rgba(0,255,200,0.03)">
-          <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">EST. MORTGAGE · 30YR FIXED · 20% DOWN</div>
-          <div style="display:flex;justify-content:space-between;align-items:baseline">
-            <div>
-              <span style="font-size:22px;font-weight:700;color:var(--cyan)">$\${monthly.toLocaleString()}</span>
-              <span style="font-size:10px;color:var(--muted)">/mo</span>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:10px;color:var(--dim)">Down: $\${downAmt.toLocaleString()}</div>
-              <div style="font-size:9px;color:var(--muted)">Rate: \${rate.toFixed(2)}% · <span id="rate-src" style="color:var(--muted)">loading…</span></div>
-            </div>
-          </div>
-          <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,255,200,0.1);display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:9px;color:var(--muted)">Need financing?</span>
-            <button onclick="requireAuth(()=>showLendingModal())" style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--cyan);background:rgba(0,255,200,0.08);border:1px solid rgba(0,255,200,0.25);padding:4px 10px;border-radius:3px;cursor:pointer">CONNECT WITH A LENDER →</button>
-          </div>
-        </div>\`;
+        return '<div style="padding:12px 18px;border-bottom:1px solid var(--border);background:rgba(0,255,200,0.03)">'
+          +'<div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">EST. MORTGAGE · 30YR FIXED · 20% DOWN</div>'
+          +'<div style="display:flex;justify-content:space-between;align-items:baseline">'
+          +'<div><span style="font-size:22px;font-weight:700;color:var(--cyan)">$'+monthly.toLocaleString()+'</span>'
+          +'<span style="font-size:10px;color:var(--muted)">/mo</span></div>'
+          +'<div style="text-align:right">'
+          +'<div style="font-size:10px;color:var(--dim)">Down: $'+downAmt.toLocaleString()+'</div>'
+          +'<div style="font-size:9px;color:var(--muted)">Rate: '+rate.toFixed(2)+'% · FRED</div>'
+          +'</div></div>'
+          +'<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,255,200,0.1)">'
+          +'<span style="font-size:9px;color:var(--muted)">Need financing? </span>'
+          +'<button onclick="requireAuth(()=>showLendingModal())" style="font-size:9px;font-weight:700;color:var(--cyan);background:rgba(0,255,200,0.08);border:1px solid rgba(0,255,200,0.25);padding:4px 10px;border-radius:3px;cursor:pointer">CONNECT WITH A LENDER</button>'
+          +'</div></div>';
       }
       return '';
     })()}
