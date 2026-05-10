@@ -225,6 +225,10 @@ body { min-width: 900px; overflow-x: auto; }
   padding: 0 18px;
 }
 #search-input::placeholder { color: var(--muted); }
+#search-input::-webkit-search-decoration,
+#search-input::-webkit-search-cancel-button,
+#search-input::-webkit-search-results-button,
+#search-input::-webkit-search-results-decoration { display: none; }
 .search-icon {
   position: absolute;
   right: 0;
