@@ -167,10 +167,12 @@ body { min-width: 900px; overflow-x: auto; }
 #topbar {
   background: var(--bg1);
   border-bottom: 1px solid var(--border);
-  display: flex;
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
   align-items: center;
   position: relative;
   z-index: 600;
+  height: 54px;
 }
 .logo {
   display: flex;
@@ -179,7 +181,6 @@ body { min-width: 900px; overflow-x: auto; }
   padding: 0 22px;
   height: 100%;
   border-right: 1px solid var(--border);
-  flex-shrink: 0;
   text-decoration: none;
   cursor: default;
 }
@@ -207,13 +208,11 @@ body { min-width: 900px; overflow-x: auto; }
   font-weight: 500;
 }
 .search-wrap {
-  flex: 1;
   display: flex;
   align-items: center;
   height: 100%;
   position: relative;
   border-right: 1px solid var(--border);
-  min-width: 0;
 }
 #search-input {
   width: 100%;
@@ -245,7 +244,10 @@ body { min-width: 900px; overflow-x: auto; }
 .topbar-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   height: 100%;
+  padding-right: 16px;
+  gap: 8px;
 }
 .tstat {
   padding: 0 16px;
@@ -2955,14 +2957,8 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="tstat-l">Assets</div>
       <div class="tstat-v live" id="s-assets">—</div>
     </div>
-    <div class="tstat">
-      <div class="tstat-l">Status</div>
-      <div class="tstat-v live" id="s-status">SYNC</div>
-    </div>
-    <div class="tstat">
-      <div class="tstat-l">Bids 24h</div>
-      <div class="tstat-v" id="s-bids">—</div>
-    </div>
+    <div style="display:none"><div id="s-status">SYNC</div></div>
+    <div style="display:none"><div id="s-bids">—</div></div>
     <button class="tbtn" id="signin-btn" onclick="openModal('signin')">Sign In</button>
     <button class="tbtn primary" id="join-btn" onclick="openModal('signup')">Join Free</button>
   </div>
@@ -3044,7 +3040,6 @@ body { min-width: 900px; overflow-x: auto; }
         <button class="mctl" onclick="setTilt(0,this)">Top Down</button>
       </div>
       <div class="mctl-group">
-        <button class="mctl" onclick="toggleHeat(this)">Heat Zone</button>
         <button class="mctl" onclick="flyGlobe()">Global View</button>
       </div>
     </div>
