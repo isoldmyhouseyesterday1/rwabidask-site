@@ -8185,6 +8185,44 @@ function renderList(assets) {
 
 <script>
 const PARCEL_API='https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/parcel-proxy';
+
+// Fetch current 30yr mortgage rate from FRED (Federal Reserve)
+(async function fetchMortgageRate() {
+  try {
+    const r = await fetch('https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US');
+    const txt = await r.text();
+    const lines = txt.trim().split('\n');
+    const last = lines[lines.length-1].split(',');
+    const rate = parseFloat(last[1]);
+    if(!isNaN(rate) && rate > 0) {
+      window._currentMortgageRate = rate;
+      window._currentMortgageRateDate = last[0];
+      const el = document.getElementById('rate-src');
+      if(el) el.textContent = 'FRED ' + last[0];
+    }
+  } catch(e) {
+    window._currentMortgageRate = 6.82; // fallback
+  }
+})();
+
+// Fetch current 30yr mortgage rate from FRED (Federal Reserve)
+(async function fetchMortgageRate() {
+  try {
+    const r = await fetch('https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US');
+    const txt = await r.text();
+    const lines = txt.trim().split('\n');
+    const last = lines[lines.length-1].split(',');
+    const rate = parseFloat(last[1]);
+    if(!isNaN(rate) && rate > 0) {
+      window._currentMortgageRate = rate;
+      window._currentMortgageRateDate = last[0];
+      const el = document.getElementById('rate-src');
+      if(el) el.textContent = 'FRED ' + last[0];
+    }
+  } catch(e) {
+    window._currentMortgageRate = 6.82; // fallback
+  }
+})();
 async function fetchParcelData({lat,lng,address,pin}={},returnFull=false){let url=PARCEL_API+'?';const pinIsCoord=pin&&/^-?\d+\.\d+,-?\d+\.\d+$/.test(pin);if(pin&&!pinIsCoord)url+=`pin=${encodeURIComponent(pin)}`;else if(lat&&lng)url+=`lat=${lat}&lng=${lng}`;else if(address)url+=`address=${encodeURIComponent(address)}`;else return null;try{const r=await fetch(url,{signal:AbortSignal.timeout(60000),headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}});if(!r.ok){console.warn('[RWA] proxy',r.status);return null;}const d=await r.json();if(d?.listing&&window._currentAsset)window._currentAsset._listing=d.listing;if(returnFull)return d;return d?.parcel||null;}catch(e){console.warn('[RWA]',e.message);return null;}}
 window.renderBasicsPanel=async function(asset,bqData){if(bqData){_renderFull(asset,bqData);return;}if(asset?.apn&&asset.apn!=='Resolving…'){const slug=asset.apn.replace(/[^0-9-]/g,'');history.pushState({apn:slug},'','/parcel/'+slug);}const rhead=document.getElementById('rhead'),rbody=document.getElementById('rbody');if(rhead)rhead.innerHTML=`<div class="rtype">PARCEL RECORD // QUERYING</div><div class="rname">${asset?.address||asset?.apn||'Parcel'}</div><div style="margin-top:14px;display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid rgba(0,255,200,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin360 .7s linear infinite"></div><span style="font-size:10px;color:var(--muted);letter-spacing:1px">QUERYING LEDGER…</span></div>`;if(rbody)rbody.innerHTML='';const resp=await fetchParcelData({lat:asset?.lat,lng:asset?.lng,pin:asset?.apn||asset?.id},true);const data=resp?.parcel||resp;const listing=resp?.listing||null;if(data&&asset){asset._bq=data;asset._listing=listing;}_renderFull(asset,data,false,listing);
 // async polygon fetch — non-blocking
@@ -8967,6 +9005,32 @@ if(noData){
       <span style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted)">${propLabel.toUpperCase()} DATA</span>
       <span style="font-size:8px;font-weight:700;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.25);padding:2px 7px;border-radius:2px">FREE</span>
     </div>
+    ${(()=>{
+      const mortgageVal = assessed || lastSale?.price || 0;
+      if(mortgageVal > 50000) {
+        const rate = window._currentMortgageRate || 6.82;
+        const down = 0.20;
+        const principal = mortgageVal * (1 - down);
+        const monthlyRate = rate / 100 / 12;
+        const n = 360;
+        const monthly = Math.round(principal * (monthlyRate * Math.pow(1+monthlyRate,n)) / (Math.pow(1+monthlyRate,n)-1));
+        const downAmt = Math.round(mortgageVal * down);
+        return \`<div style="padding:12px 18px;border-bottom:1px solid var(--border);background:rgba(0,255,200,0.03)">
+          <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">EST. MORTGAGE · 30YR FIXED · 20% DOWN</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <div>
+              <span style="font-size:22px;font-weight:700;color:var(--cyan)">$\${monthly.toLocaleString()}</span>
+              <span style="font-size:10px;color:var(--muted)">/mo</span>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:10px;color:var(--dim)">Down: $\${downAmt.toLocaleString()}</div>
+              <div style="font-size:9px;color:var(--muted)">Rate: \${rate.toFixed(2)}% · <span id="rate-src" style="color:var(--muted)">loading…</span></div>
+            </div>
+          </div>
+        </div>\`;
+      }
+      return '';
+    })()}
     ${rows.filter(r=>r[1]).map(([k,v])=>`
       <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 18px;border-bottom:1px solid var(--border);font-size:12px;gap:8px">
         <span style="color:var(--dim);flex-shrink:0;font-size:11px">${k}</span>
