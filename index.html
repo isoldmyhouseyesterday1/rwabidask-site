@@ -8848,7 +8848,7 @@ const propLabel={sfr:'Single Family',condo:'Condominium',townhouse:'Townhouse',s
 const propIcon={sfr:'',condo:'',townhouse:'',small_multi:'',apartment:'',commercial:'',industrial:'',agricultural:'',vacant:'',unknown:''}[propCat]||'';
 
 const hasBuilding=bldg&&(bldg.year_built||bldg.sqft_total||bldg.bedrooms);
-const hasComm=bq?.commercial&&bq.commercial.gross_sqft&&parseInt(bq.commercial.gross_sqft)>0;
+const hasComm=bq?.commercial&&bq.commercial.gross_sqft&&parseInt(bq.commercial.gross_sqft)>0&&!['sfr','condo','townhouse','small_multi','apartment'].includes(propCat);
 const views=bq?.views||[];
 const wfnt=bq?.waterfront||null;
 let rows=[];
@@ -8856,7 +8856,7 @@ let rows=[];
 if(hasComm){
   const comm=bq.commercial;
   rows=[
-    comm.description&&['BLDG TYPE',comm.description.trim()],
+    comm.description&&['BUILDING',comm.description.trim()],
     comm.gross_sqft&&parseInt(comm.gross_sqft)>0&&['GROSS AREA',`${Number(comm.gross_sqft).toLocaleString()} sqft`],
     comm.net_sqft&&parseInt(comm.net_sqft)>0&&['NET RENTABLE',`${Number(comm.net_sqft).toLocaleString()} sqft`],
     comm.stories&&parseInt(comm.stories)>0&&['STORIES',comm.stories],
@@ -8909,7 +8909,7 @@ if(hasComm){
   const comm=bq?.commercial||null;
   rows=[
     bq?.use_description&&['USE',bq.use_description],
-    comm?.description&&['BLDG TYPE',comm.description],
+    comm?.description&&['BUILDING',comm.description],
     comm?.gross_sqft&&parseInt(comm.gross_sqft)>0&&['GROSS AREA',`${Number(comm.gross_sqft).toLocaleString()} sqft`],
     comm?.net_sqft&&parseInt(comm.net_sqft)>0&&['NET RENTABLE',`${Number(comm.net_sqft).toLocaleString()} sqft`],
     (comm?.stories||bldg?.stories)&&['STORIES',comm?.stories||bldg?.stories],
