@@ -61,7 +61,7 @@
         display: grid !important;
         grid-template-columns: 288px 1fr 340px !important;
         width: 100vw !important;
-        height: calc(100vh - 152px) !important; /* ribbon24 + topbar54 + ticker30 + footer44 */
+        height: calc(100vh - 98px) !important; /* topbar54 + footer44 */
         overflow: hidden !important;
     }
     #left {
@@ -2972,7 +2972,7 @@ body { min-width: 900px; overflow-x: auto; }
     <div class="left-head">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 6px;">
         <div class="left-title" style="margin:0;display:none">GLOBAL ASSET DATABASE</div>
-        <div style="font-size:8px;color:var(--muted);letter-spacing:1px" id="left-live-badge"><span class="live-dot"></span>LIVE</div>
+        <div style="display:none" id="left-live-badge"><span class="live-dot"></span>LIVE</div>
       </div>
 <!-- dashboard summary removed — data in header topbar -->
       <div id="cat-sponsor-strip" style="display:none"></div>
