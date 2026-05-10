@@ -61,7 +61,7 @@
         display: grid !important;
         grid-template-columns: 288px 1fr 340px !important;
         width: 100vw !important;
-        height: calc(100vh - 98px) !important; /* topbar54 + footer44 */
+        height: calc(100vh - 82px) !important; /* topbar54 + footer28 */
         overflow: hidden !important;
     }
     #left {
@@ -2137,8 +2137,7 @@ body { min-width: 900px; overflow-x: auto; }
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    height: 44px;
-    flex-shrink: 0;
+    height: 28px;
     background: var(--bg1);
     border-top: 1px solid var(--border);
     font-family: var(--font);
@@ -2148,7 +2147,10 @@ body { min-width: 900px; overflow-x: auto; }
     text-transform: uppercase;
     color: var(--muted);
     z-index: 9999;
-    position: relative;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 .footer-left  { flex: 1; display: flex; align-items: center; color: var(--dim); }
 .footer-center { flex: 1; text-align: center; color: var(--silver); font-weight: 700; letter-spacing: 2px; }
@@ -3047,16 +3049,7 @@ body { min-width: 900px; overflow-x: auto; }
       </div>
     </div>
     <div class="map-status"><span class="live-dot"></span><span id="map-status-txt">ESTABLISHING SECURE CONNECTION…</span></div>
-    <div class="blimp-layer">
-      <div class="blimp" id="blimp-el" title="Partnership — Annie Group LLC">
-        <div class="blimp-body">
-          <div class="blimp-hull"><div><div class="blimp-text">ANNIE GROUP LLC</div><div class="blimp-sub">PARTNERSHIP INQUIRY</div></div></div>
-          <div class="blimp-tail"></div>
-        </div>
-        <div class="blimp-string"></div>
-        <div class="blimp-flag">AIRSPACE</div>
-      </div>
-    </div>
+
     <div id="mobile-list-view" style="display:none;position:absolute;inset:0;background:var(--bg);z-index:300;overflow-y:auto;flex-direction:column;"></div>
     <!-- Double-click instruction hint -->
     <div id="dblclick-hint">DOUBLE-CLICK ANY PARCEL TO IDENTIFY</div>
@@ -3107,37 +3100,7 @@ body { min-width: 900px; overflow-x: auto; }
 <!-- ════════════════════════════════════════════════════════════════
      WALLET MODAL — Stripe Elements + Credit Balance
      ════════════════════════════════════════════════════════════════ -->
-<div id="wallet-modal">
-  <div class="wallet-card">
-    <div class="wallet-header">
-      <span class="wallet-title">⬡ RWABidAsk WALLET</span>
-      <button class="wallet-close" onclick="closeWallet()">✕</button>
-    </div>
-    <div class="wallet-body">
-      <div class="wallet-balance">
-        <div class="wallet-bal-lbl">Available Credits</div>
-        <div class="wallet-bal-val" id="wallet-bal">$0.00</div>
-        <div class="wallet-bal-sub">1 Credit = $1.00 USD · All sales final</div>
-      </div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">Top-Up Amount</div>
-      <div class="wallet-topup-row">
-        <div class="topup-btn" data-amount="10" onclick="selectTopup(this,10)">$10</div>
-        <div class="topup-btn" data-amount="25" onclick="selectTopup(this,25)">$25</div>
-        <div class="topup-btn" data-amount="50" onclick="selectTopup(this,50)">$50</div>
-        <div class="topup-btn" data-amount="100" onclick="selectTopup(this,100)">$100</div>
-      </div>
-      <div id="stripe-card-element"></div>
-      <button class="wallet-pay-btn" id="wallet-pay-btn" onclick="processTopup()" disabled>
-        ADD CREDITS
-      </button>
-      <div class="wallet-notice">All transactions are final. No refunds. Secured by Stripe.</div>
-      <div class="wallet-history">
-        <div class="wallet-history-title">Recent Transactions</div>
-        <div id="wallet-txn-list"><div style="font-size:10px;color:var(--muted)">No transactions yet</div></div>
-      </div>
-    </div>
-  </div>
-</div>
+
 </div>
 
 <div id="info-win" class="info-win" style="display:none;position:fixed;z-index:9999;"></div>
