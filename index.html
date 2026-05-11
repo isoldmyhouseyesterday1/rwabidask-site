@@ -7984,6 +7984,22 @@ async function initiateStripeSandbox(apn) {
     showToast("ERROR: NO ASSET SELECTED");
     return;
   }
+  // Admin bypass — skip Stripe for admin accounts
+  const _role = (currentUserRole||'').toLowerCase();
+  const _email = currentUser?.email || '';
+  if (_role === 'admin' || _email === 'ops@rwabidask.com') {
+    showToast('ADMIN ACCESS — LOADING INTEL REPORT…');
+    try {
+      const bq = await fetchParcelData({pin: apn, paid: true});
+      if (bq) {
+        const asset = {id: apn, apn: apn, type: 'real_estate'};
+        _renderFull(asset, bq);
+        showToast('✓ ADMIN INTEL REPORT LOADED');
+        setTimeout(() => generateIntelPDF(bq), 1000);
+      }
+    } catch(e) { showToast('ADMIN LOAD ERROR: ' + e.message); }
+    return;
+  }
   showToast(`INITIATING INTEL REPORT FOR APN: ${apn}...`);
 
   // Log transaction intent (Supabase — sessions/transactions scope)
