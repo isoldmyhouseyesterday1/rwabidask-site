@@ -8296,6 +8296,103 @@ async function generateIntelPDF(bq) {
     if (appeals.length===0)        score+=5;
     score = Math.max(10,Math.min(99,score));
     const scoreLabel = score>=80?'Prime Grade':score>=65?'Investment Grade':score>=50?'Standard Grade':'Elevated Risk';
+    const compsData  = (typeof j !== 'undefined' && j && j.comps) ? j.comps : null;
+    const nbhd       = (compsData && compsData.neighborhood)    ? compsData.neighborhood    : [];
+    const soldComps  = (compsData && compsData.recent_sales)     ? compsData.recent_sales     : [];
+    const activeComp = (compsData && compsData.active_listings)  ? compsData.active_listings  : [];
+    function avgComps(arr, field) {
+      var vals = arr.map(function(c){ return parseFloat(c[field]||0); }).filter(function(v){ return v > 0; });
+      return vals.length > 0 ? Math.round(vals.reduce(function(a,b){ return a+b; }, 0) / vals.length) : null;
+    }
+    var nbhdAvgVal   = avgComps(nbhd,     'latest_total_val');
+    var nbhdAvgSqft  = avgComps(nbhd,     'SqFtTotLiving');
+    var soldAvgPrice = avgComps(soldComps, 'last_sale_price');
+    var soldAvgSqft  = avgComps(soldComps, 'SqFtTotLiving');
+    var nbhdAvgPpsf  = (nbhdAvgVal && nbhdAvgSqft && nbhdAvgSqft > 0) ? Math.round(nbhdAvgVal / nbhdAvgSqft) : null;
+    var soldAvgPpsf  = (soldAvgPrice && soldAvgSqft && soldAvgSqft > 0) ? Math.round(soldAvgPrice / soldAvgSqft) : null;
+    function isEntity(name) {
+      if (!name) return false;
+      var n = name.toUpperCase();
+      return /LLC|L\.L\.C|CORP|INC|TRUST|LP |L\.P|PLLC|ASSOC|PROPERTIES|HOLDINGS|GROUP|PARTNERS|FUND|REIT|ESTATE OF|BANK|LENDING|CAPITAL|INVESTMENTS|VENTURES|REALTY|DEVELOPMENT|ENTERPRISES/.test(n);
+    }
+    var chainOfTitle = salesHist.filter(function(s){ return si(s.SalePrice) > 1000; }).map(function(s){
+      var buyerIsEntity  = isEntity(s.BuyerName  || s.Buyer  || '');
+      var sellerIsEntity = isEntity(s.SellerName || s.Seller || '');
+      return {
+        date:       String(s.DocumentDate || s.SaleDate || '').substring(0,10),
+        price:      si(s.SalePrice),
+        instrument: s.instrument_decoded || null,
+        reason:     s.reason_decoded || null,
+        warnings:   s.warnings_decoded || [],
+        buyer:      buyerIsEntity  ? (s.BuyerName  || s.Buyer  || null) : '[Individual Buyer]',
+        seller:     sellerIsEntity ? (s.SellerName || s.Seller || null) : '[Individual Seller]',
+      };
+    });
+    var mortgEst = calcMortgage(assessed, 20, 7.0);
+    function compRow(c, mode) {
+      var addr  = c.Address || c.address || '—';
+      var price = mode === 'sold' ? (si(c.last_sale_price) || si(c.latest_total_val)) : si(c.asking_price || c.latest_total_val);
+      var sqft  = si(c.SqFtTotLiving);
+      var ppsf  = sqft > 0 && price > 0 ? Math.round(price/sqft) : null;
+      var dist  = c.dist_m ? Math.round(parseFloat(c.dist_m)) + 'm' : null;
+      var yr    = c.YrBuilt || null;
+      var beds  = c.Bedrooms || null;
+      var date  = mode === 'sold' ? String(c.last_sale_date||'').substring(0,10) : null;
+      var out   = '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;page-break-inside:avoid">';
+      out += '<div style="display:flex;justify-content:space-between;align-items:baseline">';
+      out += '<span style="font-size:11px;font-weight:600;color:#111;flex:1">' + addr + '</span>';
+      out += price > 0 ? '<span style="font-family:monospace;font-size:12px;font-weight:700;color:#185FA5">$' + price.toLocaleString() + '</span>' : '';
+      out += '</div><div style="display:flex;gap:12px;font-size:9px;color:#666;margin-top:3px;font-family:monospace">';
+      if (sqft > 0) out += '<span>' + sqft.toLocaleString() + ' sqft</span>';
+      if (ppsf)     out += '<span>$' + ppsf + '/sf</span>';
+      if (beds)     out += '<span>' + beds + ' bd</span>';
+      if (yr)       out += '<span>Built ' + yr + '</span>';
+      if (dist)     out += '<span>' + dist + ' away</span>';
+      if (date)     out += '<span>Sold ' + date + '</span>';
+      out += '</div></div>';
+      return out;
+    }
+    var nbhdHtml = nbhd.length > 0 ? nbhd.map(function(c){ return compRow(c,'nbhd'); }).join('') :
+      '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No neighborhood comps within 0.5 mile</div>';
+    var soldHtml = soldComps.length > 0 ? soldComps.map(function(c){ return compRow(c,'sold'); }).join('') :
+      '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No sales found within 1 mile in past 12 months</div>';
+    var activeHtml = activeComp.length > 0 ? activeComp.map(function(c){ return compRow(c,'active'); }).join('') :
+      '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No active RWABidAsk listings nearby</div>';
+    var nbhdStatsHtml = '';
+    if (nbhdAvgVal || soldAvgPrice) {
+      nbhdStatsHtml += '<div style="display:flex;gap:16px;flex-wrap:wrap;margin:12px 0;padding:10px 14px;background:#f8f8f8;border-left:3px solid #185FA5">';
+      if (nbhdAvgVal)   nbhdStatsHtml += '<div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">NBHD AVG ASSESSED</div><div style="font-size:14px;font-weight:700;font-family:monospace">$' + nbhdAvgVal.toLocaleString() + '</div></div>';
+      if (nbhdAvgPpsf)  nbhdStatsHtml += '<div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">NBHD AVG $/SQFT</div><div style="font-size:14px;font-weight:700;font-family:monospace">$' + nbhdAvgPpsf + '</div></div>';
+      if (soldAvgPrice) nbhdStatsHtml += '<div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">12MO AVG SALE</div><div style="font-size:14px;font-weight:700;font-family:monospace">$' + soldAvgPrice.toLocaleString() + '</div></div>';
+      if (soldAvgPpsf)  nbhdStatsHtml += '<div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">12MO AVG $/SQFT</div><div style="font-size:14px;font-weight:700;font-family:monospace">$' + soldAvgPpsf + '</div></div>';
+      nbhdStatsHtml += '</div>';
+    }
+    var chainHtml = chainOfTitle.length > 0 ? chainOfTitle.map(function(s){
+      var out = '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;page-break-inside:avoid">';
+      out += '<div style="display:flex;justify-content:space-between;align-items:baseline">';
+      out += '<span style="font-size:10px;font-family:monospace;color:#666">' + (s.date || '—') + '</span>';
+      out += s.price > 0 ? '<span style="font-family:monospace;font-size:12px;font-weight:700;color:#185FA5">$' + s.price.toLocaleString() + '</span>' : '';
+      out += '</div><div style="font-size:10px;color:#444;margin-top:2px">';
+      out += '<span style="color:#888">FROM: </span>' + (s.seller || '—') + ' &rarr; <span style="color:#888">TO: </span>' + (s.buyer || '—');
+      out += '</div>';
+      if (s.instrument) out += '<div style="font-size:9px;color:#888;font-family:monospace;margin-top:2px">' + s.instrument + (s.reason ? ' · ' + s.reason : '') + '</div>';
+      if (s.warnings && s.warnings.length > 0) out += '<div style="font-size:9px;color:#c00;font-family:monospace;margin-top:2px">&#9873; ' + s.warnings.slice(0,2).join(' · ') + '</div>';
+      out += '</div>';
+      return out;
+    }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No recorded arm\'s-length sales on record</div>';
+    var mortgPdfHtml = '';
+    if (mortgEst && mortgEst.payment > 0) {
+      mortgPdfHtml = '<div style="margin:12px 0;padding:12px 16px;background:#f8f8f8;border-left:3px solid #111;page-break-inside:avoid">';
+      mortgPdfHtml += '<div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">ESTIMATED MONTHLY PAYMENT (20% DOWN · 30YR @ 7.0%)</div>';
+      mortgPdfHtml += '<div style="font-size:28px;font-weight:700;font-family:monospace;color:#111">$' + mortgEst.payment.toLocaleString() + '<span style="font-size:13px;font-weight:400;color:#666">/mo</span></div>';
+      mortgPdfHtml += '<div style="display:flex;gap:16px;font-size:9px;color:#666;font-family:monospace;margin-top:6px">';
+      mortgPdfHtml += '<span>Down: $' + mortgEst.downAmt.toLocaleString() + '</span>';
+      mortgPdfHtml += '<span>Loan: $' + mortgEst.principal.toLocaleString() + '</span>';
+      mortgPdfHtml += '<span>30yr total: ~$' + Math.round(mortgEst.total30/1000) + 'k</span>';
+      mortgPdfHtml += '</div><div style="font-size:8px;color:#aaa;font-family:monospace;margin-top:4px">Based on assessed value. Rate is estimate only — verify with lender.</div>';
+      mortgPdfHtml += '</div>';
+    }
+
 
     // Helpers
     const row = (k,rv,cls='') => rv!=null&&rv!==''
@@ -8549,6 +8646,32 @@ ${apprHist.length?`
   </div>
 </div>
 
+
+${nbhdStatsHtml}
+<!-- CH C1: NEIGHBORHOOD COMPS -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">C1</span><span class="ch-t">NEIGHBORHOOD COMPS (0.5 MI · SAME USE)</span><span class="ch-s ${nbhd.length>0?'ok':'none'}">${nbhd.length>0?nbhd.length+' FOUND':'NONE'}</span></div>
+  <div class="ch-body">${nbhdHtml}</div>
+</div>
+<!-- CH C2: RECENT SALES -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">C2</span><span class="ch-t">RECENT SALES (12 MONTHS · 1 MI RADIUS)</span><span class="ch-s ${soldComps.length>0?'ok':'none'}">${soldComps.length>0?soldComps.length+' FOUND':'NONE'}</span></div>
+  <div class="ch-body">${soldHtml}</div>
+</div>
+<!-- CH C3: ACTIVE LISTINGS -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">C3</span><span class="ch-t">ACTIVE LISTINGS (RWABIDASK NETWORK)</span><span class="ch-s ${activeComp.length>0?'ok':'none'}">${activeComp.length>0?activeComp.length+' ACTIVE':'NONE'}</span></div>
+  <div class="ch-body">${activeHtml}</div>
+</div>
+${mortgPdfHtml}
+<!-- CH CT: CHAIN OF TITLE -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">CT</span><span class="ch-t">CHAIN OF TITLE (RECORDED TRANSACTIONS)</span><span class="ch-s ${chainOfTitle.length>0?'ok':'none'}">${chainOfTitle.length>0?chainOfTitle.length+' RECORDS':'NONE'}</span></div>
+  <div class="ch-body">
+    <div style="font-size:9px;color:#888;font-family:monospace;margin-bottom:8px;line-height:1.6">Entity names per public deed records. Individual owner names omitted per privacy policy. Arm's-length sales only.</div>
+    ${chainHtml}
+  </div>
+</div>
 <!-- CH 06: PERMITS -->
 ${permits.length?`
 <div class="ch">
@@ -8784,6 +8907,37 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
   }
   })();
 }
+
+// ── MORTGAGE CALCULATOR ──────────────────────────────────────────────────────
+function calcMortgage(assessedValue, downPctOverride, annualRateOverride) {
+  var price     = parseInt(assessedValue) || 0;
+  var downPct   = (typeof downPctOverride   === 'number') ? downPctOverride   : 20;
+  var annualRate= (typeof annualRateOverride === 'number') ? annualRateOverride : 7.0;
+  if (price <= 0) return null;
+  var downAmt   = Math.round(price * downPct / 100);
+  var principal = price - downAmt;
+  var monthly   = annualRate / 100 / 12;
+  var n         = 360;
+  var payment   = monthly === 0 ? Math.round(principal / n) :
+    Math.round(principal * monthly * Math.pow(1+monthly,n) / (Math.pow(1+monthly,n)-1));
+  return { price, downAmt, downPct, principal, rate:annualRate, payment, total30:payment*n };
+}
+function mortgageCardHtml(assessedValue, rateOverride) {
+  var m = calcMortgage(assessedValue, 20, rateOverride || 7.0);
+  if (!m || m.payment <= 0) return '';
+  var html = '<div style="margin:8px 16px 0;padding:12px 14px;background:rgba(0,20,14,.6);border:1px solid rgba(0,255,200,.12);border-radius:4px">';
+  html += '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">EST. MONTHLY PAYMENT</div>';
+  html += '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px">';
+  html += '<div style="font-size:24px;font-weight:700;color:var(--cyan);font-family:monospace">$' + m.payment.toLocaleString() + '/mo</div>';
+  html += '<div style="font-size:9px;color:var(--muted);text-align:right;line-height:1.6">' + m.rate.toFixed(2) + '% / 30yr est.<br>20% down · assessed value</div>';
+  html += '</div><div style="display:flex;gap:12px;font-size:9px;color:var(--dim)">';
+  html += '<span>Down: $' + m.downAmt.toLocaleString() + '</span>';
+  html += '<span>Loan: $' + m.principal.toLocaleString() + '</span>';
+  html += '<span>Total: $' + Math.round(m.total30/1000) + 'k</span>';
+  html += '</div></div>';
+  return html;
+}
+
 function _renderFull(asset,bq,isPaidReport=false,listing=null){
 const a=asset||{},pin=bq?.PIN||a.apn||a.id||'—',addr=bq?.address||a.address||'—',
 cityState=bq?.city?`${bq.city} ${bq.state||'WA'} ${bq.zip_code||''}`.trim():(bq?.zip_code||''),
@@ -8984,6 +9138,7 @@ if(noData){
       ${views.length>0?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(0,255,200,.05);color:var(--cyan);border:1px solid rgba(0,255,200,.15)">VIEWS</span>`:''}
       ${!hasHazard&&!tsunami&&!sc?`<span style="font-size:8px;padding:3px 8px;border-radius:3px;background:rgba(62,230,136,.08);color:var(--green);border:1px solid rgba(62,230,136,.25)">NO HAZARDS ON RECORD</span>`:''}
     </div>
+    ${mortgageCardHtml(assessed)}
     <div style="margin:8px 16px;padding:14px;background:linear-gradient(135deg,rgba(0,40,28,.7),rgba(0,20,40,.7));border:1px solid rgba(0,255,200,.18);border-radius:4px">
       <div style="font-size:12px;font-weight:600;color:var(--cyan);margin-bottom:6px">Full Intel Report — $20</div>
       <div style="font-size:11px;color:rgba(0,255,200,.45);margin-bottom:12px">30yr history · all permits · geo-risk · tax appeals · formulas</div>
