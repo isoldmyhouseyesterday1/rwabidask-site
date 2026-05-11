@@ -8393,6 +8393,86 @@ async function generateIntelPDF(bq) {
       if (soldAvgPpsf)  nbhdStatsHtml += '<div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">12MO AVG $/SQFT</div><div style="font-size:14px;font-weight:700;font-family:monospace">$' + soldAvgPpsf + '</div></div>';
       nbhdStatsHtml += '</div>';
     }
+
+    // ── COMP RANGE CHART (PDF) ────────────────────────────────────────────────
+    function buildRangeChartSvg(compsArr, subjectVal, subjectSqft, mode) {
+      var prices = compsArr.map(function(c){
+        return mode === 'sold' ? (si(c.last_sale_price)||si(c.latest_total_val)) : si(c.latest_total_val);
+      }).filter(function(v){ return v > 10000; });
+      if (prices.length < 2) return '';
+      prices.sort(function(a,b){ return a-b; });
+      var minV = prices[0], maxV = prices[prices.length-1];
+      var avgV = Math.round(prices.reduce(function(a,b){return a+b;},0)/prices.length);
+      var rng  = maxV - minV || 1;
+      var W = 560, H = 60, pad = 40;
+      var xpos = function(v){ return pad + Math.round((v-minV)/rng*(W-pad*2)); };
+      var subX = subjectVal > 0 ? Math.max(pad, Math.min(W-pad, xpos(subjectVal))) : -1;
+      var avgX = xpos(avgV);
+      var out = '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">';
+      // Range line
+      out += '<line x1="' + pad + '" y1="30" x2="' + (W-pad) + '" y2="30" stroke="#ddd" stroke-width="3" stroke-linecap="round"/>';
+      // Comp dots
+      prices.forEach(function(v){
+        var x = xpos(v);
+        out += '<circle cx="' + x + '" cy="30" r="4" fill="#185FA5" opacity="0.6"/>';
+      });
+      // Avg line
+      out += '<line x1="' + avgX + '" y1="18" x2="' + avgX + '" y2="42" stroke="#185FA5" stroke-width="1.5" stroke-dasharray="3,2"/>';
+      out += '<text x="' + avgX + '" y="14" font-size="7" fill="#185FA5" font-family="monospace" text-anchor="middle">avg $' + Math.round(avgV/1000) + 'k</text>';
+      // Subject dot
+      if (subX > 0) {
+        out += '<circle cx="' + subX + '" cy="30" r="7" fill="#00c49a" stroke="#fff" stroke-width="2"/>';
+        out += '<text x="' + subX + '" y="52" font-size="8" fill="#00c49a" font-family="monospace" font-weight="bold" text-anchor="middle">SUBJECT</text>';
+      }
+      // Min/max labels
+      out += '<text x="' + pad + '" y="14" font-size="7" fill="#888" font-family="monospace" text-anchor="middle">$' + Math.round(minV/1000) + 'k</text>';
+      out += '<text x="' + (W-pad) + '" y="14" font-size="7" fill="#888" font-family="monospace" text-anchor="middle">$' + Math.round(maxV/1000) + 'k</text>';
+      out += '</svg>';
+      return out;
+    }
+
+    function buildZipBarChartSvg(trendArr, subjectVal) {
+      var sales = trendArr.map(function(c){
+        return { addr: (c.Address||'').trim().substring(0,22), price: si(c.last_sale_price)||si(c.latest_total_val), sqft: si(c.SqFtTotLiving) };
+      }).filter(function(c){ return c.price > 10000; });
+      sales.sort(function(a,b){ return a.price - b.price; });
+      if (sales.length < 2) return '';
+      var maxP = Math.max(...sales.map(function(c){return c.price;}));
+      // Also add subject
+      var allVals = sales.map(function(c){return c.price;});
+      allVals.push(subjectVal);
+      allVals.sort(function(a,b){return a-b;});
+      var subjectRank = allVals.indexOf(subjectVal);
+      var W = 560, barH = 14, gap = 4, padL = 140, padR = 60;
+      var totalH = (barH + gap) * (sales.length + 1) + 20;
+      var out = '<svg width="100%" viewBox="0 0 ' + W + ' ' + totalH + '" xmlns="http://www.w3.org/2000/svg">';
+      // Draw comp bars
+      sales.forEach(function(c, i){
+        var y = i * (barH + gap) + 10;
+        var bw = Math.round((c.price / maxP) * (W - padL - padR));
+        var isSubjectRange = subjectVal > 0 && Math.abs(c.price - subjectVal) / subjectVal < 0.05;
+        var fill = isSubjectRange ? '#00c49a' : '#185FA5';
+        var op   = isSubjectRange ? '1' : '0.55';
+        out += '<text x="' + (padL-4) + '" y="' + (y+11) + '" font-size="8" fill="#444" font-family="monospace" text-anchor="end">' + c.addr + '</text>';
+        out += '<rect x="' + padL + '" y="' + y + '" width="' + bw + '" height="' + barH + '" fill="' + fill + '" opacity="' + op + '" rx="2"/>';
+        out += '<text x="' + (padL+bw+4) + '" y="' + (y+11) + '" font-size="8" fill="#185FA5" font-family="monospace" font-weight="600">$' + Math.round(c.price/1000) + 'k</text>';
+      });
+      // Subject bar
+      if (subjectVal > 0) {
+        var sy = sales.length * (barH + gap) + 10;
+        var sbw = Math.round((subjectVal / maxP) * (W - padL - padR));
+        out += '<text x="' + (padL-4) + '" y="' + (sy+11) + '" font-size="8" fill="#00c49a" font-family="monospace" font-weight="bold" text-anchor="end">★ SUBJECT</text>';
+        out += '<rect x="' + padL + '" y="' + sy + '" width="' + sbw + '" height="' + barH + '" fill="#00c49a" rx="2"/>';
+        out += '<text x="' + (padL+sbw+4) + '" y="' + (sy+11) + '" font-size="8" fill="#00c49a" font-family="monospace" font-weight="700">$' + Math.round(subjectVal/1000) + 'k (assessed)</text>';
+      }
+      out += '</svg>';
+      return out;
+    }
+
+    var rangeChartC2 = buildRangeChartSvg(soldComps, assessed, sqft, 'sold');
+    var rangeChartC3 = buildRangeChartSvg(c3, assessed, sqft, 'sold');
+    var zipBarChart  = buildZipBarChartSvg(c5, assessed);
+
     var chainHtml = chainOfTitle.length > 0 ? chainOfTitle.map(function(s){
       var out = '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;page-break-inside:avoid">';
       out += '<div style="display:flex;justify-content:space-between;align-items:baseline">';
@@ -8684,6 +8764,7 @@ ${nbhdStatsHtml}
   <div class="ch-hd"><span class="ch-n">C2</span><span class="ch-t">RECENT SALES (12 MO · 1 MI · ±30% GLA · SAME USE)</span><span class="ch-s ${c2.length>0?'ok':'none'}">${c2.length>0?c2.length+' FOUND':'NONE'}</span></div>
   <div class="ch-body">${soldHtml}</div>
 </div>
+${rangeChartC2 ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">RECENT SALE PRICE RANGE — SUBJECT POSITION (cyan dot)</div>${rangeChartC2}</div>` : ''}
 <!-- CH C3: BROAD MARKET -->
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">C3</span><span class="ch-t">BROAD MARKET SALES (24 MO · 2 MI · ±50% GLA · SAME USE)</span><span class="ch-s ${c3.length>0?'ok':'none'}">${c3.length>0?c3.length+' FOUND':'NONE'}</span></div>
@@ -8699,6 +8780,7 @@ ${nbhdStatsHtml}
   <div class="ch-hd"><span class="ch-n">C5</span><span class="ch-t">DISTRICT SALES TREND (36 MO · SAME DISTRICT · SAME USE)</span><span class="ch-s ${c5.length>0?'ok':'none'}">${c5.length>0?c5.length+' SALES':'NONE'}</span></div>
   <div class="ch-body">${trendHtml}</div>
 </div>
+${zipBarChart ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">ZIP CODE VALUE DISTRIBUTION — WHERE THIS PARCEL SITS (★ = subject assessed value)</div>${zipBarChart}</div>` : ''}
 <!-- CH C6: ACTIVE LISTINGS -->
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">C6</span><span class="ch-t">ACTIVE LISTINGS (RWABIDASK NETWORK)</span><span class="ch-s ${activeComp.length>0?'ok':'none'}">${activeComp.length>0?activeComp.length+' ACTIVE':'NONE'}</span></div>
@@ -8979,6 +9061,27 @@ function mortgageCardHtml(assessedValue, rateOverride) {
   return html;
 }
 
+
+// ── COMP RANGE TEASER (free panel) ───────────────────────────────────────────
+function compRangeTeaserHtml(zip, assessedValue) {
+  if (!assessedValue || assessedValue <= 0) return '';
+  var html = '<div style="margin:8px 16px 0;padding:12px 14px;background:rgba(0,20,14,.6);border:1px solid rgba(0,255,200,.12);border-radius:4px;position:relative;overflow:hidden">';
+  html += '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">COMP RANGE · ZIP ' + (zip||'—') + ' · RECENT SALES</div>';
+  // Simple range bar — blurred ends, subject dot visible
+  html += '<div style="position:relative;height:28px;margin:4px 0 8px">';
+  html += '<div style="position:absolute;top:12px;left:0;right:0;height:4px;background:rgba(0,255,200,.15);border-radius:2px"></div>';
+  // Blurred left label
+  html += '<div style="position:absolute;left:0;top:0;font-size:9px;font-family:monospace;color:var(--muted);filter:blur(4px)">$???k</div>';
+  // Blurred right label
+  html += '<div style="position:absolute;right:0;top:0;font-size:9px;font-family:monospace;color:var(--muted);filter:blur(4px)">$???k</div>';
+  // Subject dot at 50% — we dont know position without comp data, center it
+  html += '<div style="position:absolute;left:50%;top:6px;width:16px;height:16px;border-radius:50%;background:var(--cyan);border:2px solid #fff;transform:translateX(-50%);box-shadow:0 0 8px rgba(0,255,200,.6)"></div>';
+  html += '</div>';
+  html += '<div style="font-size:8px;color:var(--muted);text-align:center;letter-spacing:1px">UNLOCK INTEL REPORT TO SEE FULL COMP ANALYSIS</div>';
+  html += '</div>';
+  return html;
+}
+
 function _renderFull(asset,bq,isPaidReport=false,listing=null){
 const a=asset||{},pin=bq?.PIN||a.apn||a.id||'—',addr=bq?.address||a.address||'—',
 cityState=bq?.city?`${bq.city} ${bq.state||'WA'} ${bq.zip_code||''}`.trim():(bq?.zip_code||''),
@@ -9180,6 +9283,7 @@ if(noData){
       ${!hasHazard&&!tsunami&&!sc?`<span style="font-size:8px;padding:3px 8px;border-radius:3px;background:rgba(62,230,136,.08);color:var(--green);border:1px solid rgba(62,230,136,.25)">NO HAZARDS ON RECORD</span>`:''}
     </div>
     ${mortgageCardHtml(assessed)}
+    ${compRangeTeaserHtml(bq&&bq.zip_code, assessed)}
     <div style="margin:8px 16px;padding:14px;background:linear-gradient(135deg,rgba(0,40,28,.7),rgba(0,20,40,.7));border:1px solid rgba(0,255,200,.18);border-radius:4px">
       <div style="font-size:12px;font-weight:600;color:var(--cyan);margin-bottom:6px">Full Intel Report — $20</div>
       <div style="font-size:11px;color:rgba(0,255,200,.45);margin-bottom:12px">30yr history · all permits · geo-risk · tax appeals · formulas</div>
