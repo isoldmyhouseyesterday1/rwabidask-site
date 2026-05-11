@@ -8216,6 +8216,7 @@ async function generateIntelPDF(bq) {
         const j = await r.json();
         if (j?.parcel) d = j.parcel;
         if (j?.comps)  _paidComps = j.comps;
+        if (j?.crime)  window._lastCrime = j.crime;
       } catch(e) { console.warn('[PDF fetch]',e); }
     }
 
@@ -8472,6 +8473,84 @@ async function generateIntelPDF(bq) {
     var rangeChartC2 = buildRangeChartSvg(soldComps, assessed, sqft, 'sold');
     var rangeChartC3 = buildRangeChartSvg(c3, assessed, sqft, 'sold');
     var zipBarChart  = buildZipBarChartSvg(c5, assessed);
+
+
+    // ── CRIME DATA ────────────────────────────────────────────────────────────
+    const _cr         = d.crime || (window._lastCrime) || null;
+    const crHalf      = _cr && _cr.half_mile  ? _cr.half_mile  : null;
+    const crOne       = _cr && _cr.one_mile   ? _cr.one_mile   : null;
+    const crTrend     = _cr && _cr.trend      ? _cr.trend      : [];
+    const crPeak      = _cr && _cr.peak_hours ? _cr.peak_hours : [];
+    var crTrendAdj = crTrend.map(function(t){
+      var yr = parseInt(t.incident_year);
+      var cnt = parseInt(t.incidents);
+      if (yr === new Date().getFullYear()) {
+        var dayOfYear = Math.floor((Date.now() - new Date(yr+'-01-01').getTime()) / 86400000);
+        cnt = dayOfYear > 0 ? Math.round(cnt * 365 / dayOfYear) : cnt;
+        return {incident_year: yr, incidents: cnt, annualized: true};
+      }
+      return {incident_year: yr, incidents: cnt, annualized: false};
+    });
+    var crYoy = null;
+    if (crTrendAdj.length >= 2) {
+      var last2 = crTrendAdj.slice(-2);
+      crYoy = last2[1].incidents > 0 ? Math.round((last2[0].incidents - last2[1].incidents) / last2[1].incidents * 100) : null;
+    }
+    function buildCrimeTrendSvg(trend) {
+      if (!trend || trend.length < 3) return '';
+      var maxV = Math.max.apply(null, trend.map(function(t){ return t.incidents; }));
+      var W = 560, H = 80, pad = 20;
+      var bw = Math.floor((W - pad*2) / trend.length) - 2;
+      var out = '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+      out += '<line x1="' + pad + '" y1="' + (H-15) + '" x2="' + (W-pad) + '" y2="' + (H-15) + '" stroke="#eee" stroke-width="1"/>';
+      trend.forEach(function(t, i) {
+        var x = pad + i * (bw + 2);
+        var h = Math.max(2, Math.round((t.incidents / maxV) * (H-20)));
+        var y = H - 15 - h;
+        var fill = t.annualized ? '#f0a500' : '#185FA5';
+        out += '<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + h + '" fill="' + fill + '" opacity="0.8" rx="1"/>';
+        if (i === 0 || i === trend.length-1 || i === Math.floor(trend.length/2)) {
+          out += '<text x="' + (x+bw/2) + '" y="' + (H-2) + '" font-size="7" fill="#888" font-family="monospace" text-anchor="middle">' + t.incident_year + '</text>';
+        }
+      });
+      out += '<text x="' + (W-pad) + '" y="12" font-size="8" fill="#185FA5" font-family="monospace" text-anchor="end">' + maxV + '/yr peak</text>';
+      if (trend[trend.length-1] && trend[trend.length-1].annualized) {
+        out += '<text x="' + pad + '" y="12" font-size="7" fill="#f0a500" font-family="monospace">' + trend[trend.length-1].incident_year + ' annualized</text>';
+      }
+      out += '</svg>';
+      return out;
+    }
+    var crimeTrendSvg = buildCrimeTrendSvg(crTrendAdj);
+    function crimeRows(byCategory) {
+      if (!byCategory || byCategory.length === 0) return '<div style="font-size:10px;color:#888;font-style:italic">No data</div>';
+      var total = byCategory.reduce(function(s,r){ return s + parseInt(r.total_all_time||0); }, 0);
+      return byCategory.map(function(r) {
+        var t = parseInt(r.total_all_time||0);
+        var m = parseInt(r.last_12mo||0);
+        var pct = total > 0 ? Math.round(t/total*100) : 0;
+        var barW = Math.round(pct * 1.8);
+        var cat = (r.offense_category||'OTHER').toUpperCase();
+        var color = cat.indexOf('VIOLENT') >= 0 ? '#c00' : cat.indexOf('PROPERTY') >= 0 ? '#854F0B' : '#555';
+        return '<div style="padding:6px 0;border-bottom:1px solid #f0f0f0;page-break-inside:avoid">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">' +
+          '<span style="font-size:10px;font-weight:600;color:' + color + '">' + cat + '</span>' +
+          '<span style="font-family:monospace;font-size:10px;font-weight:700">' + t.toLocaleString() + ' total · ' + m + ' last 12mo</span>' +
+          '</div>' +
+          '<div style="height:4px;background:#f0f0f0;border-radius:2px">' +
+          '<div style="height:4px;width:' + barW + 'px;background:' + color + ';border-radius:2px;opacity:0.6"></div>' +
+          '</div></div>';
+      }).join('');
+    }
+    function peakHoursHtml(peak) {
+      if (!peak || peak.length === 0) return '';
+      var labels = ['12am','1am','2am','3am','4am','5am','6am','7am','8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm'];
+      return '<div style="font-size:9px;color:#666;font-family:monospace;margin-top:6px">PEAK HOURS: ' +
+        peak.map(function(p){ return (labels[parseInt(p.hour_of_day||0)]||p.hour_of_day) + ' (' + p.incidents + ')'; }).join(' · ') + '</div>';
+    }
+    var crimeHalfHtml = crHalf ? crimeRows(crHalf.by_category) : '<div style="font-size:10px;color:#888;font-style:italic">No data</div>';
+    var crimeOneHtml  = crOne  ? crimeRows(crOne.by_category)  : '';
+    var crimePeakHtml = peakHoursHtml(crPeak);
+    var crimeSource   = _cr ? (_cr.data_source || 'SPD + KCSO') : '';
 
     var chainHtml = chainOfTitle.length > 0 ? chainOfTitle.map(function(s){
       var out = '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;page-break-inside:avoid">';
@@ -8787,6 +8866,32 @@ ${zipBarChart ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div sty
   <div class="ch-body">${activeHtml}</div>
 </div>
 ${mortgPdfHtml}
+<!-- CH CR: CRIME & SAFETY -->
+<div class="ch">
+  <div class="ch-hd">
+    <span class="ch-n">CR</span>
+    <span class="ch-t">CRIME & SAFETY ANALYSIS</span>
+    <span class="ch-s ${_cr?(crHalf&&crHalf.total_all_time>0?'warn':'ok'):'none'}">${_cr?(crHalf&&crHalf.total_all_time>0?crHalf.total_all_time+' INCIDENTS 0.5MI':'CLEAN'):'NO DATA'}</span>
+  </div>
+  <div class="ch-body">
+    ${_cr ? `
+    <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:#f8f8f8;border-left:3px solid #185FA5">
+      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">0.5MI ALL TIME</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crHalf&&crHalf.total_all_time?Number(crHalf.total_all_time).toLocaleString():'—'}</div></div>
+      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">0.5MI LAST 12MO</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crHalf&&crHalf.last_12mo?crHalf.last_12mo:'—'}</div></div>
+      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">1MI ALL TIME</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crOne&&crOne.total_all_time?Number(crOne.total_all_time).toLocaleString():'—'}</div></div>
+      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">1MI LAST 12MO</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crOne&&crOne.last_12mo?crOne.last_12mo:'—'}</div></div>
+      ${crYoy !== null ? '<div><div style=\'font-size:8px;color:#888;font-family:monospace;letter-spacing:1px\'>YOY TREND</div><div style=\'font-size:18px;font-weight:700;font-family:monospace;color:'+(crYoy<0?'#3B6D11':'#c00')+'\'>'+(crYoy>0?'+':'')+crYoy+'%</div></div>' : ''}
+    </div>
+    <div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">INCIDENT TREND — 1 MILE RADIUS (2010–PRESENT)</div>
+    ${crimeTrendSvg}
+    <div style="font-size:8px;color:#aaa;font-family:monospace;margin-bottom:12px">Blue = full year · Gold = current year annualized</div>
+    <div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin:10px 0 6px">BY CATEGORY — 0.5 MILE RADIUS</div>
+    ${crimeHalfHtml}
+    ${crimePeakHtml}
+    <div style="font-size:8px;color:#aaa;font-family:monospace;margin-top:8px">Source: ${crimeSource}</div>
+    ` : '<div style=\'font-size:10px;color:#888;font-style:italic;padding:8px 0\'>Crime data not available for this location</div>'}
+  </div>
+</div>
 <!-- CH CT: CHAIN OF TITLE -->
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">CT</span><span class="ch-t">CHAIN OF TITLE (RECORDED TRANSACTIONS)</span><span class="ch-s ${chainOfTitle.length>0?'ok':'none'}">${chainOfTitle.length>0?chainOfTitle.length+' RECORDS':'NONE'}</span></div>
