@@ -8331,35 +8331,60 @@ async function generateIntelPDF(bq) {
       };
     });
     var mortgEst = calcMortgage(assessed, 20, 7.0);
+    var _meth = compsData && compsData.methodology ? compsData.methodology : {};
     function compRow(c, mode) {
       var addr  = c.Address || c.address || '—';
-      var price = mode === 'sold' ? (si(c.last_sale_price) || si(c.latest_total_val)) : si(c.asking_price || c.latest_total_val);
+      var price = mode === 'sold' || mode === 'broad' || mode === 'trend'
+        ? (si(c.last_sale_price) || si(c.latest_total_val))
+        : mode === 'active' ? si(c.asking_price || c.latest_total_val)
+        : si(c.latest_total_val);
       var sqft  = si(c.SqFtTotLiving);
-      var ppsf  = sqft > 0 && price > 0 ? Math.round(price/sqft) : null;
+      var ppsf  = mode === 'sold' || mode === 'broad' || mode === 'trend'
+        ? (si(c.sale_ppsf) || (sqft > 0 && price > 0 ? Math.round(price/sqft) : null))
+        : (si(c.ppsf) || (sqft > 0 && price > 0 ? Math.round(price/sqft) : null));
       var dist  = c.dist_m ? Math.round(parseFloat(c.dist_m)) + 'm' : null;
       var yr    = c.YrBuilt || null;
       var beds  = c.Bedrooms || null;
-      var date  = mode === 'sold' ? String(c.last_sale_date||'').substring(0,10) : null;
+      var grade = c.BldgGrade || null;
+      var date  = (mode === 'sold' || mode === 'broad' || mode === 'trend') ? String(c.last_sale_date||'').substring(0,10) : null;
       var out   = '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;page-break-inside:avoid">';
       out += '<div style="display:flex;justify-content:space-between;align-items:baseline">';
       out += '<span style="font-size:11px;font-weight:600;color:#111;flex:1">' + addr + '</span>';
-      out += price > 0 ? '<span style="font-family:monospace;font-size:12px;font-weight:700;color:#185FA5">$' + price.toLocaleString() + '</span>' : '';
-      out += '</div><div style="display:flex;gap:12px;font-size:9px;color:#666;margin-top:3px;font-family:monospace">';
+      out += price > 0 ? '<span style="font-family:monospace;font-size:12px;font-weight:700;color:#185FA5">$' + price.toLocaleString() + (date?' <span style=\'font-size:9px;font-weight:400;color:#888\'>(sold)</span>':''  ) + '</span>' : '';
+      out += '</div><div style="display:flex;gap:10px;font-size:9px;color:#666;margin-top:3px;font-family:monospace;flex-wrap:wrap">';
       if (sqft > 0) out += '<span>' + sqft.toLocaleString() + ' sqft</span>';
-      if (ppsf)     out += '<span>$' + ppsf + '/sf</span>';
+      if (ppsf)     out += '<span style="color:#185FA5;font-weight:600">$' + ppsf + '/sf</span>';
       if (beds)     out += '<span>' + beds + ' bd</span>';
       if (yr)       out += '<span>Built ' + yr + '</span>';
+      if (grade)    out += '<span>Grade: ' + grade + '</span>';
       if (dist)     out += '<span>' + dist + ' away</span>';
-      if (date)     out += '<span>Sold ' + date + '</span>';
+      if (date)     out += '<span>' + date + '</span>';
       out += '</div></div>';
       return out;
     }
-    var nbhdHtml = nbhd.length > 0 ? nbhd.map(function(c){ return compRow(c,'nbhd'); }).join('') :
-      '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No neighborhood comps within 0.5 mile</div>';
-    var soldHtml = soldComps.length > 0 ? soldComps.map(function(c){ return compRow(c,'sold'); }).join('') :
-      '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No sales found within 1 mile in past 12 months</div>';
-    var activeHtml = activeComp.length > 0 ? activeComp.map(function(c){ return compRow(c,'active'); }).join('') :
-      '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No active RWABidAsk listings nearby</div>';
+    function methLine(m) {
+      if (!m) return '';
+      var radius = typeof m.radius_m === 'number' ? (m.radius_m >= 1000 ? (m.radius_m/1000).toFixed(1)+'mi' : m.radius_m+'m') : m.radius_m;
+      var parts = [];
+      parts.push('Radius: ' + radius);
+      if (m.sqft_range && m.sqft_range !== 'any') parts.push('GLA: ' + m.sqft_range + ' sqft');
+      if (m.yr_range && m.yr_range !== 'any') parts.push('Year built: ' + m.yr_range);
+      parts.push('Window: ' + m.window);
+      parts.push('Sort: ' + m.sort);
+      return '<div style="font-size:8px;color:#aaa;font-family:monospace;padding:4px 0 6px;border-bottom:1px solid #f4f4f4;margin-bottom:4px">METHODOLOGY: ' + parts.join(' · ') + '</div>';
+    }
+    var c1 = compsData && compsData.neighborhood    ? compsData.neighborhood    : [];
+    var c2 = compsData && compsData.recent_sales     ? compsData.recent_sales     : [];
+    var c3 = compsData && compsData.broad_market     ? compsData.broad_market     : [];
+    var c4 = compsData && compsData.ppsf_comps       ? compsData.ppsf_comps       : [];
+    var c5 = compsData && compsData.district_trend   ? compsData.district_trend   : [];
+    var nbhd      = c1; var soldComps = c2; var activeComp = compsData && compsData.active_listings ? compsData.active_listings : [];
+    var nbhdHtml  = methLine(_meth.c1) + (c1.length > 0 ? c1.map(function(c){ return compRow(c,'nbhd'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No tight comps found — see broad market set below</div>');
+    var soldHtml  = methLine(_meth.c2) + (c2.length > 0 ? c2.map(function(c){ return compRow(c,'sold'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No sales within 1 mile in past 12 months</div>');
+    var broadHtml = methLine(_meth.c3) + (c3.length > 0 ? c3.map(function(c){ return compRow(c,'broad'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No sales within 2 miles in past 24 months</div>');
+    var ppsfHtml  = methLine(_meth.c4) + (c4.length > 0 ? c4.map(function(c){ return compRow(c,'ppsf'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No $/sqft comps available</div>');
+    var trendHtml = methLine(_meth.c5) + (c5.length > 0 ? c5.map(function(c){ return compRow(c,'trend'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No district sales in past 36 months</div>');
+    var activeHtml = activeComp.length > 0 ? activeComp.map(function(c){ return compRow(c,'active'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No active RWABidAsk listings nearby</div>';
     var nbhdStatsHtml = '';
     if (nbhdAvgVal || soldAvgPrice) {
       nbhdStatsHtml += '<div style="display:flex;gap:16px;flex-wrap:wrap;margin:12px 0;padding:10px 14px;background:#f8f8f8;border-left:3px solid #185FA5">';
@@ -8650,19 +8675,34 @@ ${apprHist.length?`
 
 
 ${nbhdStatsHtml}
-<!-- CH C1: NEIGHBORHOOD COMPS -->
+<!-- CH C1: TIGHT VALUE COMPS -->
 <div class="ch">
-  <div class="ch-hd"><span class="ch-n">C1</span><span class="ch-t">NEIGHBORHOOD COMPS (0.5 MI · SAME USE)</span><span class="ch-s ${nbhd.length>0?'ok':'none'}">${nbhd.length>0?nbhd.length+' FOUND':'NONE'}</span></div>
+  <div class="ch-hd"><span class="ch-n">C1</span><span class="ch-t">TIGHT VALUE COMPS (0.5 MI · ±30% GLA · ±15YR · SAME USE)</span><span class="ch-s ${c1.length>0?'ok':'none'}">${c1.length>0?c1.length+' FOUND':'NONE'}</span></div>
   <div class="ch-body">${nbhdHtml}</div>
 </div>
 <!-- CH C2: RECENT SALES -->
 <div class="ch">
-  <div class="ch-hd"><span class="ch-n">C2</span><span class="ch-t">RECENT SALES (12 MONTHS · 1 MI RADIUS)</span><span class="ch-s ${soldComps.length>0?'ok':'none'}">${soldComps.length>0?soldComps.length+' FOUND':'NONE'}</span></div>
+  <div class="ch-hd"><span class="ch-n">C2</span><span class="ch-t">RECENT SALES (12 MO · 1 MI · ±30% GLA · SAME USE)</span><span class="ch-s ${c2.length>0?'ok':'none'}">${c2.length>0?c2.length+' FOUND':'NONE'}</span></div>
   <div class="ch-body">${soldHtml}</div>
 </div>
-<!-- CH C3: ACTIVE LISTINGS -->
+<!-- CH C3: BROAD MARKET -->
 <div class="ch">
-  <div class="ch-hd"><span class="ch-n">C3</span><span class="ch-t">ACTIVE LISTINGS (RWABIDASK NETWORK)</span><span class="ch-s ${activeComp.length>0?'ok':'none'}">${activeComp.length>0?activeComp.length+' ACTIVE':'NONE'}</span></div>
+  <div class="ch-hd"><span class="ch-n">C3</span><span class="ch-t">BROAD MARKET SALES (24 MO · 2 MI · ±50% GLA · SAME USE)</span><span class="ch-s ${c3.length>0?'ok':'none'}">${c3.length>0?c3.length+' FOUND':'NONE'}</span></div>
+  <div class="ch-body">${broadHtml}</div>
+</div>
+<!-- CH C4: PRICE PER SQFT -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">C4</span><span class="ch-t">PRICE PER SQFT COMPS (1 MI · CLOSEST $/SF TO SUBJECT)</span><span class="ch-s ${c4.length>0?'ok':'none'}">${c4.length>0?c4.length+' FOUND':'NONE'}</span></div>
+  <div class="ch-body">${ppsfHtml}</div>
+</div>
+<!-- CH C5: DISTRICT TREND -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">C5</span><span class="ch-t">DISTRICT SALES TREND (36 MO · SAME DISTRICT · SAME USE)</span><span class="ch-s ${c5.length>0?'ok':'none'}">${c5.length>0?c5.length+' SALES':'NONE'}</span></div>
+  <div class="ch-body">${trendHtml}</div>
+</div>
+<!-- CH C6: ACTIVE LISTINGS -->
+<div class="ch">
+  <div class="ch-hd"><span class="ch-n">C6</span><span class="ch-t">ACTIVE LISTINGS (RWABIDASK NETWORK)</span><span class="ch-s ${activeComp.length>0?'ok':'none'}">${activeComp.length>0?activeComp.length+' ACTIVE':'NONE'}</span></div>
   <div class="ch-body">${activeHtml}</div>
 </div>
 ${mortgPdfHtml}
