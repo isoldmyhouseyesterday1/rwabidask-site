@@ -8299,17 +8299,16 @@ async function generateIntelPDF(bq) {
     score = Math.max(10,Math.min(99,score));
     const scoreLabel = score>=80?'Prime Grade':score>=65?'Investment Grade':score>=50?'Standard Grade':'Elevated Risk';
     const compsData  = _paidComps || null;
-    const nbhd       = (compsData && compsData.neighborhood)    ? compsData.neighborhood    : [];
-    const soldComps  = (compsData && compsData.recent_sales)     ? compsData.recent_sales     : [];
-    const activeComp = (compsData && compsData.active_listings)  ? compsData.active_listings  : [];
+    var _c1tmp = compsData && compsData.neighborhood  ? compsData.neighborhood  : [];
+    var _c2tmp = compsData && compsData.recent_sales   ? compsData.recent_sales   : [];
     function avgComps(arr, field) {
       var vals = arr.map(function(c){ return parseFloat(c[field]||0); }).filter(function(v){ return v > 0; });
       return vals.length > 0 ? Math.round(vals.reduce(function(a,b){ return a+b; }, 0) / vals.length) : null;
     }
-    var nbhdAvgVal   = avgComps(nbhd,     'latest_total_val');
-    var nbhdAvgSqft  = avgComps(nbhd,     'SqFtTotLiving');
-    var soldAvgPrice = avgComps(soldComps, 'last_sale_price');
-    var soldAvgSqft  = avgComps(soldComps, 'SqFtTotLiving');
+    var nbhdAvgVal   = avgComps(_c1tmp, 'latest_total_val');
+    var nbhdAvgSqft  = avgComps(_c1tmp, 'SqFtTotLiving');
+    var soldAvgPrice = avgComps(_c2tmp, 'last_sale_price');
+    var soldAvgSqft  = avgComps(_c2tmp, 'SqFtTotLiving');
     var nbhdAvgPpsf  = (nbhdAvgVal && nbhdAvgSqft && nbhdAvgSqft > 0) ? Math.round(nbhdAvgVal / nbhdAvgSqft) : null;
     var soldAvgPpsf  = (soldAvgPrice && soldAvgSqft && soldAvgSqft > 0) ? Math.round(soldAvgPrice / soldAvgSqft) : null;
     function isEntity(name) {
