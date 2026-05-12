@@ -9705,6 +9705,14 @@ async function brokerToggleStatus(apn, newStatus, btn) {
   if (btn) { btn.textContent = 'UPDATING...'; btn.disabled = true; }
   try {
     await _sb.from('parcel_listings').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('apn', apn).eq('contact_email', currentUser.email);
+    // Also update BigQuery so proxy stops serving the listing card
+    try {
+      await fetch(PARCEL_API + '?action=delist', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+        body: JSON.stringify({apn: apn, status: newStatus})
+      });
+    } catch(e) { console.warn('[delist bq]', e); }
     showToast('LISTING ' + newStatus.toUpperCase());
     await new Promise(r => setTimeout(r, 400));
     var content = document.getElementById('broker-tab-content');
