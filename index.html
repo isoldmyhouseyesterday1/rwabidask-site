@@ -10183,6 +10183,31 @@ async function submitListing(apn) {
         contact_email:email, media_urls:uploadedUrls, created_by:userId})
     });
     if (res.ok) {
+      // Also write to Supabase parcel_listings so dashboard can read it
+      if (_sb) {
+        try {
+          await _sb.from('parcel_listings').upsert({
+            apn: apn,
+            asking_price: price || 0,
+            listing_type: type,
+            role: role,
+            description: desc,
+            video_url: video || null,
+            tour_url: tour || null,
+            contact_name: name,
+            contact_phone: phone || null,
+            contact_email: email,
+            agent_photo_url: photo || null,
+            license_number: license || null,
+            brokerage: brokerage || null,
+            media_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
+            status: 'active',
+            created_by: userId,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'apn' });
+        } catch(e) { console.warn('[listing sync]', e); }
+      }
       document.getElementById('listing-modal')?.remove();
       showToast('LISTING SUBMITTED — LIVE ON PARCEL');
     } else {
