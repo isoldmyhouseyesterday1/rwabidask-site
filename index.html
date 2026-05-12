@@ -9706,7 +9706,9 @@ async function brokerToggleStatus(apn, newStatus, btn) {
   try {
     await _sb.from('parcel_listings').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('apn', apn).eq('contact_email', currentUser.email);
     showToast('LISTING ' + newStatus.toUpperCase());
-    brokerTab('listings');
+    await new Promise(r => setTimeout(r, 400));
+    var content = document.getElementById('broker-tab-content');
+    if (content) brokerLoadListings(content);
   } catch(e) {
     showToast('UPDATE FAILED: ' + e.message);
     if (btn) { btn.disabled = false; }
