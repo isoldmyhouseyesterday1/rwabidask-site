@@ -9630,9 +9630,9 @@ async function brokerLoadListings(container) {
         + '</div></div>'
         + (l.description ? '<div style="font-size:10px;color:#8899aa;margin-bottom:10px;line-height:1.6">' + l.description.substring(0,120) + (l.description.length>120?'...':'') + '</div>' : '')
         + '<div style="display:flex;gap:8px">'
-        + '<button onclick="brokerViewParcel('' + l.apn + '')" style="flex:1;padding:7px;background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.2);color:#00ffc8;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">VIEW PARCEL</button>'
-        + '<button onclick="brokerToggleStatus('' + l.apn + '','' + (l.status==='active'?'inactive':'active') + '',this)" style="flex:1;padding:7px;background:rgba(255,255,255,.03);border:1px solid #1a4a5a;color:#8899aa;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">' + (l.status==='active'?'DELIST':'RE-ACTIVATE') + '</button>'
-        + '<button onclick="brokerEditListing('' + l.apn + '')" style="flex:1;padding:7px;background:rgba(255,255,255,.03);border:1px solid #1a4a5a;color:#8899aa;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">EDIT</button>'
+        + '<button onclick="brokerViewParcel(\'' + l.apn + '\')" style="flex:1;padding:7px;background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.2);color:#00ffc8;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">VIEW PARCEL</button>'
+        + '<button onclick="brokerToggleStatus(\'' + l.apn + '\',\'' + (l.status==='active'?'inactive':'active') + '\',this)" style="flex:1;padding:7px;background:rgba(255,255,255,.03);border:1px solid #1a4a5a;color:#8899aa;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">' + (l.status==='active'?'DELIST':'RE-ACTIVATE') + '</button>'
+        + '<button onclick="brokerEditListing(\'' + l.apn + '\')" style="flex:1;padding:7px;background:rgba(255,255,255,.03);border:1px solid #1a4a5a;color:#8899aa;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">EDIT</button>'
         + '</div></div>';
     });
     container.innerHTML = html;
