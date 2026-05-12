@@ -6,7 +6,7 @@
 <title>RWABidAsk™ | Global Asset Database</title>
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<meta name="description" content="RWABidAsk — Global Asset Market. Institutional digitization of real estate, debt, financials, energy, infrastructure, robotics, bio, anthro, IP, minerals, natural resources, aviation and maritime transport on the Persistent Ledger.">
+<meta name="description" content="RWABidAsk — Real Property Intelligence Platform. Professional parcel data, comp analysis, crime radius, chain of title, and geo-risk reports for King County Washington real estate.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2502,9 +2502,9 @@ body { min-width: 900px; overflow-x: auto; }
 #wallet-modal {
   position: fixed; inset: 0; z-index: 19000;
   background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
-  display: none; align-items: center; justify-content: center;
+  display: none !important; align-items: center; justify-content: center;
 }
-#wallet-modal.open { display: flex; }
+#wallet-modal.open { display: none !important; }
 .wallet-card {
   background: var(--bg1); border: 1px solid var(--border2);
   border-radius: 4px; width: 380px; max-width: 96vw;
@@ -3159,18 +3159,10 @@ let markersRendered = false;
 // ASSET CATEGORIES - Castle/Estates mapped to Real Estate
 // ============================================================
 const ASSET_CATEGORIES = [
-  // ── Global Ledger — 10 Sectors (ALL tab + alphabetical order) ──
+  // ── Phase 1: Real Estate only — other sectors hidden pending data ──
+  // ── Future: anthro, bio, financial, energy, healthcare, infrastructure, robotics, technology, transport ──
   { id: 'all',            label: 'ALL',            physical: false, mapPin: false },
-  { id: 'anthro',         label: 'ANTHRO',         physical: true,  mapPin: true  },
-  { id: 'bio',            label: 'BIO',            physical: true,  mapPin: true  },
-  { id: 'financial',      label: 'CAPITAL',        physical: false, mapPin: false },
-  { id: 'energy',         label: 'ENERGY',         physical: true,  mapPin: true  },
-  { id: 'healthcare',     label: 'HEALTHCARE',     physical: true,  mapPin: true  },
-  { id: 'infrastructure', label: 'INFRASTRUCTURE', physical: false, mapPin: false },
   { id: 'realestate',     label: 'REAL ESTATE',    physical: false, mapPin: false },
-  { id: 'robotics',       label: 'ROBOTICS',       physical: true,  mapPin: true  },
-  { id: 'technology',     label: 'TECHNOLOGY',     physical: false, mapPin: false },
-  { id: 'transport',      label: 'TRANSPORT',      physical: true,  mapPin: true  },
 ];
 
 // Categories that render globe pins (physical, tangible, locatable)
