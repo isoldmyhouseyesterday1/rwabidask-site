@@ -6450,7 +6450,7 @@ function openModal(type, titleOverride, bodyOverride) {
       </div>
       <div class="legal-note" style="margin-top:10px;font-size:10px;">New? <a href="#" onclick="openModal('register');return false" style="color:var(--cyan)">Create Account</a></div>
     `;
-  } else if (type === 'register') {
+  } else if (type === 'signup' || type === 'register') {
     if (modalTitle) modalTitle.textContent = "CREATE ACCOUNT";
     modalBody.innerHTML = `
       <div class="mfield"><label>FULL NAME</label><input type="text" id="reg-name" placeholder="John Smith"></div>
