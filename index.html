@@ -9508,6 +9508,7 @@ if(noData){
         <button style="flex:1;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>showInsuranceModal())">INSURANCE</button>
       </div>
       <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','CONTACT_BROKER'); showToast('BROKER INQUIRY TRANSMITTED'); })">CONTACT BROKER</button>
+      <button style="width:100%;padding:8px;border:1px solid rgba(0,255,200,.2);background:rgba(0,255,200,.05);color:var(--cyan);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;margin-top:4px" onclick="requireAuth(()=>showBrokerDashboard())">MY BROKER DASHBOARD</button>
       <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','MAKE_OFFER'); showToast('OFFER SYSTEM COMING SOON'); })">MAKE OFFER TO OWNER</button>
     </div>`;
 
@@ -9559,6 +9560,191 @@ if(bq&&pin&&pin!=='—'){
   if(typeof addToRecentlyViewed==='function') addToRecentlyViewed(realAsset);
   if(typeof setStatus==='function') setStatus(`PARCEL: ${pin}`);
 }}
+
+// ── BROKER DASHBOARD ─────────────────────────────────────────────────────────
+async function showBrokerDashboard() {
+  if (!currentUser) { openModal('signin'); return; }
+  const existing = document.getElementById('broker-dash-modal');
+  if (existing) existing.remove();
+  const m = document.createElement('div');
+  m.id = 'broker-dash-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  var html = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.2);border-radius:8px;width:100%;max-width:720px;max-height:92vh;display:flex;flex-direction:column;">'
+    + '<div style="padding:16px 20px;border-bottom:1px solid rgba(0,255,200,.12);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">'
+    + '<div><div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#00ffc8">BROKER DASHBOARD</div>'
+    + '<div style="font-size:9px;color:#556677;margin-top:2px">' + (currentUser.email||'') + '</div></div>'
+    + '<button onclick="document.getElementById(\'broker-dash-modal\').remove()" style="background:none;border:none;color:#556677;font-size:20px;cursor:pointer">x</button>'
+    + '</div>'
+    + '<div style="display:flex;border-bottom:1px solid rgba(0,255,200,.1);flex-shrink:0">'
+    + '<button onclick="brokerTab(\'listings\')" id="btab-listings" style="flex:1;padding:10px;background:rgba(0,255,200,.08);border:none;border-bottom:2px solid #00ffc8;color:#00ffc8;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer">MY LISTINGS</button>'
+    + '<button onclick="brokerTab(\'leads\')" id="btab-leads" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:#556677;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer">INQUIRIES</button>'
+    + '<button onclick="brokerTab(\'corrections\')" id="btab-corrections" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:#556677;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer">DATA CORRECTIONS</button>'
+    + '</div>'
+    + '<div id="broker-tab-content" style="overflow-y:auto;flex:1;padding:16px 20px"></div>'
+    + '</div>';
+  m.innerHTML = html;
+  document.body.appendChild(m);
+  brokerTab('listings');
+}
+
+function brokerTab(tab) {
+  ['listings','leads','corrections'].forEach(function(t) {
+    var btn = document.getElementById('btab-' + t);
+    if (btn) {
+      btn.style.background = t === tab ? 'rgba(0,255,200,.08)' : 'none';
+      btn.style.color = t === tab ? '#00ffc8' : '#556677';
+      btn.style.borderBottomColor = t === tab ? '#00ffc8' : 'transparent';
+    }
+  });
+  var content = document.getElementById('broker-tab-content');
+  if (!content) return;
+  if (tab === 'listings') brokerLoadListings(content);
+  else if (tab === 'leads') brokerLoadLeads(content);
+  else if (tab === 'corrections') brokerShowCorrections(content);
+}
+
+async function brokerLoadListings(container) {
+  container.innerHTML = '<div style="font-size:10px;color:#556677;padding:20px 0">Loading listings...</div>';
+  if (!_sb || !currentUser) return;
+  try {
+    var result = await _sb.from('parcel_listings').select('*').eq('contact_email', currentUser.email).order('created_at', { ascending: false });
+    var data = result.data, error = result.error;
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:32px 0"><div style="font-size:12px;color:#556677;margin-bottom:8px">No listings yet</div><div style="font-size:10px;color:#3a4a5a">Click LIST THIS PROPERTY on any parcel to add your first listing</div></div>';
+      return;
+    }
+    var html = '<div style="font-size:9px;color:#556677;margin-bottom:12px;letter-spacing:1px">' + data.length + ' LISTING' + (data.length > 1 ? 'S' : '') + ' ON RECORD</div>';
+    data.forEach(function(l) {
+      var badge = l.listing_type === 'for_rent' ? 'FOR RENT' : l.listing_type === 'for_lease' ? 'FOR LEASE' : l.listing_type === 'auction' ? 'AUCTION' : 'FOR SALE';
+      var statusColor = l.status === 'active' ? '#00ffc8' : '#f87171';
+      var price = l.asking_price ? '$' + Number(l.asking_price).toLocaleString() : '—';
+      var created = l.created_at ? l.created_at.substring(0,10) : '—';
+      html += '<div style="border:1px solid rgba(0,255,200,.1);border-radius:6px;padding:14px;margin-bottom:12px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
+        + '<div><div style="font-size:11px;font-weight:700;color:#c8dded;margin-bottom:2px">APN: ' + l.apn + '</div>'
+        + '<div style="font-size:9px;color:#556677;font-family:monospace">Listed ' + created + ' · ' + badge + '</div></div>'
+        + '<div style="display:flex;gap:8px;align-items:center">'
+        + '<span style="font-size:16px;font-weight:700;color:#f0c060">' + price + '</span>'
+        + '<span style="font-size:8px;font-weight:700;padding:2px 7px;border-radius:3px;background:' + (l.status==='active'?'rgba(0,255,200,.1)':'rgba(248,113,113,.1)') + ';color:' + statusColor + ';border:1px solid ' + statusColor + '">' + (l.status||'active').toUpperCase() + '</span>'
+        + '</div></div>'
+        + (l.description ? '<div style="font-size:10px;color:#8899aa;margin-bottom:10px;line-height:1.6">' + l.description.substring(0,120) + (l.description.length>120?'...':'') + '</div>' : '')
+        + '<div style="display:flex;gap:8px">'
+        + '<button onclick="brokerViewParcel('' + l.apn + '')" style="flex:1;padding:7px;background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.2);color:#00ffc8;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">VIEW PARCEL</button>'
+        + '<button onclick="brokerToggleStatus('' + l.apn + '','' + (l.status==='active'?'inactive':'active') + '',this)" style="flex:1;padding:7px;background:rgba(255,255,255,.03);border:1px solid #1a4a5a;color:#8899aa;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">' + (l.status==='active'?'DELIST':'RE-ACTIVATE') + '</button>'
+        + '<button onclick="brokerEditListing('' + l.apn + '')" style="flex:1;padding:7px;background:rgba(255,255,255,.03);border:1px solid #1a4a5a;color:#8899aa;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:1px">EDIT</button>'
+        + '</div></div>';
+    });
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div style="color:#f87171;font-size:10px;padding:20px 0">Error: ' + e.message + '</div>';
+  }
+}
+
+async function brokerToggleStatus(apn, newStatus, btn) {
+  if (!_sb || !currentUser) return;
+  if (btn) { btn.textContent = 'UPDATING...'; btn.disabled = true; }
+  try {
+    await _sb.from('parcel_listings').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('apn', apn).eq('contact_email', currentUser.email);
+    showToast('LISTING ' + newStatus.toUpperCase());
+    brokerTab('listings');
+  } catch(e) {
+    showToast('UPDATE FAILED: ' + e.message);
+    if (btn) { btn.disabled = false; }
+  }
+}
+
+function brokerViewParcel(apn) {
+  document.getElementById('broker-dash-modal')?.remove();
+  renderBasicsPanel({ id: apn, apn: apn, type: 'real_estate' });
+}
+
+function brokerEditListing(apn) {
+  document.getElementById('broker-dash-modal')?.remove();
+  showListingModal(apn);
+}
+
+async function brokerLoadLeads(container) {
+  container.innerHTML = '<div style="font-size:10px;color:#556677;padding:20px 0">Loading inquiries...</div>';
+  if (!_sb || !currentUser) return;
+  try {
+    var result = await _sb.from('leads').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
+    var data = result.data, error = result.error;
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:32px 0;font-size:11px;color:#556677">No inquiries yet</div>';
+      return;
+    }
+    var html = '<div style="font-size:9px;color:#556677;margin-bottom:12px;letter-spacing:1px">' + data.length + ' EVENTS ON RECORD</div>';
+    data.forEach(function(l) {
+      var date = l.created_at ? l.created_at.substring(0,10) : '—';
+      html += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:10px">'
+        + '<div><span style="color:#00ffc8;font-family:monospace">' + (l.apn||'—') + '</span> <span style="color:#556677">· ' + (l.action||'VIEW') + '</span></div>'
+        + '<div style="color:#3a4a5a;font-family:monospace">' + date + '</div></div>';
+    });
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div style="color:#f87171;font-size:10px">Error: ' + e.message + '</div>';
+  }
+}
+
+function brokerShowCorrections(container) {
+  container.innerHTML = '<div style="font-size:9px;color:#556677;letter-spacing:1px;margin-bottom:12px">SUBMIT A DATA CORRECTION</div>'
+    + '<div style="font-size:10px;color:#8899aa;line-height:1.7;margin-bottom:16px">If county assessor data is incorrect, submit a correction. All corrections are timestamped, attributed to your account, and stored permanently. Original records are never deleted.</div>'
+    + '<div style="display:flex;flex-direction:column;gap:10px">'
+    + '<div><label style="font-size:9px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px">APN</label>'
+    + '<input id="corr-apn" type="text" placeholder="e.g. 806800-0330" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box"></div>'
+    + '<div><label style="font-size:9px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px">FIELD</label>'
+    + '<select id="corr-field" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px">'
+    + '<option value="SqFtTotLiving">Total Living Area (sqft)</option>'
+    + '<option value="Bedrooms">Bedrooms</option>'
+    + '<option value="BathFullCount">Full Bathrooms</option>'
+    + '<option value="YrBuilt">Year Built</option>'
+    + '<option value="YrRenovated">Year Renovated</option>'
+    + '<option value="BldgGrade">Building Grade</option>'
+    + '<option value="Condition">Condition</option>'
+    + '<option value="Address">Address</option>'
+    + '<option value="ZipCode">ZIP Code</option>'
+    + '<option value="CurrentZoning">Zoning</option>'
+    + '<option value="other">Other</option>'
+    + '</select></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    + '<div><label style="font-size:9px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px">CURRENT VALUE</label>'
+    + '<input id="corr-old" type="text" placeholder="What it says now" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box"></div>'
+    + '<div><label style="font-size:9px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px">CORRECT VALUE</label>'
+    + '<input id="corr-new" type="text" placeholder="What it should be" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box"></div>'
+    + '</div>'
+    + '<div><label style="font-size:9px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px">EVIDENCE / NOTES</label>'
+    + '<textarea id="corr-notes" rows="3" placeholder="MLS #, permit #, personal knowledge as owner..." style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;box-sizing:border-box;resize:vertical"></textarea></div>'
+    + '<div style="font-size:8px;color:#3a4a5a;line-height:1.7;padding:8px;background:rgba(0,0,0,.3);border-radius:4px;border:1px solid rgba(255,255,255,.05)">Submission permanently logged with your account, IP, and timestamp per Terms of Service.</div>'
+    + '<button onclick="brokerSubmitCorrection()" style="width:100%;padding:11px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1.5px">SUBMIT CORRECTION</button>'
+    + '</div>';
+}
+
+async function brokerSubmitCorrection() {
+  var apn   = document.getElementById('corr-apn')?.value?.trim();
+  var field = document.getElementById('corr-field')?.value;
+  var oldV  = document.getElementById('corr-old')?.value?.trim();
+  var newV  = document.getElementById('corr-new')?.value?.trim();
+  var notes = document.getElementById('corr-notes')?.value?.trim();
+  if (!apn || !field || !newV) { showToast('APN, FIELD, AND NEW VALUE REQUIRED'); return; }
+  if (!currentUser) { showToast('SIGN IN REQUIRED'); return; }
+  try {
+    var r1 = await _sb.from('parcel_data_corrections').insert({
+      apn: apn, field_name: field, old_value: oldV || null,
+      new_value: newV, notes: notes || null,
+      submitted_by: currentUser.id, submitter_email: currentUser.email,
+      status: 'pending_review', created_at: new Date().toISOString(),
+    });
+    if (r1.error) throw r1.error;
+    await _sb.from('leads').insert({ apn: apn, action: 'DATA_CORRECTION', user_id: currentUser.id, created_at: new Date().toISOString() });
+    showToast('CORRECTION SUBMITTED — UNDER REVIEW');
+    ['corr-apn','corr-old','corr-new','corr-notes'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+  } catch(e) { showToast('SUBMIT FAILED: ' + e.message); }
+}
+
 function _hookMap(){const m=document.querySelector('gmp-map-3d');if(!m){setTimeout(_hookMap,800);return;}let cd=false;m.addEventListener('dblclick',async e=>{if(cd)return;cd=true;setTimeout(()=>cd=false,1500);const lat=e.detail?.latLng?.lat??e.latLng?.lat(),lng=e.detail?.latLng?.lng??e.latLng?.lng();if(!lat||!lng)return;renderBasicsPanel({id:`COORD_${lat}_${lng}`,apn:'Resolving…',address:`${lat.toFixed(6)},${lng.toFixed(6)}`,lat,lng,type:'real_estate'});if(typeof showToast==='function')showToast('QUERYING PARCEL LEDGER…');});}
 function _hookSearch(){const inp=document.getElementById('search-input');if(!inp){setTimeout(_hookSearch,600);return;}async function go(q){q=(q||inp.value||'').trim();if(!q||q.length<4)return;const cm=q.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);if(cm){renderBasicsPanel({id:`COORD_${cm[1]}_${cm[2]}`,apn:'Resolving…',address:q,lat:parseFloat(cm[1]),lng:parseFloat(cm[2]),type:'real_estate'});return;}if(typeof showToast==='function')showToast('SEARCHING…');const ex=(window.ASSETS||[]).filter(a=>(a.address||'').toLowerCase().includes(q.toLowerCase())||(a.apn||'').includes(q));if(ex.length===1){renderBasicsPanel(ex[0]);if(ex[0].lat&&ex[0].lng&&typeof flyTo==='function')flyTo(ex[0].lat,ex[0].lng,400,0);return;}const d=await fetchParcelData({address:q});if(!d){if(typeof showToast==='function')showToast('NOT FOUND IN LEDGER');return;}renderBasicsPanel({id:`ADDR_${Date.now()}`,apn:d.PIN||'',address:d.address||q,type:'real_estate'},d);if(d.LAT&&d.LON&&typeof flyTo==='function')flyTo(d.LAT,d.LON,400,0);if(typeof showToast==='function')showToast(`FOUND: ${d.PIN||q}`);}inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});const btn=document.querySelector('.search-icon');if(btn)btn.addEventListener('click',()=>go());}
 if(!document.getElementById('rwa-css')){const s=document.createElement('style');s.id='rwa-css';s.textContent='@keyframes spin360{to{transform:rotate(360deg)}}';document.head.appendChild(s);}
