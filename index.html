@@ -9829,9 +9829,8 @@ function showPricingPage() {
   var html = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.2);border-radius:8px;width:100%;max-width:860px;margin:auto;padding:32px 24px;font-family:var(--font)">'
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
     + '<div>'
-    + '<div style="font-size:10px;font-weight:700;letter-spacing:3px;color:var(--muted);margin-bottom:6px">RWABIDASK · TRANSPARENT PRICING</div>'
-    + '<div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:4px">Simple. No surprises.</div>'
-    + '<div style="font-size:10px;color:var(--muted)">Region detected: <span style="color:var(--cyan)">' + region + '</span></div>'
+    + '<div style="font-size:10px;font-weight:700;letter-spacing:3px;color:var(--muted);margin-bottom:6px">RWABIDASK · PRICING</div>'
+
     + '</div>'
     + '<button onclick="document.getElementById(\'pricing-modal\').remove()" style="background:none;border:none;color:#556677;font-size:24px;cursor:pointer;flex-shrink:0">&#x2715;</button>'
     + '</div>'
@@ -9868,7 +9867,7 @@ function showPricingPage() {
     + '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">'
     + '✓ Listed on parcel record<br>'
     + '✓ Phone number shown<br>'
-    + '✓ Up to 10 photos<br>'
+    + '✓ Unlimited photos<br>'
     + '✓ Video tour embed<br>'
     + '✓ 3D / Gaussian splatting tour<br>'
     + '✓ Contact agent button<br>'
@@ -9941,7 +9940,7 @@ function showPricingPage() {
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:10px;color:#8899aa;line-height:1.8">'
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Are Intel Reports refundable?</div>All sales are final. Reports are generated instantly and delivered immediately. No refunds.</div>'
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Can I cancel my subscription?</div>Yes — cancel anytime. Your subscription remains active until the end of the billing period.</div>'
-    + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">How is my region determined?</div>By your device timezone. Prices shown are final — no currency conversion surprises.</div>'
+
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Is listing data verified?</div>Listings are submitted by owners, agents, and representatives who certify accuracy under our Terms of Service. All submissions are permanently logged.</div>'
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">What counties are covered?</div>King County, Washington currently. Pierce and Snohomish counties coming soon. National expansion in progress.</div>'
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Are phone numbers shown for free?</div>Name and email only on free listings. Phone number shown on paid listings ($19 one-time or Listings Unlimited plan).</div>'
@@ -9949,7 +9948,7 @@ function showPricingPage() {
     + '</div>'
 
     + '<div style="text-align:center;margin-top:24px;font-size:9px;color:var(--muted);line-height:1.8">'
-    + 'Annie Group LLC d/b/a RWABidAsk · All prices in USD · Payments secured by Stripe<br>'
+    + 'RWABidAsk · All prices in USD · Payments secured by Stripe<br>'
     + 'Questions: <a href="mailto:ops@rwabidask.com" style="color:var(--cyan)">ops@rwabidask.com</a>'
     + '</div>'
     + '</div>';
@@ -10056,7 +10055,7 @@ function showListingModal(apn) {
 
         <div>
           <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">UPLOAD PHOTOS / VIDEO <span style="color:#3a4a5a;">stored in RWABidAsk cloud · max 50MB per file</span></label>
-          <input id="lt-files" type="file" multiple accept="image/*,video/*" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:11px;box-sizing:border-box;">
+          <input id="lt-files" type="file" multiple accept="image/*,video/*,application/pdf" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:11px;box-sizing:border-box;">
           <div id="lt-upload-status" style="font-size:9px;color:#556677;margin-top:4px;"></div>
         </div>
 
