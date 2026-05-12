@@ -6497,49 +6497,93 @@ function showTosModal(name, email, password) {
   if (existing) existing.remove();
   const m = document.createElement('div');
   m.id = 'tos-modal';
-  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
-  const html = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.25);border-radius:8px;width:100%;max-width:600px;max-height:90vh;display:flex;flex-direction:column;">'
-    + '<div style="padding:16px 20px;border-bottom:1px solid rgba(0,255,200,.15);flex-shrink:0">'
-    + '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#00ffc8">RWABIDASK — TERMS OF SERVICE & DATA USE AGREEMENT</div>'
-    + '<div style="font-size:9px;color:#556677;margin-top:3px">Version 1.0 · Annie Group LLC · You must read and accept to create an account</div>'
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  const html = '<div style="background:#fff;border:1px solid #ccc;border-radius:4px;width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;font-family:Georgia,serif;color:#111;">'
+    + '<div style="padding:18px 24px;border-bottom:2px solid #111;flex-shrink:0;background:#fff">'
+    + '<div style="font-size:13px;font-weight:700;letter-spacing:1px;color:#111;text-transform:uppercase">Terms of Service, Privacy Policy & Data Use Agreement</div>'
+    + '<div style="font-size:10px;color:#555;margin-top:4px">Annie Group LLC d/b/a RWABidAsk · Version 1.0 · Effective May 2026</div>'
+    + '<div style="font-size:10px;color:#111;margin-top:6px;font-weight:700">YOU MUST READ AND ACCEPT THIS AGREEMENT TO CREATE AN ACCOUNT. THIS IS A LEGALLY BINDING CONTRACT.</div>'
     + '</div>'
-    + '<div style="overflow-y:auto;flex:1;padding:16px 20px;font-size:10px;color:#aaa;line-height:1.8;font-family:Georgia,serif" id="tos-scroll">'
-    + '<p style="color:#ff4444;font-weight:700;font-size:11px;margin-bottom:12px">IMPORTANT: PLEASE READ THIS ENTIRE AGREEMENT. BY CLICKING I AGREE YOU ENTER INTO A LEGALLY BINDING CONTRACT.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 1 — PARTIES AND ACCEPTANCE</p>'
-    + '<p>This Terms of Service, Privacy Policy, and Data Use Agreement is between Annie Group LLC, a Washington State limited liability company doing business as RWABidAsk and you. Your acceptance is recorded permanently with your IP address, timestamp, device user agent, and agreement version number. This record is immutable and cannot be deleted.</p>'
-    + '<p style="color:#ff4444;font-weight:700;margin:12px 0 4px">SECTION 2 — NOT A CONSUMER REPORTING AGENCY — FCRA DISCLAIMER</p>'
-    + '<p style="color:#ffaaaa">RWABIDASK IS NOT A CONSUMER REPORTING AGENCY UNDER THE FAIR CREDIT REPORTING ACT (15 U.S.C. § 1681). INFORMATION FROM THIS PLATFORM MAY NOT BE USED TO DETERMINE ELIGIBILITY FOR CREDIT, INSURANCE, EMPLOYMENT, HOUSING, OR ANY OTHER FCRA-REGULATED PURPOSE. ANY SUCH USE IS A MATERIAL BREACH OF THIS AGREEMENT.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 3 — DESCRIPTION OF SERVICES</p>'
-    + '<p>RWABidAsk is a real property intelligence platform aggregating publicly available county assessor data, government geospatial datasets, recorded deed and transaction history, crime statistics, and other public records. Services include free parcel data, paid Property Intelligence Reports ($20 each), property listing tools, and subscription plans.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 4 — NOT LEGAL, FINANCIAL, OR APPRAISAL ADVICE</p>'
-    + '<p>Nothing on this platform constitutes a certified appraisal, legal advice, financial advice, investment recommendation, title report, or credit rating. Property Intelligence Scores are proprietary computational metrics only. Always conduct independent due diligence before any real property transaction.</p>'
-    + '<p style="color:#ff9900;font-weight:700;margin:12px 0 4px">SECTION 5 — DATA COLLECTION AND IMMUTABLE RECORDS</p>'
-    + '<p style="color:#ffcc88">By using this platform you consent to permanent collection of: your IP address on every interaction, device user agent, every parcel viewed or searched, every search query, every report purchased, every listing submitted, every data correction, every file uploaded, every payment transaction, and every login timestamp. ALL data is written to an immutable audit ledger that cannot be deleted or modified. Data corrections are stored as new layers — original records are never destroyed.</p>'
-    + '<p style="color:#ffcc88;margin-top:8px">All data you submit becomes the permanent property of Annie Group LLC. You grant Annie Group LLC a perpetual, irrevocable, worldwide, royalty-free license to use, store, display, and build upon all submitted data. This policy is consistent with policies of Google LLC and Meta Platforms Inc.</p>'
-    + '<p style="color:#ffcc88;margin-top:8px">Your data may be processed by: Google Cloud Platform, Supabase Inc., Stripe Inc., Vercel Inc., and Google Maps Platform.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 6 — WASHINGTON STATE & CALIFORNIA PRIVACY RIGHTS</p>'
-    + '<p>Annie Group LLC complies with the Washington My Health MY Data Act (RCW 70.372), Washington Privacy Act, and CCPA. Washington and California residents may submit privacy requests to privacy@rwabidask.com. Immutable ledger records cannot be deleted as a matter of platform architecture. Data breach notification per RCW 19.255.010.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 7 — BROKER AND LISTING OBLIGATIONS</p>'
-    + '<p>Anyone submitting listings or data corrections represents all information is accurate, they have legal authority to act, and all submissions comply with RCW 18.85, the Federal Fair Housing Act (42 U.S.C. § 3604), and Washington State Law Against Discrimination (RCW 49.60). You are solely responsible for submitted data and agree to indemnify Annie Group LLC from any related claims.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 8 — PAYMENTS AND REFUNDS</p>'
-    + '<p>Intel Reports are $20.00 USD. All sales are final. No refunds once a report is generated. Subscription fees are non-refundable except as required by law. Annie Group LLC does not store payment card numbers.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 9 — PROHIBITED USES</p>'
-    + '<p>You may not: scrape or systematically download data; reverse engineer algorithms; submit false data; violate fair housing or privacy laws; use data for FCRA purposes; circumvent payment systems; or use bots without written authorization.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 10 — DISCLAIMERS AND LIABILITY</p>'
-    + '<p>THE PLATFORM IS PROVIDED AS IS WITHOUT WARRANTY. TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT PAID FOR THE SPECIFIC SERVICE. COUNTY ASSESSOR DATA MAY BE OUTDATED OR INCORRECT. CRIME DATA IS FROM LAW ENFORCEMENT OPEN DATA AND MAY NOT REFLECT ALL INCIDENTS.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 11 — GOVERNING LAW AND DISPUTES</p>'
-    + '<p>Governed by Washington State law. Disputes resolved by binding arbitration in King County under AAA rules. Class action waiver applies.</p>'
-    + '<p style="color:#00ffc8;font-weight:700;margin:12px 0 4px">SECTION 12 — CONTACT</p>'
-    + '<p>Annie Group LLC d/b/a RWABidAsk · privacy@rwabidask.com · legal@rwabidask.com · rwabidask.com</p>'
-    + '<p style="color:#ff4444;font-weight:700;font-size:11px;margin:16px 0 8px;border-top:1px solid rgba(255,68,68,.3);padding-top:12px">BY CLICKING I AGREE YOU CONFIRM: You have read this agreement · You accept all terms · You consent to immutable data collection · You will not use this for FCRA purposes · This is legally binding · Your acceptance is permanently recorded.</p>'
+    + '<div style="overflow-y:auto;flex:1;padding:20px 24px;font-size:11px;color:#111;line-height:1.9" id="tos-scroll">'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 1 — PARTIES AND ACCEPTANCE</p>'
+    + '<p style="margin:0 0 14px">This Terms of Service, Privacy Policy, and Data Use Agreement ("Agreement") is between Annie Group LLC, a Washington State limited liability company doing business as RWABidAsk ("Company") and you ("User"). By clicking I Agree you enter into a legally binding contract. Your acceptance is recorded permanently with your IP address, timestamp, device user agent string, and agreement version number. This acceptance record is immutable and cannot be deleted or modified.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 2 — DESCRIPTION OF SERVICES</p>'
+    + '<p style="margin:0 0 14px">RWABidAsk is a real property intelligence platform that aggregates, displays, and analyzes publicly available county assessor data, government geospatial datasets, recorded deed and transaction history, crime statistics from law enforcement open data portals, building permit records, and other public records. Services include free parcel data display, paid Property Intelligence Reports ($20.00 USD per report), property listing tools, broker and owner data submission tools, data correction tools, and subscription plans for professional users.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 3 — NOT A CONSUMER REPORTING AGENCY — FCRA DISCLAIMER</p>'
+    + '<p style="margin:0 0 6px;font-weight:700">RWABIDASK IS NOT A CONSUMER REPORTING AGENCY AS DEFINED BY THE FAIR CREDIT REPORTING ACT, 15 U.S.C. § 1681 ET SEQ. ("FCRA"). THE INFORMATION PROVIDED THROUGH THIS PLATFORM MAY NOT BE USED, IN WHOLE OR IN PART, AS A FACTOR IN:</p>'
+    + '<p style="margin:0 0 4px;padding-left:16px">• Determining a consumer's eligibility for credit or insurance</p>'
+    + '<p style="margin:0 0 4px;padding-left:16px">• Evaluating a consumer for employment purposes</p>'
+    + '<p style="margin:0 0 4px;padding-left:16px">• Evaluating a consumer for housing or rental eligibility</p>'
+    + '<p style="margin:0 0 14px;padding-left:16px">• Any other purpose authorized under the FCRA</p>'
+    + '<p style="margin:0 0 14px">By creating an account you expressly represent and warrant that you will not use any data, report, or information obtained from RWABidAsk for any FCRA-regulated purpose. Violation of this provision is a material breach of this Agreement.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 4 — NOT LEGAL, FINANCIAL, OR APPRAISAL ADVICE</p>'
+    + '<p style="margin:0 0 14px">Nothing on this platform constitutes: a certified real property appraisal or appraisal report as defined under USPAP; legal advice or a legal opinion; financial advice or investment advice; a recommendation to buy, sell, or hold any asset; a title report or title insurance commitment; or a credit report or credit rating. Property Intelligence Scores are proprietary computational metrics based on publicly available data. Always conduct independent due diligence including title searches, professional appraisals, and legal counsel before any real property transaction.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 5 — DATA COLLECTION, LOGGING, AND IMMUTABLE RECORDS</p>'
+    + '<p style="font-weight:700;margin:0 0 4px">5.1 What We Collect</p>'
+    + '<p style="margin:0 0 10px">By using this platform, with or without an account, you acknowledge and consent to the collection, storage, and permanent retention of the following data: your IP address on every page load, search, and interaction; your device browser user agent string; every parcel you view, search, or click; every search query you enter; every report you purchase or attempt to purchase; every listing you submit, modify, or delete; every data correction or override you submit; every file, image, document, or media you upload; every message or inquiry you send; every payment transaction record; your account creation timestamp, login timestamps, and logout timestamps; and your geographic location as inferred from your IP address.</p>'
+    + '<p style="font-weight:700;margin:0 0 4px">5.2 Immutable Ledger</p>'
+    + '<p style="margin:0 0 10px">ALL data collected is written to an immutable audit ledger. Records cannot be deleted by you or modified after creation. Each record is timestamped and associated with your account and IP address. Data corrections are stored as new layers on top of original records — original records are never destroyed. This ledger is maintained permanently as part of the chain of records for each parcel.</p>'
+    + '<p style="font-weight:700;margin:0 0 4px">5.3 Data Ownership</p>'
+    + '<p style="margin:0 0 10px">All data you submit, upload, or generate through this platform becomes the permanent property of Annie Group LLC upon submission. You grant Annie Group LLC a perpetual, irrevocable, worldwide, royalty-free license to use, store, display, distribute, and build upon all submitted data for any lawful business purpose. This data ownership policy is consistent with the policies of major technology platforms including Google LLC and Meta Platforms Inc.</p>'
+    + '<p style="font-weight:700;margin:0 0 4px">5.4 Third Party Data Processors</p>'
+    + '<p style="margin:0 0 14px">Your data may be processed by: Google Cloud Platform / BigQuery; Supabase Inc.; Stripe Inc.; Vercel Inc.; and Google Maps Platform. Each processor maintains its own privacy policy and data processing terms.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 6 — WASHINGTON STATE PRIVACY RIGHTS</p>'
+    + '<p style="margin:0 0 14px">Annie Group LLC complies with the Washington My Health MY Data Act (RCW 70.372) and the Washington Privacy Act to the extent applicable. Washington State residents may submit privacy requests to privacy@rwabidask.com. Note that immutable ledger records cannot be deleted as a matter of platform architecture. Data breach notification will be provided as required by RCW 19.255.010.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 7 — CALIFORNIA RESIDENTS — CCPA NOTICE</p>'
+    + '<p style="margin:0 0 14px">California residents may have rights under the California Consumer Privacy Act including the right to know what personal information is collected and the right to request deletion subject to applicable exceptions. Annie Group LLC does not sell personal information to third parties. Contact privacy@rwabidask.com to exercise CCPA rights. Immutable audit ledger records are exempt from deletion requests as a matter of platform architecture and records retention requirements.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 8 — BROKER, AGENT, AND LISTING SUBMITTER OBLIGATIONS</p>'
+    + '<p style="margin:0 0 10px">Any broker, agent, property owner, or representative who submits a listing, data correction, or property information represents and warrants that: all submitted information is accurate and truthful; they have legal authority to list or represent the subject property; no submission violates applicable real estate licensing law (RCW 18.85), MLS rules, or other regulations; and all submissions comply with the Federal Fair Housing Act (42 U.S.C. § 3604) and Washington State Law Against Discrimination (RCW 49.60).</p>'
+    + '<p style="margin:0 0 14px">You are solely responsible for all data you submit. You agree to indemnify and hold harmless Annie Group LLC from any claim arising from your submissions.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 9 — INTELLECTUAL PROPERTY</p>'
+    + '<p style="margin:0 0 14px">The RWABidAsk name, logo, platform design, Property Intelligence Score methodology, and comp set methodology are proprietary to Annie Group LLC. Intel Reports are licensed for personal or business use only and may not be resold, redistributed, or republished without written consent. Underlying public records data remains in the public domain.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 10 — PAYMENTS AND REFUNDS</p>'
+    + '<p style="margin:0 0 14px">Property Intelligence Reports are $20.00 USD per report. All sales are final. No refunds are issued once a report has been generated and delivered. Subscription fees are billed in advance and are non-refundable except as required by applicable law. Payment processing is handled by Stripe Inc. Annie Group LLC does not store payment card information.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 11 — PROHIBITED USES</p>'
+    + '<p style="margin:0 0 14px">You may not use this platform to: scrape, harvest, or systematically download data; reverse engineer proprietary algorithms; submit false, fraudulent, or misleading data; violate fair housing, privacy, or consumer protection laws; use data for FCRA-regulated purposes; circumvent access controls or payment systems; or use automated bots or scripts without written authorization.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 12 — DISCLAIMERS AND LIMITATION OF LIABILITY</p>'
+    + '<p style="margin:0 0 14px">THE PLATFORM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. ANNIE GROUP LLC MAKES NO WARRANTIES REGARDING ACCURACY, COMPLETENESS, OR FITNESS FOR ANY PARTICULAR PURPOSE. COUNTY ASSESSOR DATA MAY BE OUTDATED, INCOMPLETE, OR INCORRECT. CRIME DATA IS SOURCED FROM LAW ENFORCEMENT OPEN DATA PORTALS AND MAY NOT REFLECT ALL INCIDENTS. TO THE MAXIMUM EXTENT PERMITTED BY LAW, ANNIE GROUP LLC'S TOTAL LIABILITY FOR ANY CLAIM SHALL NOT EXCEED THE AMOUNT YOU PAID FOR THE SPECIFIC SERVICE GIVING RISE TO THE CLAIM.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 13 — GOVERNING LAW AND DISPUTE RESOLUTION</p>'
+    + '<p style="margin:0 0 14px">This Agreement is governed by the laws of the State of Washington. Any dispute shall be resolved by binding arbitration in King County, Washington under the rules of the American Arbitration Association. You waive the right to participate in any class action lawsuit or class-wide arbitration against Annie Group LLC.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 14 — CHILDREN</p>'
+    + '<p style="margin:0 0 14px">This platform is not directed at children under 13. By creating an account you represent that you are at least 18 years old or the age of majority in your jurisdiction.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 15 — MODIFICATIONS</p>'
+    + '<p style="margin:0 0 14px">Annie Group LLC may modify these terms at any time. Continued use of the platform after notice of modification constitutes acceptance. Your original acceptance record is preserved permanently regardless of subsequent modifications.</p>'
+
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 16 — CONTACT</p>'
+    + '<p style="margin:0 0 24px">Annie Group LLC d/b/a RWABidAsk · privacy@rwabidask.com · legal@rwabidask.com · rwabidask.com</p>'
+
+    + '<div style="border-top:2px solid #111;padding-top:14px;margin-top:4px">'
+    + '<p style="font-weight:700;margin:0 0 8px">BY CLICKING "I AGREE AND CREATE ACCOUNT" YOU ACKNOWLEDGE THAT:</p>'
+    + '<p style="margin:0 0 4px">1. You have read this entire agreement in full.</p>'
+    + '<p style="margin:0 0 4px">2. You understand and accept all terms without reservation.</p>'
+    + '<p style="margin:0 0 4px">3. You consent to permanent immutable data collection as described in Section 5.</p>'
+    + '<p style="margin:0 0 4px">4. You will not use this platform for any FCRA-regulated purpose.</p>'
+    + '<p style="margin:0 0 4px">5. This agreement is legally binding upon you.</p>'
+    + '<p style="margin:0 0 0">6. Your acceptance is permanently recorded with your IP address and timestamp.</p>'
     + '</div>'
-    + '<div style="padding:14px 20px;border-top:1px solid rgba(0,255,200,.15);flex-shrink:0;display:flex;flex-direction:column;gap:8px">'
-    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
-    + '<input type="checkbox" id="tos-check" style="width:14px;height:14px;accent-color:#00ffc8">'
-    + '<label for="tos-check" style="font-size:10px;color:#aaa;cursor:pointer">I have read and agree to the full Terms of Service, Privacy Policy, and Data Use Agreement</label>'
     + '</div>'
-    + '<button id="tos-agree-btn" style="width:100%;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#000;border:none;border-radius:4px;padding:12px;font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1.5px">I AGREE AND CREATE ACCOUNT</button>'
-    + '<button onclick="document.getElementById(\'tos-modal\').remove()" style="width:100%;background:none;border:1px solid rgba(255,255,255,.15);color:#666;border-radius:4px;padding:8px;font-size:10px;cursor:pointer">CANCEL — GO BACK</button>'
+    + '<div style="padding:16px 24px;border-top:2px solid #111;flex-shrink:0;background:#f9f9f9;display:flex;flex-direction:column;gap:10px">'
+    + '<div style="display:flex;align-items:flex-start;gap:10px">'
+    + '<input type="checkbox" id="tos-check" style="width:14px;height:14px;margin-top:2px;flex-shrink:0">'
+    + '<label for="tos-check" style="font-size:10px;color:#111;cursor:pointer;line-height:1.6">I have read, understand, and agree to the full Terms of Service, Privacy Policy, and Data Use Agreement. I acknowledge this is a legally binding contract and my acceptance is permanently recorded.</label>'
+    + '</div>'
+    + '<button id="tos-agree-btn" style="width:100%;background:#111;color:#fff;border:none;padding:13px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase">I AGREE AND CREATE ACCOUNT</button>'
+    + '<button onclick="document.getElementById(\'tos-modal\').remove()" style="width:100%;background:#fff;border:1px solid #ccc;color:#555;padding:9px;font-size:10px;cursor:pointer">Cancel — Go Back</button>'
     + '</div></div>';
   m.innerHTML = html;
   document.body.appendChild(m);
