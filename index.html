@@ -4756,7 +4756,7 @@ async function logPartnerLead(assetId, actionType) {
                 intent_timestamp:  new Date().toISOString(),
                 compliance_status: 'pre-licensing_inquiry'
             },
-            status: 'pending'
+            status: 'approved'
         });
         if (error) throw error;
     } catch (e) {
@@ -5099,7 +5099,7 @@ async function submitBid() {
                 intent_timestamp: new Date().toISOString(),
                 compliance_status: 'pre-licensing_inquiry'
             },
-            status: 'pending'
+            status: 'approved'
         });
         if (error) throw error;
 
@@ -10590,7 +10590,7 @@ async function brokerSubmitCorrection() {
       apn: apn, field_name: field, old_value: oldV || null,
       new_value: newV, notes: notes || null,
       submitted_by: currentUser.id, submitter_email: currentUser.email,
-      status: 'pending_review', created_at: new Date().toISOString(),
+      status: 'approved', created_at: new Date().toISOString(),
     });
     if (r1.error) throw r1.error;
     await _sb.from('leads').insert({ apn: apn, action: 'DATA_CORRECTION', user_id: currentUser.id, created_at: new Date().toISOString() });
