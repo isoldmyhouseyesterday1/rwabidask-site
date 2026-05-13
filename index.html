@@ -10121,12 +10121,15 @@ const RWA_GATE = {
     showPricingPage();
   },
   stripeCheckout: async function(product) {
-    if (!window.currentUser) { openModal('signin'); return; }
+    const _cu = window.currentUser || currentUser;
+    const _supabase = window._sb || _sb;
+    if (!_cu) { openModal('signin'); return; }
+    if (!_supabase) { showToast('SYSTEM ERROR: NOT READY'); return; }
     const priceId = getStripePriceId(product);
     if (!priceId) { showToast('SYSTEM ERROR: PRICE NOT FOUND'); return; }
     try {
       showToast('CONNECTING TO STRIPE…');
-      const session = await window._sb.auth.getSession();
+      const session = await _supabase.auth.getSession();
       const token = session?.data?.session?.access_token;
       const resp = await fetch(
         'https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/create-checkout-session',
@@ -10137,10 +10140,10 @@ const RWA_GATE = {
             ...(token ? { 'Authorization': 'Bearer ' + token } : {})
           },
           body: JSON.stringify({
-            user_id:     window.currentUser.id,
+            user_id:     _cu.id,
             price_id:    priceId,
             product:     product,
-            email:       window.currentUser.email,
+            email:       _cu.email,
             success_url: window.location.href + '?subscribed=true',
             cancel_url:  window.location.href
           })
