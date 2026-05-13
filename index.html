@@ -3001,11 +3001,11 @@ body { min-width: 900px; overflow-x: auto; }
         <button class="ptab map-tab" onclick="setCategory('business', this)">BUSINESSES</button>
       </div>
       <!-- ── AI SEARCH ─────────────────────────────────────────────── -->
-      <div id="ai-search-wrap" style="padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div id="ai-search-wrap" style="padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden;box-sizing:border-box;">
         <div style="position:relative;">
           <input id="ai-search-input" type="text"
             placeholder="✦ Ask anything... 3bd waterfront under $2M Mercer Island"
-            style="width:100%;background:rgba(0,255,200,.04);color:var(--text);border:1px solid rgba(0,255,200,.2);border-radius:4px;padding:7px 36px 7px 10px;font-size:10px;font-family:var(--font);letter-spacing:.2px;"
+            style="width:100%;box-sizing:border-box;background:rgba(0,255,200,.04);color:var(--text);border:1px solid rgba(0,255,200,.2);border-radius:4px;padding:7px 36px 7px 10px;font-size:10px;font-family:var(--font);letter-spacing:.2px;"
             onkeydown="if(event.key==='Enter')runAISearch()"
           >
           <button onclick="runAISearch()" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--cyan);cursor:pointer;font-size:14px;padding:4px;">✦</button>
