@@ -6492,12 +6492,13 @@ function showAccountMenu() {
     + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();signOut()" style="width:100%;padding:7px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer;text-align:left;letter-spacing:.5px">Sign out</button>'
     + '</div>';
   document.body.appendChild(menu);
+  // Use mousedown instead of click to avoid race with button clicks
   setTimeout(() => {
-    document.addEventListener('click', function closeMenu(e) {
+    document.addEventListener('mousedown', function closeMenu(e) {
       const m = document.getElementById('rwa-account-menu');
-      if (m && !m.contains(e.target)) { m.remove(); document.removeEventListener('click', closeMenu); }
+      if (m && !m.contains(e.target)) { m.remove(); document.removeEventListener('mousedown', closeMenu); }
     });
-  }, 100);
+  }, 200);
 }
 
 async function openBillingPortal() {
@@ -9997,10 +9998,13 @@ async function brokerSubmitCorrection() {
 // ══════════════════════════════════════════════════════════════════
 // ── Safe global helpers for account menu buttons ────────────────
 function _rwaUpgrade(product) {
+  // Sync currentUser to window before calling
+  if (typeof currentUser !== 'undefined') window.currentUser = currentUser;
   if (typeof RWA_GATE !== 'undefined') RWA_GATE.stripeCheckout(product);
   else showToast('Loading... please try again');
 }
 function _rwaAction(action) {
+  if (typeof currentUser !== 'undefined') window.currentUser = currentUser;
   if (action === 'listings' && typeof showListingManager === 'function') showListingManager();
   else if (action === 'history' && typeof showIntelReportHistory === 'function') showIntelReportHistory();
 }
@@ -10108,7 +10112,7 @@ const RWA_GATE = {
       + '<button onclick="RWA_GATE.stripeCheckout(\'starter\')" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO STARTER — ' + starterP + '/MO</button>'
       + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:13px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.4);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — ' + proP + '/MO <span style="font-size:9px;background:rgba(0,255,200,.15);padding:2px 8px;border-radius:10px;margin-left:4px;">MOST POPULAR</span></button>'
       + '<div style="border-top:1px solid rgba(0,255,200,.1);margin:12px 0;"></div>'
-      + '<button onclick="RWA_GATE.stripeCheckout(\'intel_report\')" style="width:100%;padding:10px;background:transparent;color:#8899aa;border:none;font-size:10px;cursor:pointer">Buy one Intel Report — ' + intelP + '</button>'
+
       + '</div>';
     document.body.appendChild(overlay);
   },
