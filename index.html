@@ -3014,7 +3014,7 @@ body { min-width: 900px; overflow-x: auto; }
         <div style="display:flex;justify-content:space-between;margin-top:5px;">
           <span style="font-size:8px;color:var(--muted)">$0</span>
           <span id="price-fine-tune" style="font-size:8px;color:var(--muted);letter-spacing:.3px;text-align:center;flex:1"></span>
-          <span style="font-size:8px;color:var(--muted)">$20M+</span>
+          <span style="font-size:8px;color:var(--muted)">$1B+</span>
         </div>
       </div>
 
@@ -3075,7 +3075,7 @@ body { min-width: 900px; overflow-x: auto; }
                 <option value="3000000">$3M</option>
                 <option value="5000000">$5M</option>
                 <option value="10000000">$10M</option>
-                <option value="20000000">$20M+</option>
+                <option value="1000000000">$1B+</option>
               </select>
             </div>
           </div>
@@ -4235,19 +4235,19 @@ const SLIDER_STEPS = 48; // 48 steps: $1 (10^0) → $25T
 let sliderMinStep = 0;
 let sliderMaxStep = SLIDER_STEPS; // default: full range visible
 let sliderMinPrice = 1;
-let sliderMaxPrice = 20000000; // $25T
+let sliderMaxPrice = 1000000000; // $25T
 
 function logSliderToPrice(step) {
   if (step <= 0) return 1;
-  if (step >= SLIDER_STEPS) return 20000000;
+  if (step >= SLIDER_STEPS) return 1000000000;
   // Log scale: 10^0 → 10^(log10(25T)) across 48 steps
-  const MAX_LOG = Math.log10(20000000); // ~13.398
+  const MAX_LOG = Math.log10(1000000000); // ~13.398
   return Math.round(Math.pow(10, (step / SLIDER_STEPS) * MAX_LOG));
 }
 
 function fmtSliderPrice(step) {
   const p = logSliderToPrice(step);
-  if (p >= 20000000) return '$20M+';
+  if (p >= 1000000000) return '$1B+';
   if (p >= 1e12) return '$' + (p/1e12).toFixed(p >= 10e12 ? 0 : 1) + 'T';
   if (p >= 1e9) return '$' + (p/1e9).toFixed(p >= 1e11 ? 0 : p >= 1e10 ? 0 : 1) + 'B';
   if (p >= 1e6) return '$' + (p/1e6).toFixed(p >= 1e8 ? 0 : 1) + 'M';
@@ -4286,7 +4286,7 @@ function resetPriceSlider() {
   sliderMinStep = 0;
   sliderMaxStep = SLIDER_STEPS;
   sliderMinPrice = 1;
-  sliderMaxPrice = 20000000;
+  sliderMaxPrice = 1000000000;
   updateSliderUI();
   applySliderFilter();
 }
@@ -10540,7 +10540,7 @@ window.setParkingFilter = setParkingFilter;
 // PARCEL FILTER SEARCH SYSTEM
 // ══════════════════════════════════════════════════════════════════
 
-const PARCEL_MAX_PRICE = 20000000; // $20M max for RE slider
+const PARCEL_MAX_PRICE = 1000000000; // $20M max for RE slider
 
 let _filterSearchDebounce = null;
 let _filterSearchResults = [];
@@ -10633,11 +10633,11 @@ window._doParcelSearch = async function _doParcelSearch() {
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
     ov.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.25);border-radius:8px;width:100%;max-width:380px;padding:28px 24px;font-family:var(--font);text-align:center">'
       + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:12px;">SEARCH LIMIT REACHED</div>'
-      + '<div style="font-size:18px;font-weight:700;color:#f0f4f8;margin-bottom:8px;">You've used all ' + _searchLimit + ' searches this month.</div>'
+      + '<div style="font-size:18px;font-weight:700;color:#f0f4f8;margin-bottom:8px;">You&#39;ve used all ' + _searchLimit + ' searches this month.</div>'
       + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px;">Upgrade to Pro for 500 searches/month, or pay $0.25 per additional search.</div>'
-      + (_tier === 'starter' ? '<button onclick="document.getElementById('rwa-search-limit-modal').remove();_rwaUpgrade('pro')" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;">UPGRADE TO PRO — $39/MO</button>' : '')
-      + '<button onclick="document.getElementById('rwa-search-limit-modal').remove();_payPerSearch()" style="width:100%;padding:11px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;">BUY 10 SEARCHES — $2.50</button>'
-      + '<button onclick="document.getElementById('rwa-search-limit-modal').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer;">Cancel</button>'
+      + (_tier === 'starter' ? '<button onclick="document.getElementById(\'rwa-search-limit-modal\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;">UPGRADE TO PRO — $39/MO</button>' : '')
+      + '<button onclick="document.getElementById(\'rwa-search-limit-modal\').remove();_payPerSearch()" style="width:100%;padding:11px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;">BUY 10 SEARCHES — $2.50</button>'
+      + '<button onclick="document.getElementById(\'rwa-search-limit-modal\').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer;">Cancel</button>'
       + '</div>';
     document.body.appendChild(ov);
     if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
