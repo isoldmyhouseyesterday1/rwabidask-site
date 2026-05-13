@@ -7666,8 +7666,47 @@ async function submitBrokerSubscription(assetId) {
 
   // Generic success flag (all Stripe sessions can include &success=true)
   const isSuccess = params.get('success') === 'true';
+  const isSubscribed = params.get('subscribed') === 'true';
   const isBrokerVerified = params.get('broker_verified') === '1';
   const assetId = params.get('asset');
+
+  // ── Subscription success — refresh tier from Supabase ────────────
+  if (isSubscribed) {
+    history.replaceState({}, '', window.location.pathname);
+    const refreshTier = async () => {
+      if (!currentUser || !_sb) { setTimeout(refreshTier, 500); return; }
+      try {
+        const { data: profile } = await _sb.from('profiles')
+          .select('subscription_tier')
+          .eq('id', currentUser.id)
+          .maybeSingle();
+        if (profile?.subscription_tier) {
+          window._userTier = profile.subscription_tier;
+          await updateAuthUI();
+          showToast('✓ SUBSCRIPTION ACTIVE — WELCOME TO ' + profile.subscription_tier.toUpperCase() + '!');
+        } else {
+          // Webhook may not have fired yet — retry a few times
+          let attempts = 0;
+          const poll = setInterval(async () => {
+            attempts++;
+            const { data: p } = await _sb.from('profiles').select('subscription_tier').eq('id', currentUser.id).maybeSingle();
+            if (p?.subscription_tier || attempts > 6) {
+              clearInterval(poll);
+              if (p?.subscription_tier) {
+                window._userTier = p.subscription_tier;
+                await updateAuthUI();
+                showToast('✓ SUBSCRIPTION ACTIVE — WELCOME TO ' + p.subscription_tier.toUpperCase() + '!');
+              } else {
+                showToast('✓ PAYMENT CONFIRMED — REFRESHING YOUR ACCOUNT…');
+                setTimeout(() => location.reload(), 2000);
+              }
+            }
+          }, 2000);
+        }
+      } catch(e) { showToast('✓ PAYMENT CONFIRMED — PLEASE REFRESH'); }
+    };
+    setTimeout(refreshTier, 1000);
+  }
 
   if (isSuccess || isBrokerVerified) {
     history.replaceState({}, '', window.location.pathname);
