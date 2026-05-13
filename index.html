@@ -2998,8 +2998,8 @@ body { min-width: 900px; overflow-x: auto; }
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">ASSESSED VALUE</span>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button id="filter-toggle-btn" style="font-size:8px;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);cursor:pointer;padding:2px 8px;letter-spacing:.5px;font-weight:600;border-radius:3px" onclick="toggleFilterPanel()">FILTERS ▾</button>
-            <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="resetAllFilters()">RESET</button>
+            <button id="filter-toggle-btn" style="font-size:8px;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);cursor:pointer;padding:2px 8px;letter-spacing:.5px;font-weight:600;border-radius:3px" onclick="typeof toggleFilterPanel==='function'&&toggleFilterPanel()">FILTERS ▾</button>
+            <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="typeof resetAllFilters==='function'&&resetAllFilters()">RESET</button>
           </div>
         </div>
         <div style="text-align:center;margin-bottom:7px;">
@@ -3026,7 +3026,7 @@ body { min-width: 900px; overflow-x: auto; }
           <div style="display:flex;gap:8px;margin-bottom:10px;">
             <div style="flex:1;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">BEDS</div>
-              <select id="f-beds" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <select id="f-beds" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
                 <option value="">Any</option>
                 <option value="1">1+</option>
                 <option value="2">2+</option>
@@ -3037,7 +3037,7 @@ body { min-width: 900px; overflow-x: auto; }
             </div>
             <div style="flex:1;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">BATHS</div>
-              <select id="f-baths" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <select id="f-baths" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
                 <option value="">Any</option>
                 <option value="1">1+</option>
                 <option value="2">2+</option>
@@ -3051,8 +3051,8 @@ body { min-width: 900px; overflow-x: auto; }
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">LIVING AREA (SQFT)</div>
             <div style="display:flex;gap:6px;">
-              <input id="f-sqft-min" type="number" placeholder="Min" onchange="runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-              <input id="f-sqft-max" type="number" placeholder="Max" onchange="runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <input id="f-sqft-min" type="number" placeholder="Min" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <input id="f-sqft-max" type="number" placeholder="Max" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
             </div>
           </div>
 
@@ -3060,15 +3060,15 @@ body { min-width: 900px; overflow-x: auto; }
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">YEAR BUILT</div>
             <div style="display:flex;gap:6px;">
-              <input id="f-yr-min" type="number" placeholder="From" onchange="runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-              <input id="f-yr-max" type="number" placeholder="To" onchange="runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <input id="f-yr-min" type="number" placeholder="From" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <input id="f-yr-max" type="number" placeholder="To" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
             </div>
           </div>
 
           <!-- Property type -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">PROPERTY TYPE</div>
-            <select id="f-prop-type" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <select id="f-prop-type" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">All Types</option>
               <option value="residential">Residential</option>
               <option value="commercial">Commercial</option>
@@ -3079,7 +3079,7 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- Waterfront -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">WATERFRONT</div>
-            <select id="f-waterfront" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <select id="f-waterfront" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
               <option value="yes">Waterfront only</option>
               <option value="no">No waterfront</option>
@@ -3089,7 +3089,7 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- Waterfront body -->
           <div style="margin-bottom:10px;" id="f-wf-body-wrap">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">WATER BODY</div>
-            <select id="f-wf-body" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <select id="f-wf-body" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
               <option value="lake_washington">Lake Washington</option>
               <option value="lake_sammamish">Lake Sammamish</option>
@@ -3102,7 +3102,7 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- View -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">VIEW</div>
-            <select id="f-view" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <select id="f-view" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
               <option value="lake_washington">Lake Washington</option>
               <option value="puget_sound">Puget Sound</option>
@@ -3116,7 +3116,7 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- Water system -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">WATER SYSTEM</div>
-            <select id="f-water-sys" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <select id="f-water-sys" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
               <option value="1">Private (well)</option>
               <option value="2">Water District (public)</option>
@@ -3128,7 +3128,7 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- Sewer system -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">SEWER SYSTEM</div>
-            <select id="f-sewer-sys" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <select id="f-sewer-sys" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
               <option value="1">Private (septic)</option>
               <option value="2">Public (sewer)</option>
@@ -3140,7 +3140,7 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- Lot size -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">MIN LOT SIZE</div>
-            <select id="f-lot" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <select id="f-lot" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
               <option value="2000">2,000 sqft+</option>
               <option value="5000">5,000 sqft+</option>
@@ -3157,19 +3157,19 @@ body { min-width: 900px; overflow-x: auto; }
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">FEATURES</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">
               <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
-                <input type="checkbox" id="f-garage" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> Garage
+                <input type="checkbox" id="f-garage" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="accent-color:var(--cyan)"> Garage
               </label>
               <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
-                <input type="checkbox" id="f-basement" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> Basement
+                <input type="checkbox" id="f-basement" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="accent-color:var(--cyan)"> Basement
               </label>
               <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
-                <input type="checkbox" id="f-no-flood" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> No flood risk
+                <input type="checkbox" id="f-no-flood" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="accent-color:var(--cyan)"> No flood risk
               </label>
               <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
-                <input type="checkbox" id="f-no-seismic" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> No seismic risk
+                <input type="checkbox" id="f-no-seismic" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="accent-color:var(--cyan)"> No seismic risk
               </label>
               <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
-                <input type="checkbox" id="f-motivated" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> Not sold 10+ yrs
+                <input type="checkbox" id="f-motivated" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="accent-color:var(--cyan)"> Not sold 10+ yrs
               </label>
             </div>
           </div>
@@ -3177,7 +3177,7 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- Building grade -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">MIN BUILD QUALITY</div>
-            <select id="f-grade" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <select id="f-grade" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
               <option value="7">Average (7+)</option>
               <option value="8">Good (8+)</option>
@@ -3190,7 +3190,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Search button -->
-          <button onclick="runParcelSearch()" id="filter-search-btn" style="width:100%;padding:9px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-bottom:6px;">SEARCH PARCELS</button>
+          <button onclick="typeof runParcelSearch==='function'&&runParcelSearch()" id="filter-search-btn" style="width:100%;padding:9px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-bottom:6px;">SEARCH PARCELS</button>
           <div id="filter-result-count" style="font-size:9px;color:var(--muted);text-align:center;min-height:14px;"></div>
 
           <!-- Premium gate overlay -->
