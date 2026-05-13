@@ -3022,6 +3022,12 @@ body { min-width: 900px; overflow-x: auto; }
       <div id="filter-panel" style="display:none;border-bottom:1px solid var(--border);background:#060e1c;flex-shrink:0;overflow-y:auto;max-height:60vh;">
         <div style="padding:10px 14px 6px;">
 
+          <!-- Free tier notice -->
+          <div id="filter-free-notice" style="display:none;background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.15);border-radius:4px;padding:8px;margin-bottom:10px;font-size:9px;color:#8899aa;line-height:1.6;">
+            <span style="color:var(--cyan);font-weight:700;">FREE:</span> Filter active listings by beds, baths, and type.<br>
+            <span style="color:#fbbf24;font-weight:700;">STARTER+:</span> Search all 635k King County parcels with full filters.
+            <button onclick="_rwaUpgrade('starter')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;">UNLOCK ALL FILTERS — $19/MO</button>
+          </div>
           <!-- Beds / Baths -->
           <div style="display:flex;gap:8px;margin-bottom:10px;">
             <div style="flex:1;">
@@ -3048,7 +3054,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Sqft -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">LIVING AREA (SQFT)</div>
             <div style="display:flex;gap:6px;">
               <input id="f-sqft-min" type="number" placeholder="Min" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
@@ -3057,7 +3063,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Year built -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">YEAR BUILT</div>
             <div style="display:flex;gap:6px;">
               <input id="f-yr-min" type="number" placeholder="From" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
@@ -3077,7 +3083,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Waterfront -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">WATERFRONT</div>
             <select id="f-waterfront" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
@@ -3100,7 +3106,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- View -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">VIEW</div>
             <select id="f-view" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
@@ -3114,7 +3120,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Water system -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">WATER SYSTEM</div>
             <select id="f-water-sys" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
@@ -3126,7 +3132,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Sewer system -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">SEWER SYSTEM</div>
             <select id="f-sewer-sys" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
@@ -3138,7 +3144,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Lot size -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">MIN LOT SIZE</div>
             <select id="f-lot" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
@@ -3153,7 +3159,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Features -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">FEATURES</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">
               <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
@@ -3175,7 +3181,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
 
           <!-- Building grade -->
-          <div style="margin-bottom:10px;">
+          <div style="margin-bottom:10px;" class="filter-premium-only">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">MIN BUILD QUALITY</div>
             <select id="f-grade" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <option value="">Any</option>
@@ -10431,21 +10437,25 @@ window.toggleFilterPanel = function toggleFilterPanel() {
   const btn = document.getElementById('filter-toggle-btn');
   if (!panel) return;
 
-  // Check tier gate
   const tier = window._userTier || 'free';
   const isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
-  if (!isAdmin && tier === 'free') {
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    if (panel.style.display === 'block') {
-      const gate = document.getElementById('filter-gate');
-      if (gate) gate.style.display = 'flex';
-    }
-    if (btn) btn.textContent = panel.style.display === 'none' ? 'FILTERS ▾' : 'FILTERS ▴';
-    return;
-  }
+  const isPremium = isAdmin || tier === 'starter' || tier === 'pro';
 
   panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
   if (btn) btn.textContent = panel.style.display === 'none' ? 'FILTERS ▾' : 'FILTERS ▴';
+
+  if (panel.style.display === 'block') {
+    // Show/hide premium gate overlay
+    const gate = document.getElementById('filter-gate');
+    if (gate) gate.style.display = isPremium ? 'none' : 'flex';
+    // Show/hide premium-only fields
+    document.querySelectorAll('.filter-premium-only').forEach(el => {
+      el.style.display = isPremium ? 'block' : 'none';
+    });
+    // Show free tier notice if not premium
+    const freeNotice = document.getElementById('filter-free-notice');
+    if (freeNotice) freeNotice.style.display = isPremium ? 'none' : 'block';
+  }
 }
 
 window.resetAllFilters = function resetAllFilters() {
@@ -10473,11 +10483,8 @@ window.resetAllFilters = function resetAllFilters() {
 window.runParcelSearch = async function runParcelSearch() {
   const tier = window._userTier || 'free';
   const isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
-  if (!isAdmin && tier === 'free') {
-    const gate = document.getElementById('filter-gate');
-    if (gate) gate.style.display = 'flex';
-    return;
-  }
+  const isPremium = isAdmin || tier === 'starter' || tier === 'pro';
+  // Free users search active listings only — premium searches all 635k parcels
 
   // Debounce
   if (_filterSearchDebounce) clearTimeout(_filterSearchDebounce);
@@ -10487,8 +10494,12 @@ window.runParcelSearch = async function runParcelSearch() {
 window._doParcelSearch = async function _doParcelSearch() {
   const btn = document.getElementById('filter-search-btn');
   const countEl = document.getElementById('filter-result-count');
+  const _tier = window._userTier || 'free';
+  const _isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
+  const _isPremium = _isAdmin || _tier === 'starter' || _tier === 'pro';
+
   if (btn) { btn.textContent = 'SEARCHING…'; btn.disabled = true; }
-  if (countEl) countEl.textContent = 'Querying 635k parcels…';
+  if (countEl) countEl.textContent = _isPremium ? 'Querying 635k parcels…' : 'Searching active listings…';
 
   try {
     const params = new URLSearchParams();
