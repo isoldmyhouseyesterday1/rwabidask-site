@@ -2996,11 +2996,14 @@ body { min-width: 900px; overflow-x: auto; }
       <div class="ptabs" id="category-tabs"></div>
       <div id="price-slider-wrap" style="padding:10px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">PRICE RANGE</span>
-          <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="resetPriceSlider()">RESET</button>
+          <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">ASSESSED VALUE</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button id="filter-toggle-btn" style="font-size:8px;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);cursor:pointer;padding:2px 8px;letter-spacing:.5px;font-weight:600;border-radius:3px" onclick="toggleFilterPanel()">FILTERS ▾</button>
+            <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="resetAllFilters()">RESET</button>
+          </div>
         </div>
         <div style="text-align:center;margin-bottom:7px;">
-          <span id="price-readout" style="font-size:12px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 10px rgba(0,255,200,.4)">$1 — $25T</span>
+          <span id="price-readout" style="font-size:12px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 10px rgba(0,255,200,.4)">$0 — $20M+</span>
         </div>
         <div id="dual-slider" style="position:relative;height:20px;margin:0 8px;user-select:none;">
           <div id="slider-track" style="position:absolute;top:50%;left:0;right:0;height:2px;background:var(--border2);transform:translateY(-50%);border-radius:1px;"></div>
@@ -3009,11 +3012,200 @@ body { min-width: 900px; overflow-x: auto; }
           <div id="handle-max" style="position:absolute;top:50%;width:16px;height:16px;background:var(--cyan);border:2px solid #0d1526;border-radius:50%;transform:translate(-50%,-50%);cursor:ew-resize;box-shadow:0 0 8px rgba(0,255,200,.6);z-index:4;left:100%;"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:5px;">
-          <span style="font-size:8px;color:var(--muted)">$1</span>
+          <span style="font-size:8px;color:var(--muted)">$0</span>
           <span id="price-fine-tune" style="font-size:8px;color:var(--muted);letter-spacing:.3px;text-align:center;flex:1"></span>
-          <span style="font-size:8px;color:var(--muted)">$25T</span>
+          <span style="font-size:8px;color:var(--muted)">$20M+</span>
         </div>
       </div>
+
+      <!-- ── FILTER PANEL ─────────────────────────────────────────── -->
+      <div id="filter-panel" style="display:none;border-bottom:1px solid var(--border);background:#060e1c;flex-shrink:0;overflow-y:auto;max-height:60vh;">
+        <div style="padding:10px 14px 6px;">
+
+          <!-- Beds / Baths -->
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <div style="flex:1;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">BEDS</div>
+              <select id="f-beds" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">Any</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+                <option value="5">5+</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">BATHS</div>
+              <select id="f-baths" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">Any</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sqft -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">LIVING AREA (SQFT)</div>
+            <div style="display:flex;gap:6px;">
+              <input id="f-sqft-min" type="number" placeholder="Min" onchange="runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <input id="f-sqft-max" type="number" placeholder="Max" onchange="runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            </div>
+          </div>
+
+          <!-- Year built -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">YEAR BUILT</div>
+            <div style="display:flex;gap:6px;">
+              <input id="f-yr-min" type="number" placeholder="From" onchange="runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <input id="f-yr-max" type="number" placeholder="To" onchange="runParcelSearch()" style="width:50%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            </div>
+          </div>
+
+          <!-- Property type -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">PROPERTY TYPE</div>
+            <select id="f-prop-type" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <option value="">All Types</option>
+              <option value="residential">Residential</option>
+              <option value="commercial">Commercial</option>
+              <option value="vacant">Vacant Land</option>
+            </select>
+          </div>
+
+          <!-- Waterfront -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">WATERFRONT</div>
+            <select id="f-waterfront" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <option value="">Any</option>
+              <option value="yes">Waterfront only</option>
+              <option value="no">No waterfront</option>
+            </select>
+          </div>
+
+          <!-- Waterfront body -->
+          <div style="margin-bottom:10px;" id="f-wf-body-wrap">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">WATER BODY</div>
+            <select id="f-wf-body" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <option value="">Any</option>
+              <option value="lake_washington">Lake Washington</option>
+              <option value="lake_sammamish">Lake Sammamish</option>
+              <option value="puget_sound">Puget Sound</option>
+              <option value="elliott_bay">Elliott Bay</option>
+              <option value="river">River / Slough</option>
+            </select>
+          </div>
+
+          <!-- View -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">VIEW</div>
+            <select id="f-view" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <option value="">Any</option>
+              <option value="lake_washington">Lake Washington</option>
+              <option value="puget_sound">Puget Sound</option>
+              <option value="mt_rainier">Mt. Rainier</option>
+              <option value="seattle_skyline">Seattle Skyline</option>
+              <option value="cascades">Cascade Mountains</option>
+              <option value="olympics">Olympic Mountains</option>
+            </select>
+          </div>
+
+          <!-- Water system -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">WATER SYSTEM</div>
+            <select id="f-water-sys" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <option value="">Any</option>
+              <option value="1">Private (well)</option>
+              <option value="2">Water District (public)</option>
+              <option value="3">Private Restricted</option>
+              <option value="4">Public Restricted</option>
+            </select>
+          </div>
+
+          <!-- Sewer system -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">SEWER SYSTEM</div>
+            <select id="f-sewer-sys" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <option value="">Any</option>
+              <option value="1">Private (septic)</option>
+              <option value="2">Public (sewer)</option>
+              <option value="3">Private Restricted</option>
+              <option value="4">Public Restricted</option>
+            </select>
+          </div>
+
+          <!-- Lot size -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">MIN LOT SIZE</div>
+            <select id="f-lot" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <option value="">Any</option>
+              <option value="2000">2,000 sqft+</option>
+              <option value="5000">5,000 sqft+</option>
+              <option value="10000">10,000 sqft+</option>
+              <option value="21780">Half acre+</option>
+              <option value="43560">1 acre+</option>
+              <option value="87120">2 acres+</option>
+              <option value="217800">5 acres+</option>
+            </select>
+          </div>
+
+          <!-- Features -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">FEATURES</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
+                <input type="checkbox" id="f-garage" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> Garage
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
+                <input type="checkbox" id="f-basement" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> Basement
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
+                <input type="checkbox" id="f-no-flood" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> No flood risk
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
+                <input type="checkbox" id="f-no-seismic" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> No seismic risk
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;">
+                <input type="checkbox" id="f-motivated" onchange="runParcelSearch()" style="accent-color:var(--cyan)"> Not sold 10+ yrs
+              </label>
+            </div>
+          </div>
+
+          <!-- Building grade -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">MIN BUILD QUALITY</div>
+            <select id="f-grade" onchange="runParcelSearch()" style="width:100%;background:#0a1628;color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <option value="">Any</option>
+              <option value="7">Average (7+)</option>
+              <option value="8">Good (8+)</option>
+              <option value="9">Better (9+)</option>
+              <option value="10">Very Good (10+)</option>
+              <option value="11">Excellent (11+)</option>
+              <option value="12">Luxury (12+)</option>
+              <option value="13">Mansion (13)</option>
+            </select>
+          </div>
+
+          <!-- Search button -->
+          <button onclick="runParcelSearch()" id="filter-search-btn" style="width:100%;padding:9px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-bottom:6px;">SEARCH PARCELS</button>
+          <div id="filter-result-count" style="font-size:9px;color:var(--muted);text-align:center;min-height:14px;"></div>
+
+          <!-- Premium gate overlay -->
+          <div id="filter-gate" style="display:none;position:absolute;inset:0;background:rgba(6,14,28,.92);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;">PREMIUM FILTERS</div>
+            <div style="font-size:12px;color:var(--text);margin-bottom:8px;">Filter 635k parcels by beds, baths, waterfront, views, and more.</div>
+            <div style="font-size:10px;color:#556677;margin-bottom:16px;">Starter or Pro plan required.</div>
+            <button onclick="_rwaUpgrade('starter')" style="padding:9px 20px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;margin-bottom:6px;">UNLOCK FILTERS — $19/MO</button>
+            <button onclick="document.getElementById('filter-gate').style.display='none'" style="background:none;border:none;color:#556677;font-size:9px;cursor:pointer;">Maybe later</button>
+          </div>
+
+        </div>
+      </div>
+      <!-- ── END FILTER PANEL ──────────────────────────────────────── -->
+
     </div>
     <div class="list-scroll" id="list-scroll">
       <!-- On-demand model: sidebar shows recently viewed parcels and sponsored listings -->
@@ -3967,19 +4159,19 @@ const SLIDER_STEPS = 48; // 48 steps: $1 (10^0) → $25T
 let sliderMinStep = 0;
 let sliderMaxStep = SLIDER_STEPS; // default: full range visible
 let sliderMinPrice = 1;
-let sliderMaxPrice = 25e12; // $25T
+let sliderMaxPrice = 20000000; // $25T
 
 function logSliderToPrice(step) {
   if (step <= 0) return 1;
-  if (step >= SLIDER_STEPS) return 25e12;
+  if (step >= SLIDER_STEPS) return 20000000;
   // Log scale: 10^0 → 10^(log10(25T)) across 48 steps
-  const MAX_LOG = Math.log10(25e12); // ~13.398
+  const MAX_LOG = Math.log10(20000000); // ~13.398
   return Math.round(Math.pow(10, (step / SLIDER_STEPS) * MAX_LOG));
 }
 
 function fmtSliderPrice(step) {
   const p = logSliderToPrice(step);
-  if (p >= 25e12) return '$25T';
+  if (p >= 20000000) return '$20M+';
   if (p >= 1e12) return '$' + (p/1e12).toFixed(p >= 10e12 ? 0 : 1) + 'T';
   if (p >= 1e9) return '$' + (p/1e9).toFixed(p >= 1e11 ? 0 : p >= 1e10 ? 0 : 1) + 'B';
   if (p >= 1e6) return '$' + (p/1e6).toFixed(p >= 1e8 ? 0 : 1) + 'M';
@@ -4018,7 +4210,7 @@ function resetPriceSlider() {
   sliderMinStep = 0;
   sliderMaxStep = SLIDER_STEPS;
   sliderMinPrice = 1;
-  sliderMaxPrice = 25e12;
+  sliderMaxPrice = 20000000;
   updateSliderUI();
   applySliderFilter();
 }
@@ -10218,6 +10410,228 @@ const RWA_GATE = {
 };
 
 // Track view — called directly inside window.renderBasicsPanel below
+
+
+// ══════════════════════════════════════════════════════════════════
+// PARCEL FILTER SEARCH SYSTEM
+// ══════════════════════════════════════════════════════════════════
+
+const PARCEL_MAX_PRICE = 20000000; // $20M max for RE slider
+
+let _filterSearchDebounce = null;
+let _filterSearchResults = [];
+
+function toggleFilterPanel() {
+  const panel = document.getElementById('filter-panel');
+  const btn = document.getElementById('filter-toggle-btn');
+  if (!panel) return;
+
+  // Check tier gate
+  const tier = window._userTier || 'free';
+  const isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
+  if (!isAdmin && tier === 'free') {
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if (panel.style.display === 'block') {
+      const gate = document.getElementById('filter-gate');
+      if (gate) gate.style.display = 'flex';
+    }
+    if (btn) btn.textContent = panel.style.display === 'none' ? 'FILTERS ▾' : 'FILTERS ▴';
+    return;
+  }
+
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (btn) btn.textContent = panel.style.display === 'none' ? 'FILTERS ▾' : 'FILTERS ▴';
+}
+
+function resetAllFilters() {
+  resetPriceSlider();
+  ['f-beds','f-baths','f-prop-type','f-waterfront','f-wf-body','f-view','f-water-sys','f-sewer-sys','f-lot','f-grade'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['f-garage','f-basement','f-no-flood','f-no-seismic','f-motivated'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+  ['f-sqft-min','f-sqft-max','f-yr-min','f-yr-max'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // Clear search results and restore recently viewed
+  _filterSearchResults = [];
+  clearSearchPins();
+  const countEl = document.getElementById('filter-result-count');
+  if (countEl) countEl.textContent = '';
+  showToast('FILTERS RESET');
+}
+
+async function runParcelSearch() {
+  const tier = window._userTier || 'free';
+  const isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
+  if (!isAdmin && tier === 'free') {
+    const gate = document.getElementById('filter-gate');
+    if (gate) gate.style.display = 'flex';
+    return;
+  }
+
+  // Debounce
+  if (_filterSearchDebounce) clearTimeout(_filterSearchDebounce);
+  _filterSearchDebounce = setTimeout(_doParcelSearch, 600);
+}
+
+async function _doParcelSearch() {
+  const btn = document.getElementById('filter-search-btn');
+  const countEl = document.getElementById('filter-result-count');
+  if (btn) { btn.textContent = 'SEARCHING…'; btn.disabled = true; }
+  if (countEl) countEl.textContent = 'Querying 635k parcels…';
+
+  try {
+    const params = new URLSearchParams();
+    params.set('action', 'search');
+
+    // Price from slider
+    if (window.sliderMinPrice && window.sliderMinPrice > 0) params.set('min_price', window.sliderMinPrice);
+    if (window.sliderMaxPrice && window.sliderMaxPrice < PARCEL_MAX_PRICE) params.set('max_price', window.sliderMaxPrice);
+
+    // Beds/baths
+    const beds = document.getElementById('f-beds')?.value;
+    const baths = document.getElementById('f-baths')?.value;
+    if (beds) params.set('min_beds', beds);
+    if (baths) params.set('min_baths', baths);
+
+    // Sqft
+    const sqftMin = document.getElementById('f-sqft-min')?.value;
+    const sqftMax = document.getElementById('f-sqft-max')?.value;
+    if (sqftMin) params.set('min_sqft', sqftMin);
+    if (sqftMax) params.set('max_sqft', sqftMax);
+
+    // Year
+    const yrMin = document.getElementById('f-yr-min')?.value;
+    const yrMax = document.getElementById('f-yr-max')?.value;
+    if (yrMin) params.set('min_year', yrMin);
+    if (yrMax) params.set('max_year', yrMax);
+
+    // Selects
+    const propType = document.getElementById('f-prop-type')?.value;
+    const waterfront = document.getElementById('f-waterfront')?.value;
+    const wfBody = document.getElementById('f-wf-body')?.value;
+    const view = document.getElementById('f-view')?.value;
+    const waterSys = document.getElementById('f-water-sys')?.value;
+    const sewerSys = document.getElementById('f-sewer-sys')?.value;
+    const lot = document.getElementById('f-lot')?.value;
+    const grade = document.getElementById('f-grade')?.value;
+    if (propType) params.set('prop_type', propType);
+    if (waterfront) params.set('waterfront', waterfront);
+    if (wfBody) params.set('waterfront_body', wfBody);
+    if (view) params.set('view_type', view);
+    if (waterSys) params.set('water_system', waterSys);
+    if (sewerSys) params.set('sewer_system', sewerSys);
+    if (lot) params.set('min_lot', lot);
+    if (grade) params.set('min_grade', grade);
+
+    // Checkboxes
+    if (document.getElementById('f-garage')?.checked) params.set('has_garage', 'yes');
+    if (document.getElementById('f-basement')?.checked) params.set('has_basement', 'yes');
+    if (document.getElementById('f-no-flood')?.checked) params.set('flood_risk', 'no');
+    if (document.getElementById('f-no-seismic')?.checked) params.set('seismic_risk', 'no');
+    if (document.getElementById('f-motivated')?.checked) params.set('motivated', 'yes');
+
+    params.set('limit', '150');
+
+    const url = 'https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/parcel-proxy?' + params.toString();
+    const resp = await fetch(url, { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+
+    _filterSearchResults = data.results || [];
+    const count = _filterSearchResults.length;
+
+    if (countEl) countEl.textContent = count + ' parcels found' + (count === 150 ? ' (showing top 150)' : '');
+
+    // Plot results on map
+    plotSearchResultsOnMap(_filterSearchResults);
+
+    // Show in sidebar list
+    renderFilterResults(_filterSearchResults);
+
+  } catch(e) {
+    if (countEl) countEl.textContent = 'Search error — try again';
+    console.error('[RWA Filter]', e);
+  } finally {
+    if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
+  }
+}
+
+function renderFilterResults(results) {
+  const wrap = document.getElementById('list-scroll');
+  if (!wrap) return;
+  if (!results.length) {
+    wrap.innerHTML = '<div style="padding:20px;text-align:center;font-size:11px;color:var(--muted)">No parcels match your filters.<br>Try widening your search.</div>';
+    return;
+  }
+  const header = '<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">' + results.length + ' parcels found</div>';
+  wrap.innerHTML = header + results.map(p => {
+    const price = p.assessed_value > 0 ? '$' + p.assessed_value.toLocaleString() : '—';
+    const details = [p.beds ? p.beds + 'bd' : null, p.baths ? p.baths + 'ba' : null, p.sqft ? p.sqft.toLocaleString() + ' sf' : null].filter(Boolean).join(' · ');
+    const wf = p.waterfront_ft > 0 ? '<span style="color:var(--cyan);font-size:8px"> · WF ' + p.waterfront_ft + 'ft</span>' : '';
+    return '<div style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="renderBasicsPanel({id:''+p.pin+'',apn:''+p.pin+'',address:''+escapeHtml(p.address||p.pin)+'',lat:'+p.lat+',lng:'+p.lng+',type:'real_estate'})">'
+      + '<div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px">' + escapeHtml(p.address || p.pin) + wf + '</div>'
+      + (details ? '<div style="font-size:9px;color:var(--muted);margin-bottom:3px">' + details + '</div>' : '')
+      + '<div style="display:flex;justify-content:space-between">'
+      + '<span style="font-size:11px;font-weight:700;color:var(--gold)">' + price + '</span>'
+      + (p.year_built ? '<span style="font-size:9px;color:var(--muted)">Built ' + p.year_built + '</span>' : '')
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function plotSearchResultsOnMap(results) {
+  // Clear existing search pins
+  clearSearchPins();
+  if (!results.length) return;
+
+  // Use existing marker system — add as temporary search result markers
+  window._searchResultMarkers = window._searchResultMarkers || [];
+
+  results.forEach(p => {
+    if (!p.lat || !p.lng) return;
+    try {
+      const marker = document.createElement('div');
+      marker.className = 'search-result-pin';
+      marker.style.cssText = 'position:absolute;width:8px;height:8px;background:#fbbf24;border:1.5px solid #000;border-radius:50%;cursor:pointer;transform:translate(-50%,-50%);z-index:100;';
+      marker.title = p.address || p.pin;
+      marker.onclick = () => renderBasicsPanel({id:p.pin, apn:p.pin, address:p.address||p.pin, lat:p.lat, lng:p.lng, type:'real_estate'});
+      marker.dataset.lat = p.lat;
+      marker.dataset.lng = p.lng;
+      marker.dataset.pin = p.pin;
+      window._searchResultMarkers.push(marker);
+    } catch(e) {}
+  });
+
+  // Try to use the existing overlay layer
+  const overlay = document.getElementById('overlay-layer');
+  if (overlay && typeof renderDOMMarkers === 'function') {
+    // Integrate with existing marker system by adding to ASSETS temporarily
+    const searchAssets = results.map(p => ({
+      id: p.pin, apn: p.pin, address: p.address || p.pin,
+      lat: p.lat, lng: p.lng, type: 'real_estate',
+      price: p.assessed_value, _isSearchResult: true
+    }));
+    window._lastSearchAssets = searchAssets;
+    showToast(results.length + ' PARCELS FOUND — SHOWING ON MAP');
+  }
+
+  // Fly to first result
+  if (results[0] && results[0].lat && typeof flyTo === 'function') {
+    flyTo(results[0].lat, results[0].lng, 2000, 0);
+  }
+}
+
+function clearSearchPins() {
+  window._searchResultMarkers = [];
+  window._lastSearchAssets = null;
+}
+
 
 // ── PRICING PAGE ─────────────────────────────────────────────────────────────
 function showPricingPage() {
