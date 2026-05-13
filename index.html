@@ -3019,33 +3019,33 @@ body { min-width: 900px; overflow-x: auto; }
       </div>
 
       <!-- ── FILTER PANEL ─────────────────────────────────────────── -->
-      <div id="filter-panel" style="display:none;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-y:auto;max-height:70vh;overflow-x:hidden;">
-        <div style="padding:10px 14px 14px;position:relative;">
+      <div id="filter-panel" style="display:none;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-y:auto;overflow-x:hidden;max-height:70vh;">
+        <div style="padding:10px 14px 14px;">
 
-          <!-- Free tier notice -->
+          <!-- Free notice -->
           <div id="filter-free-notice" style="display:none;background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:9px;color:#8899aa;line-height:1.7;">
-            <span style="color:var(--cyan);font-weight:700;">FREE:</span> Filter active listings — same as Zillow plus more.<br>
-            <span style="color:#fbbf24;font-weight:700;">STARTER+:</span> Search all 635,000 King County parcels with full intelligence filters.
-            <button onclick="_rwaUpgrade('starter')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.5px;">UNLOCK ALL FILTERS — $19/MO</button>
+            <span style="color:var(--cyan);font-weight:700;">FREE:</span> Filter active listings.<br>
+            <span style="color:#fbbf24;font-weight:700;">STARTER+:</span> Search all 635,000 King County parcels.
+            <button onclick="_rwaUpgrade('starter')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;">UNLOCK ALL PARCELS — $19/MO</button>
           </div>
 
-          <!-- Listing type — free -->
+          <!-- Listing type -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LISTING TYPE</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-for-sale" checked style="accent-color:var(--cyan)"> For Sale</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-for-rent" style="accent-color:var(--cyan)"> For Rent</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-for-lease" style="accent-color:var(--cyan)"> For Lease</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-auction" style="accent-color:var(--cyan)"> Auction</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-off-market" style="accent-color:var(--cyan)"> Off Market</label>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-for-sale" checked style="accent-color:var(--cyan)"> For Sale</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-for-rent" style="accent-color:var(--cyan)"> For Rent</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-for-lease" style="accent-color:var(--cyan)"> For Lease</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-auction" style="accent-color:var(--cyan)"> Auction</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-off-market" style="accent-color:var(--cyan)"> Off Market</label>
             </div>
           </div>
 
-          <!-- Price range — free -->
+          <!-- Price -->
           <div style="margin-bottom:10px;">
-            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PRICE RANGE</div>
-            <div style="display:flex;gap:6px;align-items:center;overflow:hidden;">
-              <select id="f-price-min" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PRICE</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <select id="f-price-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
                 <option value="">No Min</option>
                 <option value="50000">$50K</option>
                 <option value="100000">$100K</option>
@@ -3059,9 +3059,9 @@ body { min-width: 900px; overflow-x: auto; }
                 <option value="2000000">$2M</option>
                 <option value="3000000">$3M</option>
                 <option value="5000000">$5M</option>
+                <option value="10000000">$10M</option>
               </select>
-              <span style="color:var(--muted);font-size:10px;">—</span>
-              <select id="f-price-max" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+              <select id="f-price-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
                 <option value="">No Max</option>
                 <option value="100000">$100K</option>
                 <option value="200000">$200K</option>
@@ -3075,129 +3075,172 @@ body { min-width: 900px; overflow-x: auto; }
                 <option value="3000000">$3M</option>
                 <option value="5000000">$5M</option>
                 <option value="10000000">$10M</option>
+                <option value="20000000">$20M</option>
+                <option value="50000000">$50M</option>
+                <option value="100000000">$100M</option>
+                <option value="500000000">$500M</option>
                 <option value="1000000000">$1B+</option>
               </select>
             </div>
           </div>
 
-          <!-- Beds — free -->
+          <!-- Beds -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">BEDROOMS</div>
             <div style="display:flex;gap:4px;">
-              <button class="fbtn active" id="fb-beds-0" onclick="setBedsFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
-              <button class="fbtn" id="fb-beds-1" onclick="setBedsFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
-              <button class="fbtn" id="fb-beds-2" onclick="setBedsFilter(2)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">2+</button>
-              <button class="fbtn" id="fb-beds-3" onclick="setBedsFilter(3)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">3+</button>
-              <button class="fbtn" id="fb-beds-4" onclick="setBedsFilter(4)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">4+</button>
-              <button class="fbtn" id="fb-beds-5" onclick="setBedsFilter(5)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">5+</button>
+              <button id="fb-beds-0" onclick="setBedsFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
+              <button id="fb-beds-1" onclick="setBedsFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
+              <button id="fb-beds-2" onclick="setBedsFilter(2)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">2+</button>
+              <button id="fb-beds-3" onclick="setBedsFilter(3)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">3+</button>
+              <button id="fb-beds-4" onclick="setBedsFilter(4)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">4+</button>
+              <button id="fb-beds-5" onclick="setBedsFilter(5)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">5+</button>
             </div>
           </div>
 
-          <!-- Baths — free -->
+          <!-- Baths -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">BATHROOMS</div>
             <div style="display:flex;gap:4px;">
-              <button class="fbtn active" id="fb-baths-0" onclick="setBathsFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
-              <button class="fbtn" id="fb-baths-1" onclick="setBathsFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
-              <button class="fbtn" id="fb-baths-15" onclick="setBathsFilter(1.5)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1.5+</button>
-              <button class="fbtn" id="fb-baths-2" onclick="setBathsFilter(2)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">2+</button>
-              <button class="fbtn" id="fb-baths-3" onclick="setBathsFilter(3)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">3+</button>
-              <button class="fbtn" id="fb-baths-4" onclick="setBathsFilter(4)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">4+</button>
+              <button id="fb-baths-0" onclick="setBathsFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
+              <button id="fb-baths-1" onclick="setBathsFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
+              <button id="fb-baths-15" onclick="setBathsFilter(1.5)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1.5+</button>
+              <button id="fb-baths-2" onclick="setBathsFilter(2)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">2+</button>
+              <button id="fb-baths-3" onclick="setBathsFilter(3)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">3+</button>
+              <button id="fb-baths-4" onclick="setBathsFilter(4)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">4+</button>
             </div>
           </div>
 
-          <!-- Property type — free -->
+          <!-- Property type -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PROPERTY TYPE</div>
             <div style="display:flex;flex-wrap:wrap;gap:5px;">
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-sfr" checked style="accent-color:var(--cyan)"> Single Family</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-condo" style="accent-color:var(--cyan)"> Condo</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-townhouse" style="accent-color:var(--cyan)"> Townhouse</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-multi" style="accent-color:var(--cyan)"> Multi-Family</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-land" style="accent-color:var(--cyan)"> Land/Lot</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-commercial" style="accent-color:var(--cyan)"> Commercial</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-industrial" style="accent-color:var(--cyan)"> Industrial</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-farm" style="accent-color:var(--cyan)"> Farm/Ranch</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-business" style="accent-color:var(--cyan)"> Business for Sale</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="f-type-mobile" style="accent-color:var(--cyan)"> Mobile Home</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-sfr" checked style="accent-color:var(--cyan)"> Single Family</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-condo" style="accent-color:var(--cyan)"> Condo</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-townhouse" style="accent-color:var(--cyan)"> Townhouse</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-multi" style="accent-color:var(--cyan)"> Multi-Family</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-land" style="accent-color:var(--cyan)"> Land/Lot</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-commercial" style="accent-color:var(--cyan)"> Commercial</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-industrial" style="accent-color:var(--cyan)"> Industrial</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-farm" style="accent-color:var(--cyan)"> Farm/Ranch</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-business" style="accent-color:var(--cyan)"> Business for Sale</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-mobile" style="accent-color:var(--cyan)"> Mobile Home</label>
             </div>
           </div>
 
-          <!-- Sqft — free -->
+          <!-- Square feet -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">SQUARE FEET</div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <input id="f-sqft-min" type="number" placeholder="Min sqft" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-              <span style="color:var(--muted);font-size:10px;">—</span>
-              <input id="f-sqft-max" type="number" placeholder="Max sqft" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-            </div>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
-              <button onclick="document.getElementById('f-sqft-min').value=1000" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">1k</button>
-              <button onclick="document.getElementById('f-sqft-min').value=1500" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">1.5k</button>
-              <button onclick="document.getElementById('f-sqft-min').value=2000" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">2k</button>
-              <button onclick="document.getElementById('f-sqft-min').value=3000" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">3k</button>
-              <button onclick="document.getElementById('f-sqft-min').value=5000" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">5k</button>
-              <button onclick="document.getElementById('f-sqft-min').value=10000" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">10k</button>
-              <button onclick="document.getElementById('f-sqft-min').value=20000" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">20k</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <select id="f-sqft-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                <option value="">No Min</option>
+                <option value="500">500</option>
+                <option value="750">750</option>
+                <option value="1000">1,000</option>
+                <option value="1250">1,250</option>
+                <option value="1500">1,500</option>
+                <option value="1750">1,750</option>
+                <option value="2000">2,000</option>
+                <option value="2500">2,500</option>
+                <option value="3000">3,000</option>
+                <option value="3500">3,500</option>
+                <option value="4000">4,000</option>
+                <option value="5000">5,000</option>
+                <option value="7500">7,500</option>
+                <option value="10000">10,000</option>
+                <option value="20000">20,000</option>
+              </select>
+              <select id="f-sqft-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                <option value="">No Max</option>
+                <option value="500">500</option>
+                <option value="750">750</option>
+                <option value="1000">1,000</option>
+                <option value="1500">1,500</option>
+                <option value="2000">2,000</option>
+                <option value="2500">2,500</option>
+                <option value="3000">3,000</option>
+                <option value="3500">3,500</option>
+                <option value="4000">4,000</option>
+                <option value="5000">5,000</option>
+                <option value="7500">7,500</option>
+                <option value="10000">10,000</option>
+                <option value="20000">20,000</option>
+              </select>
             </div>
           </div>
 
-          <!-- Lot size — free -->
+          <!-- Lot size -->
           <div style="margin-bottom:10px;">
-            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LOT SIZE (SQFT)</div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <input id="f-lot-min" type="number" placeholder="Min sqft" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-              <span style="color:var(--muted);font-size:10px;">—</span>
-              <input id="f-lot-max" type="number" placeholder="Max sqft" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-            </div>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
-              <button onclick="document.getElementById('f-lot-min').value=5000" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">5k sf</button>
-              <button onclick="document.getElementById('f-lot-min').value=10890" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">¼ac</button>
-              <button onclick="document.getElementById('f-lot-min').value=21780" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">½ac</button>
-              <button onclick="document.getElementById('f-lot-min').value=43560" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">1ac</button>
-              <button onclick="document.getElementById('f-lot-min').value=217800" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">5ac</button>
-              <button onclick="document.getElementById('f-lot-min').value=435600" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">10ac</button>
-              <button onclick="document.getElementById('f-lot-min').value=2178000" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">50ac</button>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LOT SIZE</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <select id="f-lot-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                <option value="">No Min</option>
+                <option value="1000">1,000 sqft</option>
+                <option value="2000">2,000 sqft</option>
+                <option value="3000">3,000 sqft</option>
+                <option value="4000">4,000 sqft</option>
+                <option value="5000">5,000 sqft</option>
+                <option value="7500">7,500 sqft</option>
+                <option value="10890">¼ acre</option>
+                <option value="21780">½ acre</option>
+                <option value="43560">1 acre</option>
+                <option value="87120">2 acres</option>
+                <option value="217800">5 acres</option>
+                <option value="435600">10 acres</option>
+                <option value="871200">20 acres</option>
+                <option value="2178000">50 acres</option>
+                <option value="4356000">100 acres</option>
+              </select>
+              <select id="f-lot-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                <option value="">No Max</option>
+                <option value="2000">2,000 sqft</option>
+                <option value="5000">5,000 sqft</option>
+                <option value="10890">¼ acre</option>
+                <option value="21780">½ acre</option>
+                <option value="43560">1 acre</option>
+                <option value="87120">2 acres</option>
+                <option value="217800">5 acres</option>
+                <option value="435600">10 acres</option>
+                <option value="871200">20 acres</option>
+                <option value="2178000">50 acres</option>
+              </select>
             </div>
           </div>
 
-          <!-- Year built — free -->
+          <!-- Year built -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">YEAR BUILT</div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <input id="f-yr-min" type="number" placeholder="Min year" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-              <span style="color:var(--muted);font-size:10px;">—</span>
-              <input id="f-yr-max" type="number" placeholder="Max year" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <input id="f-yr-min" type="number" placeholder="Min year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
+              <input id="f-yr-max" type="number" placeholder="Max year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
             </div>
           </div>
 
-          <!-- Parking — free -->
+          <!-- Parking -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PARKING SPOTS</div>
             <div style="display:flex;gap:4px;">
-              <button class="fbtn active" id="fb-park-0" onclick="setParkingFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
-              <button class="fbtn" id="fb-park-1" onclick="setParkingFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
-              <button class="fbtn" id="fb-park-2" onclick="setParkingFilter(2)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">2+</button>
-              <button class="fbtn" id="fb-park-3" onclick="setParkingFilter(3)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">3+</button>
+              <button id="fb-park-0" onclick="setParkingFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
+              <button id="fb-park-1" onclick="setParkingFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
+              <button id="fb-park-2" onclick="setParkingFilter(2)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">2+</button>
+              <button id="fb-park-3" onclick="setParkingFilter(3)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">3+</button>
             </div>
           </div>
 
-          <!-- Amenities — free -->
+          <!-- Amenities -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">AMENITIES</div>
             <div style="display:flex;flex-wrap:wrap;gap:5px;">
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-garage" style="accent-color:var(--cyan)"> Garage</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-basement" style="accent-color:var(--cyan)"> Basement</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-waterfront-check" style="accent-color:var(--cyan)"> Waterfront</label>
-              <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-has-view" style="accent-color:var(--cyan)"> Has View</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-garage" style="accent-color:var(--cyan)"> Garage</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-basement" style="accent-color:var(--cyan)"> Basement</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-waterfront-check" style="accent-color:var(--cyan)"> Waterfront</label>
+              <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-has-view" style="accent-color:var(--cyan)"> Has View</label>
             </div>
           </div>
 
-          <!-- ── PREMIUM FILTERS ────────────────────────────────── -->
+          <!-- PREMIUM FILTERS -->
           <div class="filter-premium-only" style="display:none;">
-            <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:#fbbf24;margin:12px 0 8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);">★ PREMIUM INTELLIGENCE FILTERS</div>
+            <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:#fbbf24;margin:12px 0 8px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);">★ PREMIUM INTELLIGENCE FILTERS</div>
 
-            <!-- Water body -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">WATERFRONT BODY</div>
               <select id="f-wf-body" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
@@ -3210,7 +3253,6 @@ body { min-width: 900px; overflow-x: auto; }
               </select>
             </div>
 
-            <!-- View type -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">VIEW TYPE</div>
               <select id="f-view" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
@@ -3224,7 +3266,6 @@ body { min-width: 900px; overflow-x: auto; }
               </select>
             </div>
 
-            <!-- Water system -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">WATER SYSTEM</div>
               <select id="f-water-sys" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
@@ -3236,7 +3277,6 @@ body { min-width: 900px; overflow-x: auto; }
               </select>
             </div>
 
-            <!-- Sewer system -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">SEWER SYSTEM</div>
               <select id="f-sewer-sys" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
@@ -3246,9 +3286,8 @@ body { min-width: 900px; overflow-x: auto; }
               </select>
             </div>
 
-            <!-- Building grade -->
             <div style="margin-bottom:10px;">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">MIN BUILD QUALITY (ASSESSOR GRADE)</div>
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">MIN BUILD QUALITY</div>
               <select id="f-grade" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
                 <option value="">Any</option>
                 <option value="7">Average (7+)</option>
@@ -3261,22 +3300,18 @@ body { min-width: 900px; overflow-x: auto; }
               </select>
             </div>
 
-            <!-- Risk filters -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">RISK EXCLUSIONS</div>
-              <div style="display:flex;flex-wrap:wrap;gap:5px;">
-                <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-no-flood" style="accent-color:var(--cyan)"> No flood risk</label>
-                <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-no-seismic" style="accent-color:var(--cyan)"> No seismic risk</label>
-                <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text);cursor:pointer;"><input type="checkbox" id="f-motivated" style="accent-color:var(--cyan)"> Not sold 10+ yrs <span style="color:#fbbf24;font-size:8px;">(motivated seller)</span></label>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-no-flood" style="accent-color:var(--cyan)"> Exclude flood risk parcels</label>
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-no-seismic" style="accent-color:var(--cyan)"> Exclude seismic risk parcels</label>
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-motivated" style="accent-color:var(--cyan)"> Not sold in 10+ years <span style="color:#fbbf24;font-size:8px;margin-left:2px;">(motivated seller)</span></label>
               </div>
             </div>
-
           </div>
-          <!-- ── END PREMIUM FILTERS ──────────────────────────── -->
 
-          <!-- Search button -->
-          <button onclick="typeof runParcelSearch==='function'&&runParcelSearch()" id="filter-search-btn" style="width:100%;padding:9px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-top:6px;margin-bottom:6px;">SEARCH PARCELS</button>
-          <div id="filter-result-count" style="font-size:9px;color:var(--muted);text-align:center;min-height:14px;"></div>
+          <button onclick="typeof runParcelSearch==='function'&&runParcelSearch()" id="filter-search-btn" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-top:6px;margin-bottom:6px;">SEARCH PARCELS</button>
+          <div id="filter-result-count" style="font-size:9px;color:var(--muted);text-align:center;min-height:16px;"></div>
 
         </div>
       </div>
