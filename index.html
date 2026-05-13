@@ -2969,7 +2969,7 @@ body { min-width: 900px; overflow-x: auto; }
   </div>
 
   <div id="unified-ledger-block" style="display:none;position:absolute;"></div>
-  <div class="topbar-right">
+  <div class="topbar-right" style="padding-right:0;">
     <div class="tstat" style="display:none"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc">—</div></div>
     <div class="tstat" style="display:none">
       <div class="tstat-l">Assets</div>
@@ -2993,7 +2993,12 @@ body { min-width: 900px; overflow-x: auto; }
       </div>
 <!-- dashboard summary removed — data in header topbar -->
       <div id="cat-sponsor-strip" style="display:none"></div>
-      <div class="ptabs" id="category-tabs"></div>
+      <div class="ptabs" id="category-tabs">
+        <button class="ptab map-tab on" onclick="setCategory('all', this)">ALL</button>
+        <button class="ptab map-tab" onclick="setCategory('realestate', this)">REAL ESTATE</button>
+        <button class="ptab map-tab" onclick="setCategory('transport', this)">TRANSPORTS</button>
+        <button class="ptab map-tab" onclick="setCategory('business', this)">BUSINESSES</button>
+      </div>
       <div id="price-slider-wrap" style="padding:10px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">ASSESSED VALUE</span>
