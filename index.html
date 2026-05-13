@@ -9915,7 +9915,7 @@ const RWA_GATE = {
       + '</div>'
       + '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
       + '<button onclick="RWA_GATE.showPlansModal()" style="padding:7px 14px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.5px">SEE PLANS</button>'
-      + '<button onclick="document.getElementById('rwa-nudge').remove()" style="padding:7px 14px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Dismiss</button>'
+      + '<button onclick="document.getElementById(\'rwa-nudge\').remove()" style="padding:7px 14px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Dismiss</button>'
       + '</div>';
     document.body.appendChild(d);
     setTimeout(() => { const n = document.getElementById('rwa-nudge'); if(n) n.remove(); }, 12000);
