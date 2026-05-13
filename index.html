@@ -6381,40 +6381,148 @@ async function signOut() {
   if (map3dEl) onCameraChange();
 }
 
-async function updateAuthUI() { 
-  const signinBtn = document.getElementById('signin-btn'); 
-  const joinBtn = document.getElementById('join-btn'); 
+async function updateAuthUI() {
+  const signinBtn = document.getElementById('signin-btn');
+  const joinBtn   = document.getElementById('join-btn');
   if (currentUser) {
-    // Fetch role from Supabase profiles table if available
-    if (_sb && !currentUserRole) {
-      try {
-        const { data: profile } = await _sb.from('profiles').select('role').eq('id', currentUser.id).maybeSingle();
-        if (profile?.role) currentUserRole = profile.role;
-        else currentUserRole = currentUser.user_metadata?.role || 'Investor';
-      } catch(e) { currentUserRole = currentUser.user_metadata?.role || 'Investor'; }
+    try {
+      const { data: profile } = await _sb.from('profiles')
+        .select('role, subscription_tier, stripe_customer_id')
+        .eq('id', currentUser.id).maybeSingle();
+      if (profile?.role) currentUserRole = profile.role;
+      else currentUserRole = currentUser.user_metadata?.role || 'Investor';
+      window._userTier = profile?.subscription_tier || 'free';
+      window._stripeCustomerId = profile?.stripe_customer_id || null;
+    } catch(e) {
+      currentUserRole = currentUser.user_metadata?.role || 'Investor';
+      window._userTier = 'free';
     }
-    const role = (currentUserRole || 'Investor').toLowerCase();
-    const isPro = role === 'pro' || role === 'broker' || role === 'owner' || role === 'institutional';
-    if (signinBtn) { 
-      signinBtn.textContent = ((isPro ? '[PRO] ' : '') + (currentUser.email?.split('@')[0] || 'Account')).slice(0, 16); 
-      signinBtn.style.color = isPro ? 'var(--gold)' : '';
-      signinBtn.onclick = () => showToast(`SIGNED IN: ${currentUser.email} [${(currentUserRole||'Investor').toUpperCase()}]`); 
-    } 
-    if (joinBtn) { 
-      joinBtn.textContent = 'Sign Out'; 
-      joinBtn.onclick = () => signOut(); 
-    } 
-  } else { 
-    if (signinBtn) { 
-      signinBtn.textContent = 'Sign In'; 
+    const tier = window._userTier || 'free';
+    const isAdmin = window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(currentUser.id);
+    const tierLabel = isAdmin ? 'ADMIN' : tier === 'pro' ? 'PRO' : tier === 'starter' ? 'STARTER' : 'FREE';
+    const tierColor = isAdmin ? 'var(--gold)' : tier === 'pro' ? 'var(--gold)' : tier === 'starter' ? 'var(--cyan)' : 'var(--muted)';
+    const handle = (currentUser.email?.split('@')[0] || 'Account').slice(0, 14);
+    if (signinBtn) {
+      signinBtn.innerHTML = '<span style="color:'+tierColor+';font-size:9px;letter-spacing:1px;">'+tierLabel+'</span> '+handle;
+      signinBtn.style.color = 'var(--text)';
+      signinBtn.onclick = () => showAccountMenu();
+    }
+    if (joinBtn) {
+      if (!isAdmin && tier === 'free') {
+        joinBtn.textContent = 'Upgrade';
+        joinBtn.style.background = 'rgba(0,255,200,.15)';
+        joinBtn.style.color = 'var(--cyan)';
+        joinBtn.style.border = '1px solid rgba(0,255,200,.3)';
+        joinBtn.onclick = () => showPricingPage();
+      } else {
+        joinBtn.textContent = 'Sign Out';
+        joinBtn.style.background = '';
+        joinBtn.style.color = '';
+        joinBtn.style.border = '';
+        joinBtn.onclick = () => signOut();
+      }
+    }
+  } else {
+    window._userTier = 'free';
+    if (signinBtn) {
+      signinBtn.innerHTML = 'Sign In';
       signinBtn.style.color = '';
-      signinBtn.onclick = () => openModal('signin'); 
-    } 
-    if (joinBtn) { 
-      joinBtn.textContent = 'Join Free'; 
-      joinBtn.onclick = () => openModal('register'); 
-    } 
-  } 
+      signinBtn.onclick = () => openModal('signin');
+    }
+    if (joinBtn) {
+      joinBtn.textContent = 'Join Free';
+      joinBtn.style.background = '';
+      joinBtn.style.color = '';
+      joinBtn.style.border = '';
+      joinBtn.onclick = () => openModal('register');
+    }
+  }
+}
+
+function showAccountMenu() {
+  const existing = document.getElementById('rwa-account-menu');
+  if (existing) { existing.remove(); return; }
+  const tier = window._userTier || 'free';
+  const isAdmin = window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(currentUser?.id);
+  const tierLabel = isAdmin ? 'ADMIN' : tier === 'pro' ? 'PRO' : tier === 'starter' ? 'STARTER' : 'FREE PLAN';
+  const tierColor = isAdmin ? '#fbbf24' : tier === 'pro' ? '#fbbf24' : tier === 'starter' ? '#00ffc8' : '#556677';
+  const t1 = typeof detectRegionalTier === 'function' && detectRegionalTier() === 'tier1';
+  const menu = document.createElement('div');
+  menu.id = 'rwa-account-menu';
+  menu.style.cssText = 'position:fixed;top:52px;right:12px;background:#0a1628;border:1px solid rgba(0,255,200,.2);border-radius:8px;width:260px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.7);font-family:var(--font);overflow:hidden;';
+  var upgradeSection = '';
+  if (!isAdmin && tier === 'free') {
+    upgradeSection = '<div style="padding:10px 14px;border-top:1px solid rgba(0,255,200,.08)">'
+      + '<div style="font-size:9px;color:#556677;letter-spacing:1px;margin-bottom:8px">UPGRADE YOUR PLAN</div>'
+      + '<button onclick="document.getElementById('rwa-account-menu').remove();RWA_GATE.stripeCheckout('starter')" style="width:100%;padding:8px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;margin-bottom:6px;letter-spacing:.5px">STARTER — $'+(t1?'19':'10')+'/MO</button>'
+      + '<button onclick="document.getElementById('rwa-account-menu').remove();RWA_GATE.stripeCheckout('pro')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">PRO — $'+(t1?'39':'20')+'/MO ★</button>'
+      + '</div>';
+  } else if (!isAdmin && tier === 'starter') {
+    upgradeSection = '<div style="padding:10px 14px;border-top:1px solid rgba(0,255,200,.08)">'
+      + '<button onclick="document.getElementById('rwa-account-menu').remove();RWA_GATE.stripeCheckout('pro')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">UPGRADE TO PRO — $'+(t1?'39':'20')+'/MO</button>'
+      + '</div>';
+  }
+  var billingSection = '';
+  if (window._stripeCustomerId && tier !== 'free') {
+    billingSection = '<div style="padding:8px 14px;border-top:1px solid rgba(0,255,200,.08)">'
+      + '<button onclick="openBillingPortal()" style="width:100%;padding:7px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer;text-align:left;letter-spacing:.5px">⚙ Manage billing / cancel</button>'
+      + '</div>';
+  }
+  menu.innerHTML = '<div style="padding:14px 14px 10px">'
+    + '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:'+tierColor+';margin-bottom:2px">'+tierLabel+'</div>'
+    + '<div style="font-size:12px;color:var(--text);margin-bottom:2px">'+(currentUser?.email||'')+'</div>'
+    + '<div style="font-size:9px;color:#556677">Member since '+new Date(currentUser?.created_at||Date.now()).getFullYear()+'</div>'
+    + '</div>'
+    + '<div style="border-top:1px solid rgba(0,255,200,.08)">'
+    + '<button onclick="document.getElementById('rwa-account-menu').remove();showListingManager()" style="width:100%;padding:9px 14px;background:transparent;color:#8899aa;border:none;font-size:10px;cursor:pointer;text-align:left;letter-spacing:.5px">My Listings</button>'
+    + '<button onclick="document.getElementById('rwa-account-menu').remove();showIntelReportHistory()" style="width:100%;padding:9px 14px;background:transparent;color:#8899aa;border:none;font-size:10px;cursor:pointer;text-align:left;letter-spacing:.5px">Intel Report History</button>'
+    + '</div>'
+    + upgradeSection + billingSection
+    + '<div style="padding:8px 14px;border-top:1px solid rgba(0,255,200,.08)">'
+    + '<button onclick="document.getElementById('rwa-account-menu').remove();signOut()" style="width:100%;padding:7px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer;text-align:left;letter-spacing:.5px">Sign out</button>'
+    + '</div>';
+  document.body.appendChild(menu);
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      const m = document.getElementById('rwa-account-menu');
+      if (m && !m.contains(e.target)) { m.remove(); document.removeEventListener('click', closeMenu); }
+    });
+  }, 100);
+}
+
+async function openBillingPortal() {
+  if (!currentUser || !window._stripeCustomerId) { showToast('NO BILLING ACCOUNT FOUND'); return; }
+  showToast('OPENING BILLING PORTAL…');
+  try {
+    const sess = await _sb.auth.getSession();
+    const tok = sess?.data?.session?.access_token;
+    const resp = await fetch('https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(tok ? { 'Authorization': 'Bearer '+tok } : {}) },
+      body: JSON.stringify({ user_id: currentUser.id, action: 'billing_portal', customer_id: window._stripeCustomerId, return_url: window.location.href })
+    });
+    const data = await resp.json();
+    if (data?.url) window.location.href = data.url;
+    else showToast('BILLING PORTAL UNAVAILABLE');
+  } catch(e) { showToast('BILLING PORTAL ERROR'); }
+}
+
+async function showIntelReportHistory() {
+  if (!currentUser) { openModal('signin'); return; }
+  showToast('LOADING REPORT HISTORY…');
+  try {
+    const { data: reports } = await _sb.from('intel_reports').select('apn, created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+    const existing = document.getElementById('rwa-intel-history');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'rwa-intel-history';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    const rows = reports && reports.length > 0
+      ? reports.map(r => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,255,200,.08);font-size:11px"><span style="color:var(--cyan);font-family:monospace">'+r.apn+'</span><span style="color:#556677">'+new Date(r.created_at).toLocaleDateString()+'</span></div>').join('')
+      : '<div style="font-size:11px;color:#556677;padding:16px 0;text-align:center">No Intel Reports purchased yet</div>';
+    overlay.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.2);border-radius:8px;width:100%;max-width:400px;padding:24px;font-family:var(--font)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan)">INTEL REPORT HISTORY</div><button onclick="document.getElementById('rwa-intel-history').remove()" style="background:none;border:none;color:#556677;font-size:20px;cursor:pointer">&#x2715;</button></div>'+rows+'</div>';
+    document.body.appendChild(overlay);
+  } catch(e) { showToast('ERROR LOADING HISTORY'); }
 }
 
 /* --- UNIFIED MODAL TERMINAL ENGINE --- */
@@ -10375,6 +10483,29 @@ document.addEventListener('click', function(e) {
 });
 
 async function submitListing(apn) {
+  // ── LISTING PAYMENT GATE ──────────────────────────────────────
+  const _tier = window._userTier || 'free';
+  const _isAdmin = window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(currentUser?.id);
+  if (!_isAdmin && _tier !== 'pro') {
+    const { data: _credits } = await _sb.from('listing_credits').select('id').eq('user_id', currentUser.id).limit(1);
+    if (!_credits || _credits.length === 0) {
+      const _t1 = typeof detectRegionalTier === 'function' && detectRegionalTier() === 'tier1';
+      const _ov = document.createElement('div');
+      _ov.id = 'rwa-listing-gate';
+      _ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+      _ov.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.25);border-radius:8px;width:100%;max-width:400px;padding:28px 24px;font-family:var(--font);text-align:center">'
+        + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:16px">LIST A PROPERTY</div>'
+        + '<div style="font-size:18px;font-weight:700;color:#f0f4f8;margin-bottom:8px">Ready to list?</div>'
+        + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px">One listing or unlimited — your call.</div>'
+        + '<button onclick="document.getElementById('rwa-listing-gate').remove();RWA_GATE.stripeCheckout('list_property')" style="width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">LIST ONE PROPERTY — $'+(_t1?'14':'7')+'</button>'
+        + '<button onclick="document.getElementById('rwa-listing-gate').remove();RWA_GATE.stripeCheckout('pro')" style="width:100%;padding:12px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — UNLIMITED LISTINGS $'+(_t1?'39':'20')+'/MO</button>'
+        + '<button onclick="document.getElementById('rwa-listing-gate').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Cancel</button>'
+        + '</div>';
+      document.body.appendChild(_ov);
+      return;
+    }
+  }
+  // ── END GATE ──────────────────────────────────────────────────
   const type      = document.getElementById('lt-type')?.value || 'for_sale';
   const role      = document.getElementById('lt-role')?.value || 'owner';
   const price     = parseFloat(document.getElementById('lt-price')?.value || '0');
