@@ -7192,7 +7192,7 @@ function showTosModal(name, email, password) {
     + '<p style="margin:0 0 14px">This Terms of Service, Privacy Policy, and Data Use Agreement ("Agreement") is between Annie Group LLC, a Washington State limited liability company doing business as RWABidAsk ("Company") and you ("User"). By clicking I Agree you enter into a legally binding contract. Your acceptance is recorded permanently with your IP address, timestamp, device user agent string, and agreement version number. This acceptance record is immutable and cannot be deleted or modified.</p>'
 
     + '<p style="font-weight:700;margin:0 0 6px">SECTION 2 — DESCRIPTION OF SERVICES</p>'
-    + '<p style="margin:0 0 14px">RWABidAsk is a real property intelligence platform that aggregates, displays, and analyzes publicly available county assessor data, government geospatial datasets, recorded deed and transaction history, crime statistics from law enforcement open data portals, building permit records, and other public records. Services include free parcel data display, paid Property Intelligence Reports ($9.00 USD T1 / $5.00 USD T2 per report), property listing tools, broker and owner data submission tools, data correction tools, and subscription plans for professional users.</p>'
+    + '<p style="margin:0 0 14px">RWABidAsk is a real property intelligence platform that aggregates, displays, and analyzes publicly available county assessor data, government geospatial datasets, recorded deed and transaction history, crime statistics from law enforcement open data portals, building permit records, and other public records. Services include free parcel data display, paid Property Intelligence Reports ($9.00 USD T1 / $5.00 USD T2 per report), asset listing tools, broker and owner data submission tools, data correction tools, and subscription plans for professional users.</p>'
 
     + '<p style="font-weight:700;margin:0 0 6px">SECTION 3 — NOT A CONSUMER REPORTING AGENCY — FCRA DISCLAIMER</p>'
     + '<p style="margin:0 0 6px;font-weight:700">RWABIDASK IS NOT A CONSUMER REPORTING AGENCY AS DEFINED BY THE FAIR CREDIT REPORTING ACT, 15 U.S.C. § 1681 ET SEQ. ("FCRA"). THE INFORMATION PROVIDED THROUGH THIS PLATFORM MAY NOT BE USED, IN WHOLE OR IN PART, AS A FACTOR IN:</p>'
@@ -11156,9 +11156,9 @@ function showPricingPage() {
     + '<button onclick="document.getElementById(\'pricing-modal\').remove();showToast(\'CLICK ANY PARCEL TO BUY INTEL REPORT\')" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">BUY REPORT</button>'
     + '</div>'
 
-    // List a property
+    // List an asset
     + '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">'
-    + '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">LIST A PROPERTY</div>'
+    + '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">LIST AN ASSET</div>'
     + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + prices.listing_oneshot + '</div>'
     + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">one-time · 90 days active</div>'
     + '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">'
@@ -11171,7 +11171,7 @@ function showPricingPage() {
     + '✓ Listing manager dashboard<br>'
     + '✓ For sale, rent, lease, auction'
     + '</div>'
-    + '<button onclick="document.getElementById(\'pricing-modal\').remove();showToast(\'CLICK ANY PARCEL TO LIST PROPERTY\')" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">LIST PROPERTY</button>'
+    + '<button onclick="document.getElementById(\'pricing-modal\').remove();showToast(\'CLICK ANY PARCEL TO LIST ASSET\')" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">LIST ASSET</button>'
     + '</div>'
     + '</div>'
 
@@ -11450,7 +11450,7 @@ async function submitListing(apn) {
       _ov.id = 'rwa-listing-gate';
       _ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
       _ov.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.25);border-radius:8px;width:100%;max-width:400px;padding:28px 24px;font-family:var(--font);text-align:center">'
-        + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:16px">LIST A PROPERTY</div>'
+        + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:16px">LIST AN ASSET</div>'
         + '<div style="font-size:18px;font-weight:700;color:#f0f4f8;margin-bottom:8px">Ready to list?</div>'
         + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px">One listing or unlimited — your call.</div>'
         + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove();RWA_GATE.stripeCheckout(\'list_property\')" style="width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">LIST ONE PROPERTY — $'+(_t1?'14':'7')+'</button>'
