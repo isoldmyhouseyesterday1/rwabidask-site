@@ -8529,6 +8529,10 @@ const _origUpdateAuthUI = typeof updateAuthUI !== 'undefined' ? updateAuthUI : n
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     initStripe();
+    // Render category tabs
+    if (typeof renderCategoryTabs === 'function') renderCategoryTabs();
+    // Init filter panel for default category
+    if (typeof updateFilterPanelForCategory === 'function') updateFilterPanelForCategory('realestate');
     // Show wallet button when user is signed in
     const origUpdateAuth = window.updateAuthUI;
     if (typeof origUpdateAuth === 'function') {
