@@ -10619,7 +10619,7 @@ window._doParcelSearch = async function _doParcelSearch() {
       const _searchLimit = _isAdmin ? 99999 : (_tier === 'pro' ? 500 : 200);
 
       if (!_isAdmin && _searchCount >= _searchLimit) {
-        if (countEl) countEl.innerHTML = '<span style="color:#fbbf24">Monthly search limit reached. <span style="color:var(--cyan);cursor:pointer;" onclick="_rwaUpgrade('pro')">Upgrade to Pro for 500/mo</span></span>';
+        if (countEl) countEl.innerHTML = '<span style="color:#fbbf24">Monthly search limit reached. <span style="color:var(--cyan);cursor:pointer;" onclick="_rwaUpgrade(\'pro\')">Upgrade to Pro for 500/mo</span></span>';
         if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
         return;
       }
