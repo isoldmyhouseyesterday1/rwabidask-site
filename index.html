@@ -3022,6 +3022,7 @@ body { min-width: 900px; overflow-x: auto; }
       <div id="filter-panel" style="display:none;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-y:auto;overflow-x:hidden;max-height:70vh;">
         <div style="padding:10px 14px 14px;">
 
+          <div id="re-filters">
           <!-- Free notice -->
           <div id="filter-free-notice" style="display:none;background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:9px;color:#8899aa;line-height:1.7;">
             <span style="color:var(--cyan);font-weight:700;">FREE:</span> Filter active listings.<br>
@@ -3309,6 +3310,236 @@ body { min-width: 900px; overflow-x: auto; }
               </div>
             </div>
           </div>
+
+          </div><!-- end re-filters -->
+
+          <!-- TRANSPORT FILTERS -->
+          <div id="transport-filters" style="display:none;">
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">VESSEL / CRAFT TYPE</div>
+              <select id="f-transport-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">All Types</option>
+                <optgroup label="Marine">
+                  <option value="yacht">Yacht</option>
+                  <option value="sailboat">Sailboat</option>
+                  <option value="powerboat">Powerboat</option>
+                  <option value="catamaran">Catamaran</option>
+                  <option value="ferry">Ferry</option>
+                  <option value="tugboat">Tugboat</option>
+                  <option value="ship">Ship / Commercial Vessel</option>
+                </optgroup>
+                <optgroup label="Aviation">
+                  <option value="jet">Private Jet</option>
+                  <option value="plane">Prop Plane</option>
+                  <option value="helicopter">Helicopter</option>
+                  <option value="drone">Drone / UAV</option>
+                </optgroup>
+                <optgroup label="Ground">
+                  <option value="rv">RV / Motorhome</option>
+                  <option value="vehicle">Specialty Vehicle</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PRICE</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <select id="f-t-price-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Min</option>
+                  <option value="10000">$10K</option>
+                  <option value="50000">$50K</option>
+                  <option value="100000">$100K</option>
+                  <option value="250000">$250K</option>
+                  <option value="500000">$500K</option>
+                  <option value="1000000">$1M</option>
+                  <option value="5000000">$5M</option>
+                  <option value="10000000">$10M</option>
+                </select>
+                <select id="f-t-price-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Max</option>
+                  <option value="50000">$50K</option>
+                  <option value="100000">$100K</option>
+                  <option value="250000">$250K</option>
+                  <option value="500000">$500K</option>
+                  <option value="1000000">$1M</option>
+                  <option value="5000000">$5M</option>
+                  <option value="10000000">$10M</option>
+                  <option value="50000000">$50M</option>
+                  <option value="100000000">$100M+</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">YEAR</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <input id="f-t-yr-min" type="number" placeholder="Min year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
+                <input id="f-t-yr-max" type="number" placeholder="Max year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LENGTH (FEET)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <select id="f-t-len-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Min</option>
+                  <option value="20">20 ft</option>
+                  <option value="30">30 ft</option>
+                  <option value="40">40 ft</option>
+                  <option value="50">50 ft</option>
+                  <option value="75">75 ft</option>
+                  <option value="100">100 ft</option>
+                  <option value="150">150 ft</option>
+                  <option value="200">200 ft</option>
+                </select>
+                <select id="f-t-len-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Max</option>
+                  <option value="30">30 ft</option>
+                  <option value="40">40 ft</option>
+                  <option value="50">50 ft</option>
+                  <option value="75">75 ft</option>
+                  <option value="100">100 ft</option>
+                  <option value="150">150 ft</option>
+                  <option value="200">200 ft</option>
+                  <option value="300">300 ft</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">CONDITION</div>
+              <select id="f-t-condition" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">Any</option>
+                <option value="new">New</option>
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+                <option value="project">Project / Restoration</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">FLAG / REGISTRATION</div>
+              <select id="f-t-flag" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">Any</option>
+                <option value="us">United States</option>
+                <option value="cayman">Cayman Islands</option>
+                <option value="marshall">Marshall Islands</option>
+                <option value="panama">Panama</option>
+                <option value="bahamas">Bahamas</option>
+                <option value="uk">United Kingdom</option>
+                <option value="malta">Malta</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div><!-- end transport-filters -->
+
+          <!-- BUSINESS FILTERS -->
+          <div id="business-filters" style="display:none;">
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">INDUSTRY</div>
+              <select id="f-b-industry" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">All Industries</option>
+                <option value="restaurant">Restaurant / Food Service</option>
+                <option value="retail">Retail</option>
+                <option value="ecommerce">E-Commerce</option>
+                <option value="saas">SaaS / Software</option>
+                <option value="manufacturing">Manufacturing</option>
+                <option value="construction">Construction / Trades</option>
+                <option value="healthcare">Healthcare / Medical</option>
+                <option value="automotive">Automotive</option>
+                <option value="franchise">Franchise</option>
+                <option value="real_estate_biz">Real Estate Services</option>
+                <option value="hospitality">Hotel / Hospitality</option>
+                <option value="distribution">Distribution / Logistics</option>
+                <option value="media">Media / Content</option>
+                <option value="professional">Professional Services</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">ASKING PRICE</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <select id="f-b-price-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Min</option>
+                  <option value="50000">$50K</option>
+                  <option value="100000">$100K</option>
+                  <option value="250000">$250K</option>
+                  <option value="500000">$500K</option>
+                  <option value="1000000">$1M</option>
+                  <option value="5000000">$5M</option>
+                  <option value="10000000">$10M</option>
+                </select>
+                <select id="f-b-price-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Max</option>
+                  <option value="100000">$100K</option>
+                  <option value="250000">$250K</option>
+                  <option value="500000">$500K</option>
+                  <option value="1000000">$1M</option>
+                  <option value="5000000">$5M</option>
+                  <option value="10000000">$10M</option>
+                  <option value="50000000">$50M</option>
+                  <option value="100000000">$100M+</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">ANNUAL REVENUE</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <select id="f-b-rev-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Min</option>
+                  <option value="100000">$100K</option>
+                  <option value="250000">$250K</option>
+                  <option value="500000">$500K</option>
+                  <option value="1000000">$1M</option>
+                  <option value="5000000">$5M</option>
+                  <option value="10000000">$10M</option>
+                </select>
+                <select id="f-b-rev-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Max</option>
+                  <option value="500000">$500K</option>
+                  <option value="1000000">$1M</option>
+                  <option value="5000000">$5M</option>
+                  <option value="10000000">$10M</option>
+                  <option value="50000000">$50M</option>
+                  <option value="100000000">$100M+</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">EMPLOYEES</div>
+              <select id="f-b-employees" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">Any</option>
+                <option value="1">1–5</option>
+                <option value="5">6–20</option>
+                <option value="20">21–50</option>
+                <option value="50">51–100</option>
+                <option value="100">100+</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">INCLUDES REAL ESTATE</div>
+              <div style="display:flex;gap:8px;">
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="radio" name="f-b-re" value="" checked style="accent-color:var(--cyan)"> Any</label>
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="radio" name="f-b-re" value="yes" style="accent-color:var(--cyan)"> Yes</label>
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="radio" name="f-b-re" value="no" style="accent-color:var(--cyan)"> No</label>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LISTING TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-b-sale" checked style="accent-color:var(--cyan)"> For Sale</label>
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-b-invest" style="accent-color:var(--cyan)"> Investment</label>
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-b-partner" style="accent-color:var(--cyan)"> Partnership</label>
+                <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-b-franchise" style="accent-color:var(--cyan)"> Franchise</label>
+              </div>
+            </div>
+          </div><!-- end business-filters -->
 
           <button onclick="typeof runParcelSearch==='function'&&runParcelSearch()" id="filter-search-btn" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-top:6px;margin-bottom:6px;">SEARCH PARCELS</button>
           <div id="filter-result-count" style="font-size:9px;color:var(--muted);text-align:center;min-height:16px;"></div>
