@@ -3336,6 +3336,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 let _sb = null;
 let currentUser = null;
+  window.currentUser = null;
 let currentUserRole = null;
 // isPro module-level helper
 function getIsPro(){const r=(currentUserRole||"").toLowerCase();return r==="pro"||r==="broker"||r==="owner"||r==="institutional";}
@@ -6335,6 +6336,7 @@ async function signIn(email, password) {
     const { data, error } = await _sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
     currentUser = data.user;
+    window.currentUser = currentUser;
     currentUserRole = data.user?.user_metadata?.role || null;
     isAuthenticated = true;
     await updateAuthUI();
@@ -6374,6 +6376,7 @@ async function signUp(email, password, fullName) {
 async function signOut() {
   if (_sb) await _sb.auth.signOut();
   currentUser = null;
+  window.currentUser = null;
   isAuthenticated = false;
   updateAuthUI();
   // Open House: no auth gate auto-show on signOut
@@ -6391,7 +6394,8 @@ async function updateAuthUI() {
         .eq('id', currentUser.id).maybeSingle();
       if (profile?.role) currentUserRole = profile.role;
       else currentUserRole = currentUser.user_metadata?.role || 'Investor';
-      window._userTier = profile?.subscription_tier || 'free';
+            const _isAdminUser = window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(currentUser.id);
+      window._userTier = _isAdminUser ? 'admin' : (profile?.subscription_tier || 'free');
       window._stripeCustomerId = profile?.stripe_customer_id || null;
     } catch(e) {
       currentUserRole = currentUser.user_metadata?.role || 'Investor';
