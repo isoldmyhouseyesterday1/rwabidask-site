@@ -3141,8 +3141,8 @@ body { min-width: 900px; overflow-x: auto; }
     <div class="auth-gate-title">RWABidAsk | Sign In Required</div>
     <div class="auth-gate-sub">Sign in to place offers, request financing, and unlock premium data.</div>
     <div class="auth-gate-buttons">
-      <button class="auth-gate-btn primary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('register')">CREATE ACCOUNT</button>
-      <button class="auth-gate-btn secondary" onclick="document.getElementById('auth-gate').classList.add('hidden'); openModal('signin')">SIGN IN</button>
+      <button class="auth-gate-btn primary" onclick="document.getElementById(\'auth-gate\').classList.add(\'hidden\'); openModal('register')">CREATE ACCOUNT</button>
+      <button class="auth-gate-btn secondary" onclick="document.getElementById(\'auth-gate\').classList.add(\'hidden\'); openModal('signin')">SIGN IN</button>
     </div>
   </div>
 </div>
@@ -4668,7 +4668,7 @@ function renderSpecs(specs, assetCat, assetRaw, isUnlockedCtx) {
   const actionGrid = `
   <div class="act-grid" style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
     <button class="abtn a-buy" style="background:var(--accent); color:#000; font-weight:700;" onclick="initiateStripeSandbox('${apn}')">
-      BUY INTEL REPORT ($20)
+      BUY INTEL REPORT
     </button>
     <button class="abtn a-bid" onclick="openModal('bid')">PLACE BID</button>
   </div>
@@ -6511,7 +6511,7 @@ function showTosModal(name, email, password) {
     + '<p style="margin:0 0 14px">This Terms of Service, Privacy Policy, and Data Use Agreement ("Agreement") is between Annie Group LLC, a Washington State limited liability company doing business as RWABidAsk ("Company") and you ("User"). By clicking I Agree you enter into a legally binding contract. Your acceptance is recorded permanently with your IP address, timestamp, device user agent string, and agreement version number. This acceptance record is immutable and cannot be deleted or modified.</p>'
 
     + '<p style="font-weight:700;margin:0 0 6px">SECTION 2 — DESCRIPTION OF SERVICES</p>'
-    + '<p style="margin:0 0 14px">RWABidAsk is a real property intelligence platform that aggregates, displays, and analyzes publicly available county assessor data, government geospatial datasets, recorded deed and transaction history, crime statistics from law enforcement open data portals, building permit records, and other public records. Services include free parcel data display, paid Property Intelligence Reports ($20.00 USD per report), property listing tools, broker and owner data submission tools, data correction tools, and subscription plans for professional users.</p>'
+    + '<p style="margin:0 0 14px">RWABidAsk is a real property intelligence platform that aggregates, displays, and analyzes publicly available county assessor data, government geospatial datasets, recorded deed and transaction history, crime statistics from law enforcement open data portals, building permit records, and other public records. Services include free parcel data display, paid Property Intelligence Reports ($9.00 USD T1 / $5.00 USD T2 per report), property listing tools, broker and owner data submission tools, data correction tools, and subscription plans for professional users.</p>'
 
     + '<p style="font-weight:700;margin:0 0 6px">SECTION 3 — NOT A CONSUMER REPORTING AGENCY — FCRA DISCLAIMER</p>'
     + '<p style="margin:0 0 6px;font-weight:700">RWABIDASK IS NOT A CONSUMER REPORTING AGENCY AS DEFINED BY THE FAIR CREDIT REPORTING ACT, 15 U.S.C. § 1681 ET SEQ. ("FCRA"). THE INFORMATION PROVIDED THROUGH THIS PLATFORM MAY NOT BE USED, IN WHOLE OR IN PART, AS A FACTOR IN:</p>'
@@ -6548,7 +6548,7 @@ function showTosModal(name, email, password) {
     + '<p style="margin:0 0 14px">The RWABidAsk name, logo, platform design, Property Intelligence Score methodology, and comp set methodology are proprietary to Annie Group LLC. Intel Reports are licensed for personal or business use only and may not be resold, redistributed, or republished without written consent. Underlying public records data remains in the public domain.</p>'
 
     + '<p style="font-weight:700;margin:0 0 6px">SECTION 10 — PAYMENTS AND REFUNDS</p>'
-    + '<p style="margin:0 0 14px">Property Intelligence Reports are $20.00 USD per report. All sales are final. No refunds are issued once a report has been generated and delivered. Subscription fees are billed in advance and are non-refundable except as required by applicable law. Payment processing is handled by Stripe Inc. Annie Group LLC does not store payment card information.</p>'
+    + '<p style="margin:0 0 14px">Property Intelligence Reports are $9.00 USD (Tier 1) or $5.00 USD (Tier 2) per report. All sales are final. No refunds are issued once a report has been generated and delivered. Subscription fees are billed in advance and are non-refundable except as required by applicable law. Payment processing is handled by Stripe Inc. Annie Group LLC does not store payment card information.</p>'
 
     + '<p style="font-weight:700;margin:0 0 6px">SECTION 11 — PROHIBITED USES</p>'
     + '<p style="margin:0 0 14px">You may not use this platform to: scrape, harvest, or systematically download data; reverse engineer proprietary algorithms; submit false, fraudulent, or misleading data; violate fair housing, privacy, or consumer protection laws; use data for FCRA-regulated purposes; circumvent access controls or payment systems; or use automated bots or scripts without written authorization.</p>'
@@ -6875,7 +6875,7 @@ let _userCredits = 0;
 
 // ════════════════════════════════════════════════════════════════════
 // REGIONAL TIER DETECTION — Silent locale-based pricing
-// Tier 1: NA, EU, AU, NZ, UK → Claim $20/yr | Intelligence $10
+// Tier 1: NA, EU, AU, NZ, UK → Intel $9 | Tier 2: Intel $5
 // Tier 2: Global              → Claim $10/yr | Intelligence $5
 // ════════════════════════════════════════════════════════════════════
 const TIER1_ZONES = new Set([
@@ -10347,7 +10347,7 @@ function showListingModal(apn) {
               <div style="font-size:8px;color:#3a4a5a;margin-top:2px;">Self-reported</div>
             </div>
             <div style="flex:2;padding:8px;background:#0d1e2a;border-radius:4px;border:1px solid #1a7fa8;cursor:pointer;" onclick="showToast('UPGRADE TO VERIFIED MEMBER — $49/MO')">
-              <div style="font-size:10px;color:#1a7fa8;font-weight:700;">$49/month — Verified ✓</div>
+              <div style="font-size:10px;color:#1a7fa8;font-weight:700;">Pro Plan — Verified ✓</div>
               <div style="font-size:8px;color:#556677;margin-top:2px;">Passport · License · Agent card · Priority placement</div>
             </div>
           </div>
@@ -10361,7 +10361,7 @@ function showListingModal(apn) {
           SUBMIT LISTING →
         </button>
         <div style="font-size:9px;color:#556677;text-align:center;line-height:1.6;">
-          Free during beta · Media stored in RWABidAsk cloud · Becomes part of parcel intel record
+          Media stored in RWABidAsk cloud · Becomes part of parcel intel record
         </div>
       </div>
     </div>`;
