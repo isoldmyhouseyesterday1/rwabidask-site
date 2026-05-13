@@ -3000,6 +3000,20 @@ body { min-width: 900px; overflow-x: auto; }
         <button class="ptab map-tab" onclick="setCategory('transport', this)">TRANSPORTS</button>
         <button class="ptab map-tab" onclick="setCategory('business', this)">BUSINESSES</button>
       </div>
+      <!-- ── AI SEARCH ─────────────────────────────────────────────── -->
+      <div id="ai-search-wrap" style="padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div style="position:relative;">
+          <input id="ai-search-input" type="text"
+            placeholder="✦ Ask anything... 3bd waterfront under $2M Mercer Island"
+            style="width:100%;background:rgba(0,255,200,.04);color:var(--text);border:1px solid rgba(0,255,200,.2);border-radius:4px;padding:7px 36px 7px 10px;font-size:10px;font-family:var(--font);letter-spacing:.2px;"
+            onkeydown="if(event.key==='Enter')runAISearch()"
+          >
+          <button onclick="runAISearch()" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--cyan);cursor:pointer;font-size:14px;padding:4px;">✦</button>
+        </div>
+        <div id="ai-search-status" style="font-size:9px;color:var(--muted);min-height:14px;margin-top:4px;text-align:center;"></div>
+      </div>
+      <!-- ── END AI SEARCH ─────────────────────────────────────────── -->
+
       <div id="price-slider-wrap" style="padding:10px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">ASSESSED VALUE</span>
@@ -11109,6 +11123,102 @@ function clearSearchPins() {
   window._lastSearchAssets = null;
 }
 
+
+
+// ══════════════════════════════════════════════════════════════════
+// GEMINI AI SEARCH
+// ══════════════════════════════════════════════════════════════════
+async function runAISearch() {
+  const input = document.getElementById('ai-search-input');
+  const status = document.getElementById('ai-search-status');
+  const query = input?.value?.trim();
+  if (!query) return;
+
+  if (status) status.textContent = '✦ Thinking…';
+  input.disabled = true;
+
+  try {
+    const resp = await fetch(
+      'https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/gemini-search',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+        body: JSON.stringify({ query })
+      }
+    );
+    const data = await resp.json();
+    const filters = data.filters || {};
+
+    if (!filters || Object.keys(filters).length === 0) {
+      if (status) status.textContent = 'Could not parse filters — try rephrasing';
+      input.disabled = false;
+      return;
+    }
+
+    // Switch category if detected
+    const cat = filters.category || 'realestate';
+    if (cat && cat !== 'all') {
+      const tabBtn = document.querySelector(`[onclick*="setCategory('${cat}'"]`) ||
+                     document.querySelector(`button.ptab[onclick*="${cat}"]`);
+      if (typeof setCategory === 'function') setCategory(cat, tabBtn);
+    }
+
+    // Open filter panel
+    const panel = document.getElementById('filter-panel');
+    const btn = document.getElementById('filter-toggle-btn');
+    if (panel && panel.style.display === 'none') {
+      if (typeof toggleFilterPanel === 'function') toggleFilterPanel();
+    }
+
+    // Apply filters to form fields
+    if (filters.min_beds) setBedsFilter(parseInt(filters.min_beds));
+    if (filters.min_baths) setBathsFilter(parseFloat(filters.min_baths));
+    if (filters.min_price && document.getElementById('f-price-min')) document.getElementById('f-price-min').value = filters.min_price;
+    if (filters.max_price && document.getElementById('f-price-max')) document.getElementById('f-price-max').value = filters.max_price;
+    if (filters.min_sqft && document.getElementById('f-sqft-min')) document.getElementById('f-sqft-min').value = filters.min_sqft;
+    if (filters.max_sqft && document.getElementById('f-sqft-max')) document.getElementById('f-sqft-max').value = filters.max_sqft;
+    if (filters.min_year && document.getElementById('f-yr-min')) document.getElementById('f-yr-min').value = filters.min_year;
+    if (filters.max_year && document.getElementById('f-yr-max')) document.getElementById('f-yr-max').value = filters.max_year;
+    if (filters.min_lot && document.getElementById('f-lot-min')) document.getElementById('f-lot-min').value = filters.min_lot;
+    if (filters.waterfront === 'yes' && document.getElementById('f-waterfront-check')) document.getElementById('f-waterfront-check').checked = true;
+    if (filters.waterfront_body && document.getElementById('f-wf-body')) document.getElementById('f-wf-body').value = filters.waterfront_body;
+    if (filters.view_type && document.getElementById('f-view')) document.getElementById('f-view').value = filters.view_type;
+    if (filters.prop_type && document.getElementById('f-prop-type')) document.getElementById('f-prop-type').value = filters.prop_type;
+    if (filters.water_system && document.getElementById('f-water-sys')) document.getElementById('f-water-sys').value = filters.water_system;
+    if (filters.sewer_system && document.getElementById('f-sewer-sys')) document.getElementById('f-sewer-sys').value = filters.sewer_system;
+    if (filters.min_grade && document.getElementById('f-grade')) document.getElementById('f-grade').value = filters.min_grade;
+    if (filters.flood_risk === 'no' && document.getElementById('f-no-flood')) document.getElementById('f-no-flood').checked = true;
+    if (filters.motivated === 'yes' && document.getElementById('f-motivated')) document.getElementById('f-motivated').checked = true;
+
+    // Transport filters
+    if (filters.transport_type && document.getElementById('f-transport-type')) document.getElementById('f-transport-type').value = filters.transport_type;
+    if (filters.condition && document.getElementById('f-t-condition')) document.getElementById('f-t-condition').value = filters.condition;
+    if (filters.flag && document.getElementById('f-t-flag')) document.getElementById('f-t-flag').value = filters.flag;
+    if (filters.min_length && document.getElementById('f-t-len-min')) document.getElementById('f-t-len-min').value = filters.min_length;
+    if (filters.max_length && document.getElementById('f-t-len-max')) document.getElementById('f-t-len-max').value = filters.max_length;
+
+    // Business filters
+    if (filters.industry && document.getElementById('f-b-industry')) document.getElementById('f-b-industry').value = filters.industry;
+    if (filters.min_revenue && document.getElementById('f-b-rev-min')) document.getElementById('f-b-rev-min').value = filters.min_revenue;
+    if (filters.max_revenue && document.getElementById('f-b-rev-max')) document.getElementById('f-b-rev-max').value = filters.max_revenue;
+
+    // Count applied filters
+    const applied = Object.keys(filters).filter(k => k !== 'category').length;
+    if (status) status.textContent = '✦ ' + applied + ' filter' + (applied !== 1 ? 's' : '') + ' applied — hit SEARCH PARCELS';
+
+    // Auto-run search
+    setTimeout(() => {
+      if (typeof runParcelSearch === 'function') runParcelSearch();
+    }, 300);
+
+  } catch(e) {
+    if (status) status.textContent = 'AI search error — try again';
+    console.error('[Gemini]', e);
+  } finally {
+    input.disabled = false;
+  }
+}
+window.runAISearch = runAISearch;
 
 // ── PRICING PAGE ─────────────────────────────────────────────────────────────
 function showPricingPage() {
