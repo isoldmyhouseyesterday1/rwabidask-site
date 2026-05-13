@@ -9910,7 +9910,7 @@ const RWA_GATE = {
     d.id = 'rwa-nudge';
     d.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0a1628;border:1px solid rgba(0,255,200,.3);border-radius:8px;padding:14px 20px;z-index:99998;display:flex;align-items:center;gap:16px;min-width:340px;max-width:520px;box-shadow:0 4px 24px rgba(0,0,0,.6);';
     d.innerHTML = '<div style="flex:1">'
-      + '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan);margin-bottom:3px">YOU'VE EXPLORED ' + v + ' PARCELS</div>'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan);margin-bottom:3px">YOU&#39;VE EXPLORED ' + v + ' PARCELS</div>'
       + '<div style="font-size:11px;color:#8899aa;line-height:1.5">Data companies charge $750–$3,300/mo for this. Keep going for $19/mo.</div>'
       + '</div>'
       + '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
@@ -10045,7 +10045,8 @@ const RWA_GATE = {
 };
 
 // Track view on every renderBasicsPanel call
-(function() {
+// Deferred so renderBasicsPanel is fully defined first
+setTimeout(function() {
   const _origRender = window.renderBasicsPanel;
   if (typeof _origRender === 'function') {
     window.renderBasicsPanel = function() {
@@ -10053,7 +10054,7 @@ const RWA_GATE = {
       return _origRender.apply(this, arguments);
     };
   }
-})();
+}, 2000);
 
 // ── PRICING PAGE ─────────────────────────────────────────────────────────────
 function showPricingPage() {
