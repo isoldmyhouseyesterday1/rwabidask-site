@@ -10618,9 +10618,10 @@ window._doParcelSearch = async function _doParcelSearch() {
   const _searchLimit = _isAdmin ? 99999 : (_searchLimits[_tier] || 0);
 
   if (!_isAdmin && _tier === 'free') {
-    if (countEl) countEl.textContent = 'Upgrade to search all 635k parcels';
+    if (countEl) countEl.textContent = 'Starter plan required to search parcels.';
     if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
-    _rwaUpgrade('starter');
+    // Show soft notice — don't auto-redirect to Stripe
+    showToast('UPGRADE TO STARTER TO SEARCH 635K PARCELS');
     return;
   }
 
