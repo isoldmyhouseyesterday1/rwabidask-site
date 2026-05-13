@@ -3463,20 +3463,32 @@ let markersRendered = false;
 // ASSET CATEGORIES - Castle/Estates mapped to Real Estate
 // ============================================================
 const ASSET_CATEGORIES = [
-  // ── Phase 1: Real Estate only — other sectors hidden pending data ──
-  // ── Future: anthro, bio, financial, energy, healthcare, infrastructure, robotics, technology, transport ──
-  { id: 'all',            label: 'ALL',            physical: false, mapPin: false },
-  { id: 'realestate',     label: 'REAL ESTATE',    physical: false, mapPin: false },
+  { id: 'all',          label: 'ALL',          physical: false, mapPin: false },
+  { id: 'realestate',   label: 'REAL ESTATE',  physical: false, mapPin: false },
+  { id: 'transport',    label: 'TRANSPORTS',   physical: true,  mapPin: true  },
+  { id: 'business',     label: 'BUSINESSES',   physical: false, mapPin: false },
 ];
 
 // Categories that render globe pins (physical, tangible, locatable)
-const MAP_PIN_CATEGORIES = new Set(['anthro','bio','energy','healthcare','robotics','transport']);
+const MAP_PIN_CATEGORIES = new Set(['anthro','bio','energy','healthcare','robotics','transport','realestate']);
 // Categories that are dashboard-only (intangible / no fixed location)
-const DASHBOARD_ONLY_CATEGORIES = new Set(['financial','infrastructure','realestate','technology']);
+const DASHBOARD_ONLY_CATEGORIES = new Set(['financial','infrastructure','technology']);
 
 function getAssetCategory(type) {
   const t = (type || '').toLowerCase().trim();
   const map = {
+    // ── TRANSPORT — vessels, aircraft, vehicles ──────────────────
+    yacht: 'transport', sailboat: 'transport', powerboat: 'transport',
+    boat: 'transport', vessel: 'transport', ship: 'transport',
+    ferry: 'transport', tugboat: 'transport', catamaran: 'transport',
+    jet: 'transport', aircraft: 'transport', plane: 'transport',
+    helicopter: 'transport', drone: 'transport', aviation: 'transport',
+    maritime: 'transport', marine: 'transport',
+    rv: 'transport', motorhome: 'transport', vehicle: 'transport',
+    // ── BUSINESS ──────────────────────────────────────────────────
+    business: 'business', franchise: 'business', company: 'business',
+    restaurant: 'business', retail: 'business', ecommerce: 'business',
+    saas: 'business', startup: 'business', manufacturing: 'business',
     // ── MARITIME — physical vessels ───────────────────────────────
     // ── TRANSPORT — maritime + aviation consolidated ──────────────
     maritime:'transport', vessel:'transport', ship:'transport', boat:'transport',
@@ -4260,9 +4272,19 @@ function setCategory(catId, btn) {
   currentSearchQuery = '';
   const filtered = filterAssets(ASSETS);
   renderList(filtered);
-  // Hard-sync: re-cluster and re-pin immediately for this category
   if (markersRendered) renderDOMMarkers();
   if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull();
+  // Update filter panel for active category
+  updateFilterPanelForCategory(catId);
+}
+
+function updateFilterPanelForCategory(catId) {
+  const reFilters = document.getElementById('re-filters');
+  const transportFilters = document.getElementById('transport-filters');
+  const businessFilters = document.getElementById('business-filters');
+  if (reFilters) reFilters.style.display = (catId === 'realestate' || catId === 'all') ? 'block' : 'none';
+  if (transportFilters) transportFilters.style.display = catId === 'transport' ? 'block' : 'none';
+  if (businessFilters) businessFilters.style.display = catId === 'business' ? 'block' : 'none';
 }
 
 // ── LOG SLIDER ENGINE (Custom drag — fully independent handles) ──
