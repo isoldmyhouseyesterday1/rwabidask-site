@@ -9998,8 +9998,8 @@ async function brokerSubmitCorrection() {
 // ══════════════════════════════════════════════════════════════════
 // ── Safe global helpers for account menu buttons ────────────────
 function _rwaUpgrade(product) {
-  // Sync currentUser to window before calling
   if (typeof currentUser !== 'undefined') window.currentUser = currentUser;
+  if (typeof _sb !== 'undefined') window._sb = _sb;
   if (typeof RWA_GATE !== 'undefined') RWA_GATE.stripeCheckout(product);
   else showToast('Loading... please try again');
 }
