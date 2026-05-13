@@ -8288,6 +8288,11 @@ function renderBasicsPanel(asset) {
   const apn  = a.apn  || a.id || '—';
   const raw  = a._raw || {};
   const phys = (a.specs && a.specs.physical) || {};
+  // isPaidReport — true if user has purchased intel for this parcel
+  // Will be updated async after Supabase check
+  let isPaidReport = false;
+  const _adminBypass = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
+  if (_adminBypass) isPaidReport = true;
 
   const address  = a.address        || phys.address    || raw.address  || '—';
   const acreage  = phys.acreage     || raw.acreage     || '—';
