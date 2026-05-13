@@ -2998,8 +2998,8 @@ body { min-width: 900px; overflow-x: auto; }
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">ASSESSED VALUE</span>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button id="filter-toggle-btn" style="font-size:8px;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);cursor:pointer;padding:2px 8px;letter-spacing:.5px;font-weight:600;border-radius:3px" onclick="typeof toggleFilterPanel==='function'&&toggleFilterPanel()">FILTERS ▾</button>
-            <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="typeof resetAllFilters==='function'&&resetAllFilters()">RESET</button>
+            <button id="filter-toggle-btn" style="font-size:8px;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);cursor:pointer;padding:2px 8px;letter-spacing:.5px;font-weight:600;border-radius:3px" onclick="window.toggleFilterPanel&&window.toggleFilterPanel()">FILTERS ▾</button>
+            <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="window.resetAllFilters&&window.resetAllFilters()">RESET</button>
           </div>
         </div>
         <div style="text-align:center;margin-bottom:7px;">
@@ -10426,7 +10426,7 @@ const PARCEL_MAX_PRICE = 20000000; // $20M max for RE slider
 let _filterSearchDebounce = null;
 let _filterSearchResults = [];
 
-function toggleFilterPanel() {
+window.toggleFilterPanel = function toggleFilterPanel() {
   const panel = document.getElementById('filter-panel');
   const btn = document.getElementById('filter-toggle-btn');
   if (!panel) return;
@@ -10448,7 +10448,7 @@ function toggleFilterPanel() {
   if (btn) btn.textContent = panel.style.display === 'none' ? 'FILTERS ▾' : 'FILTERS ▴';
 }
 
-function resetAllFilters() {
+window.resetAllFilters = function resetAllFilters() {
   resetPriceSlider();
   ['f-beds','f-baths','f-prop-type','f-waterfront','f-wf-body','f-view','f-water-sys','f-sewer-sys','f-lot','f-grade'].forEach(id => {
     const el = document.getElementById(id);
@@ -10470,7 +10470,7 @@ function resetAllFilters() {
   showToast('FILTERS RESET');
 }
 
-async function runParcelSearch() {
+window.runParcelSearch = async function runParcelSearch() {
   const tier = window._userTier || 'free';
   const isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
   if (!isAdmin && tier === 'free') {
@@ -10484,7 +10484,7 @@ async function runParcelSearch() {
   _filterSearchDebounce = setTimeout(_doParcelSearch, 600);
 }
 
-async function _doParcelSearch() {
+window._doParcelSearch = async function _doParcelSearch() {
   const btn = document.getElementById('filter-search-btn');
   const countEl = document.getElementById('filter-result-count');
   if (btn) { btn.textContent = 'SEARCHING…'; btn.disabled = true; }
@@ -10579,7 +10579,7 @@ function renderFilterResults(results) {
     const price = p.assessed_value > 0 ? '$' + p.assessed_value.toLocaleString() : '—';
     const details = [p.beds ? p.beds + 'bd' : null, p.baths ? p.baths + 'ba' : null, p.sqft ? p.sqft.toLocaleString() + ' sf' : null].filter(Boolean).join(' · ');
     const wf = p.waterfront_ft > 0 ? '<span style="color:var(--cyan);font-size:8px"> · WF ' + p.waterfront_ft + 'ft</span>' : '';
-    return '<div style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="_filterClick(this)" data-pin="'+p.pin+'" data-lat="'+p.lat+'" data-lng="'+p.lng+'" data-addr="'+escapeHtml(p.address||p.pin)+'">'\n      + '<div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px">' + escapeHtml(p.address || p.pin) + wf + '</div>'
+    return '<div style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="_filterClick(this)" data-pin="'+p.pin+'" data-lat="'+p.lat+'" data-lng="'+p.lng+'" data-addr="'+escapeHtml(p.address||p.pin)+'">'      + '<div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px">' + escapeHtml(p.address || p.pin) + wf + '</div>'
       + (details ? '<div style="font-size:9px;color:var(--muted);margin-bottom:3px">' + details + '</div>' : '')
       + '<div style="display:flex;justify-content:space-between">'
       + '<span style="font-size:11px;font-weight:700;color:var(--gold)">' + price + '</span>'
