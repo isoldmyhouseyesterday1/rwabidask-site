@@ -10579,8 +10579,7 @@ function renderFilterResults(results) {
     const price = p.assessed_value > 0 ? '$' + p.assessed_value.toLocaleString() : '—';
     const details = [p.beds ? p.beds + 'bd' : null, p.baths ? p.baths + 'ba' : null, p.sqft ? p.sqft.toLocaleString() + ' sf' : null].filter(Boolean).join(' · ');
     const wf = p.waterfront_ft > 0 ? '<span style="color:var(--cyan);font-size:8px"> · WF ' + p.waterfront_ft + 'ft</span>' : '';
-    return '<div style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="renderBasicsPanel({id:''+p.pin+'',apn:''+p.pin+'',address:''+escapeHtml(p.address||p.pin)+'',lat:'+p.lat+',lng:'+p.lng+',type:'real_estate'})">'
-      + '<div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px">' + escapeHtml(p.address || p.pin) + wf + '</div>'
+    return '<div style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="_filterClick(this)" data-pin="'+p.pin+'" data-lat="'+p.lat+'" data-lng="'+p.lng+'" data-addr="'+escapeHtml(p.address||p.pin)+'">'\n      + '<div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px">' + escapeHtml(p.address || p.pin) + wf + '</div>'
       + (details ? '<div style="font-size:9px;color:var(--muted);margin-bottom:3px">' + details + '</div>' : '')
       + '<div style="display:flex;justify-content:space-between">'
       + '<span style="font-size:11px;font-weight:700;color:var(--gold)">' + price + '</span>'
@@ -10629,6 +10628,16 @@ function plotSearchResultsOnMap(results) {
   // Fly to first result
   if (results[0] && results[0].lat && typeof flyTo === 'function') {
     flyTo(results[0].lat, results[0].lng, 2000, 0);
+  }
+}
+
+function _filterClick(el) {
+  const pin = el.dataset.pin;
+  const lat = parseFloat(el.dataset.lat);
+  const lng = parseFloat(el.dataset.lng);
+  const addr = el.dataset.addr || pin;
+  if (pin && lat && lng) {
+    renderBasicsPanel({id:pin, apn:pin, address:addr, lat:lat, lng:lng, type:'real_estate'});
   }
 }
 
