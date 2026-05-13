@@ -6384,6 +6384,13 @@ async function signOut() {
   if (map3dEl) onCameraChange();
 }
 
+function isAdminUser(uid) {
+  if (!uid) return false;
+  const adminId = '788ccadc-c05d-466c-bcae-ba00ffb9ab97';
+  if (uid === adminId) return true;
+  if (window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(uid)) return true;
+  return false;
+}
 async function updateAuthUI() {
   const signinBtn = document.getElementById('signin-btn');
   const joinBtn   = document.getElementById('join-btn');
@@ -6394,15 +6401,14 @@ async function updateAuthUI() {
         .eq('id', currentUser.id).maybeSingle();
       if (profile?.role) currentUserRole = profile.role;
       else currentUserRole = currentUser.user_metadata?.role || 'Investor';
-            const _isAdminUser = window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(currentUser.id);
-      window._userTier = _isAdminUser ? 'admin' : (profile?.subscription_tier || 'free');
+            window._userTier = isAdminUser(currentUser.id) ? 'admin' : (profile?.subscription_tier || 'free');
       window._stripeCustomerId = profile?.stripe_customer_id || null;
     } catch(e) {
       currentUserRole = currentUser.user_metadata?.role || 'Investor';
       window._userTier = 'free';
     }
     const tier = window._userTier || 'free';
-    const isAdmin = window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(currentUser.id);
+    const isAdmin = isAdminUser(currentUser.id);
     const tierLabel = isAdmin ? 'ADMIN' : tier === 'pro' ? 'PRO' : tier === 'starter' ? 'STARTER' : 'FREE';
     const tierColor = isAdmin ? 'var(--gold)' : tier === 'pro' ? 'var(--gold)' : tier === 'starter' ? 'var(--cyan)' : 'var(--muted)';
     const handle = (currentUser.email?.split('@')[0] || 'Account').slice(0, 14);
@@ -6447,7 +6453,7 @@ function showAccountMenu() {
   const existing = document.getElementById('rwa-account-menu');
   if (existing) { existing.remove(); return; }
   const tier = window._userTier || 'free';
-  const isAdmin = window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(currentUser?.id);
+  const isAdmin = isAdminUser(currentUser?.id);
   const tierLabel = isAdmin ? 'ADMIN' : tier === 'pro' ? 'PRO' : tier === 'starter' ? 'STARTER' : 'FREE PLAN';
   const tierColor = isAdmin ? '#fbbf24' : tier === 'pro' ? '#fbbf24' : tier === 'starter' ? '#00ffc8' : '#556677';
   const t1 = typeof detectRegionalTier === 'function' && detectRegionalTier() === 'tier1';
@@ -10016,7 +10022,7 @@ const RWA_GATE = {
   },
   isAdmin: function() {
     if (!window.currentUser) return false;
-    return window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(window.currentUser.id);
+    return isAdminUser(window.currentUser?.id);
   },
   checkTriggers: function(v) {
     if (this.isPaid() || this.isAdmin()) return;
