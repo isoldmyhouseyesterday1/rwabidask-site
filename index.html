@@ -3019,7 +3019,7 @@ body { min-width: 900px; overflow-x: auto; }
       </div>
 
       <!-- ── FILTER PANEL ─────────────────────────────────────────── -->
-      <div id="filter-panel" style="display:none;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-y:auto;max-height:70vh;">
+      <div id="filter-panel" style="display:none;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-y:auto;max-height:70vh;overflow-x:hidden;">
         <div style="padding:10px 14px 14px;position:relative;">
 
           <!-- Free tier notice -->
@@ -3044,8 +3044,8 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- Price range — free -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PRICE RANGE</div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <select id="f-price-min" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+            <div style="display:flex;gap:6px;align-items:center;overflow:hidden;">
+              <select id="f-price-min" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
                 <option value="">No Min</option>
                 <option value="50000">$50K</option>
                 <option value="100000">$100K</option>
@@ -3061,7 +3061,7 @@ body { min-width: 900px; overflow-x: auto; }
                 <option value="5000000">$5M</option>
               </select>
               <span style="color:var(--muted);font-size:10px;">—</span>
-              <select id="f-price-max" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+              <select id="f-price-max" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
                 <option value="">No Max</option>
                 <option value="100000">$100K</option>
                 <option value="200000">$200K</option>
@@ -3200,7 +3200,7 @@ body { min-width: 900px; overflow-x: auto; }
             <!-- Water body -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">WATERFRONT BODY</div>
-              <select id="f-wf-body" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <select id="f-wf-body" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
                 <option value="">Any</option>
                 <option value="lake_washington">Lake Washington</option>
                 <option value="lake_sammamish">Lake Sammamish</option>
@@ -3213,7 +3213,7 @@ body { min-width: 900px; overflow-x: auto; }
             <!-- View type -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">VIEW TYPE</div>
-              <select id="f-view" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <select id="f-view" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
                 <option value="">Any</option>
                 <option value="lake_washington">Lake Washington</option>
                 <option value="puget_sound">Puget Sound</option>
@@ -3227,7 +3227,7 @@ body { min-width: 900px; overflow-x: auto; }
             <!-- Water system -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">WATER SYSTEM</div>
-              <select id="f-water-sys" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <select id="f-water-sys" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
                 <option value="">Any</option>
                 <option value="1">Private (well)</option>
                 <option value="2">Water District (public)</option>
@@ -3239,7 +3239,7 @@ body { min-width: 900px; overflow-x: auto; }
             <!-- Sewer system -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">SEWER SYSTEM</div>
-              <select id="f-sewer-sys" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <select id="f-sewer-sys" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
                 <option value="">Any</option>
                 <option value="1">Private (septic)</option>
                 <option value="2">Public (sewer)</option>
@@ -3249,7 +3249,7 @@ body { min-width: 900px; overflow-x: auto; }
             <!-- Building grade -->
             <div style="margin-bottom:10px;">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">MIN BUILD QUALITY (ASSESSOR GRADE)</div>
-              <select id="f-grade" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+              <select id="f-grade" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
                 <option value="">Any</option>
                 <option value="7">Average (7+)</option>
                 <option value="8">Good (8+)</option>
