@@ -2978,7 +2978,7 @@ body { min-width: 900px; overflow-x: auto; }
     <div style="display:none"><div id="s-status">SYNC</div></div>
     <div style="display:none"><div id="s-bids">—</div></div>
     <button class="tbtn" id="signin-btn" onclick="openModal('signin')">Sign In</button>
-    <button class="tbtn" onclick="showPricingPage()" style="color:var(--muted)">Pricing</button>
+    
     <button class="tbtn primary" id="join-btn" onclick="openModal('signup')">Join Free</button>
   </div>
 </div>
@@ -6908,7 +6908,7 @@ function detectRegionalTier() {
 }
 
 function getIntelligencePrice() {
-  return detectRegionalTier() === 'tier1' ? 20.00 : 10.00;
+  return detectRegionalTier() === 'tier1' ? 9.00 : 5.00;
 }
 
 function getClaimPrice() {
@@ -6916,13 +6916,31 @@ function getClaimPrice() {
 }
 
 // Subscription pricing by tier
+// ── STRIPE PRICE IDs ──────────────────────────────────────────────
+const STRIPE_PRICES = {
+  intel_report:        { t1: 'price_1TWe9LKuC0MRY8oU2UfZCXvM', t2: 'price_1TWeCHKuC0MRY8oUu6nwxESa' },
+  list_property:       { t1: 'price_1TWdqdKuC0MRY8oUStEnToPh', t2: 'price_1TWdrAKuC0MRY8oUCzNrmpxu' },
+  starter:             { t1: 'price_1TWdrgKuC0MRY8oU6An2Pux8', t2: 'price_1TWdsCKuC0MRY8oUTgBvX5xI' },
+  pro:                 { t1: 'price_1TWdsgKuC0MRY8oUIC2osyEs', t2: 'price_1TWdt6KuC0MRY8oUM6uZtFPX' },
+  listings_unlimited:  { t1: 'price_1TWdtxKuC0MRY8oUwItcWgRu', t2: 'price_1TWduVKuC0MRY8oUmubKLEtv' },
+  agent_seat:          { t1: 'price_1TWduyKuC0MRY8oUfvhAA2Cj', t2: 'price_1TWdvHKuC0MRY8oUgu8AueE6' },
+  white_label:         { t1: 'price_1TWdvxKuC0MRY8oU204OR2vi', t2: 'price_1TWdwTKuC0MRY8oUEW1fyPnA' },
+};
+
+function getStripePriceId(product) {
+  const tier = detectRegionalTier();
+  return STRIPE_PRICES[product][tier === 'tier1' ? 't1' : 't2'];
+}
+
 function getSubscriptionPrices() {
   const t1 = detectRegionalTier() === 'tier1';
   return {
-    intel_unlimited: t1 ? 49  : 25,
-    listings_unlimited: t1 ? 99  : 50,
-    pro_bundle: t1 ? 149 : 75,
-    listing_oneshot: t1 ? 19  : 10,
+    intel_unlimited:    t1 ? 19  : 10,
+    listings_unlimited: t1 ? 29  : 15,
+    pro_bundle:         t1 ? 39  : 20,
+    listing_oneshot:    t1 ? 14  : 7,
+    agent_seat:         t1 ? 19  : 10,
+    white_label:        t1 ? 39  : 20,
   };
 }
 
@@ -7177,6 +7195,7 @@ async function showOrderbookModal(assetId) {
 
   // Silent regional pricing — no tier menu shown to user
   const price = getIntelligencePrice();
+  const intelPriceId = getStripePriceId('intel_report');
 
   const bodyHtml = `
     <div style="font-size:10px;color:var(--dim);line-height:1.9;margin-bottom:16px;letter-spacing:.3px;text-transform:uppercase">
@@ -7226,6 +7245,7 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
         body: JSON.stringify({
           user_id:     currentUser.id,
           asset_id:    String(assetId),
+          price_id:    intelPriceId,
           tier:        'intelligence_' + detectRegionalTier(),
           price_usd:   price,
           email:       currentUser.email,
@@ -9852,6 +9872,188 @@ async function brokerSubmitCorrection() {
   } catch(e) { showToast('SUBMIT FAILED: ' + e.message); }
 }
 
+
+
+// ══════════════════════════════════════════════════════════════════
+// SMART CONVERSION SYSTEM — View counter + intent gates
+// ══════════════════════════════════════════════════════════════════
+const RWA_GATE = {
+  getViews: function() {
+    return parseInt(localStorage.getItem('rwa_views') || '0');
+  },
+  addView: function() {
+    const v = this.getViews() + 1;
+    localStorage.setItem('rwa_views', v);
+    this.checkTriggers(v);
+    return v;
+  },
+  isPaid: function() {
+    const u = window.currentUser;
+    if (!u) return false;
+    const tier = window._userTier || '';
+    return tier === 'starter' || tier === 'pro' || tier === 'admin';
+  },
+  isAdmin: function() {
+    if (!window.currentUser) return false;
+    return window.ADMIN_USER_IDS && window.ADMIN_USER_IDS.has(window.currentUser.id);
+  },
+  checkTriggers: function(v) {
+    if (this.isPaid() || this.isAdmin()) return;
+    if (v >= 1000) { this.showHardGate(); return; }
+    if (v >= 500 && v % 100 === 0) { this.showIntelPrompt(); return; }
+    if (v % 100 === 0) { this.showNudge(v); }
+  },
+  showNudge: function(v) {
+    const existing = document.getElementById('rwa-nudge');
+    if (existing) existing.remove();
+    const d = document.createElement('div');
+    d.id = 'rwa-nudge';
+    d.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0a1628;border:1px solid rgba(0,255,200,.3);border-radius:8px;padding:14px 20px;z-index:99998;display:flex;align-items:center;gap:16px;min-width:340px;max-width:520px;box-shadow:0 4px 24px rgba(0,0,0,.6);';
+    d.innerHTML = '<div style="flex:1">'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan);margin-bottom:3px">YOU'VE EXPLORED ' + v + ' PARCELS</div>'
+      + '<div style="font-size:11px;color:#8899aa;line-height:1.5">Data companies charge $750–$3,300/mo for this. Keep going for $19/mo.</div>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
+      + '<button onclick="RWA_GATE.showPlansModal()" style="padding:7px 14px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.5px">SEE PLANS</button>'
+      + '<button onclick="document.getElementById('rwa-nudge').remove()" style="padding:7px 14px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Dismiss</button>'
+      + '</div>';
+    document.body.appendChild(d);
+    setTimeout(() => { const n = document.getElementById('rwa-nudge'); if(n) n.remove(); }, 12000);
+  },
+  showIntelPrompt: function() {
+    const existing = document.getElementById('rwa-convert-modal');
+    if (existing) existing.remove();
+    const tier = detectRegionalTier();
+    const t1 = tier === 'tier1';
+    const intelP = t1 ? '$9' : '$5';
+    const starterP = t1 ? '$19' : '$10';
+    const v = this.getViews();
+    const overlay = document.createElement('div');
+    overlay.id = 'rwa-convert-modal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    overlay.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.25);border-radius:8px;width:100%;max-width:420px;padding:28px 24px;font-family:var(--font)">'
+      + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:16px">RWABIDASK</div>'
+      + '<div style="font-size:20px;font-weight:700;color:#f0f4f8;margin-bottom:8px;line-height:1.3">' + v + ' parcels. You know what you&#39;re looking for.</div>'
+      + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px">Get the data that actually closes deals — comps, crime radius, and chain of title on any parcel, instantly.<br><br>'
+      + '<span style="color:#556677;font-size:11px">ATTOM charges $90/mo just for reports. CoStar starts at $9,000/yr. You&#39;ve been using the same depth of data free.</span></div>'
+      + '<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);border-radius:6px;padding:12px 14px;margin-bottom:16px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      + '<span style="font-size:10px;color:#8899aa">Free views used</span>'
+      + '<span style="font-size:12px;font-weight:700;color:#f0f4f8">' + v + ' / 1,000</span>'
+      + '</div>'
+      + '<div style="background:rgba(255,255,255,.08);border-radius:3px;height:4px;overflow:hidden">'
+      + '<div style="height:4px;border-radius:3px;background:#EF9F27;width:' + Math.min(100, Math.round(v/10)) + '%"></div>'
+      + '</div>'
+      + '<div style="font-size:10px;color:#556677;margin-top:6px">' + (1000-v) + ' free views remaining</div>'
+      + '</div>'
+      + '<button onclick="RWA_GATE.stripeCheckout('intel_report')" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GET INTEL REPORT — ' + intelP + '</button>'
+      + '<button onclick="RWA_GATE.stripeCheckout('starter')" style="width:100%;padding:11px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO UNLIMITED — ' + starterP + '/MO</button>'
+      + '<button onclick="document.getElementById('rwa-convert-modal').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Remind me later</button>'
+      + '</div>';
+    document.body.appendChild(overlay);
+  },
+  showHardGate: function() {
+    const existing = document.getElementById('rwa-hard-gate');
+    if (existing) return;
+    const tier = detectRegionalTier();
+    const t1 = tier === 'tier1';
+    const starterP = t1 ? '$19' : '$10';
+    const proP = t1 ? '$39' : '$20';
+    const intelP = t1 ? '$9' : '$5';
+    const overlay = document.createElement('div');
+    overlay.id = 'rwa-hard-gate';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:999999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    overlay.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.3);border-radius:8px;width:100%;max-width:440px;padding:32px 28px;font-family:var(--font);text-align:center">'
+      + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:20px">RWABIDASK</div>'
+      + '<div style="font-size:22px;font-weight:700;color:#f0f4f8;margin-bottom:10px;line-height:1.3">You&#39;ve hit the free limit.</div>'
+      + '<div style="font-size:12px;color:#8899aa;line-height:1.7;margin-bottom:8px">You&#39;ve viewed 1,000 parcels free.</div>'
+      + '<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);border-radius:6px;padding:14px;margin-bottom:20px;text-align:left">'
+      + '<div style="font-size:10px;color:#556677;line-height:1.8">'
+      + '<span style="color:#8899aa;font-weight:600;">ATTOM</span> charges $90/mo just for reports.<br>'
+      + '<span style="color:#8899aa;font-weight:600;">CoStar</span> starts at $9,000/yr — behind a sales call.<br>'
+      + '<span style="color:#8899aa;font-weight:600;">MLS</span> requires a real estate license just to get in.<br><br>'
+      + '<span style="color:var(--cyan);">You just used the same depth of data. Free.</span>'
+      + '</div>'
+      + '</div>'
+      + '<div style="background:rgba(255,255,255,.05);border-radius:4px;height:4px;margin-bottom:20px;overflow:hidden">'
+      + '<div style="height:4px;background:#E24B4A;width:100%;border-radius:4px"></div>'
+      + '</div>'
+      + '<button onclick="RWA_GATE.stripeCheckout('starter')" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO STARTER — ' + starterP + '/MO</button>'
+      + '<button onclick="RWA_GATE.stripeCheckout('pro')" style="width:100%;padding:13px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.4);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — ' + proP + '/MO <span style="font-size:9px;background:rgba(0,255,200,.15);padding:2px 8px;border-radius:10px;margin-left:4px;">MOST POPULAR</span></button>'
+      + '<div style="border-top:1px solid rgba(0,255,200,.1);margin:12px 0;"></div>'
+      + '<button onclick="RWA_GATE.stripeCheckout('intel_report')" style="width:100%;padding:10px;background:transparent;color:#8899aa;border:none;font-size:10px;cursor:pointer">Buy one Intel Report — ' + intelP + '</button>'
+      + '</div>';
+    document.body.appendChild(overlay);
+  },
+  showPlansModal: function() {
+    document.getElementById('rwa-nudge') && document.getElementById('rwa-nudge').remove();
+    showPricingPage();
+  },
+  stripeCheckout: async function(product) {
+    if (!window.currentUser) { openModal('signin'); return; }
+    const priceId = getStripePriceId(product);
+    if (!priceId) { showToast('SYSTEM ERROR: PRICE NOT FOUND'); return; }
+    try {
+      showToast('CONNECTING TO STRIPE…');
+      const session = await window._sb.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      const resp = await fetch(
+        'https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/create-checkout-session',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+          },
+          body: JSON.stringify({
+            user_id:     window.currentUser.id,
+            price_id:    priceId,
+            product:     product,
+            email:       window.currentUser.email,
+            success_url: window.location.href + '?subscribed=true',
+            cancel_url:  window.location.href
+          })
+        }
+      );
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      if (data?.url) { window.location.href = data.url; }
+      else { showToast('SYSTEM ERROR: CHECKOUT FAILED'); }
+    } catch(e) {
+      showToast('SYSTEM ERROR: CHECKOUT FAILED');
+      console.error('[RWABidAsk] Checkout error:', e);
+    }
+  },
+  // Call this on every parcel panel open
+  trackView: function() {
+    if (this.isPaid() || this.isAdmin()) return;
+    this.addView();
+  },
+  // Gate check for action buttons
+  requirePlan: function(plan, action) {
+    // plan: 'any' | 'starter' | 'pro'
+    const tier = window._userTier || '';
+    const isAdmin = this.isAdmin();
+    if (isAdmin) { action(); return; }
+    if (plan === 'any' && (tier === 'starter' || tier === 'pro')) { action(); return; }
+    if (plan === 'starter' && (tier === 'starter' || tier === 'pro')) { action(); return; }
+    if (plan === 'pro' && tier === 'pro') { action(); return; }
+    // Not paid — show appropriate modal
+    if (!window.currentUser) { openModal('signin'); return; }
+    this.showIntelPrompt();
+  }
+};
+
+// Track view on every renderBasicsPanel call
+(function() {
+  const _origRender = window.renderBasicsPanel;
+  if (typeof _origRender === 'function') {
+    window.renderBasicsPanel = function() {
+      RWA_GATE.trackView();
+      return _origRender.apply(this, arguments);
+    };
+  }
+})();
 
 // ── PRICING PAGE ─────────────────────────────────────────────────────────────
 function showPricingPage() {
