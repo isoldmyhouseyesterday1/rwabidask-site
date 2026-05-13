@@ -264,7 +264,8 @@ body { min-width: 900px; overflow-x: auto; }
   align-items: center;
   justify-content: flex-end;
   height: 100%;
-  width: 340px;
+  min-width: 340px;
+  max-width: 360px;
   flex-shrink: 0;
   padding-right: 16px;
   gap: 8px;
@@ -2971,7 +2972,7 @@ body { min-width: 900px; overflow-x: auto; }
   </div>
 
   <div id="unified-ledger-block" style="display:none;position:absolute;"></div>
-  <div class="topbar-right" style="padding-right:0;">
+  <div class="topbar-right">
     <div class="tstat" style="display:none"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc">—</div></div>
     <div class="tstat" style="display:none">
       <div class="tstat-l">Assets</div>
