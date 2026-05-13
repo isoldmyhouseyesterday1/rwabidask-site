@@ -3127,70 +3127,37 @@ body { min-width: 900px; overflow-x: auto; }
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">SQUARE FEET</div>
             <div style="display:flex;gap:6px;align-items:center;">
-              <select id="f-sqft-min" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
-                <option value="">No Min</option>
-                <option value="500">500</option>
-                <option value="750">750</option>
-                <option value="1000">1,000</option>
-                <option value="1250">1,250</option>
-                <option value="1500">1,500</option>
-                <option value="1750">1,750</option>
-                <option value="2000">2,000</option>
-                <option value="2500">2,500</option>
-                <option value="3000">3,000</option>
-                <option value="4000">4,000</option>
-                <option value="5000">5,000</option>
-                <option value="7500">7,500</option>
-              </select>
+              <input id="f-sqft-min" type="number" placeholder="Min sqft" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <span style="color:var(--muted);font-size:10px;">—</span>
-              <select id="f-sqft-max" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
-                <option value="">No Max</option>
-                <option value="500">500</option>
-                <option value="750">750</option>
-                <option value="1000">1,000</option>
-                <option value="1500">1,500</option>
-                <option value="2000">2,000</option>
-                <option value="2500">2,500</option>
-                <option value="3000">3,000</option>
-                <option value="4000">4,000</option>
-                <option value="5000">5,000</option>
-                <option value="7500">7,500</option>
-              </select>
+              <input id="f-sqft-max" type="number" placeholder="Max sqft" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
+              <button onclick="document.getElementById('f-sqft-min').value=1000;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">1k</button>
+              <button onclick="document.getElementById('f-sqft-min').value=1500;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">1.5k</button>
+              <button onclick="document.getElementById('f-sqft-min').value=2000;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">2k</button>
+              <button onclick="document.getElementById('f-sqft-min').value=3000;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">3k</button>
+              <button onclick="document.getElementById('f-sqft-min').value=5000;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">5k</button>
+              <button onclick="document.getElementById('f-sqft-min').value=10000;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">10k</button>
+              <button onclick="document.getElementById('f-sqft-min').value=20000;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">20k</button>
             </div>
           </div>
 
           <!-- Lot size — free -->
           <div style="margin-bottom:10px;">
-            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LOT SIZE</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LOT SIZE (SQFT)</div>
             <div style="display:flex;gap:6px;align-items:center;">
-              <select id="f-lot-min" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
-                <option value="">No Min</option>
-                <option value="1000">1,000 sqft</option>
-                <option value="2000">2,000 sqft</option>
-                <option value="3000">3,000 sqft</option>
-                <option value="5000">5,000 sqft</option>
-                <option value="7500">7,500 sqft</option>
-                <option value="10890">¼ acre</option>
-                <option value="21780">½ acre</option>
-                <option value="43560">1 acre</option>
-                <option value="87120">2 acres</option>
-                <option value="217800">5 acres</option>
-                <option value="435600">10 acres</option>
-              </select>
+              <input id="f-lot-min" type="number" placeholder="Min sqft" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
               <span style="color:var(--muted);font-size:10px;">—</span>
-              <select id="f-lot-max" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
-                <option value="">No Max</option>
-                <option value="2000">2,000 sqft</option>
-                <option value="5000">5,000 sqft</option>
-                <option value="10890">¼ acre</option>
-                <option value="21780">½ acre</option>
-                <option value="43560">1 acre</option>
-                <option value="87120">2 acres</option>
-                <option value="217800">5 acres</option>
-                <option value="435600">10 acres</option>
-                <option value="871200">20 acres</option>
-                <option value="2178000">50 acres</option>
-              </select>
+              <input id="f-lot-max" type="number" placeholder="Max sqft" onchange="typeof runParcelSearch==='function'&&runParcelSearch()" style="flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
+              <button onclick="document.getElementById('f-lot-min').value=5000;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">5k sf</button>
+              <button onclick="document.getElementById('f-lot-min').value=10890;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">¼ac</button>
+              <button onclick="document.getElementById('f-lot-min').value=21780;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">½ac</button>
+              <button onclick="document.getElementById('f-lot-min').value=43560;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">1ac</button>
+              <button onclick="document.getElementById('f-lot-min').value=217800;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">5ac</button>
+              <button onclick="document.getElementById('f-lot-min').value=435600;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">10ac</button>
+              <button onclick="document.getElementById('f-lot-min').value=2178000;typeof runParcelSearch==='function'&&runParcelSearch()" style="padding:2px 7px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;">50ac</button>
             </div>
           </div>
 
@@ -10644,8 +10611,44 @@ window._doParcelSearch = async function _doParcelSearch() {
   const _isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
   const _isPremium = _isAdmin || _tier === 'starter' || _tier === 'pro';
 
+  // ── Search limit tracking ────────────────────────────────────────
+  const _searchLimits = { free: 0, starter: 200, pro: 500 };
+  const _searchKey = 'rwa_searches_' + new Date().toISOString().substring(0,7); // monthly
+  const _searchCount = parseInt(localStorage.getItem(_searchKey) || '0');
+  const _searchLimit = _isAdmin ? 99999 : (_searchLimits[_tier] || 0);
+
+  if (!_isAdmin && _tier === 'free') {
+    if (countEl) countEl.textContent = 'Upgrade to search all 635k parcels';
+    if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
+    _rwaUpgrade('starter');
+    return;
+  }
+
+  if (!_isAdmin && _searchCount >= _searchLimit) {
+    const overageCost = 0.25; // $0.25 per search over limit
+    const existing = document.getElementById('rwa-search-limit-modal');
+    if (existing) existing.remove();
+    const ov = document.createElement('div');
+    ov.id = 'rwa-search-limit-modal';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    ov.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.25);border-radius:8px;width:100%;max-width:380px;padding:28px 24px;font-family:var(--font);text-align:center">'
+      + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:12px;">SEARCH LIMIT REACHED</div>'
+      + '<div style="font-size:18px;font-weight:700;color:#f0f4f8;margin-bottom:8px;">You've used all ' + _searchLimit + ' searches this month.</div>'
+      + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px;">Upgrade to Pro for 500 searches/month, or pay $0.25 per additional search.</div>'
+      + (_tier === 'starter' ? '<button onclick="document.getElementById('rwa-search-limit-modal').remove();_rwaUpgrade('pro')" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;">UPGRADE TO PRO — $39/MO</button>' : '')
+      + '<button onclick="document.getElementById('rwa-search-limit-modal').remove();_payPerSearch()" style="width:100%;padding:11px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;">BUY 10 SEARCHES — $2.50</button>'
+      + '<button onclick="document.getElementById('rwa-search-limit-modal').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer;">Cancel</button>'
+      + '</div>';
+    document.body.appendChild(ov);
+    if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
+    return;
+  }
+
+  // Increment search counter
+  localStorage.setItem(_searchKey, _searchCount + 1);
+  if (countEl) countEl.textContent = _isPremium ? 'Querying 635k parcels… (' + (_searchCount+1) + '/' + _searchLimit + ')' : 'Searching active listings…';
+
   if (btn) { btn.textContent = 'SEARCHING…'; btn.disabled = true; }
-  if (countEl) countEl.textContent = _isPremium ? 'Querying 635k parcels…' : 'Searching active listings…';
 
   try {
     const params = new URLSearchParams();
@@ -10803,6 +10806,11 @@ function _filterClick(el) {
   if (pin && lat && lng) {
     renderBasicsPanel({id:pin, apn:pin, address:addr, lat:lat, lng:lng, type:'real_estate'});
   }
+}
+
+function _payPerSearch() {
+  // Buy 10 extra searches for $2.50
+  showToast('PAY-PER-SEARCH COMING SOON — UPGRADE TO PRO FOR NOW');
 }
 
 function clearSearchPins() {
