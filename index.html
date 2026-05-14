@@ -5798,7 +5798,7 @@ function selectAsset(id) {
               <div id="ma-loading" style="font-size:10px;color:var(--muted);padding:8px 0">Loading inquiries…</div>
             </div>
         </div>
-        <!-- Permanent Ledger footer removed — clean panel end -->
+        <!-- Global Asset Database footer removed — clean panel end -->
     `;
 
     // ── Map fly-to & mobile drawer ──────────────────────────────
@@ -6473,7 +6473,7 @@ function renderDOMMarkers() {
   const range = map3dEl.range || 22000000;
 
   // ── Physical assets only ─────────────────────────────────────────
-  const physicalFiltered = filterAssets(ASSETS).filter(a => a._hasCoords && isMapPinAsset(a.type, a));
+  const physicalFiltered = filterAssets(ASSETS).filter(a => a._hasCoords && isMapPinAsset(a.type, a) && (parseFloat(a.price)||0) > 0);
   window.allFiltered = filterAssets(ASSETS); // keep global in sync
 
   // ── ZOOM-TO-REVEAL (Level of Detail) ─────────────────────────────
@@ -7134,7 +7134,7 @@ function openModal(type, titleOverride, bodyOverride) {
   if (type === 'signin') {
     if (modalTitle) modalTitle.textContent = "SIGN IN";
     modalBody.innerHTML = `
-      <div class="msub" style="margin-bottom:15px;color:var(--muted);font-size:11px;">Access the Global Asset Directory and Permanent Ledger</div>
+      <div class="msub" style="margin-bottom:15px;color:var(--muted);font-size:11px;">Global Asset Database</div>
       <div class="mfield"><label>EMAIL</label><input type="email" id="login-email" placeholder="investor@domain.com"></div>
       <div class="mfield"><label>PASSWORD</label><input type="password" id="login-password" placeholder="••••••••"></div>
       <div class="mfooter" style="margin-top:20px;display:flex;gap:10px;">
@@ -11279,7 +11279,7 @@ function showPricingPage() {
     + '✓ 3D / Gaussian splatting tour<br>'
     + '✓ Contact agent button<br>'
     + '✓ Listing manager dashboard<br>'
-    + '✓ For sale, rent, lease, auction'
+    + '✓ Real estate · Transports · Businesses · For sale, rent, lease, auction'
     + '</div>'
     + '<button onclick="document.getElementById(\'pricing-modal\').remove();showToast(\'CLICK ANY PARCEL TO LIST ASSET\')" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">LIST ASSET</button>'
     + '</div>'
@@ -11293,7 +11293,7 @@ function showPricingPage() {
     + '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">'
     + '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">INTEL REPORTS UNLIMITED</div>'
     + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + prices.intel_unlimited + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
-    + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">unlimited reports · any parcel</div>'
+    + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">unlimited reports · any King County parcel</div>'
     + '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">'
     + '✓ Unlimited Intel Reports<br>'
     + '✓ All report features included<br>'
@@ -11349,13 +11349,13 @@ function showPricingPage() {
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Can I cancel my subscription?</div>Yes — cancel anytime. Your subscription remains active until the end of the billing period.</div>'
 
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Is listing data verified?</div>Listings are submitted by owners, agents, and representatives who certify accuracy under our Terms of Service. All submissions are permanently logged.</div>'
-    + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">What counties are covered?</div>King County, Washington currently. Pierce and Snohomish counties coming soon. National expansion in progress.</div>'
-    + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Are phone numbers shown for free?</div>Name and email only on free listings. Phone number shown on paid listings ($19 one-time or Listings Unlimited plan).</div>'
+    + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">What counties are covered?</div>King County, Washington (635,000+ parcels). Pierce and Snohomish counties coming soon. National expansion in progress. Transport and business listings available globally.</div>'
+    + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Are phone numbers shown for free?</div>Name and email only on free listings. Phone number shown on paid listings ($14 one-time or Listings Unlimited plan).</div>'
     + '</div>'
     + '</div>'
 
     + '<div style="text-align:center;margin-top:24px;font-size:9px;color:var(--muted);line-height:1.8">'
-    + 'RWABidAsk · All prices in USD · Payments secured by Stripe<br>'
+    + 'RWABidAsk · Global Asset Database · Real Estate · Transports · Businesses · All prices in USD · Payments secured by Stripe<br>'
     + 'Questions: <a href="mailto:ops@rwabidask.com" style="color:var(--cyan)">ops@rwabidask.com</a>'
     + '</div>'
     + '</div>';
