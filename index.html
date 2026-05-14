@@ -10273,7 +10273,8 @@ const spark=trend.length>1?(()=>{
 
 const sc=bq?.seismic_site_class||'';
 const tsunami=bool(hazards.tsunami)||bool(bq?.geo?.in_tsunami_zone);
-const zoningHtml=zoning?`${zoning} <a href="https://aqua.kingcounty.gov/council/clerk/code/24-30_Title_21A.htm" target="_blank" style="color:var(--cyan);text-decoration:none;font-size:9px">↗ code</a>`:null;
+const zoningUrl = bq?._county==='pierce' ? 'https://www.piercecountywa.gov/2186/Zoning' : 'https://aqua.kingcounty.gov/council/clerk/code/24-30_Title_21A.htm';
+const zoningHtml=zoning?`${zoning} <a href="${zoningUrl}" target="_blank" style="color:var(--cyan);text-decoration:none;font-size:9px">↗ code</a>`:null;
 rows=rows.map(([k,v])=>k==='ZONING'&&zoningHtml?[k,zoningHtml]:[k,v]);
 
 document.getElementById('rhead').innerHTML=`
