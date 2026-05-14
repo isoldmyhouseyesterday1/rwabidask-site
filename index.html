@@ -10117,7 +10117,7 @@ lotAcres=bq?.sqft_lot?(Number(bq.sqft_lot)/43560).toFixed(2):null,
 zoning=bq?.zoning||bq?.current_zoning||null,
 hazards=bq?.hazards||{},
 bool=v=>v===true||v==='true'||v===1||v==='1',
-hasHazard=bool(hazards.seismic)||bool(hazards.landslide)||bool(hazards.erosion)||bool(hazards.coal_mine)||bool(hazards.flood_100yr)||bool(hazards.tsunami);
+hasHazard=bool(hazards.seismic)||bool(hazards.landslide)||bool(hazards.erosion)||bool(hazards.coal_mine)||bool(hazards.flood_100yr)||bool(hazards.tsunami)||bool(hazards.mine_hazard)||(hazards.lahar&&hazards.lahar!=='NONE')||bool(hazards.wetland)||bool(hazards.aquifer);
 
 const pu=parseInt(bq?.use_code||bq?.PresentUse||0)||0;
 function getPropCategory(code){
@@ -10158,7 +10158,12 @@ if(hasComm){
     bq?.price_per_sqft&&['$/SQFT',`$${Number(bq.price_per_sqft).toLocaleString()}/sqft (assessed)`],
     sqftLot&&['LOT SIZE',`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`],
     bq?.water_system_name&&['WATER',bq.water_system_name],
-    bq?.ems_agency&&['EMS',`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
+    (bq?.ems_agency||bq?.proximity?.nearest_ems)&&['EMS',bq?.proximity?.nearest_ems?`${bq.proximity.nearest_ems}${bq.proximity.nearest_ems_miles?' · '+bq.proximity.nearest_ems_miles+'mi':''}`:`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
+    bq?.proximity?.nearest_school&&['NEAREST SCHOOL',`${bq.proximity.nearest_school}${bq.proximity.nearest_school_miles?' · '+bq.proximity.nearest_school_miles+'mi':''}`],
+    bq?.proximity?.nearest_fire_station&&['FIRE STATION',`${bq.proximity.nearest_fire_station}${bq.proximity.nearest_fire_station_miles?' · '+bq.proximity.nearest_fire_station_miles+'mi':''}`],
+    bq?.proximity?.nearest_police&&['POLICE',`${bq.proximity.nearest_police}${bq.proximity.nearest_police_miles?' · '+bq.proximity.nearest_police_miles+'mi':''}`],
+    bq?.proximity?.nearest_hospital&&['HOSPITAL',`${bq.proximity.nearest_hospital}${bq.proximity.nearest_hospital_miles?' · '+bq.proximity.nearest_hospital_miles+'mi':''}`],
+    bq?.proximity?.crime_count_half_mile>0&&['CRIME (0.5mi)',bq.proximity.crime_count_half_mile+' incidents'],
     bq?.power?.nearest_transmission_voltage&&['POWER LINE',`${bq.power.nearest_transmission_voltage}kV ${bq.power.nearest_transmission_class||''} · ${bq.power.nearest_transmission_owner||''}`],
     bq?.power?.substation_name&&['SUBSTATION',`${bq.power.substation_name} · ${Math.round(bq.power.substation_distance_m||0)}m`],
     zoning&&['ZONING',zoning],
@@ -10185,7 +10190,12 @@ if(hasComm){
     wfnt&&['WATERFRONT',`${wfnt.body_of_water||'Waterfront'} · ${wfnt.footage&&wfnt.footage>0?wfnt.footage+' ft·':''} ${wfnt.tidelands||''}`],
     views.length>0&&['VIEWS',views.slice(0,3).join(', ')],
     bq?.water_system_name&&['WATER',bq.water_system_name],
-    bq?.ems_agency&&['EMS',`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
+    (bq?.ems_agency||bq?.proximity?.nearest_ems)&&['EMS',bq?.proximity?.nearest_ems?`${bq.proximity.nearest_ems}${bq.proximity.nearest_ems_miles?' · '+bq.proximity.nearest_ems_miles+'mi':''}`:`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
+    bq?.proximity?.nearest_school&&['NEAREST SCHOOL',`${bq.proximity.nearest_school}${bq.proximity.nearest_school_miles?' · '+bq.proximity.nearest_school_miles+'mi':''}`],
+    bq?.proximity?.nearest_fire_station&&['FIRE STATION',`${bq.proximity.nearest_fire_station}${bq.proximity.nearest_fire_station_miles?' · '+bq.proximity.nearest_fire_station_miles+'mi':''}`],
+    bq?.proximity?.nearest_police&&['POLICE',`${bq.proximity.nearest_police}${bq.proximity.nearest_police_miles?' · '+bq.proximity.nearest_police_miles+'mi':''}`],
+    bq?.proximity?.nearest_hospital&&['HOSPITAL',`${bq.proximity.nearest_hospital}${bq.proximity.nearest_hospital_miles?' · '+bq.proximity.nearest_hospital_miles+'mi':''}`],
+    bq?.proximity?.crime_count_half_mile>0&&['CRIME (0.5mi)',bq.proximity.crime_count_half_mile+' incidents'],
     bq?.power?.nearest_transmission_voltage&&['POWER LINE',`${bq.power.nearest_transmission_voltage}kV ${bq.power.nearest_transmission_class||''} · ${bq.power.nearest_transmission_owner||''}`],
     bq?.power?.substation_name&&['SUBSTATION',`${bq.power.substation_name} · ${Math.round(bq.power.substation_distance_m||0)}m`],
     zoning&&['ZONING',zoning],
@@ -10216,7 +10226,12 @@ if(hasComm){
     bq?.power?.substation_name&&['SUBSTATION',`${bq.power.substation_name} · ${bq.power.substation_max_volt||''}kV · ${Math.round(bq.power.substation_distance_m||0)}m`],
     sqftLot&&['LOT SIZE',`${sqftLot} sqft${lotAcres?` (${lotAcres} ac)`:''}`],
     bq?.water_system_name&&['WATER',bq.water_system_name],
-    bq?.ems_agency&&['EMS',`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
+    (bq?.ems_agency||bq?.proximity?.nearest_ems)&&['EMS',bq?.proximity?.nearest_ems?`${bq.proximity.nearest_ems}${bq.proximity.nearest_ems_miles?' · '+bq.proximity.nearest_ems_miles+'mi':''}`:`${bq.ems_agency}${bq.ems_distance_m?' · '+Math.round(parseFloat(bq.ems_distance_m))+'m':''}`],
+    bq?.proximity?.nearest_school&&['NEAREST SCHOOL',`${bq.proximity.nearest_school}${bq.proximity.nearest_school_miles?' · '+bq.proximity.nearest_school_miles+'mi':''}`],
+    bq?.proximity?.nearest_fire_station&&['FIRE STATION',`${bq.proximity.nearest_fire_station}${bq.proximity.nearest_fire_station_miles?' · '+bq.proximity.nearest_fire_station_miles+'mi':''}`],
+    bq?.proximity?.nearest_police&&['POLICE',`${bq.proximity.nearest_police}${bq.proximity.nearest_police_miles?' · '+bq.proximity.nearest_police_miles+'mi':''}`],
+    bq?.proximity?.nearest_hospital&&['HOSPITAL',`${bq.proximity.nearest_hospital}${bq.proximity.nearest_hospital_miles?' · '+bq.proximity.nearest_hospital_miles+'mi':''}`],
+    bq?.proximity?.crime_count_half_mile>0&&['CRIME (0.5mi)',bq.proximity.crime_count_half_mile+' incidents'],
     zoning&&['ZONING',zoning],
   ].filter(Boolean).filter(r=>r&&r[1]);
 } else if(['vacant','agricultural'].includes(propCat)){
@@ -10297,6 +10312,13 @@ if(noData){
       ${bool(hazards.landslide)?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">LANDSLIDE ZONE</span>`:''}
       ${bool(hazards.erosion)?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">EROSION ZONE</span>`:''}
       ${bool(hazards.coal_mine)?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">COAL MINE HAZARD</span>`:''}
+      ${bool(hazards.mine_hazard)||bool(hazards.coal_mine)?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">MINE HAZARD</span>`:''}
+      ${hazards.lahar&&hazards.lahar!=='NONE'?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,60,0,.08);color:#ff6b35;border:1px solid rgba(255,60,0,.25)">LAHAR ZONE · ${hazards.lahar}</span>`:''}
+      ${bool(hazards.wetland)?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(0,180,100,.08);color:#00b464;border:1px solid rgba(0,180,100,.25)">WETLAND</span>`:''}
+      ${bool(hazards.aquifer)?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(0,180,255,.08);color:#00b4ff;border:1px solid rgba(0,180,255,.25)">AQUIFER RECHARGE</span>`:''}
+      ${bq?.geo?.in_urban_growth_boundary?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(0,255,200,.05);color:var(--cyan);border:1px solid rgba(0,255,200,.15)">URBAN GROWTH AREA</span>`:''}
+      ${bq?.geo?.fiber_access?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(0,255,200,.05);color:var(--cyan);border:1px solid rgba(0,255,200,.15)">FIBER ACCESS</span>`:''}
+      ${bq?.geo?.historic_register?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(255,180,0,.08);color:var(--gold);border:1px solid rgba(255,180,0,.25)">HISTORIC REGISTER</span>`:''}
       ${wfnt?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(0,180,255,.08);color:#00b4ff;border:1px solid rgba(0,180,255,.25)">WATERFRONT ${wfnt.footage?'· '+wfnt.footage+' FT':''}</span>`:''}
       ${views.length>0?`<span style="font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;background:rgba(0,255,200,.05);color:var(--cyan);border:1px solid rgba(0,255,200,.15)">VIEWS</span>`:''}
       ${!hasHazard&&!tsunami&&!sc?`<span style="font-size:8px;padding:3px 8px;border-radius:3px;background:rgba(62,230,136,.08);color:var(--green);border:1px solid rgba(62,230,136,.25)">NO HAZARDS ON RECORD</span>`:''}
