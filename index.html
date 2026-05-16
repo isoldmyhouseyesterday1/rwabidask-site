@@ -3047,7 +3047,7 @@ body { min-width: 900px; overflow-x: auto; }
           <div id="filter-free-notice" style="display:none;background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:9px;color:#8899aa;line-height:1.7;">
             <span style="color:var(--cyan);font-weight:700;">FREE:</span> Filter active listings.<br>
             <span style="color:#fbbf24;font-weight:700;">STARTER+:</span> Search all 635,000 King County parcels.
-            <button onclick="_rwaUpgrade('starter')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;">UNLOCK ALL PARCELS — $19/MO</button>
+            <button onclick="_rwaUpgrade('pro')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;">UNLOCK ALL PARCELS — $19/MO</button>
           </div>
 
           <!-- Listing type -->
@@ -6985,8 +6985,8 @@ async function updateAuthUI() {
     }
     const tier = window._userTier || 'free';
     const isAdmin = isAdminUser(currentUser.id);
-    const tierLabel = isAdmin ? 'ADMIN' : tier === 'pro' ? 'PRO' : tier === 'starter' ? 'STARTER' : 'FREE';
-    const tierColor = isAdmin ? 'var(--gold)' : tier === 'pro' ? 'var(--gold)' : tier === 'starter' ? 'var(--cyan)' : 'var(--muted)';
+    const tierLabel = isAdmin ? 'ADMIN' : tier === 'pro' ? 'PRO' : tier === 'pro' ? 'PRO' : 'FREE';
+    const tierColor = isAdmin ? 'var(--gold)' : tier === 'pro' ? 'var(--gold)' : 'var(--muted)';
     const handle = (currentUser.email?.split('@')[0] || 'Account').slice(0, 14);
     if (signinBtn) {
       signinBtn.innerHTML = '<span style="color:'+tierColor+';font-size:9px;letter-spacing:1px;">'+tierLabel+'</span> '+handle;
@@ -7030,8 +7030,8 @@ function showAccountMenu() {
   if (existing) { existing.remove(); return; }
   const tier = window._userTier || 'free';
   const isAdmin = isAdminUser(currentUser?.id);
-  const tierLabel = isAdmin ? 'ADMIN' : tier === 'pro' ? 'PRO' : tier === 'starter' ? 'STARTER' : 'FREE PLAN';
-  const tierColor = isAdmin ? '#fbbf24' : tier === 'pro' ? '#fbbf24' : tier === 'starter' ? '#00ffc8' : '#556677';
+  const tierLabel = isAdmin ? 'ADMIN' : tier === 'pro' ? 'PRO' : tier === 'pro' ? 'PRO' : 'FREE PLAN';
+  const tierColor = isAdmin ? '#fbbf24' : tier === 'pro' ? '#fbbf24' : '#556677';
   const t1 = typeof detectRegionalTier === 'function' && detectRegionalTier() === 'tier1';
   const menu = document.createElement('div');
   menu.id = 'rwa-account-menu';
@@ -7040,10 +7040,10 @@ function showAccountMenu() {
   if (!isAdmin && tier === 'free') {
     upgradeSection = '<div style="padding:10px 14px;border-top:1px solid rgba(0,255,200,.08)">'
       + '<div style="font-size:9px;color:#556677;letter-spacing:1px;margin-bottom:8px">UPGRADE YOUR PLAN</div>'
-      + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'starter\')" style="width:100%;padding:8px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;margin-bottom:6px;letter-spacing:.5px">STARTER — $'+(t1?'19':'10')+'/MO</button>'
+      + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;margin-bottom:6px;letter-spacing:.5px">PRO — $34/MO</button>'
       + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">PRO — $'+(t1?'39':'20')+'/MO ★</button>'
       + '</div>';
-  } else if (!isAdmin && tier === 'starter') {
+  } else if (!isAdmin && tier === 'pro') {
     upgradeSection = '<div style="padding:10px 14px;border-top:1px solid rgba(0,255,200,.08)">'
       + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">UPGRADE TO PRO — $'+(t1?'39':'20')+'/MO</button>'
       + '</div>';
@@ -7614,12 +7614,12 @@ function getClaimPrice() {
 // ── STRIPE PRICE IDs ──────────────────────────────────────────────
 const STRIPE_PRICES = {
   intel_report:        { t1: 'price_1TWe9LKuC0MRY8oU2UfZCXvM', t2: 'price_1TWeCHKuC0MRY8oUu6nwxESa' },
-  list_property:       { t1: 'price_1TWdqdKuC0MRY8oUStEnToPh', t2: 'price_1TWdrAKuC0MRY8oUCzNrmpxu' },
-  starter:             { t1: 'price_1TWdrgKuC0MRY8oU6An2Pux8', t2: 'price_1TWdsCKuC0MRY8oUTgBvX5xI' },
-  pro:                 { t1: 'price_1TWdsgKuC0MRY8oUIC2osyEs', t2: 'price_1TWdt6KuC0MRY8oUM6uZtFPX' },
-  listings_unlimited:  { t1: 'price_1TWdtxKuC0MRY8oUwItcWgRu', t2: 'price_1TWduVKuC0MRY8oUmubKLEtv' },
-  agent_seat:          { t1: 'price_1TWduyKuC0MRY8oUfvhAA2Cj', t2: 'price_1TWdvHKuC0MRY8oUgu8AueE6' },
-  white_label:         { t1: 'price_1TWdvxKuC0MRY8oU204OR2vi', t2: 'price_1TWdwTKuC0MRY8oUEW1fyPnA' },
+
+  verified_badge:       { t1: 'price_1TXieRKuC0MRY8oUGTPoFhve', t2: 'price_1TXietKuC0MRY8oUVlF5nNpV' },
+  pro:                 { t1: 'price_1TXiXTKuC0MRY8oUO06JXXSB', t2: 'price_1TWdt6KuC0MRY8oUM6uZtFPX' },
+
+
+
 };
 
 function getStripePriceId(product) {
@@ -7631,11 +7631,11 @@ function getSubscriptionPrices() {
   const t1 = detectRegionalTier() === 'tier1';
   return {
     intel_unlimited:    t1 ? 19  : 10,
-    listings_unlimited: t1 ? 29  : 15,
+  
     pro_bundle:         t1 ? 39  : 20,
     listing_oneshot:    t1 ? 14  : 7,
-    agent_seat:         t1 ? 19  : 10,
-    white_label:        t1 ? 39  : 20,
+  
+  
   };
 }
 
@@ -10669,7 +10669,7 @@ const RWA_GATE = {
     const u = window.currentUser;
     if (!u) return false;
     const tier = window._userTier || '';
-    return tier === 'starter' || tier === 'pro' || tier === 'admin';
+    return tier === 'pro' || tier === 'admin';
   },
   isAdmin: function() {
     if (!window.currentUser) return false;
@@ -10704,7 +10704,7 @@ const RWA_GATE = {
     const tier = detectRegionalTier();
     const t1 = tier === 'tier1';
     const intelP = t1 ? '$9' : '$5';
-    const starterP = t1 ? '$19' : '$10';
+    const proP = t1 ? "$34" : "$21";
     const v = this.getViews();
     const overlay = document.createElement('div');
     overlay.id = 'rwa-convert-modal';
@@ -10725,7 +10725,7 @@ const RWA_GATE = {
       + '<div style="font-size:10px;color:#556677;margin-top:6px">' + (1000-v) + ' free views remaining</div>'
       + '</div>'
       + '<button onclick="RWA_GATE.stripeCheckout(\'intel_report\')" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GET INTEL REPORT — ' + intelP + '</button>'
-      + '<button onclick="RWA_GATE.stripeCheckout(\'starter\')" style="width:100%;padding:11px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO UNLIMITED — ' + starterP + '/MO</button>'
+      + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:11px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — $34/MO</button>'
       + '<button onclick="document.getElementById(\'rwa-convert-modal\').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Remind me later</button>'
       + '</div>';
     document.body.appendChild(overlay);
@@ -10735,7 +10735,7 @@ const RWA_GATE = {
     if (existing) return;
     const tier = detectRegionalTier();
     const t1 = tier === 'tier1';
-    const starterP = t1 ? '$19' : '$10';
+    const proP = t1 ? "$34" : "$21";
     const proP = t1 ? '$39' : '$20';
     const intelP = t1 ? '$9' : '$5';
     const overlay = document.createElement('div');
@@ -10756,7 +10756,7 @@ const RWA_GATE = {
       + '<div style="background:rgba(255,255,255,.05);border-radius:4px;height:4px;margin-bottom:20px;overflow:hidden">'
       + '<div style="height:4px;background:#E24B4A;width:100%;border-radius:4px"></div>'
       + '</div>'
-      + '<button onclick="RWA_GATE.stripeCheckout(\'starter\')" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO STARTER — ' + starterP + '/MO</button>'
+      + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — $34/MO</button>'
       + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:13px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.4);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — ' + proP + '/MO <span style="font-size:9px;background:rgba(0,255,200,.15);padding:2px 8px;border-radius:10px;margin-left:4px;">MOST POPULAR</span></button>'
       + '<div style="border-top:1px solid rgba(0,255,200,.1);margin:12px 0;"></div>'
 
@@ -10816,8 +10816,8 @@ const RWA_GATE = {
     const tier = window._userTier || '';
     const isAdmin = this.isAdmin();
     if (isAdmin) { action(); return; }
-    if (plan === 'any' && (tier === 'starter' || tier === 'pro')) { action(); return; }
-    if (plan === 'starter' && (tier === 'starter' || tier === 'pro')) { action(); return; }
+    if (plan === 'any' && (tier === 'pro')) { action(); return; }
+    if (plan === 'pro' && (tier === 'pro')) { action(); return; }
     if (plan === 'pro' && tier === 'pro') { action(); return; }
     // Not paid — show appropriate modal
     if (!window.currentUser) { openModal('signin'); return; }
@@ -10887,7 +10887,7 @@ window.toggleFilterPanel = function toggleFilterPanel() {
 
   const tier = window._userTier || 'free';
   const isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
-  const isPremium = isAdmin || tier === 'starter' || tier === 'pro';
+  const isPremium = isAdmin || tier === 'pro';
 
   panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
   if (btn) btn.textContent = panel.style.display === 'none' ? 'FILTERS ▾' : 'FILTERS ▴';
@@ -10941,7 +10941,7 @@ window._doParcelSearch = async function _doParcelSearch() {
   const countEl = document.getElementById('filter-result-count');
   const _tier = window._userTier || 'free';
   const _isAdmin = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
-  const _isPremium = _isAdmin || _tier === 'starter' || _tier === 'pro';
+  const _isPremium = _isAdmin || _tier === 'pro';
 
   if (btn) { btn.textContent = 'SEARCHING…'; btn.disabled = true; }
   if (countEl) countEl.textContent = _isPremium ? 'Searching 635k parcels…' : 'Searching active listings…';
@@ -11323,13 +11323,13 @@ function showPricingPage() {
     + '✓ Priority support<br>'
     + '✓ Best for: investors, lenders, agents pulling 3+ reports/month'
     + '</div>'
-    + '<button onclick="_rwaUpgrade(\'starter\')" style="width:100%;padding:10px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">SUBSCRIBE</button>'
+    + '<button onclick="_rwaUpgrade(\'pro\')" style="width:100%;padding:10px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">SUBSCRIBE</button>'
     + '</div>'
 
     // Listings Unlimited
     + '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">'
     + '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">LISTINGS UNLIMITED</div>'
-    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + prices.listings_unlimited + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
+    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + prices.pro + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
     + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">unlimited active listings</div>'
     + '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">'
     + '✓ Unlimited active listings<br>'
@@ -11340,7 +11340,7 @@ function showPricingPage() {
     + '✓ Data correction submissions<br>'
     + '✓ Best for: property managers, landlords, agents'
     + '</div>'
-    + '<button onclick="_rwaUpgrade(\'listings_unlimited\')" style="width:100%;padding:10px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">SUBSCRIBE</button>'
+    + '<button onclick="_rwaUpgrade(\'pro\')" style="width:100%;padding:10px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">SUBSCRIBE</button>'
     + '</div>'
 
     // Pro Bundle
@@ -11586,7 +11586,7 @@ async function submitListing(apn) {
         + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:16px">LIST AN ASSET</div>'
         + '<div style="font-size:18px;font-weight:700;color:#f0f4f8;margin-bottom:8px">Ready to list?</div>'
         + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px">One listing or unlimited — your call.</div>'
-        + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove();RWA_GATE.stripeCheckout(\'list_property\')" style="width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">LIST ONE PROPERTY — $'+(_t1?'14':'7')+'</button>'
+        + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove();RWA_GATE.stripeCheckout(\'verified_badge\')" style="width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">VERIFY LISTING — $3')+'</button>'
         + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove();RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:12px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — UNLIMITED LISTINGS $'+(_t1?'39':'20')+'/MO</button>'
         + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Cancel</button>'
         + '</div>';
