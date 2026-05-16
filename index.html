@@ -3061,10 +3061,141 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- Free notice -->
           <div id="filter-free-notice" style="display:none;background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:9px;color:#8899aa;line-height:1.7;">
             <span style="color:var(--cyan);font-weight:700;">FREE:</span> Filter active listings.<br>
-            <span style="color:#fbbf24;font-weight:700;">STARTER+:</span> Search all 635,000 King County parcels.
-            <button onclick="_rwaUpgrade('pro')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;">UNLOCK ALL PARCELS -- $19/MO</button>
+            <span style="color:#fbbf24;font-weight:700;">PRO:</span> Search all 635,000 King County parcels.
+            <button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;">GO PRO -- $34/MO</button>
           </div>
 
+          <!-- TRANSPORT FILTERS -->
+          <div id="transport-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">TYPE</div>
+              <select id="f-transport-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Yacht / Sailboat</option>
+                <option>Motor Vessel</option>
+                <option>Private Jet</option>
+                <option>Helicopter</option>
+                <option>Classic Car</option>
+                <option>Motorcycle</option>
+                <option>RV / Motorhome</option>
+              </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MIN</div><input id="f-transport-year-min" type="number" placeholder="1990" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MAX</div><input id="f-transport-year-max" type="number" placeholder="2025" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+            </div>
+          </div>
+          <!-- BUSINESS FILTERS -->
+          <div id="business-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">INDUSTRY</div>
+              <input id="f-business-industry" type="text" placeholder="e.g. Restaurant, SaaS" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MIN REVENUE</div><input id="f-business-rev-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MAX REVENUE</div><input id="f-business-rev-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+            </div>
+          </div>
+          <!-- DEBT FILTERS -->
+          <div id="debt-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LOAN TYPE</div>
+              <select id="f-debt-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Mortgage Note</option>
+                <option>Business Loan</option>
+                <option>Bridge Loan</option>
+                <option>Hard Money</option>
+                <option>Bond</option>
+                <option>NPL Portfolio</option>
+              </select>
+            </div>
+          </div>
+          <!-- ENERGY FILTERS -->
+          <div id="energy-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ENERGY TYPE</div>
+              <select id="f-energy-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Oil &amp; Gas</option>
+                <option>Solar Farm</option>
+                <option>Wind Farm</option>
+                <option>Hydro</option>
+                <option>Geothermal</option>
+                <option>Battery Storage</option>
+              </select>
+            </div>
+          </div>
+          <!-- HEALTHCARE FILTERS -->
+          <div id="healthcare-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">PROCEDURE / SERVICE</div>
+              <input id="f-healthcare-procedure" type="text" placeholder="e.g. Knee Replacement, Dental" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">COUNTRY</div>
+              <input id="f-healthcare-country" type="text" placeholder="e.g. Mexico, Thailand, USA" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            </div>
+          </div>
+          <!-- IP FILTERS -->
+          <div id="ip-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">IP TYPE</div>
+              <select id="f-ip-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Patent</option>
+                <option>Trademark</option>
+                <option>Copyright</option>
+                <option>Domain Name</option>
+                <option>Software License</option>
+                <option>Royalty Stream</option>
+              </select>
+            </div>
+          </div>
+          <!-- ANTHRO FILTERS -->
+          <div id="anthro-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CATEGORY</div>
+              <select id="f-anthro-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Athlete</option>
+                <option>Model</option>
+                <option>Architect</option>
+                <option>Coder / Developer</option>
+                <option>Security / Protection</option>
+                <option>Carpenter / Trades</option>
+                <option>Creative / Artist</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LOCATION</div>
+              <input id="f-anthro-location" type="text" placeholder="City, Country" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            </div>
+          </div>
+          <!-- ART FILTERS -->
+          <div id="art-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CATEGORY</div>
+              <select id="f-art-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Fine Art</option>
+                <option>Watch / Jewelry</option>
+                <option>Wine / Spirits</option>
+                <option>Classic Car</option>
+                <option>Sports Memorabilia</option>
+                <option>Trading Cards</option>
+                <option>NFT / Digital</option>
+              </select>
+            </div>
+          </div>
+          <!-- GENERIC FILTERS -->
+          <div id="generic-filters" style="display:none">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">KEYWORDS</div>
+              <input id="f-generic-keywords" type="text" placeholder="Search by keyword..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            </div>
+          </div>
           <!-- Listing type -->
           <div style="margin-bottom:10px;">
             <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LISTING TYPE</div>
@@ -3576,7 +3707,7 @@ body { min-width: 900px; overflow-x: auto; }
             </div>
           </div><!-- end business-filters -->
 
-          <button onclick="typeof runParcelSearch==='function'&&runParcelSearch()" id="filter-search-btn" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-top:6px;margin-bottom:6px;">SEARCH PARCELS</button>
+          <button onclick="typeof runParcelSearch==='function'&&runParcelSearch()" id="filter-search-btn" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-top:6px;margin-bottom:6px;">SEARCH</button>
           <div id="filter-result-count" style="font-size:9px;color:var(--muted);text-align:center;min-height:16px;"></div>
 
         </div>
@@ -4545,12 +4676,33 @@ function setCategory(catId, btn) {
 }
 
 function updateFilterPanelForCategory(catId) {
-  const reFilters = document.getElementById('re-filters');
-  const transportFilters = document.getElementById('transport-filters');
-  const businessFilters = document.getElementById('business-filters');
-  if (reFilters) reFilters.style.display = (catId === 'realestate' || catId === 'all') ? 'block' : 'none';
-  if (transportFilters) transportFilters.style.display = catId === 'transport' ? 'block' : 'none';
-  if (businessFilters) businessFilters.style.display = catId === 'business' ? 'block' : 'none';
+  var panels = {
+    'realestate': 're-filters',
+    'transport':  'transport-filters',
+    'business':   'business-filters',
+    'debt':       'debt-filters',
+    'energy':     'energy-filters',
+    'healthcare': 'healthcare-filters',
+    'ip':         'ip-filters',
+    'anthro':     'anthro-filters',
+    'art':        'art-filters',
+  };
+  var genericCats = ['currency','equities','resources','infrastructure','robotics','rights','other'];
+  var allPanelIds = ['re-filters','transport-filters','business-filters','debt-filters','energy-filters','healthcare-filters','ip-filters','anthro-filters','art-filters','generic-filters'];
+  allPanelIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  if (catId === 'all') {
+    var el = document.getElementById('re-filters');
+    if (el) el.style.display = 'block';
+  } else if (panels[catId]) {
+    var el = document.getElementById(panels[catId]);
+    if (el) el.style.display = 'block';
+  } else if (genericCats.indexOf(catId) > -1) {
+    var el = document.getElementById('generic-filters');
+    if (el) el.style.display = 'block';
+  }
 }
 
 // ── LOG SLIDER ENGINE (Custom drag -- fully independent handles) ──
@@ -10964,7 +11116,7 @@ window._doParcelSearch = async function _doParcelSearch() {
 
       if (!_isAdmin && _searchCount >= _searchLimit) {
         if (countEl) countEl.innerHTML = '<span style="color:#fbbf24">Monthly search limit reached. <span style="color:var(--cyan);cursor:pointer;" onclick="_rwaUpgrade(\'pro\')">Upgrade to Pro for 500/mo</span></span>';
-        if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
+        if (btn) { btn.textContent = 'SEARCH'; btn.disabled = false; }
         return;
       }
       localStorage.setItem(_searchKey, _searchCount + 1);
@@ -11067,7 +11219,7 @@ window._doParcelSearch = async function _doParcelSearch() {
     if (countEl) countEl.textContent = 'Search error -- ' + e.message;
     console.error('[RWA Filter]', e);
   } finally {
-    if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
+    if (btn) { btn.textContent = 'SEARCH'; btn.disabled = false; }
   }
 }
 
@@ -11236,7 +11388,7 @@ async function runAISearch() {
 
     // Count applied filters
     const applied = Object.keys(filters).filter(k => k !== 'category').length;
-    if (status) status.textContent = '✦ ' + applied + ' filter' + (applied !== 1 ? 's' : '') + ' applied -- hit SEARCH PARCELS';
+    if (status) status.textContent = '✦ ' + applied + ' filter' + (applied !== 1 ? 's' : '') + ' applied -- hit SEARCH';
 
     // Auto-run search
     setTimeout(() => {
