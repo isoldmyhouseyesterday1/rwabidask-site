@@ -11255,119 +11255,69 @@ window.runAISearch = runAISearch;
 // ── PRICING PAGE ─────────────────────────────────────────────────────────────
 window.showPricingPage = function showPricingPage() {
   const existing = document.getElementById('pricing-modal');
-  if (existing) existing.remove();
+  if (existing) { existing.remove(); return; }
   const t1 = typeof detectRegionalTier === 'function' && detectRegionalTier() === 'tier1';
   const intelP = t1 ? '8' : '5';
   const badgeP = t1 ? '3' : '2';
-  const proP   = t1 ? '34' : '21';
-
+  const proP = t1 ? '34' : '21';
+  const proP19 = t1 ? '19' : '10';
   const m = document.createElement('div');
   m.id = 'pricing-modal';
   m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
-
-  m.innerHTML = `
-    <div style="background:#0a1628;border:1px solid rgba(0,255,200,.2);border-radius:8px;width:100%;max-width:860px;margin:auto;padding:32px 24px;font-family:var(--font)">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
-        <div style="font-size:10px;font-weight:700;letter-spacing:3px;color:var(--muted)">RWABIDASK · PRICING</div>
-        <button onclick="document.getElementById('pricing-modal').remove()" style="background:none;border:none;color:#556677;font-size:24px;cursor:pointer">&#x2715;</button>
-      </div>
-
-      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px;border-top:1px solid rgba(0,255,200,.1);padding-top:20px">ONE-TIME</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px">
-
-        <div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">INTEL REPORT</div>
-          <div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$${intelP}</div>
-          <div style="font-size:9px;color:var(--muted);margin-bottom:14px">per report · King County parcels</div>
-          <div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">
-            ✓ 5 comp sets with methodology<br>
-            ✓ Crime radius + trend 2010–present<br>
-            ✓ Chain of title<br>
-            ✓ 30yr assessed value history<br>
-            ✓ All permits on record<br>
-            ✓ Geo-risk full profile<br>
-            ✓ Fault line + tsunami + flood<br>
-            ✓ Mineral & subsurface rights<br>
-            ✓ Intel score 0–100
-          </div>
-          <button onclick="document.getElementById('pricing-modal').remove();showToast('DOUBLE-CLICK ANY KING COUNTY PARCEL TO BUY')" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">BUY REPORT</button>
-        </div>
-
-        <div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">VERIFIED BADGE</div>
-          <div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$${badgeP}</div>
-          <div style="font-size:9px;color:var(--muted);margin-bottom:14px">one-time · permanent on listing</div>
-          <div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">
-            ✓ Verified checkmark on listing<br>
-            ✓ Priority placement in search<br>
-            ✓ Phone number visible to buyers<br>
-            ✓ Builds buyer trust<br>
-            ✓ Never expires
-          </div>
-          <button onclick="document.getElementById('pricing-modal').remove();window.openListingForm&&window.openListingForm()" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">LIST FREE · GET VERIFIED</button>
-        </div>
-
-      </div>
-
-      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px;border-top:1px solid rgba(0,255,200,.1);padding-top:20px">MONTHLY SUBSCRIPTION -- CANCEL ANYTIME</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:28px">
-
-        <div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">INTEL UNLIMITED</div>
-          <div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$${t1?'19':'10'}<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>
-          <div style="font-size:9px;color:var(--muted);margin-bottom:14px">unlimited reports · any parcel</div>
-          <div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">
-            ✓ Unlimited Intel Reports<br>
-            ✓ All report features<br>
-            ✓ Priority support<br>
-            ✓ Best for: investors pulling 3+ reports/mo
-          </div>
-          <button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="width:100%;padding:10px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">SUBSCRIBE -- $${t1?'19':'10'}/MO</button>
-        </div>
-
-        <div style="border:2px solid rgba(0,255,200,.4);border-radius:6px;padding:20px;position:relative">
-          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#000;font-size:8px;font-weight:700;padding:2px 10px;border-radius:10px;letter-spacing:1px;white-space:nowrap">BEST VALUE</div>
-          <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">PRO</div>
-          <div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$${proP}<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>
-          <div style="font-size:9px;color:var(--muted);margin-bottom:14px">everything unlimited</div>
-          <div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">
-            ✓ Unlimited Intel Reports<br>
-            ✓ Unlimited active listings<br>
-            ✓ Priority placement<br>
-            ✓ Lead notifications<br>
-            ✓ API access<br>
-            ✓ White label reports<br>
-            ✓ Best for: brokerages, funds, lenders
-          </div>
-          <button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="width:100%;padding:10px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">GO PRO -- $${proP}/MO</button>
-        </div>
-
-      </div>
-
-      <div style="border-top:1px solid rgba(0,255,200,.1);padding-top:20px">
-        <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px">FAQ</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:10px;color:#8899aa;line-height:1.8">
-          <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Are Intel Reports refundable?</div>All sales are final. Reports are generated instantly.</div>
-          <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Can I cancel my subscription?</div>Yes -- cancel anytime. Active until end of billing period.</div>
-          <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Is listing free?</div>Yes. List any asset anywhere free. Pay $${badgeP} for a verified badge.</div>
-          <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">What counties are covered?</div>King County WA (635k parcels). Pierce, Snohomish & national expansion coming.</div>
-        </div>
-      </div>
-
-      <div style="text-align:center;margin-top:24px;font-size:9px;color:var(--muted)">
-        RWABidAsk · Global Asset Database · All prices USD · Secured by Stripe<br>
-        <a href="mailto:ops@rwabidask.com" style="color:var(--cyan)">ops@rwabidask.com</a>
-      </div>
-    </div>`;
-
+  var h = '';
+  h += '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.2);border-radius:8px;width:100%;max-width:860px;margin:auto;padding:32px 24px;font-family:var(--font)">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">';
+  h += '<div style="font-size:10px;font-weight:700;letter-spacing:3px;color:var(--muted)">RWABIDASK - PRICING</div>';
+  h += '<button onclick="document.getElementById('pricing-modal').remove()" style="background:none;border:none;color:#556677;font-size:24px;cursor:pointer">&#x2715;</button>';
+  h += '</div>';
+  h += '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px;border-top:1px solid rgba(0,255,200,.1);padding-top:20px">ONE-TIME</div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px">';
+  h += '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">';
+  h += '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">INTEL REPORT</div>';
+  h += '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + intelP + '</div>';
+  h += '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">per report - King County parcels</div>';
+  h += '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">';
+  h += 'checkmark 5 comp sets with methodology<br>checkmark Crime radius + trend 2010-present<br>checkmark Chain of title<br>checkmark 30yr assessed value history<br>checkmark All permits on record<br>checkmark Geo-risk full profile<br>checkmark Fault line + tsunami + flood<br>checkmark Mineral rights<br>checkmark Intel score 0-100';
+  h += '</div>';
+  h += '<button onclick="document.getElementById('pricing-modal').remove();showToast('DOUBLE-CLICK ANY KING COUNTY PARCEL TO BUY')" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">BUY REPORT</button>';
+  h += '</div>';
+  h += '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">';
+  h += '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">VERIFIED BADGE</div>';
+  h += '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + badgeP + '</div>';
+  h += '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">one-time - permanent on listing</div>';
+  h += '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">';
+  h += 'checkmark Verified checkmark on listing<br>checkmark Priority placement<br>checkmark Phone number visible<br>checkmark Never expires';
+  h += '</div>';
+  h += '<button onclick="document.getElementById('pricing-modal').remove();window.openListingForm&&window.openListingForm()" style="width:100%;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">LIST FREE - GET VERIFIED</button>';
+  h += '</div>';
+  h += '</div>';
+  h += '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px;border-top:1px solid rgba(0,255,200,.1);padding-top:20px">MONTHLY - CANCEL ANYTIME</div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:28px">';
+  h += '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">';
+  h += '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">INTEL UNLIMITED</div>';
+  h += '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + proP19 + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>';
+  h += '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">unlimited reports - any parcel</div>';
+  h += '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">checkmark Unlimited Intel Reports<br>checkmark All report features<br>checkmark Priority support</div>';
+  h += '<button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="width:100%;padding:10px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">SUBSCRIBE - $' + proP19 + '/MO</button>';
+  h += '</div>';
+  h += '<div style="border:2px solid rgba(0,255,200,.4);border-radius:6px;padding:20px;position:relative">';
+  h += '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#000;font-size:8px;font-weight:700;padding:2px 10px;border-radius:10px;letter-spacing:1px;white-space:nowrap">BEST VALUE</div>';
+  h += '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">PRO</div>';
+  h += '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + proP + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>';
+  h += '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">everything unlimited</div>';
+  h += '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">checkmark Unlimited Intel Reports<br>checkmark Unlimited listings<br>checkmark Priority placement<br>checkmark Lead notifications<br>checkmark API access<br>checkmark White label reports</div>';
+  h += '<button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="width:100%;padding:10px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">GO PRO - $' + proP + '/MO</button>';
+  h += '</div>';
+  h += '</div>';
+  h += '<div style="text-align:center;margin-top:24px;font-size:9px;color:var(--muted)">';
+  h += 'RWABidAsk - Global Asset Database - All prices USD - Secured by Stripe<br>';
+  h += '<a href="mailto:ops@rwabidask.com" style="color:var(--cyan)">ops@rwabidask.com</a>';
+  h += '</div></div>';
+  m.innerHTML = h;
   document.body.appendChild(m);
-  m.addEventListener('click', e => { if(e.target===m) m.remove(); });
+  m.addEventListener('click', function(e) { if(e.target===m) m.remove(); });
 }
-// Show pricing modal if URL is /pricing
-(function() {
-  if (window.location.pathname === '/pricing') {
-    setTimeout(showPricingPage, 1000);
-  }
+
 })();
 
 function _hookMap(){const m=document.querySelector('gmp-map-3d');if(!m){setTimeout(_hookMap,800);return;}let cd=false;m.addEventListener('dblclick',async e=>{if(cd)return;cd=true;setTimeout(()=>cd=false,1500);const lat=e.detail?.latLng?.lat??e.latLng?.lat(),lng=e.detail?.latLng?.lng??e.latLng?.lng();if(!lat||!lng)return;renderBasicsPanel({id:`COORD_${lat}_${lng}`,apn:'Resolving…',address:`${lat.toFixed(6)},${lng.toFixed(6)}`,lat,lng,type:'real_estate'});if(typeof showToast==='function')showToast('QUERYING PARCEL LEDGER…');});}
