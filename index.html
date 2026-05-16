@@ -7631,11 +7631,8 @@ function getSubscriptionPrices() {
   const t1 = detectRegionalTier() === 'tier1';
   return {
     intel_unlimited:    t1 ? 19  : 10,
-  
-    pro_bundle:         t1 ? 39  : 20,
-    listing_oneshot:    t1 ? 14  : 7,
-  
-  
+    pro:                t1 ? 34  : 21,
+    verified_badge:     t1 ? 3   : 2,
   };
 }
 
@@ -11292,8 +11289,8 @@ function showPricingPage() {
     // List an asset
     + '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">'
     + '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">LIST AN ASSET</div>'
-    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + prices.listing_oneshot + '</div>'
-    + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">one-time · 90 days active</div>'
+    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + (t1 ? '3' : '2') + '</div>'
+    + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">one-time · permanent on listing</div>'
     + '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">'
     + '✓ Listed on parcel record<br>'
     + '✓ Phone number shown<br>'
@@ -11315,7 +11312,7 @@ function showPricingPage() {
     // Intel Unlimited
     + '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">'
     + '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">INTEL REPORTS UNLIMITED</div>'
-    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + prices.intel_unlimited + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
+    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + (t1 ? '19' : '10') + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
     + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">unlimited reports · any King County parcel</div>'
     + '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">'
     + '✓ Unlimited Intel Reports<br>'
@@ -11329,7 +11326,7 @@ function showPricingPage() {
     // Listings Unlimited
     + '<div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">'
     + '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">LISTINGS UNLIMITED</div>'
-    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + prices.pro + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
+    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + (t1 ? '34' : '21') + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
     + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">unlimited active listings</div>'
     + '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">'
     + '✓ Unlimited active listings<br>'
@@ -11347,7 +11344,7 @@ function showPricingPage() {
     + '<div style="border:2px solid rgba(0,255,200,.4);border-radius:6px;padding:20px;position:relative">'
     + '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#000;font-size:8px;font-weight:700;padding:2px 10px;border-radius:10px;letter-spacing:1px;white-space:nowrap">BEST VALUE</div>'
     + '<div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">PRO BUNDLE</div>'
-    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + prices.pro_bundle + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
+    + '<div style="font-size:32px;font-weight:700;color:var(--cyan);margin-bottom:4px">$' + (t1 ? '34' : '21') + '<span style="font-size:12px;font-weight:400;color:var(--muted)">/mo</span></div>'
     + '<div style="font-size:9px;color:var(--muted);margin-bottom:14px">everything unlimited</div>'
     + '<div style="font-size:10px;color:#8899aa;line-height:1.8;margin-bottom:14px">'
     + '✓ Unlimited Intel Reports<br>'
@@ -11373,12 +11370,12 @@ function showPricingPage() {
 
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Is listing data verified?</div>Listings are submitted by owners, agents, and representatives who certify accuracy under our Terms of Service. All submissions are permanently logged.</div>'
     + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">What counties are covered?</div>King County, Washington (635,000+ parcels). Pierce and Snohomish counties coming soon. National expansion in progress. Transport and business listings available globally.</div>'
-    + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Are phone numbers shown for free?</div>Name and email only on free listings. Phone number shown on paid listings ($14 one-time or Listings Unlimited plan).</div>'
+    + '<div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Are phone numbers shown for free?</div>Name and email only on free listings. Listings are free. Add a Verified Badge for $3 to show your phone number and get priority placement.</div>'
     + '</div>'
     + '</div>'
 
     + '<div style="text-align:center;margin-top:24px;font-size:9px;color:var(--muted);line-height:1.8">'
-    + 'RWABidAsk · Global Asset Database · Real Estate · Transports · Businesses · All prices in USD · Payments secured by Stripe<br>'
+    + 'RWABidAsk · Global Asset Database · All Asset Classes · All prices in USD · Payments secured by Stripe<br>'
     + 'Questions: <a href="mailto:ops@rwabidask.com" style="color:var(--cyan)">ops@rwabidask.com</a>'
     + '</div>'
     + '</div>';
