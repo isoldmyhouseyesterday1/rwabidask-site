@@ -2466,19 +2466,17 @@ body { min-width: 900px; overflow-x: auto; }
 
 /* Category ribbon — clean, no DASH badges */
 .ptabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
-  padding: 5px 6px;
+  display: flex; flex-wrap: wrap;
+  gap: 3px; padding: 5px 6px;
   border-bottom: 1px solid var(--border);
 }
 .ptab {
-  padding: 6px 4px; font-size: 8px; font-weight: 700;
+  flex: 1 1 auto;
+  padding: 6px 8px; font-size: 8.5px; font-weight: 700;
   letter-spacing: .5px; text-transform: uppercase;
   background: none; border: 1px solid transparent;
-  color: var(--dim); cursor: pointer; border-radius: 2px;
-  transition: all .12s; text-align: center;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--dim); cursor: pointer; border-radius: 3px;
+  transition: all .12s; text-align: center; white-space: nowrap;
 }
 .ptab:hover { border-color: var(--border2); color: var(--silver); }
 .ptab.on {
