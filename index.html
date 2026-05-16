@@ -11363,7 +11363,7 @@ window.showPricingPage = function showPricingPage() {
   document.body.appendChild(m);
   m.addEventListener('click', e => { if(e.target===m) m.remove(); });
 }
-// Show pricing page if URL is /pricing
+// Show pricing modal if URL is /pricing
 (function() {
   if (window.location.pathname === '/pricing') {
     setTimeout(showPricingPage, 1000);
