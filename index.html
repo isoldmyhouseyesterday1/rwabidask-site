@@ -10654,7 +10654,7 @@ async function brokerSubmitCorrection() {
 // SMART CONVERSION SYSTEM — View counter + intent gates
 // ══════════════════════════════════════════════════════════════════
 // ── Safe global helpers for account menu buttons ────────────────
-function _rwaUpgrade(product) {
+window._rwaUpgrade = function _rwaUpgrade(product) {
   if (typeof currentUser !== 'undefined') window.currentUser = currentUser;
   if (typeof _sb !== 'undefined') window._sb = _sb;
   if (typeof RWA_GATE !== 'undefined') RWA_GATE.stripeCheckout(product);
@@ -11488,7 +11488,7 @@ const FIELD_DEFS = {
   description:      { label: 'Description',          type: 'textarea', placeholder: 'Additional details, contact preferences, terms...' },
 };
 
-function openListingForm() {
+window.openListingForm = function openListingForm() {
   if (!currentUser) { showToast('SIGN IN TO LIST AN ASSET'); return; }
   const existing = document.getElementById('rwa-listing-form');
   if (existing) existing.remove();
