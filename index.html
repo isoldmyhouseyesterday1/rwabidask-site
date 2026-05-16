@@ -6,7 +6,7 @@
 <title>RWABidAsk™ | Global Asset Database</title>
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<meta name="description" content="RWABidAsk — Real Property Intelligence Platform. Professional parcel data, comp analysis, crime radius, chain of title, and geo-risk reports for King County Washington real estate.">
+<meta name="description" content="RWABidAsk -- Real Property Intelligence Platform. Professional parcel data, comp analysis, crime radius, chain of title, and geo-risk reports for King County Washington real estate.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,7 @@
   var s = document.createElement('script');
   s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
   s.crossOrigin = 'anonymous';
-  s.onerror = function(){ console.warn('[RWABidAsk] Supabase CDN load failed — running without auth'); };
+  s.onerror = function(){ console.warn('[RWABidAsk] Supabase CDN load failed -- running without auth'); };
   document.head.appendChild(s);
 })();
 </script>
@@ -39,7 +39,7 @@
       .limit(1)
       .single();
     if (data?.apn) {
-      if (typeof showToast === 'function') showToast('✓ PAYMENT CONFIRMED — LOADING INTEL REPORT…');
+      if (typeof showToast === 'function') showToast('✓ PAYMENT CONFIRMED -- LOADING INTEL REPORT…');
       const bq = await fetchParcelData({pin: data.apn, paid: true});
       if (bq && typeof _renderFull === 'function') {
         _renderFull({id: data.apn, apn: data.apn, type: 'real_estate'}, bq);
@@ -544,7 +544,7 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .mctl:hover, .mctl.on { color: var(--cyan); background: var(--cyan-dim); }
 .map-status {
-  display: none !important; /* Globe status box removed — status is in topbar */
+  display: none !important; /* Globe status box removed -- status is in topbar */
   position: absolute;
   bottom: 14px;
   left: 50%;
@@ -820,7 +820,7 @@ body { min-width: 900px; overflow-x: auto; }
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.rinner { padding: 20px; }           /* "Older Eyes" fix — was 14px 16px */
+.rinner { padding: 20px; }           /* "Older Eyes" fix -- was 14px 16px */
 .rsect { margin-bottom: 22px; }
 .rsect-title {
   font-size: 9px;
@@ -836,11 +836,11 @@ body { min-width: 900px; overflow-x: auto; }
 .rrow {
   display: flex;
   justify-content: space-between;
-  padding: 9px 20px;                 /* breathing room — was 6px 0 */
+  padding: 9px 20px;                 /* breathing room -- was 6px 0 */
   border-bottom: 1px solid var(--border);
   font-size: 12px;
   gap: 16px;
-  line-height: 1.6;                  /* "Older Eyes" fix — was implicit 1.2 */
+  line-height: 1.6;                  /* "Older Eyes" fix -- was implicit 1.2 */
 }
 .rk { color: var(--dim); flex-shrink: 0; font-size: 11px; line-height: 1.6; }
 .rv {
@@ -894,8 +894,8 @@ body { min-width: 900px; overflow-x: auto; }
 .a-buy  { background: var(--cyan); color: #000; }
 .a-bid  { background: none; border: 1px solid rgba(0,255,200,.3) !important; color: var(--cyan); }
 
-/* ── Intel Report CTA — Primary Commerce Button ──────────────────
-   Color: #ff9900 amber-orange — triadic complement to #00ffc8 cyan
+/* ── Intel Report CTA -- Primary Commerce Button ──────────────────
+   Color: #ff9900 amber-orange -- triadic complement to #00ffc8 cyan
    on the deep navy palette. Maximum contrast, "commerce" signal,
    no conflict with existing gold (#e2c55a) or red (#ff6b6b). */
 .btn-intel-report {
@@ -956,7 +956,7 @@ body { min-width: 900px; overflow-x: auto; }
   margin-bottom: 8px;
 }
 
-/* ── Basics Panel — free surface-level parcel data ─────────── */
+/* ── Basics Panel -- free surface-level parcel data ─────────── */
 .basics-panel {
   padding: 0;
 }
@@ -1314,7 +1314,7 @@ body { min-width: 900px; overflow-x: auto; }
   overflow: visible;
 }
 
-/* MOBILE "ZILLOW" UI (≤767px) — Centered Globe + 75vh Slide-up Drawer */
+/* MOBILE "ZILLOW" UI (≤767px) -- Centered Globe + 75vh Slide-up Drawer */
 @media (max-width: 767px) {
   #shell {
     grid-template-rows: 48px 1fr;
@@ -1338,7 +1338,7 @@ body { min-width: 900px; overflow-x: auto; }
     right: 0 !important;
     top: auto !important;
     width: 100% !important;
-    height: 52vh !important;          /* 50% of screen — readable, not overwhelming */
+    height: 52vh !important;          /* 50% of screen -- readable, not overwhelming */
     max-height: 52vh !important;
     border-left: none !important;
     border-top: 2px solid rgba(0,255,200,.35) !important;
@@ -1365,7 +1365,7 @@ body { min-width: 900px; overflow-x: auto; }
     margin: 10px auto 0;
     flex-shrink: 0;
   }
-  /* Sheet close button — injected by JS into #right on mobile open */
+  /* Sheet close button -- injected by JS into #right on mobile open */
   .sheet-close-btn {
     position: absolute;
     top: 10px;
@@ -1969,7 +1969,7 @@ body { min-width: 900px; overflow-x: auto; }
 .digitize-btn:hover { background: var(--cyan-dim); border-color: rgba(0,255,200,.5); }
 .digitize-btn:disabled { opacity: .4; cursor: default; }
 
-/* CLINICAL AUTHENTICATION GATE — Minimalist, No Escape */
+/* CLINICAL AUTHENTICATION GATE -- Minimalist, No Escape */
 .auth-gate {
   position: fixed;
   top: 0;
@@ -2464,7 +2464,7 @@ body { min-width: 900px; overflow-x: auto; }
 .dash-stat.red   .dash-stat-val { color: #f87171; }
 .dash-stat.green .dash-stat-val { color: #34d399; }
 
-/* Category ribbon — clean, no DASH badges */
+/* Category ribbon -- clean, no DASH badges */
 .ptabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2556,7 +2556,7 @@ body { min-width: 900px; overflow-x: auto; }
 .wallet-notice { font-size: 8px; color: var(--muted); text-align:center; margin-top:10px; line-height:1.7; }
 
 /* ════════════════════════════════════════════════════════════════
-   CLAIM / SPONSOR BUTTONS on asset listing — uniform spec
+   CLAIM / SPONSOR BUTTONS on asset listing -- uniform spec
    ════════════════════════════════════════════════════════════════ */
 .abtn-claim-listing {
   width: 100%; padding: 11px; background: rgba(226,197,90,.07);
@@ -2637,7 +2637,7 @@ body { min-width: 900px; overflow-x: auto; }
 
 
 /* ════════════════════════════════════════════════════════════════
-   GOLD ROW BLUR — Teaser-First Paywall Rows
+   GOLD ROW BLUR -- Teaser-First Paywall Rows
    ════════════════════════════════════════════════════════════════ */
 .spec-row-locked {
   position: relative;
@@ -2662,12 +2662,12 @@ body { min-width: 900px; overflow-x: auto; }
 .spec-row-lock-icon:hover { transform: scale(1.2); }
 .rrow-null .rv { display: flex; align-items: center; }
 
-/* Auth gate override — hidden in Open House mode */
+/* Auth gate override -- hidden in Open House mode */
 .auth-gate { display: none !important; }
 .auth-gate.force-show { display: flex !important; }
 
 /* ════════════════════════════════════════════════════════════════
-   INSTITUTIONAL LEDGER — Bloomberg-style market cap ticker
+   INSTITUTIONAL LEDGER -- Bloomberg-style market cap ticker
    ════════════════════════════════════════════════════════════════ */
 #unified-ledger-block {
   display: flex;
@@ -2706,13 +2706,13 @@ body { min-width: 900px; overflow-x: auto; }
 }
 
 /* ════════════════════════════════════════════════════════════════
-   PANEL SPACING — "Older Eyes" fix
+   PANEL SPACING -- "Older Eyes" fix
    Increased padding, line-height, no text touching borders
    ════════════════════════════════════════════════════════════════ */
 .rrow {
   display: flex;
   justify-content: space-between;
-  padding: 9px 16px;        /* was: 6px 0 — now has horizontal padding */
+  padding: 9px 16px;        /* was: 6px 0 -- now has horizontal padding */
   border-bottom: 1px solid var(--border);
   font-size: 12px;
   gap: 16px;
@@ -2760,7 +2760,7 @@ body { min-width: 900px; overflow-x: auto; }
 }
 
 /* ════════════════════════════════════════════════════════════════
-   METADATA BLOCK — clean ledger footer in panel
+   METADATA BLOCK -- clean ledger footer in panel
    ════════════════════════════════════════════════════════════════ */
 .meta-block {
   margin: 0;
@@ -2802,9 +2802,9 @@ body { min-width: 900px; overflow-x: auto; }
 .meta-val.hl { color: var(--cyan); }
 
 /* ════════════════════════════════════════════════════════════════
-   REVENUE BUTTONS — Sponsor, Claim, Market Intel (Broker)
+   REVENUE BUTTONS -- Sponsor, Claim, Market Intel (Broker)
    ════════════════════════════════════════════════════════════════ */
-/* Sponsor — purple, partnership signal */
+/* Sponsor -- purple, partnership signal */
 .abtn-sponsor-parcel {
   width: 100%;
   padding: 11px 16px;
@@ -2823,7 +2823,7 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .abtn-sponsor-parcel:hover { background: rgba(147,51,234,.16); border-color: #a855f7; }
 
-/* Claim — gold, ownership signal */
+/* Claim -- gold, ownership signal */
 .abtn-claim-parcel {
   width: 100%;
   padding: 11px 16px;
@@ -2842,7 +2842,7 @@ body { min-width: 900px; overflow-x: auto; }
 }
 .abtn-claim-parcel:hover { background: rgba(226,197,90,.14); border-color: var(--gold); }
 
-/* Broker Intel Buy — amber, commerce signal (matches Intel Report CTA hue family) */
+/* Broker Intel Buy -- amber, commerce signal (matches Intel Report CTA hue family) */
 .abtn-broker-intel {
   width: 100%;
   padding: 12px 16px;
@@ -2872,7 +2872,7 @@ body { min-width: 900px; overflow-x: auto; }
 .abtn-broker-intel:hover { background: rgba(255,153,0,.15); border-color: #ff9900; }
 
 /* ════════════════════════════════════════════════════════════════
-   SIDEBAR RECENTLY VIEWED — on-demand model list state
+   SIDEBAR RECENTLY VIEWED -- on-demand model list state
    ════════════════════════════════════════════════════════════════ */
 .sidebar-section-head {
   padding: 10px 16px 6px;
@@ -2973,13 +2973,13 @@ body { min-width: 900px; overflow-x: auto; }
 
   <div id="unified-ledger-block" style="display:none;position:absolute;"></div>
   <div class="topbar-right">
-    <div class="tstat" style="display:none"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc">—</div></div>
+    <div class="tstat" style="display:none"><div class="tstat-l">GMC</div><div class="tstat-v" id="s-gmc">--</div></div>
     <div class="tstat" style="display:none">
       <div class="tstat-l">Assets</div>
-      <div class="tstat-v live" id="s-assets">—</div>
+      <div class="tstat-v live" id="s-assets">--</div>
     </div>
     <div style="display:none"><div id="s-status">SYNC</div></div>
-    <div style="display:none"><div id="s-bids">—</div></div>
+    <div style="display:none"><div id="s-bids">--</div></div>
     <button class="tbtn" id="signin-btn" onclick="openModal('signin')">Sign In</button>
     
     <button class="tbtn primary" id="join-btn" onclick="if(window._userTier&&window._userTier!=='free'){signOut();}else if(currentUser){window.showPricingPage&&window.showPricingPage();}else{openModal('signup');}">Join Free</button>
@@ -2994,7 +2994,7 @@ body { min-width: 900px; overflow-x: auto; }
         <div class="left-title" style="margin:0;display:none">GLOBAL ASSET DATABASE</div>
         <div style="display:none" id="left-live-badge"><span class="live-dot"></span>LIVE</div>
       </div>
-<!-- dashboard summary removed — data in header topbar -->
+<!-- dashboard summary removed -- data in header topbar -->
       <div id="cat-sponsor-strip" style="display:none"></div>
       <div class="ptabs" id="category-tabs">
         <button class="ptab map-tab on" onclick="setCategory('all', this)">ALL</button>
@@ -3038,7 +3038,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
         </div>
         <div style="text-align:center;margin-bottom:7px;">
-          <span id="price-readout" style="font-size:12px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 10px rgba(0,255,200,.4)">$0 — $20M+</span>
+          <span id="price-readout" style="font-size:12px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.3px;text-shadow:0 0 10px rgba(0,255,200,.4)">$0 -- $20M+</span>
         </div>
         <div id="dual-slider" style="position:relative;height:20px;margin:0 8px;user-select:none;">
           <div id="slider-track" style="position:absolute;top:50%;left:0;right:0;height:2px;background:var(--border2);transform:translateY(-50%);border-radius:1px;"></div>
@@ -3062,7 +3062,7 @@ body { min-width: 900px; overflow-x: auto; }
           <div id="filter-free-notice" style="display:none;background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:9px;color:#8899aa;line-height:1.7;">
             <span style="color:var(--cyan);font-weight:700;">FREE:</span> Filter active listings.<br>
             <span style="color:#fbbf24;font-weight:700;">STARTER+:</span> Search all 635,000 King County parcels.
-            <button onclick="_rwaUpgrade('pro')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;">UNLOCK ALL PARCELS — $19/MO</button>
+            <button onclick="_rwaUpgrade('pro')" style="display:block;width:100%;margin-top:6px;padding:5px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;">UNLOCK ALL PARCELS -- $19/MO</button>
           </div>
 
           <!-- Listing type -->
@@ -3642,7 +3642,7 @@ body { min-width: 900px; overflow-x: auto; }
     <div class="rhead" id="rhead">
       <div class="rtype">Select an Asset</div>
       <div class="rname" style="opacity:.25">Click any marker or listing</div>
-      <div class="rcity">—</div>
+      <div class="rcity">--</div>
     </div>
     <div class="rbody" id="rbody">
       <div class="r-empty">
@@ -3675,13 +3675,13 @@ body { min-width: 900px; overflow-x: auto; }
 
 <footer id="footer">
   <div class="footer-left" style="font-size:9px;color:var(--muted);">© 2026 ANNIE GROUP LLC</div>
-  <div class="footer-center" style="font-size:9px;font-weight:700;letter-spacing:2px;">RWABIDASK™ — GLOBAL ASSET DATABASE</div>
+  <div class="footer-center" style="font-size:9px;font-weight:700;letter-spacing:2px;">RWABIDASK™ -- GLOBAL ASSET DATABASE</div>
   <div class="footer-right" style="font-size:9px;color:var(--muted);">SYSTEM: OPERATIONAL</div>
 </footer>
 
 
 <!-- ════════════════════════════════════════════════════════════════
-     WALLET MODAL — Stripe Elements + Credit Balance
+     WALLET MODAL -- Stripe Elements + Credit Balance
      ════════════════════════════════════════════════════════════════ -->
 
 </div>
@@ -3704,7 +3704,7 @@ body { min-width: 900px; overflow-x: auto; }
 </div>
 <!-- mobile list view is rendered inside map-col via JS -->
 
-<!-- AUTH GATE — Hidden by default (Open House mode). Triggered only on gated actions. -->
+<!-- AUTH GATE -- Hidden by default (Open House mode). Triggered only on gated actions. -->
 <div class="auth-gate hidden" id="auth-gate" style="display:none!important">
   <div class="auth-gate-card">
     <div class="auth-gate-title">RWABidAsk | Sign In Required</div>
@@ -3743,7 +3743,7 @@ const DASHBOARD_ONLY_CATEGORIES = new Set(['financial','infrastructure','technol
 function getAssetCategory(type) {
   const t = (type || '').toLowerCase().trim();
   const map = {
-    // ── TRANSPORT — vessels, aircraft, vehicles ──────────────────
+    // ── TRANSPORT -- vessels, aircraft, vehicles ──────────────────
     yacht: 'transport', sailboat: 'transport', powerboat: 'transport',
     boat: 'transport', vessel: 'transport', ship: 'transport',
     ferry: 'transport', tugboat: 'transport', catamaran: 'transport',
@@ -3755,8 +3755,8 @@ function getAssetCategory(type) {
     business: 'business', franchise: 'business', company: 'business',
     restaurant: 'business', retail: 'business', ecommerce: 'business',
     saas: 'business', startup: 'business', manufacturing: 'business',
-    // ── MARITIME — physical vessels ───────────────────────────────
-    // ── TRANSPORT — maritime + aviation consolidated ──────────────
+    // ── MARITIME -- physical vessels ───────────────────────────────
+    // ── TRANSPORT -- maritime + aviation consolidated ──────────────
     maritime:'transport', vessel:'transport', ship:'transport', boat:'transport',
     yacht:'transport', tanker:'transport', ferry:'transport', cargo:'transport',
     submarine:'transport', barge:'transport', trawler:'transport',
@@ -3765,13 +3765,13 @@ function getAssetCategory(type) {
     jet:'transport', helicopter:'transport', hangar:'transport',
     'private jet':'transport', turboprop:'transport', rotorcraft:'transport',
     transport:'transport', shipping:'transport', logistics:'transport',
-    // ── ROBOTICS — automated physical infrastructure ─────────────
+    // ── ROBOTICS -- automated physical infrastructure ─────────────
     robotics:'robotics', robot:'robotics', autonomous:'robotics',
     'automated system':'robotics', automation:'robotics', uav:'robotics',
     ugv:'robotics', usv:'robotics', 'robotic fleet':'robotics',
     'autonomous vehicle':'robotics', 'drone fleet':'robotics',
     'industrial robot':'robotics', exoskeleton:'robotics', drone:'robotics',
-    // ── ANTHRO — Human Operating Capital ────────────────────────
+    // ── ANTHRO -- Human Operating Capital ────────────────────────
     anthro:'anthro', 'human capital':'anthro', labor:'anthro',
     labour:'anthro', workforce:'anthro', personnel:'anthro',
     'labor pool':'anthro', 'intelligence pool':'anthro',
@@ -3780,7 +3780,7 @@ function getAssetCategory(type) {
     'security detail':'anthro', 'medical team':'anthro',
     unit:'anthro', team:'anthro', crew:'anthro', squad:'anthro',
     'operating capital':'anthro', 'human ecosystem':'anthro',
-    // ── BIO — physical biological production/facilities ──────────
+    // ── BIO -- physical biological production/facilities ──────────
     bio:'bio', biological:'bio', biotech:'bio',
     'bio-manufacturing':'bio', biomanufacturing:'bio',
     'bio facility':'bio', 'research facility':'bio',
@@ -3796,12 +3796,12 @@ function getAssetCategory(type) {
     healthcare:'healthcare', hospital:'healthcare', clinic:'healthcare',
     medical:'healthcare', health:'healthcare', 'medical facility':'healthcare',
     'care facility':'healthcare', 'nursing home':'healthcare',
-    // ── ENERGY — physical generation assets ─────────────────────
+    // ── ENERGY -- physical generation assets ─────────────────────
     energy:'energy', solar:'energy', wind:'energy', 'power plant':'energy',
     nuclear:'energy', hydro:'energy', geothermal:'energy', battery:'energy',
     grid:'energy', 'energy storage':'energy', biomass:'energy', powerplant:'energy',
     'wind farm':'energy', 'solar farm':'energy', substation:'energy',
-    // ── REAL ESTATE — structures/land (dashboard-only) ───────────
+    // ── REAL ESTATE -- structures/land (dashboard-only) ───────────
     residential:'realestate', land:'realestate', castle:'realestate',
     estate:'realestate', property:'realestate', realestate:'realestate',
     'real estate':'realestate', house:'realestate', condo:'realestate',
@@ -3809,13 +3809,13 @@ function getAssetCategory(type) {
     retail:'realestate', industrial:'realestate', warehouse:'realestate',
     multifamily:'realestate', hotel:'realestate', resort:'realestate',
     farmland:'realestate',
-    // ── INFRASTRUCTURE — fixed network assets (dashboard-only) ───
+    // ── INFRASTRUCTURE -- fixed network assets (dashboard-only) ───
     infrastructure:'infrastructure', bridge:'infrastructure', tunnel:'infrastructure',
     satellite:'infrastructure', telecom:'infrastructure', port:'infrastructure',
     pipeline:'infrastructure', rail:'infrastructure', road:'infrastructure',
     datacenter:'infrastructure', 'data center':'infrastructure', tower:'infrastructure',
     cable:'infrastructure', dam:'infrastructure', desalination:'infrastructure',
-    // ── TECHNOLOGY — software, IP, digital (dashboard-only) ──────
+    // ── TECHNOLOGY -- software, IP, digital (dashboard-only) ──────
     technology:'technology', tech:'technology', software:'technology',
     saas:'technology', platform:'technology', app:'technology',
     equities:'technology', equity:'technology', stock:'technology',
@@ -3825,7 +3825,7 @@ function getAssetCategory(type) {
     etf:'technology', fund:'technology', 'venture capital':'technology',
     'tokenized stock':'technology', spac:'technology', ipo:'technology',
     'hedge fund':'technology',
-    // ── CAPITAL — intangibles, debt, cash, IP (dashboard-only) ───
+    // ── CAPITAL -- intangibles, debt, cash, IP (dashboard-only) ───
     financial:'financial', financials:'financial', debt:'financial',
     bond:'financial', bonds:'financial', 'treasury bill':'financial',
     treasury:'financial', ip:'financial', patent:'financial',
@@ -3864,7 +3864,7 @@ function isPhysicalAsset(type) {
 }
 
 // isMapPinAsset: returns true ONLY for assets that should render on the globe.
-// Rule: physical, tangible, has a real location — not a document, patent, or dashboard metric.
+// Rule: physical, tangible, has a real location -- not a document, patent, or dashboard metric.
 function isMapPinAsset(type, asset) {
   const cat = getAssetCategory(type);
   if (!MAP_PIN_CATEGORIES.has(cat)) return false;
@@ -3888,9 +3888,9 @@ function isMapPinAsset(type, asset) {
 }
 
 // ============================================================
-// GLOBAL STATE — all vars hoisted to prevent any ReferenceError
+// GLOBAL STATE -- all vars hoisted to prevent any ReferenceError
 // ============================================================
-window.allFiltered = []; // defined FIRST — no scope error possible
+window.allFiltered = []; // defined FIRST -- no scope error possible
 let ASSETS = [];
 window.ASSETS = ASSETS;
 let SEARCH_RESULTS = [];
@@ -3908,7 +3908,7 @@ let domMarkers = {};
 
 let cameraDebounceTimer = null;
 let isCameraProcessing = false;
-const MARKER_VISIBLE_RANGE = 300000; // pins appear below 300km — city zoom
+const MARKER_VISIBLE_RANGE = 300000; // pins appear below 300km -- city zoom
 let isAuthenticated = false;
 
 // Supabase config
@@ -3936,14 +3936,14 @@ function getLendingOptions(assetType) {
       'Conventional Fixed-Rate Mortgage',
       'Jumbo / HNW Portfolio Financing',
       'SBA 504 (Green Energy / Owner-Occupied)',
-      'CMBS (Conduit) — Non-Recourse',
+      'CMBS (Conduit) -- Non-Recourse',
       'Bridge / Hard Money (REO/Distressed)',
       'Construction-to-Permanent Loan'
     ];
   }
   if (['commercial','office','retail','business'].includes(type)) {
     return [
-      'CMBS (Conduit) — Non-Recourse',
+      'CMBS (Conduit) -- Non-Recourse',
       'Bridge / Hard Money (Value-Add)',
       'Conventional Fixed-Rate Commercial',
       'Mezzanine / Preferred Equity',
@@ -3955,7 +3955,7 @@ function getLendingOptions(assetType) {
   if (['infrastructure','energy'].includes(type)) {
     return [
       'Tax-Equity Partnership (ITC / PTC)',
-      'USDA Business & Industry (B&I) — Rural Development',
+      'USDA Business & Industry (B&I) -- Rural Development',
       'Mezzanine Debt / Subordinated Tranche',
       'Construction-to-Permanent (C2P)',
       'Sovereign / Multilateral (World Bank / IFC)',
@@ -3976,9 +3976,9 @@ function getLendingOptions(assetType) {
   // Aviation
   if (['aviation','airplane','jet'].includes(type)) {
     return [
-      'Aviation Finance — EETC (Enhanced Equipment Trust Certificate)',
+      'Aviation Finance -- EETC (Enhanced Equipment Trust Certificate)',
       'Pre-Delivery Payment (PDP) Financing',
-      'Operating Lease — Sale & Leaseback',
+      'Operating Lease -- Sale & Leaseback',
       'Finance Lease (Capital Lease)',
       'EXIM Bank Direct Loan / Guarantee',
       'Asset-Backed Securitization (ABS)'
@@ -4050,14 +4050,14 @@ function getInsuranceOptions(assetType) {
       'Passenger & Third-Party Liability',
       'Ground Risk Hull (In-Motion & Not-In-Motion)',
       'Hangarkeepers Legal Liability',
-      'Political Risk Insurance (PRI) — Cross-Border'
+      'Political Risk Insurance (PRI) -- Cross-Border'
     ];
   }
   // Maritime
   if (cat === 'maritime' || ['maritime','boat','ship','yacht'].includes(type)) {
     return [
-      'H&M — Hull & Machinery (All Risk)',
-      'P&I — Protection & Indemnity',
+      'H&M -- Hull & Machinery (All Risk)',
+      'P&I -- Protection & Indemnity',
       'War Risk (Hull & P&I)',
       'Cargo & Freight Liability',
       'Marine General Liability',
@@ -4070,12 +4070,12 @@ function getInsuranceOptions(assetType) {
       'Cyber Liability (Autonomous Systems)',
       'Product Malfunction / Recall',
       'General Operational Liability',
-      'E&O — Professional Errors & Omissions',
+      'E&O -- Professional Errors & Omissions',
       'Drone / UAS Hull & Liability',
       'Technology Errors & Omissions (Tech E&O)'
     ];
   }
-  // Anthro — Human Capital
+  // Anthro -- Human Capital
   if (cat === 'anthro' || type === 'anthro') {
     return [
       'Workers Compensation (Multi-State)',
@@ -4144,7 +4144,7 @@ function getInsuranceOptions(assetType) {
 /* submitInsurance is defined below with the modal handlers */
 
 // ============================================================
-// DATA ADAPTER — normalizeAsset(a)
+// DATA ADAPTER -- normalizeAsset(a)
 // Maps the polymorphic `specs` JSONB column to flat display fields.
 // Handles all 28+ known sub-objects: identification, physical, ledger,
 // financials, media, machinery, logistics, strategic, force_composition,
@@ -4197,7 +4197,7 @@ function normalizeAsset(a) {
     a.original_currency = (led.currency || fin.currency || a.currency || '').toUpperCase() || null;
   }
 
-  // ── Location — STRICT: never default to USA/Global/Unknown ──
+  // ── Location -- STRICT: never default to USA/Global/Unknown ──
   const BAD_LOC = new Set(['unknown','global','usa','n/a','null','undefined','']);
   const cleanLoc = v => { const t = (v||'').toString().trim(); return BAD_LOC.has(t.toLowerCase()) ? '' : t; };
   a.city    = cleanLoc(phys.city    || loc.city    || a.city    || '');
@@ -4269,7 +4269,7 @@ async function fetchListingsFromSupabase() {
   }
   try {
     setStatus('FETCHING GLOBAL DIRECTORY FROM LEDGER…');
-    // Broad select — works whether table is 'listings', 'assets', or a joined view
+    // Broad select -- works whether table is 'listings', 'assets', or a joined view
     const { data, error } = await _sb
       .from('listings')
       .select('*')
@@ -4277,13 +4277,13 @@ async function fetchListingsFromSupabase() {
 
     if (error) {
       console.error('[RWABidAsk] Supabase fetch error:', error);
-      setStatus('LEDGER CONNECTION ISSUE — RETRYING');
+      setStatus('LEDGER CONNECTION ISSUE -- RETRYING');
       return [];
     }
 
     if (!data || data.length === 0) {
       console.log('[RWABidAsk] No listings found in database');
-      setStatus('NO ASSETS IN LEDGER — ADD LISTINGS VIA DASHBOARD');
+      setStatus('NO ASSETS IN LEDGER -- ADD LISTINGS VIA DASHBOARD');
       return [];
     }
 
@@ -4298,7 +4298,7 @@ async function fetchListingsFromSupabase() {
       // Merge join data into row (row fields take precedence)
       const r = Object.assign({}, assetInfo, row);
 
-      // ── Coordinates — check every known column name ──
+      // ── Coordinates -- check every known column name ──
       let lat = parseFloat(r.lat ?? r.latitude ?? r.Latitude ?? r.lat_lng?.lat ?? '');
       let lng = parseFloat(r.lng ?? r.longitude ?? r.Longitude ?? r.lat_lng?.lng ?? '');
 
@@ -4355,13 +4355,13 @@ async function fetchListingsFromSupabase() {
         }
       }
 
-      // ── Asset Identity — title is THE primary identifier ──
+      // ── Asset Identity -- title is THE primary identifier ──
       const assetTitle =
         r.title || r.name || r.asset_name || r.address ||
         r.property_address || r.vessel_name || r.aircraft_id ||
         r.instrument_name || ('Asset #' + r.id);
 
-      // ── Type — check every known field ──
+      // ── Type -- check every known field ──
       const rawType = (
         r.asset_type || r.category || r.asset_class ||
         r.type || r.class || 'financial'
@@ -4381,9 +4381,9 @@ async function fetchListingsFromSupabase() {
         id: r.id,
         // plid: strict bigint from schema
         plid: r.plid != null ? Number(r.plid) : null,
-        // 'address' stores the TITLE — the primary identity label
+        // 'address' stores the TITLE -- the primary identity label
         address: assetTitle,
-        // city: strict text column — direct mapping, no aliases
+        // city: strict text column -- direct mapping, no aliases
         city: r.city || r.location || r.port_of_registry || r.domicile || 'Global',
         country: r.country || r.jurisdiction || 'Global',
         lat: lat,
@@ -4412,7 +4412,7 @@ async function fetchListingsFromSupabase() {
         specs: r.specs || r.specifications || r.technical_specs || {},
         fleet: r.fleet || r.sub_assets || r.manifest || [],
         state: r.state || r.flag_state || null,
-        // Molecular / bio fields — surfaced at top level for fast detection
+        // Molecular / bio fields -- surfaced at top level for fast detection
         molecular_formula: r.molecular_formula || (r.specs && r.specs.molecular_formula) || null,
         cas_number: r.cas_number || (r.specs && r.specs.cas_number) || null,
         // Preserve all raw fields for the vault display
@@ -4426,7 +4426,7 @@ async function fetchListingsFromSupabase() {
 
   } catch (err) {
     console.error('[RWABidAsk] Exception fetching listings:', err);
-    setStatus('LEDGER FETCH FAILED — CHECK CONNECTION');
+    setStatus('LEDGER FETCH FAILED -- CHECK CONNECTION');
     return [];
   }
 }
@@ -4449,17 +4449,17 @@ function onDataReady() {
   setStatus('CLICK ANY PARCEL TO IDENTIFY');
   const sAssets = document.getElementById('s-assets');
   const sStatus = document.getElementById('s-status');
-  if (sAssets) sAssets.textContent = '—';
+  if (sAssets) sAssets.textContent = '--';
   if (sStatus) sStatus.textContent = 'LIVE';
   if (typeof buildTicker === 'function') buildTicker([]);
-  // Unified ledger ticker — animated on first boot
+  // Unified ledger ticker -- animated on first boot
   updateUnifiedLedger(true);
   renderRecentlyViewed();
   window.dispatchEvent(new CustomEvent('rwa:assetsLoaded'));
 }
 
 function fmtPrice(n) {
-  if (!n || n === 0) return '—';
+  if (!n || n === 0) return '--';
   if (n >= 1e13) return '$' + (n / 1e12).toFixed(0) + 'T';
   if (n >= 1e12) return '$' + (n / 1e12).toFixed(1) + 'T';
   if (n >= 1e9)  return '$' + (n / 1e9).toFixed(2) + 'B';
@@ -4553,7 +4553,7 @@ function updateFilterPanelForCategory(catId) {
   if (businessFilters) businessFilters.style.display = catId === 'business' ? 'block' : 'none';
 }
 
-// ── LOG SLIDER ENGINE (Custom drag — fully independent handles) ──
+// ── LOG SLIDER ENGINE (Custom drag -- fully independent handles) ──
 const SLIDER_STEPS = 48; // 48 steps: $1 (10^0) → $25T
 let sliderMinStep = 0;
 let sliderMaxStep = SLIDER_STEPS; // default: full range visible
@@ -4591,7 +4591,7 @@ function updateSliderUI() {
   if (fill) { fill.style.left = pct1 + '%'; fill.style.width = (pct2 - pct1) + '%'; }
   const minLabel = fmtSliderPrice(sliderMinStep);
   const maxLabel = fmtSliderPrice(sliderMaxStep);
-  if (readout) readout.textContent = minLabel + ' — ' + maxLabel;
+  if (readout) readout.textContent = minLabel + ' -- ' + maxLabel;
   if (finetune) finetune.textContent = '↔ drag handles';
 }
 
@@ -4614,7 +4614,7 @@ function resetPriceSlider() {
   applySliderFilter();
 }
 
-// ── Drag logic — works on mouse and touch ──
+// ── Drag logic -- works on mouse and touch ──
 function initDualSlider() {
   const track = document.getElementById('dual-slider');
   if (!track) return;
@@ -4683,12 +4683,12 @@ function initDualSlider() {
   });
 }
 
-// Legacy stub — kept for any old oninput references
+// Legacy stub -- kept for any old oninput references
 function onPriceSlider() { applySliderFilter(); }
 
 function filterAssets(assets) {
   let filtered = assets;
-  // Category filter — asset_type is primary, category is fallback
+  // Category filter -- asset_type is primary, category is fallback
   if (activeTab !== 'all') {
     filtered = filtered.filter(a => {
       const rawFields = a._raw || {};
@@ -4696,7 +4696,7 @@ function filterAssets(assets) {
       return getAssetCategory(typeStr) === activeTab;
     });
   }
-  // Price filter — compare as float; full range up to $25T
+  // Price filter -- compare as float; full range up to $25T
   filtered = filtered.filter(a => {
     const p = parseFloat(a.price) || 0;
     if (p <= 0) return sliderMinPrice <= 1; // include $0 assets at min range
@@ -4707,7 +4707,7 @@ function filterAssets(assets) {
 }
 
 function setFilter(el, f) {
-  // Legacy stub — filtering now handled by log slider
+  // Legacy stub -- filtering now handled by log slider
   activeFilter = f;
 }
 
@@ -4770,7 +4770,7 @@ async function logPartnerLead(assetId, actionType) {
     }
 
     if (!currentUser) {
-        showToast("AUTH REQUIRED — SIGN IN TO LOG INTENT");
+        showToast("AUTH REQUIRED -- SIGN IN TO LOG INTENT");
         setTimeout(() => openModal('signin'), 1000);
         return;
     }
@@ -4821,7 +4821,7 @@ async function toggleWatchlist() {
             await _sb.from('user_watchlist').insert([{ user_id: currentUser.id, asset_id: asset.id.toString() }]);
             if (btn) { btn.innerHTML = "✓ PINNED"; btn.style.color = "var(--cyan)"; btn.style.borderColor = "var(--cyan)"; }
             logPartnerLead(asset.id, 'WATCHLIST');
-            showToast("ASSET PINNED — CLOUD SYNC CONFIRMED");
+            showToast("ASSET PINNED -- CLOUD SYNC CONFIRMED");
         }
     } catch (e) {
         console.error("[RWABidAsk] Watchlist Error:", e);
@@ -4928,7 +4928,7 @@ function showLendingModal() {
       <div class="mfield">
         <label>FINANCING TYPE</label>
         <select id="lending-select">
-          <option value="">— Choose one —</option>
+          <option value="">-- Choose one --</option>
           ${optHtml}
         </select>
       </div>
@@ -4967,7 +4967,7 @@ function showInsuranceModal() {
       <div class="mfield">
         <label>COVERAGE TYPE</label>
         <select id="insurance-select">
-          <option value="">— Choose one —</option>
+          <option value="">-- Choose one --</option>
           ${optHtml}
         </select>
       </div>
@@ -5045,8 +5045,8 @@ function showBidModal() {
         <input type="number" id="bid-amount" placeholder="${askingPrice > 0 ? askingPrice : '0'}"
           value="${askingPrice > 0 ? askingPrice : ''}"
           style="font-size:18px;font-weight:700;color:var(--cyan);"
-          oninput="document.getElementById('bid-preview').textContent = this.value ? '$'+parseFloat(this.value).toLocaleString() : '—'">
-        <div id="bid-preview" style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right;">${askingPrice > 0 ? '$'+askingPrice.toLocaleString() : '—'}</div>
+          oninput="document.getElementById('bid-preview').textContent = this.value ? '$'+parseFloat(this.value).toLocaleString() : '--'">
+        <div id="bid-preview" style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right;">${askingPrice > 0 ? '$'+askingPrice.toLocaleString() : '--'}</div>
       </div>
 
       <div class="mfield">
@@ -5141,18 +5141,18 @@ async function submitBid() {
 
     } catch(e) {
         console.error('[RWABidAsk] submitBid error:', e);
-        showToast("ERROR SAVING OFFER — CHECK CONNECTION");
+        showToast("ERROR SAVING OFFER -- CHECK CONNECTION");
     }
 }
 // ── Right panel legacy stubs (consolidated above) ──
 
 
 // ════════════════════════════════════════════════════════════════════
-// UNIVERSAL SPECS PARSER — Teaser-First with Gold Row Blur
+// UNIVERSAL SPECS PARSER -- Teaser-First with Gold Row Blur
 // Every 3rd row is blurred (backdrop-filter) with a lock icon.
 // Admin users and unlocked users see all rows clearly.
 // ════════════════════════════════════════════════════════════════════
-// JSONB sub-object display order — covers all 28+ known keys
+// JSONB sub-object display order -- covers all 28+ known keys
 const SPECS_SECTION_ORDER = [
   'identification','physical','location','ledger','financials',
   'machinery','avionics','logistics','strategic','force_composition',
@@ -5202,13 +5202,13 @@ function renderSpecs(specs, assetCat, assetRaw, isUnlockedCtx) {
       return `<div class="rsect-title" style="margin-top:8px;font-size:8px;letter-spacing:1.5px;color:var(--muted)">${escapeHtml(row.section.replace(/_/g,' ').toUpperCase())}</div>`;
     }
     dataRowIdx++;
-    const isEmpty = !row.val || row.val === 'null' || row.val === '—';
-    const displayVal = escapeHtml(isEmpty ? '—' : String(row.val));
+    const isEmpty = !row.val || row.val === 'null' || row.val === '--';
+    const displayVal = escapeHtml(isEmpty ? '--' : String(row.val));
     const displayKey = escapeHtml(row.key.replace(/_/g,' ').toUpperCase());
     const isGoldRow  = (dataRowIdx % 3 === 0) && !unlocked; // every 3rd row locked
 
     if (isEmpty) {
-      // Null field — broker CTA
+      // Null field -- broker CTA
       return `<div class="rrow rrow-null">
         <span class="rk">${displayKey}</span>
         <span class="rv" style="color:var(--border3)">
@@ -5222,7 +5222,7 @@ function renderSpecs(specs, assetCat, assetRaw, isUnlockedCtx) {
         <span class="rk">${displayKey}</span>
         <span class="rv" style="position:relative;display:inline-flex;align-items:center;gap:6px;">
           <span class="spec-row-blur" style="backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);filter:blur(4px);pointer-events:none;user-select:none">${displayVal}</span>
-          <span class="spec-row-lock-icon" onclick="buyInstitutionalAccess(window.currentAsset?.id,9.99)" title="Premium Data: Unlock for $9.99" style="cursor:pointer;font-size:11px;color:var(--gold);flex-shrink:0" aria-label="Locked — click to unlock">🔒</span>
+          <span class="spec-row-lock-icon" onclick="buyInstitutionalAccess(window.currentAsset?.id,9.99)" title="Premium Data: Unlock for $9.99" style="cursor:pointer;font-size:11px;color:var(--gold);flex-shrink:0" aria-label="Locked -- click to unlock">🔒</span>
         </span>
       </div>`;
     }
@@ -5308,7 +5308,7 @@ function buildLocationLine(a) {
   const country = clean(a.country || '');
   const port    = clean(a.port    || '');
   const primary = port || city;
-  return [primary, country].filter(Boolean).join(', ') || '—';
+  return [primary, country].filter(Boolean).join(', ') || '--';
 }
 
 // ============================================================
@@ -5346,7 +5346,7 @@ function selectAsset(id) {
     // Bio-asset: header leads with compound name + formula badge
     const headerMode = isBioAsset ? 'LAB MANIFEST' : catLabel;
     const formulaBadge = isBioAsset
-      ? `<div class="bio-formula-badge">${escapeHtml(molFormula || '—')}</div>`
+      ? `<div class="bio-formula-badge">${escapeHtml(molFormula || '--')}</div>`
       : '';
     const casLine = (isBioAsset && casNumber)
       ? `<div class="bio-cas">CAS: <span class="bio-cas-num">${escapeHtml(casNumber)}</span></div>`
@@ -5367,14 +5367,14 @@ function selectAsset(id) {
           : ''}
     `;
 
-    // ── Premium + Paywall flags (hoisted here — used by gallery AND vault) ──
+    // ── Premium + Paywall flags (hoisted here -- used by gallery AND vault) ──
     const isPremium  = !!(a._raw && a._raw.is_premium_data);
     const leadPrice  = a._raw ? (parseFloat(a._raw.lead_price) || 9.99) : 9.99;
     const isUnlocked = isAdminUser() || !isPremium ||
                        !!(a._raw?.is_unlocked_by && currentUser &&
                           a._raw.is_unlocked_by.includes(currentUser.id));
 
-    // ── Photo Gallery — Tiered Paywall (1 free, rest blur if premium) ─
+    // ── Photo Gallery -- Tiered Paywall (1 free, rest blur if premium) ─
     const imgs = extractGallery(a);
     let galleryHtml = '';
     if (imgs.length > 0) {
@@ -5383,7 +5383,7 @@ function selectAsset(id) {
         if (imgs.length > 1) {
             const extraImgs = imgs.slice(1).map(u => `<img class="photo-thumb" src="${escapeHtml(u)}" alt="" onerror="this.remove()">`).join('');
             if (!isUnlocked && isPremium) {
-                thumbsHtml = `<div style="position:relative;overflow:hidden;max-height:60px;"><div style="filter:blur(8px);pointer-events:none;user-select:none;display:flex;gap:3px;padding:4px 8px">${extraImgs}</div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,14,28,.75)"><span style="font-size:9px;font-weight:800;color:var(--gold);letter-spacing:1px">+${imgs.length-1} PHOTOS — UNLOCK FOR $${leadPrice.toFixed(2)}</span></div></div>`;
+                thumbsHtml = `<div style="position:relative;overflow:hidden;max-height:60px;"><div style="filter:blur(8px);pointer-events:none;user-select:none;display:flex;gap:3px;padding:4px 8px">${extraImgs}</div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,14,28,.75)"><span style="font-size:9px;font-weight:800;color:var(--gold);letter-spacing:1px">+${imgs.length-1} PHOTOS -- UNLOCK FOR $${leadPrice.toFixed(2)}</span></div></div>`;
             } else {
                 thumbsHtml = `<div class="photo-gallery">${extraImgs}</div>`;
             }
@@ -5405,13 +5405,13 @@ function selectAsset(id) {
     // ── Category-specific specs ──────────────────────────────
     let specsData = {};
     if (isBioAsset) {
-      // LAB MANIFEST mode — molecular & clinical fields
+      // LAB MANIFEST mode -- molecular & clinical fields
       specsData = {
         'Compound': specs_early.compound_name || specs_early.iupac_name || assetTitle,
-        'Molecular Formula': molFormula || '—',
-        'Molecular Weight': specs_early.molecular_weight || specs_early.mol_weight || specs_early.mw || '—',
-        'Purity Grade': specs_early.purity_grade || specs_early.purity || '—',
-        'CAS Number': casNumber || '—',
+        'Molecular Formula': molFormula || '--',
+        'Molecular Weight': specs_early.molecular_weight || specs_early.mol_weight || specs_early.mw || '--',
+        'Purity Grade': specs_early.purity_grade || specs_early.purity || '--',
+        'CAS Number': casNumber || '--',
         'Clinical Phase': specs_early.clinical_phase || specs_early.phase || 'Pre-Clinical',
         'Status': (a.status || 'Active').toUpperCase(),
         ...(specs_early.origin_species ? { 'Origin Species': specs_early.origin_species } : {}),
@@ -5423,11 +5423,11 @@ function selectAsset(id) {
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
     } else if (assetCat === 'anthro') {
-      // ANTHRO — Human Operating Capital
+      // ANTHRO -- Human Operating Capital
       specsData = {
-        'Unit Name':       specs.unit_name || a.address || '—',
-        'Headcount':       specs.headcount || specs.personnel_count || specs.units || '—',
-        'Deployment Speed':specs.deployment_speed || specs.mobilization_time || specs.mob_time || '—',
+        'Unit Name':       specs.unit_name || a.address || '--',
+        'Headcount':       specs.headcount || specs.personnel_count || specs.units || '--',
+        'Deployment Speed':specs.deployment_speed || specs.mobilization_time || specs.mob_time || '--',
         'Status':         (a.status || 'Active').toUpperCase(),
         ...(specs.specialization    ? { 'Specialization':   specs.specialization    } : {}),
         ...(specs.deployment_zone   ? { 'Deployment Zone':  specs.deployment_zone   } : {}),
@@ -5436,11 +5436,11 @@ function selectAsset(id) {
         ...(specs.tech_certifications ? { 'Certifications': specs.tech_certifications } : {}),
       };
     } else if (assetCat === 'robotics') {
-      // ROBOTICS — Automated Physical Infrastructure
+      // ROBOTICS -- Automated Physical Infrastructure
       specsData = {
-        'Fleet Size':      specs.fleet_size || specs.units || specs.unit_count || '—',
+        'Fleet Size':      specs.fleet_size || specs.units || specs.unit_count || '--',
         'Unit Type':       specs.unit_type || specs.robot_type || (a.type||'').toUpperCase(),
-        'Autonomy Level':  specs.autonomy_level || specs.autonomy || '—',
+        'Autonomy Level':  specs.autonomy_level || specs.autonomy || '--',
         'Status':         (a.status || 'Active').toUpperCase(),
         ...(specs.payload_kg        ? { 'Payload (kg)':     specs.payload_kg        } : {}),
         ...(specs.range_km          ? { 'Range (km)':       specs.range_km          } : {}),
@@ -5450,10 +5450,10 @@ function selectAsset(id) {
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
     } else if (assetCat === 'bio') {
-      // BIO — physical biological production/facility
+      // BIO -- physical biological production/facility
       specsData = {
         'Facility Type':   specs.facility_type || specs.bio_type || (a.type||'').toUpperCase(),
-        'Capacity':        specs.capacity || specs.production_capacity || '—',
+        'Capacity':        specs.capacity || specs.production_capacity || '--',
         'Status':         (a.status || 'Active').toUpperCase(),
         ...(specs.crop_type         ? { 'Crop/Product':     specs.crop_type         } : {}),
         ...(specs.acreage           ? { 'Acreage':          specs.acreage           } : {}),
@@ -5465,18 +5465,18 @@ function selectAsset(id) {
     } else if (isEcosystem) {
       // Fallback for old 'ecosystems' category data
       specsData = {
-        'Unit Name': specs.unit_name || a.address || '—',
-        'Headcount': specs.headcount || specs.personnel_count || '—',
-        'Deployment Speed': specs.deployment_speed || specs.mobilization_time || '—',
+        'Unit Name': specs.unit_name || a.address || '--',
+        'Headcount': specs.headcount || specs.personnel_count || '--',
+        'Deployment Speed': specs.deployment_speed || specs.mobilization_time || '--',
         'Status': (a.status || 'Active').toUpperCase(),
       };
     } else if (isCommodity) {
       specsData = {
-        'Grade/Standard': specs.grade || specs.standard || '—',
-        'Chemical Formula': specs.chemical_formula || specs.formula || '—',
-        'Unit': specs.unit || '—',
-        'Purity': specs.purity || '—',
-        'Origin': specs.origin || a.country || '—',
+        'Grade/Standard': specs.grade || specs.standard || '--',
+        'Chemical Formula': specs.chemical_formula || specs.formula || '--',
+        'Unit': specs.unit || '--',
+        'Purity': specs.purity || '--',
+        'Origin': specs.origin || a.country || '--',
         'Status': (a.status || 'Active').toUpperCase(),
         ...(specs.lot_size ? { 'Lot Size': specs.lot_size } : {}),
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
@@ -5484,7 +5484,7 @@ function selectAsset(id) {
     } else if (isMaritime) {
       specsData = {
         'Vessel Class': specs.vessel_class || specs.type || (a.type||'').toUpperCase(),
-        'Flag State': a.state || specs.flag_state || '—',
+        'Flag State': a.state || specs.flag_state || '--',
         'Status': (a.status || 'Active').toUpperCase(),
         ...(specs.gross_tonnage ? { 'Gross Tonnage': specs.gross_tonnage } : {}),
         ...(specs.length ? { 'LOA': specs.length } : {}),
@@ -5497,57 +5497,57 @@ function selectAsset(id) {
       const phys = specs.physical || {};
       specsData = {
         'Area': phys.sqft ? parseInt(phys.sqft).toLocaleString() + ' SF'
-                          : (a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '—')),
-        'Beds':       phys.bedrooms   || phys.beds   || mainStruct.beds   || specs.bedrooms  || '—',
-        'Baths':      phys.bathrooms  || phys.baths  || mainStruct.baths  || specs.bathrooms || '—',
-        'Year Built': phys.year_built || specs.year_built || '—',
-        'Lot Size':   phys.lot_size   || specs.lot_size   || '—',
-        'Zoning':     phys.zoning     || specs.zoning     || '—',
-        'Units':      phys.units      || specs.units       || '—',
-        'Type':      (a.type || '—').toUpperCase(),
+                          : (a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '--')),
+        'Beds':       phys.bedrooms   || phys.beds   || mainStruct.beds   || specs.bedrooms  || '--',
+        'Baths':      phys.bathrooms  || phys.baths  || mainStruct.baths  || specs.bathrooms || '--',
+        'Year Built': phys.year_built || specs.year_built || '--',
+        'Lot Size':   phys.lot_size   || specs.lot_size   || '--',
+        'Zoning':     phys.zoning     || specs.zoning     || '--',
+        'Units':      phys.units      || specs.units       || '--',
+        'Type':      (a.type || '--').toUpperCase(),
         'Status':    (a.status || 'Active').toUpperCase(),
-        'Days Listed': a.days || '—',
+        'Days Listed': a.days || '--',
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
     } else if (assetCat === 'maritime') {
       const mach = specs.machinery || specs.mechanical || {};
       specsData = {
         'Vessel Class': specs.vessel_class || mach.vessel_class || specs.type || (a.type||'').toUpperCase(),
-        'Flag State':   a.state || specs.flag_state || mach.flag || '—',
+        'Flag State':   a.state || specs.flag_state || mach.flag || '--',
         'Status':      (a.status || 'Active').toUpperCase(),
-        'IMO Number':   specs.imo_number || mach.imo || '—',
-        'Gross Tonnage':specs.gross_tonnage || mach.gross_tonnage || '—',
-        'LOA (m)':      specs.length || mach.loa || mach.length || '—',
-        'DWT':          specs.dwt    || mach.dwt    || '—',
-        'Main Engine':  mach.main_engine  || mach.engine  || specs.engine  || '—',
-        'Engine Hours': mach.engine_hours || specs.engine_hours || '—',
-        'Hull Rating':  mach.hull_rating  || specs.hull_rating  || '—',
-        'Year Built':   specs.year_built  || mach.year_built    || '—',
+        'IMO Number':   specs.imo_number || mach.imo || '--',
+        'Gross Tonnage':specs.gross_tonnage || mach.gross_tonnage || '--',
+        'LOA (m)':      specs.length || mach.loa || mach.length || '--',
+        'DWT':          specs.dwt    || mach.dwt    || '--',
+        'Main Engine':  mach.main_engine  || mach.engine  || specs.engine  || '--',
+        'Engine Hours': mach.engine_hours || specs.engine_hours || '--',
+        'Hull Rating':  mach.hull_rating  || specs.hull_rating  || '--',
+        'Year Built':   specs.year_built  || mach.year_built    || '--',
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
     } else if (assetCat === 'aviation') {
       const mach = specs.machinery || specs.mechanical || {};
       specsData = {
         'Aircraft Type': specs.aircraft_type || mach.type || (a.type||'').toUpperCase(),
-        'Registration':  specs.registration  || mach.reg  || '—',
+        'Registration':  specs.registration  || mach.reg  || '--',
         'Status':       (a.status || 'Active').toUpperCase(),
-        'Total Hours':   mach.total_hours    || specs.total_hours   || '—',
-        'Engine Model':  mach.engine_model   || specs.engine_model  || '—',
-        'Engine Hours':  mach.engine_hours   || specs.engine_hours  || '—',
-        'Last Overhaul': mach.last_overhaul  || specs.last_overhaul || '—',
-        'TTAF':          mach.ttaf           || specs.ttaf          || '—',
-        'Year':          specs.year_built    || mach.year           || '—',
+        'Total Hours':   mach.total_hours    || specs.total_hours   || '--',
+        'Engine Model':  mach.engine_model   || specs.engine_model  || '--',
+        'Engine Hours':  mach.engine_hours   || specs.engine_hours  || '--',
+        'Last Overhaul': mach.last_overhaul  || specs.last_overhaul || '--',
+        'TTAF':          mach.ttaf           || specs.ttaf          || '--',
+        'Year':          specs.year_built    || mach.year           || '--',
         ...(a.tokenized ? { 'Digitized': '✓ YES' } : {}),
       };
     } else {
       const phys = specs.physical || {};
       specsData = {
         'Area': phys.sqft ? parseInt(phys.sqft).toLocaleString() + ' SF'
-                          : (a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '—')),
-        'Type':   (a.type || '—').toUpperCase(),
+                          : (a.sqft ? parseInt(a.sqft).toLocaleString() + ' SF' : (specs.area || '--')),
+        'Type':   (a.type || '--').toUpperCase(),
         'Status': (a.status || 'Active').toUpperCase(),
-        'Days Listed': a.days || '—',
-        ...(mainStruct.beds ? { 'Beds': mainStruct.beds, 'Baths': mainStruct.baths || '—' } : {}),
+        'Days Listed': a.days || '--',
+        ...(mainStruct.beds ? { 'Beds': mainStruct.beds, 'Baths': mainStruct.baths || '--' } : {}),
         ...(phys.year_built  || specs.year_built  ? { 'Year Built':  phys.year_built  || specs.year_built  } : {}),
         ...(phys.lot_size    || specs.lot_size    ? { 'Lot Size':    phys.lot_size    || specs.lot_size    } : {}),
         ...(phys.zoning      || specs.zoning      ? { 'Zoning':      phys.zoning      || specs.zoning      } : {}),
@@ -5604,7 +5604,7 @@ function selectAsset(id) {
         const fleetItems2 = fleet.length > 0 ? fleet.map(item => `
             <div class="fleet-item">
                 <span class="fleet-item-name">${escapeHtml(item.name || item.type || 'Asset')}</span>
-                <span class="fleet-item-detail">${escapeHtml(item.count ? item.count + 'x' : (item.value ? fmtPrice(item.value) : '—'))}</span>
+                <span class="fleet-item-detail">${escapeHtml(item.count ? item.count + 'x' : (item.value ? fmtPrice(item.value) : '--'))}</span>
             </div>`).join('') : Object.entries(a.specs || {}).filter(([k]) => !['area','zoning','lot_size','year_built','units'].includes(k)).map(([k,v]) => `
             <div class="fleet-item">
                 <span class="fleet-item-name">${escapeHtml(k.replace(/_/g,' ').toUpperCase())}</span>
@@ -5668,9 +5668,9 @@ function selectAsset(id) {
         <div class="action-bar">
             <div class="action-bar-pro">
                 <div class="pro-header"><span class="pro-badge">PRO</span> BROKER TOOLS</div>
-                <button class="abtn-pro-manage" onclick="showToast('ASSET MANAGEMENT CONSOLE — COMING SOON')">MANAGE ASSET</button>
-                <button class="abtn-pro-leads" onclick="showToast('LEAD LOG: $9.99/EA — ACCESS PENDING')">VIEW LEAD LOG ($9.99/ea)</button>
-                <button class="abtn-pro-manage" onclick="showToast('FULL LEAD BOOK PURCHASE — PENDING')">BUY FULL LEAD BOOK</button>
+                <button class="abtn-pro-manage" onclick="showToast('ASSET MANAGEMENT CONSOLE -- COMING SOON')">MANAGE ASSET</button>
+                <button class="abtn-pro-leads" onclick="showToast('LEAD LOG: $9.99/EA -- ACCESS PENDING')">VIEW LEAD LOG ($9.99/ea)</button>
+                <button class="abtn-pro-manage" onclick="showToast('FULL LEAD BOOK PURCHASE -- PENDING')">BUY FULL LEAD BOOK</button>
                 <div class="abtn-row">
                     <button class="abtn-aux" onclick="showLendingModal()">FINANCING</button>
                     <button class="abtn-aux" onclick="showInsuranceModal()">INSURANCE</button>
@@ -5713,7 +5713,7 @@ function selectAsset(id) {
           ${specs_early.dosage_form ? `<div class="rrow"><span class="rk">DOSAGE FORM</span><span class="rv bio-mono">${escapeHtml(specs_early.dosage_form)}</span></div>` : ''}
           ${specs_early.half_life ? `<div class="rrow"><span class="rk">HALF-LIFE</span><span class="rv bio-mono">${escapeHtml(specs_early.half_life)}</span></div>` : ''}
           ${patents.length ? `<div class="rrow"><span class="rk">PATENTS</span><span class="rv">${patents.map(p=>escapeHtml(p)).join(', ')}</span></div>` : ''}
-          ${trials.length ? `<div class="rsect-title" style="font-size:9px;margin-top:8px">CLINICAL TRIALS</div>${trials.map(t=>`<div class="rrow"><span class="rk">${escapeHtml(t.phase||'Phase')}</span><span class="rv">${escapeHtml(t.title||t.id||'—')}</span></div>`).join('')}` : ''}
+          ${trials.length ? `<div class="rsect-title" style="font-size:9px;margin-top:8px">CLINICAL TRIALS</div>${trials.map(t=>`<div class="rrow"><span class="rk">${escapeHtml(t.phase||'Phase')}</span><span class="rv">${escapeHtml(t.title||t.id||'--')}</span></div>`).join('')}` : ''}
           ${synRoutes.length ? `<div class="rsect-title" style="font-size:9px;margin-top:8px">SYNTHESIS ROUTES</div><div style="font-size:9px;color:var(--dim);font-family:monospace;line-height:1.8;padding:6px 12px">${synRoutes.map(r=>escapeHtml(r)).join('<br>')}</div>` : ''}
         </div>`;
     }
@@ -5727,7 +5727,7 @@ function selectAsset(id) {
              <div class="premium-icon">🔒</div>
              <div class="premium-title">Institutional Access Required</div>
              <div class="premium-sub">Full specifications, media, and manifest are locked.</div>
-             <button class="premium-pay-btn" onclick="buyInstitutionalAccess('${a.id}', ${leadPrice})">BUY INSTITUTIONAL ACCESS — $${leadPrice.toFixed(2)}</button>
+             <button class="premium-pay-btn" onclick="buyInstitutionalAccess('${a.id}', ${leadPrice})">BUY INSTITUTIONAL ACCESS -- $${leadPrice.toFixed(2)}</button>
            </div>
          </div>` :
          `${specsGridHtml}
@@ -5743,12 +5743,12 @@ function selectAsset(id) {
              <div style="font-size:14px;font-weight:800;color:var(--text);line-height:1.4;letter-spacing:-.2px;">Verification Required<br>to Access Ledger Data</div>
              <div style="font-size:9px;color:var(--muted);line-height:1.8;max-width:210px;">Specs, fleet manifest, and financial data<br>are visible to verified members only.</div>
              <div style="width:32px;height:1px;background:var(--border2);margin:2px 0;"></div>
-             <button onclick="openModal('register')" style="width:200px;padding:12px 0;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:2px;box-shadow:0 0 20px rgba(0,255,200,.25);">$10 SIGN UP — ACCESS LEDGER</button>
-             <button onclick="openModal('signin')" style="width:200px;padding:9px 0;background:none;border:1px solid rgba(0,255,200,.3);color:var(--cyan);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px;">EXISTING MEMBER — LOG IN</button>
+             <button onclick="openModal('register')" style="width:200px;padding:12px 0;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:2px;box-shadow:0 0 20px rgba(0,255,200,.25);">$10 SIGN UP -- ACCESS LEDGER</button>
+             <button onclick="openModal('signin')" style="width:200px;padding:9px 0;background:none;border:1px solid rgba(0,255,200,.3);color:var(--cyan);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:2px;">EXISTING MEMBER -- LOG IN</button>
            </div>
          </div>`;
 
-    // ── Technical Manifest — hoisted to avoid IIFE inside template literal ──
+    // ── Technical Manifest -- hoisted to avoid IIFE inside template literal ──
     const technicalManifestHtml = (function() {
       const raw = a._raw || {};
       const specs = a.specs || {};
@@ -5813,7 +5813,7 @@ function selectAsset(id) {
               <div id="ma-loading" style="font-size:10px;color:var(--muted);padding:8px 0">Loading inquiries…</div>
             </div>
         </div>
-        <!-- Global Asset Database footer removed — clean panel end -->
+        <!-- Global Asset Database footer removed -- clean panel end -->
     `;
 
     // ── Map fly-to & mobile drawer ──────────────────────────────
@@ -5867,7 +5867,7 @@ async function performSearch() {
     if (!query) {
         SEARCH_ACTIVE = false;
         const filtered = typeof filterAssets === 'function' ? filterAssets(window.ASSETS) : window.ASSETS;
-        updateSearchUI(filtered, `GLOBAL DIRECTORY — ${window.ASSETS.length} ASSETS`);
+        updateSearchUI(filtered, `GLOBAL DIRECTORY -- ${window.ASSETS.length} ASSETS`);
         return;
     }
 
@@ -5915,7 +5915,7 @@ async function performSearch() {
                 }
             });
 
-            // Select and fly to the top hit — render Basics panel (no auth required)
+            // Select and fly to the top hit -- render Basics panel (no auth required)
             const hit   = data[0];
             const asset = (window.ASSETS || []).find(a =>
                 a.apn === hit.apn || String(a.id) === String(hit.id)
@@ -6020,7 +6020,7 @@ async function initMap() {
     map3dEl.addEventListener('gmp-tiltchange', _onCam);
     map3dEl.addEventListener('gmp-headingchange', _onCam);
 
-    // ── Interaction Overhaul — Selection Hierarchy ────────────────
+    // ── Interaction Overhaul -- Selection Hierarchy ────────────────
     // Single tap/click  → highlight parcel + Basics panel (no camera fly)
     // Double-click      → lock selection + Intel Audit View (full panel, fly)
     // Long press 700ms  → same as double-click (mobile touch)
@@ -6031,7 +6031,7 @@ async function initMap() {
     let _longPressTimer = null;
     let _lockedApn     = null;          // APN of the currently locked (double-clicked) parcel
 
-    // Shared parcel extraction — called by both single and double click paths
+    // Shared parcel extraction -- called by both single and double click paths
     function extractParcelFromEvt(evt, clickLat, clickLng) {
       const placeId      = evt.placeId || evt.detail?.placeId || null;
       const featureProps = evt.features?.[0]?.getData?.() || evt.detail?.feature || {};
@@ -6120,7 +6120,7 @@ async function initMap() {
       setTimeout(() => ring.remove(), 900);
     }
 
-    // Active selection polygon border — clinical cyan outline
+    // Active selection polygon border -- clinical cyan outline
     let _activeSelectionOverlay = null;
 
     window.drawSelectionBorder = function drawSelectionBorder(featureProps, clickLat, clickLng) {
@@ -6182,7 +6182,7 @@ async function initMap() {
 
       window.renderBasicsPanel(asset);
       setStatus(`LOCKED: ${fields.apn}`);
-      showToast(`PARCEL LOCKED — ${fields.apn}`);
+      showToast(`PARCEL LOCKED -- ${fields.apn}`);
 
       if (window.innerWidth <= 767) injectSheetCloseBtn();
 
@@ -6237,7 +6237,7 @@ async function initMap() {
           handleDoubleClick(evt, clickLat, clickLng);
         }
         _clickAccum = 0;
-      }, 300); // 300ms window — tight enough to feel snappy
+      }, 300); // 300ms window -- tight enough to feel snappy
     });
 
     // Long-press (mobile): 700ms hold = Intel Audit View
@@ -6256,7 +6256,7 @@ async function initMap() {
     
     requestAnimationFrame(() => { 
       setTimeout(() => { 
-        try { map3dEl.tilt = 0; } catch(e){} // Plan View — no auto-spin
+        try { map3dEl.tilt = 0; } catch(e){} // Plan View -- no auto-spin
       }, 4000); 
     });
     
@@ -6267,7 +6267,7 @@ async function initMap() {
     initPlacesSearch();
   } catch (err) { 
     console.error('[RWABidAsk] Map3DElement init error:', err); 
-    setStatus('MAP UNAVAILABLE — VERIFY API KEY & BILLING'); 
+    setStatus('MAP UNAVAILABLE -- VERIFY API KEY & BILLING'); 
   }
 }
 
@@ -6317,7 +6317,7 @@ async function initPlacesSearch() {
 
 function flyTo(lat, lng, range, tilt) { 
   if (!map3dEl) return; 
-  const t = tilt ?? 0;   // Plan View default — no auto-tilt/spin
+  const t = tilt ?? 0;   // Plan View default -- no auto-tilt/spin
   const r = range ?? 1400;
   try { 
     map3dEl.flyCameraTo({ 
@@ -6368,7 +6368,7 @@ function toggleHeat(btn) {
       else if (asset.price > p33) el.classList.add('heat-warm'); 
     } 
   }); 
-  showToast(heatOn ? 'Heat zones ON — cyan=low · gold=mid · red=high' : 'Heat zones OFF'); 
+  showToast(heatOn ? 'Heat zones ON -- cyan=low · gold=mid · red=high' : 'Heat zones OFF'); 
 }
 
     // ============================================================
@@ -6381,10 +6381,10 @@ function onCameraChange() {
     isCameraProcessing = true;
     try {
       if (!map3dEl) return;
-      // Open House: no auth check on markers — vault data is separately gated
+      // Open House: no auth check on markers -- vault data is separately gated
       // Data-before-map scenario: inject markers immediately if ASSETS already loaded
       if (window.ASSETS && window.ASSETS.length > 0 && !markersRendered) {
-        console.log('[RWABidAsk] Map ready — data already available, rendering markers...');
+        console.log('[RWABidAsk] Map ready -- data already available, rendering markers...');
         renderDOMMarkers();
         markersRendered = true;
       }
@@ -6410,7 +6410,7 @@ function getVisibleAssetsInViewport(assets) {
     const center = map3dEl.center || { lat: 20, lng: 10 };
     const range  = map3dEl.range || 22000000;
 
-    // ── Globe/hemisphere scale: clusters only — no individual pins loaded ──
+    // ── Globe/hemisphere scale: clusters only -- no individual pins loaded ──
     // Clusters render from buildClusters(); this function controls pin loading only
     if (range > 2000000) return assets; // clustering handles; pass all for cluster build
 
@@ -6440,7 +6440,7 @@ function getVisibleAssetsInViewport(assets) {
 let clusterMarkers = {}; // cluster DOM elements keyed by cell id
 
 function getCellSize(range) {
-  // Globe/continent: show aggregate cluster bubbles — no individual pins
+  // Globe/continent: show aggregate cluster bubbles -- no individual pins
   if (range > 12000000) return 30;  // global: 30° mega-cells (continents)
   if (range > 5000000)  return 12;  // hemisphere: 12° cells
   if (range > 2000000)  return 4;   // country: 4° cells
@@ -6504,10 +6504,10 @@ function renderDOMMarkers() {
       });
     }
     requestAnimationFrame(() => reprojectMarkersWithMatrix());
-    return; // exit — no individual pins at this zoom level
+    return; // exit -- no individual pins at this zoom level
   }
 
-  // ── Viewport culling — only assets in camera bounds ──────────────
+  // ── Viewport culling -- only assets in camera bounds ──────────────
   const viewportAssets = getVisibleAssetsInViewport(physicalFiltered);
   console.log('[RWABidAsk] Viewport pins: ' + viewportAssets.length + '/' + physicalFiltered.length);
 
@@ -6556,7 +6556,7 @@ function addClusterMarker(key, lat, lng, assets) {
     flyTo(lat, lng, newRange, 0);
     // Show these assets in list
     renderList(assets);
-    showToast(`${n} ASSETS IN CLUSTER — ZOOMING IN`);
+    showToast(`${n} ASSETS IN CLUSTER -- ZOOMING IN`);
   });
   layer.appendChild(el);
   clusterMarkers[key] = { el, lat, lng, assets };
@@ -6741,7 +6741,7 @@ function buildTicker(assets) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// UNIFIED PERSISTENT LEDGER VALUE — single Bloomberg-style ticker
+// UNIFIED PERSISTENT LEDGER VALUE -- single Bloomberg-style ticker
 // Sums: (1) live window.ASSETS from Supabase + (2) WA parcel dataset estimate
 // Called on boot and whenever ASSETS change.
 // ════════════════════════════════════════════════════════════════════
@@ -6767,7 +6767,7 @@ function updateUnifiedLedger(animate = false) {
   }
 
   if (animate) {
-    // Animated counter — Bloomberg terminal feel (1.8s)
+    // Animated counter -- Bloomberg terminal feel (1.8s)
     const dur = 1800, steps = 60;
     let step = 0;
     const tick = () => {
@@ -6789,7 +6789,7 @@ function updateUnifiedLedger(animate = false) {
   }
 }
 
-// Legacy alias — keep updateGMC working for any existing calls
+// Legacy alias -- keep updateGMC working for any existing calls
 function updateGMC(assets) {
   updateUnifiedLedger(false);
   // Also update the old s-gmc element if present
@@ -6859,7 +6859,7 @@ async function restoreSession() {
       document.getElementById('auth-gate')?.classList.add('hidden');
       if (map3dEl) onCameraChange();
     } else {
-      // No session — attempt silent token refresh
+      // No session -- attempt silent token refresh
       try {
         const { data: refreshed, error: refreshErr } = await _sb.auth.refreshSession();
         if (refreshErr) throw refreshErr;
@@ -6874,8 +6874,8 @@ async function restoreSession() {
           return;
         }
       } catch (refreshErr) {
-        // refresh_token expired or invalid — silent fail, fall to Public View
-        console.warn('[RWABidAsk] Session refresh failed — defaulting to Public View:', refreshErr?.message || refreshErr);
+        // refresh_token expired or invalid -- silent fail, fall to Public View
+        console.warn('[RWABidAsk] Session refresh failed -- defaulting to Public View:', refreshErr?.message || refreshErr);
       }
       // Public View fallback
       isAuthenticated = false;
@@ -6883,8 +6883,8 @@ async function restoreSession() {
       _publicViewFallback();
     }
   } catch (err) {
-    // Network error, CORS, or any auth crash — never let it break the app
-    console.warn('[RWABidAsk] restoreSession error — defaulting to Public View:', err?.message || err);
+    // Network error, CORS, or any auth crash -- never let it break the app
+    console.warn('[RWABidAsk] restoreSession error -- defaulting to Public View:', err?.message || err);
     isAuthenticated = false;
     currentUser     = null;
     _publicViewFallback();
@@ -6898,7 +6898,7 @@ function _publicViewFallback() {
   if (signinBtn) { signinBtn.style.display = ''; signinBtn.textContent = 'SIGN IN'; }
   if (joinBtn)   { joinBtn.style.display   = ''; }
   // Open House: map and Basics panel fully accessible in Public View
-  setStatus && setStatus('PUBLIC VIEW — SIGN IN FOR DEEP DATA');
+  setStatus && setStatus('PUBLIC VIEW -- SIGN IN FOR DEEP DATA');
   console.log('[RWABidAsk] Public View active.');
 }
 
@@ -7055,7 +7055,7 @@ function showAccountMenu() {
   if (!isAdmin && tier === 'free') {
     upgradeSection = '<div style="padding:10px 14px;border-top:1px solid rgba(0,255,200,.08)">'
       + '<div style="font-size:9px;color:#556677;letter-spacing:1px;margin-bottom:8px">UPGRADE YOUR PLAN</div>'
-      + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">GO PRO — $'+(t1?'34':'21')+'/MO ★</button>'
+      + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">GO PRO -- $'+(t1?'34':'21')+'/MO ★</button>'
       + '</div>';
   } else if (!isAdmin && tier === 'pro') {
     upgradeSection = '';
@@ -7143,7 +7143,7 @@ function openModal(type, titleOverride, bodyOverride) {
   }
 
   // For signin/register: build content here. For all others (bid/lending/insurance/etc)
-  // the caller already wrote modalTitle + modalBody — just open the modal.
+  // the caller already wrote modalTitle + modalBody -- just open the modal.
   if (type === 'signin') {
     if (modalTitle) modalTitle.textContent = "SIGN IN";
     modalBody.innerHTML = `
@@ -7172,7 +7172,7 @@ function openModal(type, titleOverride, bodyOverride) {
       <div class="legal-note" style="margin-top:10px;font-size:10px;">Already registered? <a href="#" onclick="openModal('signin');return false" style="color:var(--cyan)">Sign In</a></div>
     `;
   }
-  // All other types (bid, lending, insurance, etc): content already set by caller — just open.
+  // All other types (bid, lending, insurance, etc): content already set by caller -- just open.
   modal.style.display = 'flex';
   modal.classList.add('open');
 }
@@ -7215,13 +7215,13 @@ function showTosModal(name, email, password) {
     + '</div>'
     + '<div style="overflow-y:auto;flex:1;padding:20px 24px;font-size:11px;color:#111;line-height:1.9" id="tos-scroll">'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 1 — PARTIES AND ACCEPTANCE</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 1 -- PARTIES AND ACCEPTANCE</p>'
     + '<p style="margin:0 0 14px">This Terms of Service, Privacy Policy, and Data Use Agreement ("Agreement") is between Annie Group LLC, a Washington State limited liability company doing business as RWABidAsk ("Company") and you ("User"). By clicking I Agree you enter into a legally binding contract. Your acceptance is recorded permanently with your IP address, timestamp, device user agent string, and agreement version number. This acceptance record is immutable and cannot be deleted or modified.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 2 — DESCRIPTION OF SERVICES</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 2 -- DESCRIPTION OF SERVICES</p>'
     + '<p style="margin:0 0 14px">RWABidAsk is a real property intelligence platform that aggregates, displays, and analyzes publicly available county assessor data, government geospatial datasets, recorded deed and transaction history, crime statistics from law enforcement open data portals, building permit records, and other public records. Services include free parcel data display, paid Property Intelligence Reports ($9.00 USD T1 / $5.00 USD T2 per report), asset listing tools, broker and owner data submission tools, data correction tools, and subscription plans for professional users.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 3 — NOT A CONSUMER REPORTING AGENCY — FCRA DISCLAIMER</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 3 -- NOT A CONSUMER REPORTING AGENCY -- FCRA DISCLAIMER</p>'
     + '<p style="margin:0 0 6px;font-weight:700">RWABIDASK IS NOT A CONSUMER REPORTING AGENCY AS DEFINED BY THE FAIR CREDIT REPORTING ACT, 15 U.S.C. § 1681 ET SEQ. ("FCRA"). THE INFORMATION PROVIDED THROUGH THIS PLATFORM MAY NOT BE USED, IN WHOLE OR IN PART, AS A FACTOR IN:</p>'
     + '<p style="margin:0 0 4px;padding-left:16px">• Determining a consumer&#39;s eligibility for credit or insurance</p>'
     + '<p style="margin:0 0 4px;padding-left:16px">• Evaluating a consumer for employment purposes</p>'
@@ -7229,51 +7229,51 @@ function showTosModal(name, email, password) {
     + '<p style="margin:0 0 14px;padding-left:16px">• Any other purpose authorized under the FCRA</p>'
     + '<p style="margin:0 0 14px">By creating an account you expressly represent and warrant that you will not use any data, report, or information obtained from RWABidAsk for any FCRA-regulated purpose. Violation of this provision is a material breach of this Agreement.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 4 — NOT LEGAL, FINANCIAL, OR APPRAISAL ADVICE</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 4 -- NOT LEGAL, FINANCIAL, OR APPRAISAL ADVICE</p>'
     + '<p style="margin:0 0 14px">Nothing on this platform constitutes: a certified real property appraisal or appraisal report as defined under USPAP; legal advice or a legal opinion; financial advice or investment advice; a recommendation to buy, sell, or hold any asset; a title report or title insurance commitment; or a credit report or credit rating. Property Intelligence Scores are proprietary computational metrics based on publicly available data. Always conduct independent due diligence including title searches, professional appraisals, and legal counsel before any real property transaction.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 5 — DATA COLLECTION, LOGGING, AND IMMUTABLE RECORDS</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 5 -- DATA COLLECTION, LOGGING, AND IMMUTABLE RECORDS</p>'
     + '<p style="font-weight:700;margin:0 0 4px">5.1 What We Collect</p>'
     + '<p style="margin:0 0 10px">By using this platform, with or without an account, you acknowledge and consent to the collection, storage, and permanent retention of the following data: your IP address on every page load, search, and interaction; your device browser user agent string; every parcel you view, search, or click; every search query you enter; every report you purchase or attempt to purchase; every listing you submit, modify, or delete; every data correction or override you submit; every file, image, document, or media you upload; every message or inquiry you send; every payment transaction record; your account creation timestamp, login timestamps, and logout timestamps; and your geographic location as inferred from your IP address.</p>'
     + '<p style="font-weight:700;margin:0 0 4px">5.2 Immutable Ledger</p>'
-    + '<p style="margin:0 0 10px">ALL data collected is written to an immutable audit ledger. Records cannot be deleted by you or modified after creation. Each record is timestamped and associated with your account and IP address. Data corrections are stored as new layers on top of original records — original records are never destroyed. This ledger is maintained permanently as part of the chain of records for each parcel.</p>'
+    + '<p style="margin:0 0 10px">ALL data collected is written to an immutable audit ledger. Records cannot be deleted by you or modified after creation. Each record is timestamped and associated with your account and IP address. Data corrections are stored as new layers on top of original records -- original records are never destroyed. This ledger is maintained permanently as part of the chain of records for each parcel.</p>'
     + '<p style="font-weight:700;margin:0 0 4px">5.3 Data Ownership</p>'
     + '<p style="margin:0 0 10px">All data you submit, upload, or generate through this platform becomes the permanent property of Annie Group LLC upon submission. You grant Annie Group LLC a perpetual, irrevocable, worldwide, royalty-free license to use, store, display, distribute, and build upon all submitted data for any lawful business purpose. This data ownership policy is consistent with the policies of major technology platforms including Google LLC and Meta Platforms Inc.</p>'
     + '<p style="font-weight:700;margin:0 0 4px">5.4 Third Party Data Processors</p>'
     + '<p style="margin:0 0 14px">Your data may be processed by: Google Cloud Platform / BigQuery; Supabase Inc.; Stripe Inc.; Vercel Inc.; and Google Maps Platform. Each processor maintains its own privacy policy and data processing terms.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 6 — WASHINGTON STATE PRIVACY RIGHTS</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 6 -- WASHINGTON STATE PRIVACY RIGHTS</p>'
     + '<p style="margin:0 0 14px">Annie Group LLC complies with the Washington My Health MY Data Act (RCW 70.372) and the Washington Privacy Act to the extent applicable. Washington State residents may submit privacy requests to privacy@rwabidask.com. Note that immutable ledger records cannot be deleted as a matter of platform architecture. Data breach notification will be provided as required by RCW 19.255.010.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 7 — CALIFORNIA RESIDENTS — CCPA NOTICE</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 7 -- CALIFORNIA RESIDENTS -- CCPA NOTICE</p>'
     + '<p style="margin:0 0 14px">California residents may have rights under the California Consumer Privacy Act including the right to know what personal information is collected and the right to request deletion subject to applicable exceptions. Annie Group LLC does not sell personal information to third parties. Contact privacy@rwabidask.com to exercise CCPA rights. Immutable audit ledger records are exempt from deletion requests as a matter of platform architecture and records retention requirements.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 8 — BROKER, AGENT, AND LISTING SUBMITTER OBLIGATIONS</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 8 -- BROKER, AGENT, AND LISTING SUBMITTER OBLIGATIONS</p>'
     + '<p style="margin:0 0 10px">Any broker, agent, property owner, or representative who submits a listing, data correction, or property information represents and warrants that: all submitted information is accurate and truthful; they have legal authority to list or represent the subject property; no submission violates applicable real estate licensing law (RCW 18.85), MLS rules, or other regulations; and all submissions comply with the Federal Fair Housing Act (42 U.S.C. § 3604) and Washington State Law Against Discrimination (RCW 49.60).</p>'
     + '<p style="margin:0 0 14px">You are solely responsible for all data you submit. You agree to indemnify and hold harmless Annie Group LLC from any claim arising from your submissions.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 9 — INTELLECTUAL PROPERTY</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 9 -- INTELLECTUAL PROPERTY</p>'
     + '<p style="margin:0 0 14px">The RWABidAsk name, logo, platform design, Property Intelligence Score methodology, and comp set methodology are proprietary to Annie Group LLC. Intel Reports are licensed for personal or business use only and may not be resold, redistributed, or republished without written consent. Underlying public records data remains in the public domain.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 10 — PAYMENTS AND REFUNDS</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 10 -- PAYMENTS AND REFUNDS</p>'
     + '<p style="margin:0 0 14px">Property Intelligence Reports are $9.00 USD (Tier 1) or $5.00 USD (Tier 2) per report. All sales are final. No refunds are issued once a report has been generated and delivered. Subscription fees are billed in advance and are non-refundable except as required by applicable law. Payment processing is handled by Stripe Inc. Annie Group LLC does not store payment card information.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 11 — PROHIBITED USES</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 11 -- PROHIBITED USES</p>'
     + '<p style="margin:0 0 14px">You may not use this platform to: scrape, harvest, or systematically download data; reverse engineer proprietary algorithms; submit false, fraudulent, or misleading data; violate fair housing, privacy, or consumer protection laws; use data for FCRA-regulated purposes; circumvent access controls or payment systems; or use automated bots or scripts without written authorization.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 12 — DISCLAIMERS AND LIMITATION OF LIABILITY</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 12 -- DISCLAIMERS AND LIMITATION OF LIABILITY</p>'
     + '<p style="margin:0 0 14px">THE PLATFORM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. ANNIE GROUP LLC MAKES NO WARRANTIES REGARDING ACCURACY, COMPLETENESS, OR FITNESS FOR ANY PARTICULAR PURPOSE. COUNTY ASSESSOR DATA MAY BE OUTDATED, INCOMPLETE, OR INCORRECT. CRIME DATA IS SOURCED FROM LAW ENFORCEMENT OPEN DATA PORTALS AND MAY NOT REFLECT ALL INCIDENTS. TO THE MAXIMUM EXTENT PERMITTED BY LAW, ANNIE GROUP LLC&#39;S TOTAL LIABILITY FOR ANY CLAIM SHALL NOT EXCEED THE AMOUNT YOU PAID FOR THE SPECIFIC SERVICE GIVING RISE TO THE CLAIM.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 13 — GOVERNING LAW AND DISPUTE RESOLUTION</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 13 -- GOVERNING LAW AND DISPUTE RESOLUTION</p>'
     + '<p style="margin:0 0 14px">This Agreement is governed by the laws of the State of Washington. Any dispute shall be resolved by binding arbitration in King County, Washington under the rules of the American Arbitration Association. You waive the right to participate in any class action lawsuit or class-wide arbitration against Annie Group LLC.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 14 — CHILDREN</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 14 -- CHILDREN</p>'
     + '<p style="margin:0 0 14px">This platform is not directed at children under 13. By creating an account you represent that you are at least 18 years old or the age of majority in your jurisdiction.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 15 — MODIFICATIONS</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 15 -- MODIFICATIONS</p>'
     + '<p style="margin:0 0 14px">Annie Group LLC may modify these terms at any time. Continued use of the platform after notice of modification constitutes acceptance. Your original acceptance record is preserved permanently regardless of subsequent modifications.</p>'
 
-    + '<p style="font-weight:700;margin:0 0 6px">SECTION 16 — CONTACT</p>'
+    + '<p style="font-weight:700;margin:0 0 6px">SECTION 16 -- CONTACT</p>'
     + '<p style="margin:0 0 24px">Annie Group LLC d/b/a RWABidAsk · privacy@rwabidask.com · legal@rwabidask.com · rwabidask.com</p>'
 
     + '<div style="border-top:2px solid #111;padding-top:14px;margin-top:4px">'
@@ -7292,7 +7292,7 @@ function showTosModal(name, email, password) {
     + '<label for="tos-check" style="font-size:10px;color:#111;cursor:pointer;line-height:1.6">I have read, understand, and agree to the full Terms of Service, Privacy Policy, and Data Use Agreement. I acknowledge this is a legally binding contract and my acceptance is permanently recorded.</label>'
     + '</div>'
     + '<button id="tos-agree-btn" style="width:100%;background:#111;color:#fff;border:none;padding:13px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase">I AGREE AND CREATE ACCOUNT</button>'
-    + '<button onclick="document.getElementById(\'tos-modal\').remove()" style="width:100%;background:#fff;border:1px solid #ccc;color:#555;padding:9px;font-size:10px;cursor:pointer">Cancel — Go Back</button>'
+    + '<button onclick="document.getElementById(\'tos-modal\').remove()" style="width:100%;background:#fff;border:1px solid #ccc;color:#555;padding:9px;font-size:10px;cursor:pointer">Cancel -- Go Back</button>'
     + '</div></div>';
   m.innerHTML = html;
   document.body.appendChild(m);
@@ -7324,7 +7324,7 @@ async function acceptTosAndSignUp(name, email, password) {
       } catch(e) { console.warn('[tos log]', e); }
       document.getElementById('tos-modal')?.remove();
       closeModal();
-      showToast('ACCOUNT CREATED — PLEASE VERIFY YOUR EMAIL');
+      showToast('ACCOUNT CREATED -- PLEASE VERIFY YOUR EMAIL');
     }
   } catch(e) { showToast('Sign up failed: ' + e.message); }
 }
@@ -7344,9 +7344,9 @@ function renderMobileListViewFull() {
 
   const minLabel = fmtSliderPrice(sliderMinStep);
   const maxLabel = fmtSliderPrice(sliderMaxStep);
-  const priceHtml = `<div style="font-size:9px;color:var(--muted);padding:2px;">Range: <span style="color:var(--cyan)">${minLabel} — ${maxLabel}</span></div>`;
+  const priceHtml = `<div style="font-size:9px;color:var(--muted);padding:2px;">Range: <span style="color:var(--cyan)">${minLabel} -- ${maxLabel}</span></div>`;
 
-  // Same filterAssets logic as desktop — identical behavior
+  // Same filterAssets logic as desktop -- identical behavior
   const filteredAssets = filterAssets(allAssets);
   const count = filteredAssets.length;
 
@@ -7357,7 +7357,7 @@ function renderMobileListViewFull() {
     <div class="list-tile" onclick="selectAsset('${a.id}')" style="background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px;cursor:pointer">
       <div class="list-tile-type" style="font-size:9px;font-weight:600;color:var(--cyan);margin-bottom:6px">${(a.type||'asset').toUpperCase()}</div>
       <div class="list-tile-addr" style="font-size:13px;font-weight:600;color:var(--text)">${escapeHtml(a.address)}</div>
-      <div class="list-tile-loc" style="font-size:10px;color:var(--dim);margin:4px 0">${escapeHtml(a.city || '—')}</div>
+      <div class="list-tile-loc" style="font-size:10px;color:var(--dim);margin:4px 0">${escapeHtml(a.city || '--')}</div>
       <div style="font-size:16px;font-weight:700;color:var(--cyan)">${fmtPrice(a.price)}</div>
       ${origLine}
     </div>`;
@@ -7375,7 +7375,7 @@ function renderMobileListViewFull() {
     <div style="padding:12px;display:flex;flex-direction:column">${resultsHtml || '<div style="text-align:center;padding:40px;color:var(--muted);font-size:11px">NO ASSETS MATCH CURRENT FILTERS</div>'}</div>
   `;
 
-  // Bind category buttons — call setCategory which also syncs globe
+  // Bind category buttons -- call setCategory which also syncs globe
   container.querySelectorAll('.list-cat-btn').forEach(btn => {
     btn.onclick = () => setCategory(btn.dataset.cat, btn);
   });
@@ -7471,12 +7471,12 @@ window.showToast = showToast;
 
     function handleSponsor(id) {
     logPartnerLead(id || (window.currentAsset && window.currentAsset.id), 'SPONSOR');
-    showToast('SPONSORSHIP INTENT LOGGED — BROKER REGISTRY PENDING');
+    showToast('SPONSORSHIP INTENT LOGGED -- BROKER REGISTRY PENDING');
 }
 
 function handleClaim(id) {
     logPartnerLead(id || (window.currentAsset && window.currentAsset.id), 'CLAIM');
-    showToast('OWNERSHIP CLAIM INITIATED — VERIFICATION QUEUED');
+    showToast('OWNERSHIP CLAIM INITIATED -- VERIFICATION QUEUED');
 }
 
 function handleInquiry(id) {
@@ -7538,10 +7538,10 @@ function updateDashboardStats() {
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   set('ds-total', fmtPrice(total));
   set('ds-assets', A.length.toLocaleString());
-  set('ds-bids', bidsCount || '—');
-  set('ds-maritime', maritime || '—');
-  set('ds-aviation', aviation || '—');
-  set('ds-robotics', robotics || '—');
+  set('ds-bids', bidsCount || '--');
+  set('ds-maritime', maritime || '--');
+  set('ds-aviation', aviation || '--');
+  set('ds-robotics', robotics || '--');
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -7582,7 +7582,7 @@ let _selectedTopupAmount = 0;
 let _userCredits = 0;
 
 // ════════════════════════════════════════════════════════════════════
-// REGIONAL TIER DETECTION — Silent locale-based pricing
+// REGIONAL TIER DETECTION -- Silent locale-based pricing
 // Tier 1: NA, EU, AU, NZ, UK → Intel $9 | Tier 2: Intel $5
 // Tier 2: Global              → Claim $10/yr | Intelligence $5
 // ════════════════════════════════════════════════════════════════════
@@ -7601,7 +7601,7 @@ const TIER1_ZONES = new Set([
   'Australia/Sydney','Australia/Melbourne','Australia/Brisbane',
   'Australia/Perth','Australia/Adelaide','Australia/Darwin',
   'Pacific/Auckland','Pacific/Chatham',
-  // Asia Pacific — full price markets
+  // Asia Pacific -- full price markets
   'Asia/Tokyo','Asia/Shanghai','Asia/Hong_Kong','Asia/Singapore',
   'Asia/Seoul','Asia/Taipei','Asia/Macau',
 ]);
@@ -7653,7 +7653,7 @@ const STRIPE_PUBLIC_KEY = 'pk_live_51TOdFIKuC0MRY8oUf763R8piZD3bJ0kFbBs2V3diwB3R
 
 
 // ════════════════════════════════════════════════════════════════════
-// ADMIN BYPASS — Uses UUID only (No PII/Emails in source)
+// ADMIN BYPASS -- Uses UUID only (No PII/Emails in source)
 // ════════════════════════════════════════════════════════════════════
 const ADMIN_ID = '788ccadc-c05d-466c-bcae-ba00ffb9ab97'; 
 const ADMIN_USER_IDS = new Set([ADMIN_ID]);
@@ -7677,7 +7677,7 @@ function applyAdminBypass() {
   const style = document.getElementById('admin-bypass-style') || document.createElement('style');
   style.id = 'admin-bypass-style';
   style.textContent = `
-    /* Admin zero-blur policy — every possible paywall/blur class removed */
+    /* Admin zero-blur policy -- every possible paywall/blur class removed */
     .premium-blur-wrap    { position: static !important; }
     .premium-blur-content { filter: none !important; backdrop-filter: none !important;
                             opacity: 1 !important; pointer-events: auto !important;
@@ -7697,10 +7697,10 @@ function applyAdminBypass() {
   document.head.appendChild(style);
 }
 
-// ── requireAuth — call before any gated action (offer/financing/premium unlock) ──
+// ── requireAuth -- call before any gated action (offer/financing/premium unlock) ──
 function requireAuth(callback) {
   if (currentUser) { callback(); return; }
-  // Open House: show auth modal inline — no full-screen gate
+  // Open House: show auth modal inline -- no full-screen gate
   const modal = document.getElementById('modal');
   openModal('signin'); // route through the real modal builder
   // After sign-in completes, the page will reload/refresh and the user can retry
@@ -7823,7 +7823,7 @@ async function loadWalletHistory() {
       const isCredit = amt > 0;
       const date = new Date(t.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' });
       return `<div class="wallet-txn">
-        <span class="wallet-txn-desc">${t.action || '—'}</span>
+        <span class="wallet-txn-desc">${t.action || '--'}</span>
         <span class="wallet-txn-amt ${isCredit ? 'credit' : 'debit'}">${isCredit ? '+' : ''}$${Math.abs(amt).toFixed(2)}</span>
       </div>`;
     }).join('');
@@ -7831,7 +7831,7 @@ async function loadWalletHistory() {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// AUDIT TRAIL — every unlock/lead buy logged
+// AUDIT TRAIL -- every unlock/lead buy logged
 // ════════════════════════════════════════════════════════════════════
 async function logAuditTrail(action, assetId, metadata = {}) {
   if (!_sb || !currentUser) return;
@@ -7847,7 +7847,7 @@ async function logAuditTrail(action, assetId, metadata = {}) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// BUY LEAD GATE — POF Upload + lead_price unlock
+// BUY LEAD GATE -- POF Upload + lead_price unlock
 // ════════════════════════════════════════════════════════════════════
 let _pofVerified = false;
 
@@ -7870,7 +7870,7 @@ async function uploadPOF(inputEl, assetId) {
     if (error) throw error;
     // Update profile
     await _sb.from('profiles').update({ pof_url: path, pof_verified: false }).eq('id', currentUser.id);
-    showToast('POF UPLOADED — PENDING REVIEW');
+    showToast('POF UPLOADED -- PENDING REVIEW');
     logAuditTrail('POF_UPLOAD', assetId, { file: file.name });
     showOrderbookModal(assetId); // refresh modal
   } catch(e) { showToast('UPLOAD FAILED: ' + e.message); }
@@ -7888,9 +7888,9 @@ async function buyInstitutionalAccess(assetId, price) {
   await stripeOrderbookCheckout(assetId, 'access', price);
 }
 
-// BUY LEAD — No POF barrier. Payment IS the validation. Straight to Stripe.
+// BUY LEAD -- No POF barrier. Payment IS the validation. Straight to Stripe.
 // ════════════════════════════════════════════════════════════════════
-// BUTTON 5 — PURCHASE MARKET INTELLIGENCE
+// BUTTON 5 -- PURCHASE MARKET INTELLIGENCE
 // Silent regional pricing. Delivers PDF Intelligence Report via email.
 // ════════════════════════════════════════════════════════════════════
 async function showOrderbookModal(assetId) {
@@ -7898,7 +7898,7 @@ async function showOrderbookModal(assetId) {
   const a = (window.ASSETS || []).find(x => x.id == assetId);
   if (!a) return;
 
-  // Silent regional pricing — no tier menu shown to user
+  // Silent regional pricing -- no tier menu shown to user
   const price = getIntelligencePrice();
   const intelPriceId = getStripePriceId('intel_report');
 
@@ -7918,7 +7918,7 @@ async function showOrderbookModal(assetId) {
     </div>
     <button onclick="stripeOrderbookCheckout('${assetId}','intelligence',${price})"
       style="width:100%;padding:14px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-family:var(--font);font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-bottom:10px">
-      EXECUTE — $${price.toFixed(2)}
+      EXECUTE -- $${price.toFixed(2)}
     </button>
     <div style="font-size:8px;color:var(--muted);text-align:center;line-height:1.8;letter-spacing:.4px;text-transform:uppercase">All transactions final · Secured by Stripe</div>`;
 
@@ -8002,7 +8002,7 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
         setTimeout(loadPaidReport, 500);
         return;
       }
-      showToast('✓ PAYMENT CONFIRMED — LOADING INTEL REPORT…');
+      showToast('✓ PAYMENT CONFIRMED -- LOADING INTEL REPORT…');
       try {
         const bq = await fetchParcelData({pin: unlockId, paid: true});
         if (bq) {
@@ -8011,10 +8011,10 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
           showToast('✓ INTEL REPORT UNLOCKED');
           setTimeout(() => generateIntelPDF(bq), 1500);
         } else {
-          showToast('PAYMENT CONFIRMED — CONTACT SUPPORT IF ISSUE PERSISTS');
+          showToast('PAYMENT CONFIRMED -- CONTACT SUPPORT IF ISSUE PERSISTS');
         }
       } catch(e) {
-        showToast('PAYMENT CONFIRMED — REPORT LOADING SHORTLY');
+        showToast('PAYMENT CONFIRMED -- REPORT LOADING SHORTLY');
       }
     };
     setTimeout(loadPaidReport, 3000);
@@ -8023,7 +8023,7 @@ async function stripeOrderbookCheckout(assetId, tier, price) {
 async function purchaseLead(assetId, price) {
   if (!currentUser) { openModal('signin'); return; }
   if (_userCredits < price) {
-    showToast('INSUFFICIENT CREDITS — TOP UP YOUR WALLET');
+    showToast('INSUFFICIENT CREDITS -- TOP UP YOUR WALLET');
     openWallet();
     return;
   }
@@ -8046,7 +8046,7 @@ async function purchaseLead(assetId, price) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// BUTTON 7 — REGISTER REPRESENTATION
+// BUTTON 7 -- REGISTER REPRESENTATION
 // Full-screen institutional TOS overlay. Silent regional pricing.
 // Fields: Full Name, Authority Type, License # (optional). No Company URL.
 // ════════════════════════════════════════════════════════════════════
@@ -8062,11 +8062,11 @@ async function showClaimModal(assetId) {
   const isVerifiedBroker = role === 'broker' || role === 'pro' || role === 'institutional'
     || localStorage.getItem('rwa_broker_verified') === currentUser.id;
 
-  // Already verified — show portfolio assignment
+  // Already verified -- show portfolio assignment
   if (isVerifiedBroker || isClaimedByMe) {
     openModal('claimPortfolio', 'ASSIGN TO MY PORTFOLIO', `
       <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.14);border-radius:2px;padding:14px;margin-bottom:16px">
-        <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1.5px;margin-bottom:6px">VERIFIED REPRESENTATIVE — NO ADDITIONAL FEE</div>
+        <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1.5px;margin-bottom:6px">VERIFIED REPRESENTATIVE -- NO ADDITIONAL FEE</div>
         <div style="font-size:11px;color:var(--dim);line-height:1.8">Your subscription is active. Adding <strong style="color:var(--text)">${escapeHtml(a?.address||'this asset')}</strong> to your managed portfolio requires no additional payment.</div>
       </div>
       <div style="margin-bottom:16px">
@@ -8120,7 +8120,7 @@ async function showClaimModal(assetId) {
         <label style="display:block;font-size:9px;letter-spacing:1.5px;color:var(--muted);margin-bottom:5px;text-transform:uppercase">Authority Type *</label>
         <select id="tos-authority" onchange="tosGateCheck()"
           style="width:100%;padding:11px;background:var(--bg3, rgba(0,0,0,.6));border:1px solid var(--border2, rgba(255,255,255,.12));color:var(--text);font-family:inherit;font-size:11px;box-sizing:border-box;outline:none;cursor:pointer;letter-spacing:.3px;text-transform:uppercase">
-          <option value="">— Select Authority —</option>
+          <option value="">-- Select Authority --</option>
           <option value="Owner">OWNER</option>
           <option value="Broker">BROKER</option>
           <option value="Legal Counsel">LEGAL COUNSEL</option>
@@ -8147,7 +8147,7 @@ async function showClaimModal(assetId) {
       <div id="tos-stripe-wrap" style="display:none;margin-bottom:12px">
         <button onclick="submitBrokerSubscription('${assetId}')"
           style="width:100%;padding:15px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#041a12;border:none;font-family:inherit;font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">
-          REGISTER — $${claimPrice}/YR
+          REGISTER -- $${claimPrice}/YR
         </button>
       </div>
 
@@ -8165,7 +8165,7 @@ function tosGateCheck() {
   const certify   = document.getElementById('tos-certify')?.checked;
   const wrap      = document.getElementById('tos-stripe-wrap');
   if (!wrap) return;
-  // License is optional — gate only on name, authority, and TOS checkbox
+  // License is optional -- gate only on name, authority, and TOS checkbox
   wrap.style.display = (name && authority && certify) ? 'block' : 'none';
 }
 
@@ -8256,7 +8256,7 @@ async function submitBrokerSubscription(assetId) {
   const isBrokerVerified = params.get('broker_verified') === '1';
   const assetId = params.get('asset');
 
-  // ── Subscription success — refresh tier from Supabase ────────────
+  // ── Subscription success -- refresh tier from Supabase ────────────
   if (isSubscribed) {
     history.replaceState({}, '', window.location.pathname);
     const refreshTier = async () => {
@@ -8269,9 +8269,9 @@ async function submitBrokerSubscription(assetId) {
         if (profile?.subscription_tier) {
           window._userTier = profile.subscription_tier;
           await updateAuthUI();
-          showToast('✓ SUBSCRIPTION ACTIVE — WELCOME TO ' + profile.subscription_tier.toUpperCase() + '!');
+          showToast('✓ SUBSCRIPTION ACTIVE -- WELCOME TO ' + profile.subscription_tier.toUpperCase() + '!');
         } else {
-          // Webhook may not have fired yet — retry a few times
+          // Webhook may not have fired yet -- retry a few times
           let attempts = 0;
           const poll = setInterval(async () => {
             attempts++;
@@ -8281,15 +8281,15 @@ async function submitBrokerSubscription(assetId) {
               if (p?.subscription_tier) {
                 window._userTier = p.subscription_tier;
                 await updateAuthUI();
-                showToast('✓ SUBSCRIPTION ACTIVE — WELCOME TO ' + p.subscription_tier.toUpperCase() + '!');
+                showToast('✓ SUBSCRIPTION ACTIVE -- WELCOME TO ' + p.subscription_tier.toUpperCase() + '!');
               } else {
-                showToast('✓ PAYMENT CONFIRMED — REFRESHING YOUR ACCOUNT…');
+                showToast('✓ PAYMENT CONFIRMED -- REFRESHING YOUR ACCOUNT…');
                 setTimeout(() => location.reload(), 2000);
               }
             }
           }, 2000);
         }
-      } catch(e) { showToast('✓ PAYMENT CONFIRMED — PLEASE REFRESH'); }
+      } catch(e) { showToast('✓ PAYMENT CONFIRMED -- PLEASE REFRESH'); }
     };
     setTimeout(refreshTier, 1000);
   }
@@ -8297,11 +8297,11 @@ async function submitBrokerSubscription(assetId) {
   if (isSuccess || isBrokerVerified) {
     history.replaceState({}, '', window.location.pathname);
 
-    // Persist immediately to localStorage — survives DB lag
+    // Persist immediately to localStorage -- survives DB lag
     if (currentUser) {
       localStorage.setItem('rwa_broker_verified', currentUser.id);
     } else {
-      // Auth may not have resolved yet — wait for it then persist
+      // Auth may not have resolved yet -- wait for it then persist
       const waitForAuth = setInterval(() => {
         if (currentUser) {
           localStorage.setItem('rwa_broker_verified', currentUser.id);
@@ -8312,7 +8312,7 @@ async function submitBrokerSubscription(assetId) {
     }
 
     setTimeout(() => {
-      showToast('BROKER SUBSCRIPTION CONFIRMED — EDITOR MODE ACTIVE');
+      showToast('BROKER SUBSCRIPTION CONFIRMED -- EDITOR MODE ACTIVE');
       // Remove full-screen overlay if still present
       const overlay = document.getElementById('claim-tos-overlay');
       if (overlay) overlay.remove();
@@ -8323,7 +8323,7 @@ async function submitBrokerSubscription(assetId) {
 })();
 
 // ════════════════════════════════════════════════════════════════════
-// EDITOR MODE — Verified Broker Specification Editing
+// EDITOR MODE -- Verified Broker Specification Editing
 // ════════════════════════════════════════════════════════════════════
 function toggleEditorMode(assetId) {
   const a = (window.ASSETS || []).find(x => x.id == assetId);
@@ -8394,7 +8394,7 @@ async function submitForAIAudit(assetId) {
         selection_data: { edits, submitted_at: new Date().toISOString() }
       });
     }
-    showToast('SUBMITTED — PENDING AI AUDIT REVIEW');
+    showToast('SUBMITTED -- PENDING AI AUDIT REVIEW');
     // Collapse editor
     const fieldsEl = document.getElementById('editor-fields');
     const auditBtn = document.getElementById('ai-audit-btn');
@@ -8408,7 +8408,7 @@ async function submitForAIAudit(assetId) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// BUTTON 8 — SPONSOR THIS LISTING
+// BUTTON 8 -- SPONSOR THIS LISTING
 // Sponsorship Specs: Org Name, License #, Industry, Monthly pricing
 // Tier 1: $50/mo | Tier 2: $25/mo
 // ════════════════════════════════════════════════════════════════════
@@ -8418,7 +8418,7 @@ async function showSponsorModal(assetId) {
   if (!a) return;
 
   const industries = [
-    '— Select Industry —',
+    '-- Select Industry --',
     'Commercial Real Estate',
     'Residential Real Estate',
     'Private Equity / M&A',
@@ -8442,7 +8442,7 @@ async function showSponsorModal(assetId) {
 
   openModal('sponsorListing', 'SPONSORSHIP SPECIFICATIONS', `
     <div style="font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:14px">
-      Sponsor <strong style="color:var(--text)">${escapeHtml(a?.address||'this asset')}</strong>. Your brand becomes the exclusive promoter of this listing — competitors are removed from the surrounding search radius.
+      Sponsor <strong style="color:var(--text)">${escapeHtml(a?.address||'this asset')}</strong>. Your brand becomes the exclusive promoter of this listing -- competitors are removed from the surrounding search radius.
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
@@ -8465,9 +8465,9 @@ async function showSponsorModal(assetId) {
     </div>
     <div class="mfield"><label>SPONSORSHIP TIER</label>
       <select id="sponsor-tier">
-        <option value="">— Select Tier —</option>
-        <option value="tier1">Tier 1 — $50.00 / month (NA · EU · AU · NZ · UK)</option>
-        <option value="tier2">Tier 2 — $25.00 / month (Asia · ME · Africa · SA)</option>
+        <option value="">-- Select Tier --</option>
+        <option value="tier1">Tier 1 -- $50.00 / month (NA · EU · AU · NZ · UK)</option>
+        <option value="tier2">Tier 2 -- $25.00 / month (Asia · ME · Africa · SA)</option>
       </select>
     </div>
 
@@ -8492,7 +8492,7 @@ async function submitSponsorSpecs(assetId) {
   if (!tier)     { showToast('SPONSORSHIP TIER REQUIRED'); return; }
 
   const price = tier === 'tier1' ? 50 : 25;
-  const tierLabel = tier === 'tier1' ? 'Tier 1 — $50/mo' : 'Tier 2 — $25/mo';
+  const tierLabel = tier === 'tier1' ? 'Tier 1 -- $50/mo' : 'Tier 2 -- $25/mo';
 
   try {
     showToast('REDIRECTING TO STRIPE…');
@@ -8522,7 +8522,7 @@ async function submitSponsorSpecs(assetId) {
     if (data?.url) {
       window.location.href = data.url;
     } else {
-      showToast('CHECKOUT UNAVAILABLE — CONTACT SUPPORT');
+      showToast('CHECKOUT UNAVAILABLE -- CONTACT SUPPORT');
     }
   } catch(e) {
     showToast('STRIPE ERROR: ' + (e.message || e));
@@ -8551,7 +8551,7 @@ async function unlockPremiumData(assetId, price) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// openModal helper extension — supports custom title+body
+// openModal helper extension -- supports custom title+body
 // ════════════════════════════════════════════════════════════════════
 
 // Hook Stripe init into the auth flow
@@ -8575,7 +8575,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════
-// CATEGORY SPONSOR HOOK — show sponsor strip on category select
+// CATEGORY SPONSOR HOOK -- show sponsor strip on category select
 // ════════════════════════════════════════════════════════════════════
 const _origSetCategory = window.setCategory;
 // Extend setCategory after it's defined to add sponsor rotation
@@ -8629,7 +8629,7 @@ async function fetchMarketActivity(assetId) {
     body.innerHTML = data.map(inq => {
       const date = new Date(inq.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
       const typeCls = inq.inquiry_type === 'BID' ? 'color:var(--cyan)' : 'color:var(--gold)';
-      const amt = inq.offer_amount ? fmtPrice(parseFloat(inq.offer_amount)) : '—';
+      const amt = inq.offer_amount ? fmtPrice(parseFloat(inq.offer_amount)) : '--';
       // Show intent but block direct peer-to-peer unless handshake accepted
       const isOwner = currentUser && inq.user_id === currentUser.id;
       const contactBtn = isPro && !isOwner
@@ -8652,7 +8652,7 @@ async function fetchMarketActivity(assetId) {
 }
 
 async function requestHandshake(inquiryId) {
-  showToast('HANDSHAKE REQUEST SENT — AWAITING CONFIRMATION');
+  showToast('HANDSHAKE REQUEST SENT -- AWAITING CONFIRMATION');
   await logAuditTrail('HANDSHAKE_REQUEST', null, { inquiry_id: inquiryId });
 }
 
@@ -8677,31 +8677,31 @@ async function toggle3DLayer(type, apn) {
 
 // ════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════
-// BASICS PANEL — On-Demand Parcel View (Free / No Auth Required)
+// BASICS PANEL -- On-Demand Parcel View (Free / No Auth Required)
 // Double-click on map → JIT parcel data from tile layer → this panel.
 // Supabase scope: sessions, leads, transactions only.
 // ════════════════════════════════════════════════════════════════════
 function renderBasicsPanel(asset) {
   const a    = asset;
-  const apn  = a.apn  || a.id || '—';
+  const apn  = a.apn  || a.id || '--';
   const raw  = a._raw || {};
   const phys = (a.specs && a.specs.physical) || {};
-  // isPaidReport — true if user has purchased intel for this parcel
+  // isPaidReport -- true if user has purchased intel for this parcel
   // Will be updated async after Supabase check
   let isPaidReport = false;
   const _adminBypass = typeof isAdminUser === 'function' && isAdminUser(window.currentUser?.id);
   if (_adminBypass) isPaidReport = true;
 
-  const address  = a.address        || phys.address    || raw.address  || '—';
-  const acreage  = phys.acreage     || raw.acreage     || '—';
-  const zoning   = phys.zoning      || raw.zoning      || '—';
-  const landUse  = phys.land_use    || raw.landUse     || '—';
-  const yearBlt  = phys.year_built  || raw.yearBlt     || '—';
+  const address  = a.address        || phys.address    || raw.address  || '--';
+  const acreage  = phys.acreage     || raw.acreage     || '--';
+  const zoning   = phys.zoning      || raw.zoning      || '--';
+  const landUse  = phys.land_use    || raw.landUse     || '--';
+  const yearBlt  = phys.year_built  || raw.yearBlt     || '--';
   const county   = raw.county       || 'Washington State';
   const owner    = raw.owner        || null; // only shown to members
   const latStr   = (a.lat  || phys.lat  || raw.lat  || '').toString().substring(0, 11);
   const lngStr   = (a.lng  || phys.lng  || raw.lng  || '').toString().substring(0, 12);
-  const coordStr = (latStr && lngStr) ? `${latStr}, ${lngStr}` : '—';
+  const coordStr = (latStr && lngStr) ? `${latStr}, ${lngStr}` : '--';
 
   const isMember = !!currentUser;
   const safeApn  = escapeHtml(apn);
@@ -8722,7 +8722,7 @@ function renderBasicsPanel(asset) {
   const freeRows = [
     ['APN',        apn,     'Courier New, monospace'],
     ['ADDRESS',    address, ''],
-    ['ACREAGE',    acreage !== '—' ? `${acreage} ac` : '—', ''],
+    ['ACREAGE',    acreage !== '--' ? `${acreage} ac` : '--', ''],
     ['ZONING',     zoning,  ''],
     ['LAND USE',   landUse, ''],
     ['YEAR BUILT', yearBlt, ''],
@@ -8732,13 +8732,13 @@ function renderBasicsPanel(asset) {
 
   // ── Gated member rows ───────────────────────────────────────────
   const gatedRows = [
-    ['ASSESSED VALUE',  '—'],
-    ['MARKET VALUE',    '—'],
-    ['OWNER OF RECORD', owner || '—'],
-    ['LAST SALE PRICE', '—'],
-    ['LAST SALE DATE',  '—'],
-    ['LIENS / ENCUMB.', '—'],
-    ['TAX STATUS',      '—'],
+    ['ASSESSED VALUE',  '--'],
+    ['MARKET VALUE',    '--'],
+    ['OWNER OF RECORD', owner || '--'],
+    ['LAST SALE PRICE', '--'],
+    ['LAST SALE DATE',  '--'],
+    ['LIENS / ENCUMB.', '--'],
+    ['TAX STATUS',      '--'],
   ];
 
   const basicsHtml = `
@@ -8756,7 +8756,7 @@ function renderBasicsPanel(asset) {
       <div class="basics-gate-bar">
         <span class="basics-gate-txt">
           <span class="basics-badge basics-badge-gated">MEMBERS</span>
-          &nbsp;Deep Data — Owner, Valuation, Liens, History
+          &nbsp;Deep Data -- Owner, Valuation, Liens, History
         </span>
         ${isMember
           ? '<span class="basics-gate-txt" style="color:var(--cyan);font-size:10px">✓ UNLOCKED</span>'
@@ -8773,7 +8773,7 @@ function renderBasicsPanel(asset) {
     </div>
   `;
 
-  // ── Revenue Buttons — Financing, Insurance, Inquire ────────────
+  // ── Revenue Buttons -- Financing, Insurance, Inquire ────────────
   const actionHtml = `
     <div style="padding:14px 16px 6px;border-top:1px solid var(--border)">
       <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Actions</div>
@@ -8802,7 +8802,7 @@ function renderBasicsPanel(asset) {
     </div>
   `;
 
-  // ── Sponsor + Claim — Revenue / Lead-Gen Buttons ───────────────
+  // ── Sponsor + Claim -- Revenue / Lead-Gen Buttons ───────────────
   const revenueHtml = `
     <div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:8px">
       <div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;padding-top:4px">Parcel Engagement</div>
@@ -8821,13 +8821,13 @@ function renderBasicsPanel(asset) {
   const brokerHtml = `
     <div style="padding:0 16px 14px">
       <button class="abtn-broker-intel"
-        onclick="requireAuth(()=>{ logPartnerLead('${safeApn}','BROKER_INTEL'); showToast('BROKER SIGNAL LOGGED — INTEL PACKAGE PENDING'); })">
-        PURCHASE MARKET SIGNALS — BROKER INTEL
+        onclick="requireAuth(()=>{ logPartnerLead('${safeApn}','BROKER_INTEL'); showToast('BROKER SIGNAL LOGGED -- INTEL PACKAGE PENDING'); })">
+        PURCHASE MARKET SIGNALS -- BROKER INTEL
       </button>
     </div>
   `;
 
-  // ── Intel Report CTA — Primary Commerce / Stripe ───────────────
+  // ── Intel Report CTA -- Primary Commerce / Stripe ───────────────
   const intelHtml = `
     <div class="intel-report-wrap" style="margin:0 0 4px">
       <div class="intel-report-label">⬡ &nbsp;FULL MARKET INTELLIGENCE REPORT</div>
@@ -8840,7 +8840,7 @@ function renderBasicsPanel(asset) {
     </div>
   `;
 
-  // ── Metadata Block — clean ledger footer ───────────────────────
+  // ── Metadata Block -- clean ledger footer ───────────────────────
   const metaHtml = `
     <div class="meta-block">
       <div class="meta-block-title">⬡ &nbsp;Ledger Record</div>
@@ -8883,7 +8883,7 @@ function renderBasicsPanel(asset) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// STRIPE SANDBOX — MARKET INTELLIGENCE REPORT CHECKOUT
+// STRIPE SANDBOX -- MARKET INTELLIGENCE REPORT CHECKOUT
 // On success: removes orange "Blackout" overlays for Admin ID,
 // logs transaction to Supabase leads table, updates unified ledger.
 // ════════════════════════════════════════════════════════════════════
@@ -8892,11 +8892,11 @@ async function initiateStripeSandbox(apn) {
     showToast("ERROR: NO ASSET SELECTED");
     return;
   }
-  // Admin bypass — skip Stripe for admin accounts
+  // Admin bypass -- skip Stripe for admin accounts
   const _role = (currentUserRole||'').toLowerCase();
   const _email = currentUser?.email || '';
   if (_role === 'admin' || _email === 'ops@rwabidask.com') {
-    showToast('ADMIN ACCESS — LOADING INTEL REPORT…');
+    showToast('ADMIN ACCESS -- LOADING INTEL REPORT…');
     try {
       const bq = await fetchParcelData({pin: apn, paid: true});
       if (bq) {
@@ -8910,7 +8910,7 @@ async function initiateStripeSandbox(apn) {
   }
   showToast(`INITIATING INTEL REPORT FOR APN: ${apn}...`);
 
-  // Log transaction intent (Supabase — sessions/transactions scope)
+  // Log transaction intent (Supabase -- sessions/transactions scope)
   if (_sb && currentUser) {
     _sb.from('leads').insert({
       apn, action: 'INTEL_REPORT_PURCHASE',
@@ -8947,7 +8947,7 @@ async function initiateStripeSandbox(apn) {
       } catch(e) {}
       window.location.href = data.url;
     }
-    else showToast('CHECKOUT ERROR — TRY AGAIN');
+    else showToast('CHECKOUT ERROR -- TRY AGAIN');
   } catch (err) {
     console.error("Stripe Error:", err);
     showToast("PAYMENT ENGINE OFFLINE");
@@ -8955,7 +8955,7 @@ async function initiateStripeSandbox(apn) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// RECENTLY VIEWED — Sidebar list of on-demand identified parcels
+// RECENTLY VIEWED -- Sidebar list of on-demand identified parcels
 // ════════════════════════════════════════════════════════════════════
 const _recentlyViewed = []; // ordered newest-first, max 25
 
@@ -8987,7 +8987,7 @@ function renderRecentlyViewed() {
   }
 
   listEl.innerHTML = _recentlyViewed.map(a => {
-    const apn     = escapeHtml(a.apn  || a.id || '—');
+    const apn     = escapeHtml(a.apn  || a.id || '--');
     const address = escapeHtml(a.address || `Parcel @ ${(a.lat||'').toString().substring(0,8)}`);
     const acreage = a._raw?.acreage || (a.specs?.physical?.acreage) || null;
     const zoning  = a._raw?.zoning  || (a.specs?.physical?.zoning)  || null;
@@ -9008,14 +9008,14 @@ function renderRecentlyViewed() {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// INSTITUTIONAL LEDGER MARKET CAP — Bloomberg-style ticker
+// INSTITUTIONAL LEDGER MARKET CAP -- Bloomberg-style ticker
 // Washington State: ~3.2M taxable parcels × median assessed $385K
 // Source basis: WA DOR 2023 Property Tax Statistics
 // ════════════════════════════════════════════════════════════════════
-// renderLedgerCap removed — replaced by updateUnifiedLedger() above.
+// renderLedgerCap removed -- replaced by updateUnifiedLedger() above.
 
 // ════════════════════════════════════════════════════════════════════
-// RENDER LIST — targets #asset-list-wrap for search results
+// RENDER LIST -- targets #asset-list-wrap for search results
 // Sidebar shows Recently Viewed at rest; search results appear below
 // ════════════════════════════════════════════════════════════════════
 function renderList(assets) {
@@ -9034,9 +9034,9 @@ function renderList(assets) {
       <span style="color:var(--cyan);font-size:9px">${assets.length}</span>
     </div>
     ${assets.map(a => {
-      const apn     = escapeHtml(a.apn  || a.id || '—');
+      const apn     = escapeHtml(a.apn  || a.id || '--');
       const address = escapeHtml(a.address || `Parcel ${apn}`);
-      const price   = a.price ? `$${Number(a.price).toLocaleString()}` : '—';
+      const price   = a.price ? `$${Number(a.price).toLocaleString()}` : '--';
       const type    = escapeHtml(a.type  || 'PARCEL');
       const status  = escapeHtml(a.status || 'ACTIVE');
       return `
@@ -9057,7 +9057,7 @@ function renderList(assets) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// INSTITUTIONAL SEO — JSON-LD Schema injection + Crawler detection
+// INSTITUTIONAL SEO -- JSON-LD Schema injection + Crawler detection
 // When Googlebot / GPTBot visits, inject structured data & unblur
 // ════════════════════════════════════════════════════════════════════
 (function injectStructuredData() {
@@ -9065,7 +9065,7 @@ function renderList(assets) {
   const isCrawler = /Googlebot|GPTBot|Bingbot|AhrefsBot|SemrushBot|DotBot|YandexBot/i.test(UA);
 
   if (isCrawler) {
-    // Crawlers see full text — remove auth gate and paywall blurs
+    // Crawlers see full text -- remove auth gate and paywall blurs
     const gate = document.getElementById('auth-gate');
     if (gate) gate.style.display = 'none';
     document.querySelectorAll('.premium-blur-content').forEach(el => {
@@ -9111,7 +9111,7 @@ function renderList(assets) {
 const PARCEL_API='https://iyejqvdjbvokrswlsoda.supabase.co/functions/v1/parcel-proxy';
 async function fetchParcelData({lat,lng,address,pin}={},returnFull=false){let url=PARCEL_API+'?';const pinIsCoord=pin&&/^-?\d+\.\d+,-?\d+\.\d+$/.test(pin);if(pin&&!pinIsCoord)url+=`pin=${encodeURIComponent(pin)}`;else if(lat&&lng)url+=`lat=${lat}&lng=${lng}`;else if(address)url+=`address=${encodeURIComponent(address)}`;else return null;try{const r=await fetch(url,{signal:AbortSignal.timeout(60000),headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}});if(!r.ok){console.warn('[RWA] proxy',r.status);return null;}const d=await r.json();if(d?.listing&&window._currentAsset)window._currentAsset._listing=d.listing;if(returnFull)return d;return d?.parcel||null;}catch(e){console.warn('[RWA]',e.message);return null;}}
 window.renderBasicsPanel=async function(asset,bqData){if(typeof RWA_GATE!=='undefined')RWA_GATE.trackView();if(bqData){_renderFull(asset,bqData);return;}if(asset?.apn&&asset.apn!=='Resolving…'){const slug=asset.apn.replace(/[^0-9-]/g,'');history.pushState({apn:slug},'','/parcel/'+slug);}const rhead=document.getElementById('rhead'),rbody=document.getElementById('rbody');if(rhead)rhead.innerHTML=`<div class="rtype">PARCEL RECORD // QUERYING</div><div class="rname">${asset?.address||asset?.apn||'Parcel'}</div><div style="margin-top:14px;display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid rgba(0,255,200,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin360 .7s linear infinite"></div><span style="font-size:10px;color:var(--muted);letter-spacing:1px">QUERYING LEDGER…</span></div>`;if(rbody)rbody.innerHTML='';const resp=await fetchParcelData({lat:asset?.lat,lng:asset?.lng,pin:asset?.apn||asset?.id},true);const data=resp?.parcel||resp;const listing=resp?.listing||null;if(data&&asset){asset._bq=data;asset._listing=listing;}_renderFull(asset,data,false,listing);
-// async polygon fetch — non-blocking
+// async polygon fetch -- non-blocking
 const _pin=data?.PIN||asset?.apn;
 if(_pin&&_pin!=='Resolving…'){
   fetch(PARCEL_API+'?action=polygon&pin='+encodeURIComponent(_pin),{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
@@ -9168,8 +9168,8 @@ async function generateIntelPDF(bq) {
     const permits   = p.permits           || [];
     const appeals   = p.appeals           || [];
 
-    const addr     = String(p.address||'').trim() || '—';
-    const pin2     = p.PIN || '—';
+    const addr     = String(p.address||'').trim() || '--';
+    const pin2     = p.PIN || '--';
     const assessed = si(v.latest_total_val);
     const land     = si(v.latest_land_val);
     const imps     = si(v.latest_imps_val);
@@ -9257,7 +9257,7 @@ async function generateIntelPDF(bq) {
     var mortgEst = calcMortgage(assessed, 20, 7.0);
     var _meth = compsData && compsData.methodology ? compsData.methodology : {};
     function compRow(c, mode) {
-      var addr  = c.Address || c.address || '—';
+      var addr  = c.Address || c.address || '--';
       var price = mode === 'sold' || mode === 'broad' || mode === 'trend'
         ? (si(c.last_sale_price) || si(c.latest_total_val))
         : mode === 'active' ? si(c.asking_price || c.latest_total_val)
@@ -9303,7 +9303,7 @@ async function generateIntelPDF(bq) {
     var c4 = compsData && compsData.ppsf_comps       ? compsData.ppsf_comps       : [];
     var c5 = compsData && compsData.district_trend   ? compsData.district_trend   : [];
     var nbhd      = c1; var soldComps = c2; var activeComp = compsData && compsData.active_listings ? compsData.active_listings : [];
-    var nbhdHtml  = methLine(_meth.c1) + (c1.length > 0 ? c1.map(function(c){ return compRow(c,'nbhd'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No tight comps found — see broad market set below</div>');
+    var nbhdHtml  = methLine(_meth.c1) + (c1.length > 0 ? c1.map(function(c){ return compRow(c,'nbhd'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No tight comps found -- see broad market set below</div>');
     var soldHtml  = methLine(_meth.c2) + (c2.length > 0 ? c2.map(function(c){ return compRow(c,'sold'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No sales within 1 mile in past 12 months</div>');
     var broadHtml = methLine(_meth.c3) + (c3.length > 0 ? c3.map(function(c){ return compRow(c,'broad'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No sales within 2 miles in past 24 months</div>');
     var ppsfHtml  = methLine(_meth.c4) + (c4.length > 0 ? c4.map(function(c){ return compRow(c,'ppsf'); }).join('') : '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No $/sqft comps available</div>');
@@ -9479,10 +9479,10 @@ async function generateIntelPDF(bq) {
     var chainHtml = chainOfTitle.length > 0 ? chainOfTitle.map(function(s){
       var out = '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;page-break-inside:avoid">';
       out += '<div style="display:flex;justify-content:space-between;align-items:baseline">';
-      out += '<span style="font-size:10px;font-family:monospace;color:#666">' + (s.date || '—') + '</span>';
+      out += '<span style="font-size:10px;font-family:monospace;color:#666">' + (s.date || '--') + '</span>';
       out += s.price > 0 ? '<span style="font-family:monospace;font-size:12px;font-weight:700;color:#185FA5">$' + s.price.toLocaleString() + '</span>' : '';
       out += '</div><div style="font-size:10px;color:#444;margin-top:2px">';
-      out += '<span style="color:#888">FROM: </span>' + (s.seller || '—') + ' &rarr; <span style="color:#888">TO: </span>' + (s.buyer || '—');
+      out += '<span style="color:#888">FROM: </span>' + (s.seller || '--') + ' &rarr; <span style="color:#888">TO: </span>' + (s.buyer || '--');
       out += '</div>';
       if (s.instrument) out += '<div style="font-size:9px;color:#888;font-family:monospace;margin-top:2px">' + s.instrument + (s.reason ? ' · ' + s.reason : '') + '</div>';
       if (s.warnings && s.warnings.length > 0) out += '<div style="font-size:9px;color:#c00;font-family:monospace;margin-top:2px">&#9873; ' + s.warnings.slice(0,2).join(' · ') + '</div>';
@@ -9498,7 +9498,7 @@ async function generateIntelPDF(bq) {
       mortgPdfHtml += '<span>Down: $' + mortgEst.downAmt.toLocaleString() + '</span>';
       mortgPdfHtml += '<span>Loan: $' + mortgEst.principal.toLocaleString() + '</span>';
       mortgPdfHtml += '<span>30yr total: ~$' + Math.round(mortgEst.total30/1000) + 'k</span>';
-      mortgPdfHtml += '</div><div style="font-size:8px;color:#aaa;font-family:monospace;margin-top:4px">Based on assessed value. Rate is estimate only — verify with lender.</div>';
+      mortgPdfHtml += '</div><div style="font-size:8px;color:#aaa;font-family:monospace;margin-top:4px">Based on assessed value. Rate is estimate only -- verify with lender.</div>';
       mortgPdfHtml += '</div>';
     }
 
@@ -9511,12 +9511,12 @@ async function generateIntelPDF(bq) {
     const math = (q,a,note) =>
       `<div class="math-row"><div class="math-q">${q}</div><div class="math-a">${a}</div>${note?'<div class="math-p">'+note+'</div>':''}</div>`;
 
-    // SVG bar chart — appraisal history
+    // SVG bar chart -- appraisal history
     const chartData = apprWithChange.filter(a=>a.total>0).slice().reverse();
     const maxV = Math.max(...chartData.map(a=>a.total));
     const chartSVG = chartData.length>2 ? `
       <div style="margin:12px 0 4px;page-break-inside:avoid">
-        <div style="font-size:9px;font-family:'Courier New',monospace;color:#888;letter-spacing:1px;margin-bottom:6px">ASSESSED VALUE — ${chartData[0].RollYr} TO ${chartData[chartData.length-1].RollYr}</div>
+        <div style="font-size:9px;font-family:'Courier New',monospace;color:#888;letter-spacing:1px;margin-bottom:6px">ASSESSED VALUE -- ${chartData[0].RollYr} TO ${chartData[chartData.length-1].RollYr}</div>
         <svg width="100%" height="110" viewBox="0 0 640 110" xmlns="http://www.w3.org/2000/svg">
           <line x1="0" y1="100" x2="640" y2="100" stroke="#ddd" stroke-width="1"/>
           ${chartData.map((a,i)=>{
@@ -9615,7 +9615,7 @@ async function generateIntelPDF(bq) {
 <div class="masthead">
   <div class="mast-top">
     <div>
-      <div class="pub">RWABIDASK — PROPERTY INTELLIGENCE REPORT</div>
+      <div class="pub">RWABIDASK -- PROPERTY INTELLIGENCE REPORT</div>
       <div class="prop-name">${addr}</div>
       <div class="prop-sub">PIN ${pin2} &nbsp;·&nbsp; King County WA &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>
     </div>
@@ -9627,7 +9627,7 @@ async function generateIntelPDF(bq) {
   </div>
   <div class="tags">
     <span class="tag">GENERATED ${new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()}</span>
-    <span class="tag">LEVY ${$(p.levy_code)||'—'}</span>
+    <span class="tag">LEVY ${$(p.levy_code)||'--'}</span>
     <span class="tag">KING COUNTY ASSESSOR</span>
     <span class="tag">RWABIDASK STANDARD v2.0</span>
     ${bool(geo.in_tsunami_zone)?'<span class="tag alert">TSUNAMI INUNDATION ZONE</span>':''}
@@ -9694,9 +9694,9 @@ ${$(b.year_built)?`
       '$'+assessed.toLocaleString()+' total assessed value ÷ '+sqft.toLocaleString()+' sq ft of living area'
     ):''}
     ${cagr?math(
-      'AVERAGE YEARLY VALUE INCREASE — Compound Annual Growth Rate (CAGR) over '+yrs+' years',
+      'AVERAGE YEARLY VALUE INCREASE -- Compound Annual Growth Rate (CAGR) over '+yrs+' years',
       cagr+'% per year',
-      'From $'+oldVal.toLocaleString()+' in '+oldest?.RollYr+' to $'+assessed.toLocaleString()+' in '+apprHist[0]?.RollYr+'. The stock market has averaged about 7% per year over the same period. This is the assessor\'s valuation — not a certified appraisal.'
+      'From $'+oldVal.toLocaleString()+' in '+oldest?.RollYr+' to $'+assessed.toLocaleString()+' in '+apprHist[0]?.RollYr+'. The stock market has averaged about 7% per year over the same period. This is the assessor\'s valuation -- not a certified appraisal.'
     ):''}
     ${estTax>0?insight(
       'RWABidAsk Research: Estimated annual property tax',
@@ -9721,7 +9721,7 @@ ${apprHist.length?`
     ${cagr?insight(
       'RWABidAsk Research: What this growth rate tells buyers, lenders, and investors',
       'This property has grown at '+cagr+'% per year on the assessor\'s record over '+yrs+' years.',
-      'A property growing faster than inflation (typically 2–3%/yr) is holding and building real value. A rate above 7%/yr outperforms the average stock market return. This data comes directly from the King County Assessor — it is what the county uses to calculate your tax bill each year.'
+      'A property growing faster than inflation (typically 2–3%/yr) is holding and building real value. A rate above 7%/yr outperforms the average stock market return. This data comes directly from the King County Assessor -- it is what the county uses to calculate your tax bill each year.'
     ):''}
   </div>
 </div>`:''}
@@ -9730,7 +9730,7 @@ ${apprHist.length?`
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">05</span><span class="ch-t">SALES & TRANSACTION HISTORY</span><span class="ch-s ${armSales.length?'ok':'none'}">${armSales.length?armSales.length+' RECORDED SALE'+(armSales.length>1?'S':''):'NO MARKET SALES ON RECORD'}</span></div>
   <div class="ch-body">
-    ${armSales.length===0?row('Recorded market sales','None found in assessor record — check county records directly','muted'):''}
+    ${armSales.length===0?row('Recorded market sales','None found in assessor record -- check county records directly','muted'):''}
     ${armSales.slice(0,8).map(s=>{
       const price=si(s.SalePrice);
       const date=String(s.DocumentDate||'').substring(0,10);
@@ -9738,19 +9738,19 @@ ${apprHist.length?`
     }).join('')}
     ${yearsSinceSale?row('Current owner holding period',yearsSinceSale+' years (since '+lastSaleDate+')'):''}
     ${salePpsf?math(
-      'LAST MARKET SALE — PRICE PER SQUARE FOOT',
+      'LAST MARKET SALE -- PRICE PER SQUARE FOOT',
       '$'+salePpsf.toLocaleString()+' per sq ft',
       '$'+lastSalePrice.toLocaleString()+' sale price on '+lastSaleDate+' ÷ '+sqft.toLocaleString()+' sq ft living area'
     ):''}
     ${priceGap!==null?math(
       'CURRENT ASSESSED VALUE vs. LAST SALE PRICE',
       (priceGap>0?'+':'')+priceGap+'% '+(priceGap>0?'above':'below')+' last sale',
-      'Assessed at $'+assessed.toLocaleString()+' today vs. $'+lastSalePrice.toLocaleString()+' when last sold in '+lastSaleDate+'. A large positive gap may mean the market has outpaced the assessment — or it may signal an appeal opportunity for the owner.'
+      'Assessed at $'+assessed.toLocaleString()+' today vs. $'+lastSalePrice.toLocaleString()+' when last sold in '+lastSaleDate+'. A large positive gap may mean the market has outpaced the assessment -- or it may signal an appeal opportunity for the owner.'
     ):''}
     ${insight(
       'RWABidAsk Research: Why sale history matters to every party in a transaction',
       'The sale record is the most reliable signal of what the market actually paid.',
-      'A $0 transfer means the property changed hands within a family or trust — not a real market sale. Lenders, insurers, and buyers should look at arms-length sales only. A long time since the last sale may mean the current owner bought before a major appreciation cycle — and may not realize how much the value has moved.'
+      'A $0 transfer means the property changed hands within a family or trust -- not a real market sale. Lenders, insurers, and buyers should look at arms-length sales only. A long time since the last sale may mean the current owner bought before a major appreciation cycle -- and may not realize how much the value has moved.'
     )}
   </div>
 </div>
@@ -9767,7 +9767,7 @@ ${nbhdStatsHtml}
   <div class="ch-hd"><span class="ch-n">C2</span><span class="ch-t">RECENT SALES (12 MO · 1 MI · ±30% GLA · SAME USE)</span><span class="ch-s ${c2.length>0?'ok':'none'}">${c2.length>0?c2.length+' FOUND':'NONE'}</span></div>
   <div class="ch-body">${soldHtml}</div>
 </div>
-${rangeChartC2 ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">RECENT SALE PRICE RANGE — SUBJECT POSITION (cyan dot)</div>${rangeChartC2}</div>` : ''}
+${rangeChartC2 ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">RECENT SALE PRICE RANGE -- SUBJECT POSITION (cyan dot)</div>${rangeChartC2}</div>` : ''}
 <!-- CH C3: BROAD MARKET -->
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">C3</span><span class="ch-t">BROAD MARKET SALES (24 MO · 2 MI · ±50% GLA · SAME USE)</span><span class="ch-s ${c3.length>0?'ok':'none'}">${c3.length>0?c3.length+' FOUND':'NONE'}</span></div>
@@ -9783,7 +9783,7 @@ ${rangeChartC2 ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div st
   <div class="ch-hd"><span class="ch-n">C5</span><span class="ch-t">DISTRICT SALES TREND (36 MO · SAME DISTRICT · SAME USE)</span><span class="ch-s ${c5.length>0?'ok':'none'}">${c5.length>0?c5.length+' SALES':'NONE'}</span></div>
   <div class="ch-body">${trendHtml}</div>
 </div>
-${zipBarChart ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">ZIP CODE VALUE DISTRIBUTION — WHERE THIS PARCEL SITS (★ = subject assessed value)</div>${zipBarChart}</div>` : ''}
+${zipBarChart ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">ZIP CODE VALUE DISTRIBUTION -- WHERE THIS PARCEL SITS (★ = subject assessed value)</div>${zipBarChart}</div>` : ''}
 <!-- CH C6: ACTIVE LISTINGS -->
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">C6</span><span class="ch-t">ACTIVE LISTINGS (RWABIDASK NETWORK)</span><span class="ch-s ${activeComp.length>0?'ok':'none'}">${activeComp.length>0?activeComp.length+' ACTIVE':'NONE'}</span></div>
@@ -9800,16 +9800,16 @@ ${mortgPdfHtml}
   <div class="ch-body">
     ${_cr ? `
     <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:#f8f8f8;border-left:3px solid #185FA5">
-      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">0.5MI ALL TIME</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crHalf&&crHalf.total_all_time?Number(crHalf.total_all_time).toLocaleString():'—'}</div></div>
-      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">0.5MI LAST 12MO</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crHalf&&crHalf.last_12mo?crHalf.last_12mo:'—'}</div></div>
-      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">1MI ALL TIME</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crOne&&crOne.total_all_time?Number(crOne.total_all_time).toLocaleString():'—'}</div></div>
-      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">1MI LAST 12MO</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crOne&&crOne.last_12mo?crOne.last_12mo:'—'}</div></div>
+      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">0.5MI ALL TIME</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crHalf&&crHalf.total_all_time?Number(crHalf.total_all_time).toLocaleString():'--'}</div></div>
+      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">0.5MI LAST 12MO</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crHalf&&crHalf.last_12mo?crHalf.last_12mo:'--'}</div></div>
+      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">1MI ALL TIME</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crOne&&crOne.total_all_time?Number(crOne.total_all_time).toLocaleString():'--'}</div></div>
+      <div><div style="font-size:8px;color:#888;font-family:monospace;letter-spacing:1px">1MI LAST 12MO</div><div style="font-size:18px;font-weight:700;font-family:monospace">${crOne&&crOne.last_12mo?crOne.last_12mo:'--'}</div></div>
       ${crYoy !== null ? '<div><div style=\'font-size:8px;color:#888;font-family:monospace;letter-spacing:1px\'>YOY TREND</div><div style=\'font-size:18px;font-weight:700;font-family:monospace;color:'+(crYoy<0?'#3B6D11':'#c00')+'\'>'+(crYoy>0?'+':'')+crYoy+'%</div></div>' : ''}
     </div>
-    <div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">INCIDENT TREND — 1 MILE RADIUS (2010–PRESENT)</div>
+    <div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin-bottom:6px">INCIDENT TREND -- 1 MILE RADIUS (2010–PRESENT)</div>
     ${crimeTrendSvg}
     <div style="font-size:8px;color:#aaa;font-family:monospace;margin-bottom:12px">Blue = full year · Gold = current year annualized</div>
-    <div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin:10px 0 6px">BY CATEGORY — 0.5 MILE RADIUS</div>
+    <div style="font-size:9px;font-family:monospace;color:#888;letter-spacing:1px;margin:10px 0 6px">BY CATEGORY -- 0.5 MILE RADIUS</div>
     ${crimeHalfHtml}
     ${crimePeakHtml}
     <div style="font-size:8px;color:#aaa;font-family:monospace;margin-top:8px">Source: ${crimeSource}</div>
@@ -9832,12 +9832,12 @@ ${permits.length?`
     ${permits.slice(0,12).map(pm=>{
       const dt=String(pm.IssueDate||'').substring(0,10);
       const val=si(pm.PermitVal);
-      return row(dt+' · '+($(pm.PermitType)||'—'),val>0?'$'+val.toLocaleString():$(pm.PermitStatus)||'—');
+      return row(dt+' · '+($(pm.PermitType)||'--'),val>0?'$'+val.toLocaleString():$(pm.PermitStatus)||'--');
     }).join('')}
     ${permitTotal>0?math(
       'TOTAL PERMITTED INVESTMENT IN THIS PROPERTY',
       '$'+permitTotal.toLocaleString(),
-      permitRate?'That is '+permitRate+'% of the current assessed value of $'+assessed.toLocaleString()+'. Permitted work was inspected and approved by the county — unpermitted work is not counted here and is a liability in any transaction.':''
+      permitRate?'That is '+permitRate+'% of the current assessed value of $'+assessed.toLocaleString()+'. Permitted work was inspected and approved by the county -- unpermitted work is not counted here and is a liability in any transaction.':''
     ):''}
     ${insight(
       'RWABidAsk Research: What permits tell a lender, buyer, or insurer',
@@ -9851,25 +9851,25 @@ ${permits.length?`
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">07</span><span class="ch-t">PROPERTY RIGHTS & DESIGNATIONS</span><span class="ch-s ${bool(rts.easements)||bool(rts.deed_restrictions)?'warn':'ok'}">${bool(rts.easements)||bool(rts.deed_restrictions)?'REVIEW REQUIRED':'CLEAN'}</span></div>
   <div class="ch-body">
-    ${row('Easements on record', bool(rts.easements)?'Yes — verify via title search':'None on record',bool(rts.easements)?'bad':'')}
-    ${row('Deed restrictions', bool(rts.deed_restrictions)?'Yes — review required':'None on record',bool(rts.deed_restrictions)?'bad':'')}
-    ${bool(rts.native_growth_protection)?row('Native growth protection easement','Yes — clearing and grading may be restricted','bad'):''}
+    ${row('Easements on record', bool(rts.easements)?'Yes -- verify via title search':'None on record',bool(rts.easements)?'bad':'')}
+    ${row('Deed restrictions', bool(rts.deed_restrictions)?'Yes -- review required':'None on record',bool(rts.deed_restrictions)?'bad':'')}
+    ${bool(rts.native_growth_protection)?row('Native growth protection easement','Yes -- clearing and grading may be restricted','bad'):''}
     ${bool(rts.development_rights_purchased)?row('Development rights purchased','Yes'):''}
     ${bool(rts.dnr_lease)?row('Department of Natural Resources lease','Yes'):''}
-    ${rts.historic_site&&rts.historic_site!='0'?row('Historic site designation','Yes — alterations may require approval'):''}
-    ${rts.current_use_designation&&rts.current_use_designation!='0'?row('Current use designation','Code '+rts.current_use_designation+' — reduced tax rate may apply'):''}
-    ${rts.tidelands_shoreland&&rts.tidelands_shoreland!='0'?row('Tidelands / shoreland','Yes — code '+rts.tidelands_shoreland+' (may have special water rights)'):''}
+    ${rts.historic_site&&rts.historic_site!='0'?row('Historic site designation','Yes -- alterations may require approval'):''}
+    ${rts.current_use_designation&&rts.current_use_designation!='0'?row('Current use designation','Code '+rts.current_use_designation+' -- reduced tax rate may apply'):''}
+    ${rts.tidelands_shoreland&&rts.tidelands_shoreland!='0'?row('Tidelands / shoreland','Yes -- code '+rts.tidelands_shoreland+' (may have special water rights)'):''}
     ${rts.waterfront_location&&rts.waterfront_location!='0'?row('Waterfront location','Code '+rts.waterfront_location):''}
     ${rts.waterfront_footage&&rts.waterfront_footage!='0'?row('Waterfront footage',rts.waterfront_footage+' linear feet'):''}
-    ${bool(rts.waterfront_access_rights)?row('Waterfront access rights','Yes — deeded access on record'):''}
+    ${bool(rts.waterfront_access_rights)?row('Waterfront access rights','Yes -- deeded access on record'):''}
     ${(()=>{const active=Object.entries(vws).filter(([k,v2])=>v2&&v2!='0'&&v2!='false'&&v2!==false&&v2!==0);return active.length?row('View classifications recorded',active.map(([k,v2])=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())+' (score: '+v2+')').join(', ')):''})()}
-    ${bool(rts.species_of_concern)?row('Species of concern on parcel','Yes — development may be restricted by state/federal law','bad'):''}
-    ${bool(rts.sensitive_area_tract)?row('Sensitive area tract','Yes — additional regulations may apply'):''}
+    ${bool(rts.species_of_concern)?row('Species of concern on parcel','Yes -- development may be restricted by state/federal law','bad'):''}
+    ${bool(rts.sensitive_area_tract)?row('Sensitive area tract','Yes -- additional regulations may apply'):''}
     ${(()=>{const active=Object.entries(nus).filter(([k,v2])=>v2&&v2!='0'&&v2!='false'&&v2!==false&&v2!==0);return active.length?row('Nuisances on record',active.map(([k])=>k.replace(/_/g,' ')).join(', '),'bad'):''})()}
     ${insight(
       'RWABidAsk Research: Rights are value. Restrictions are risk.',
-      'What is — and is not — in this section matters equally.',
-      'A water right can be worth hundreds of thousands of dollars. An easement reduces usable area. Tidelands give the owner rights to the land below the water line. This report shows what the assessor has on record. It does not replace a full title search — always verify before any purchase, loan, or insurance decision.'
+      'What is -- and is not -- in this section matters equally.',
+      'A water right can be worth hundreds of thousands of dollars. An easement reduces usable area. Tidelands give the owner rights to the land below the water line. This report shows what the assessor has on record. It does not replace a full title search -- always verify before any purchase, loan, or insurance decision.'
     )}
   </div>
 </div>
@@ -9882,8 +9882,8 @@ ${permits.length?`
     ${appeals.slice(0,5).map(a=>row('Appeal '+$(a.AppealNbr)+' · Year '+$(a.BillYr),$(a.HearingResult)?'Hearing result: '+a.HearingResult:'Filed')).join('')}
     ${p.appeal_count===0?insight(
       'RWABidAsk Research: Could the current owner challenge this assessment?',
-      'Possibly. No prior appeal means no prior attempt — the door is open.',
-      'Property owners in Washington State can appeal their assessed value each year. A successful appeal can reduce the taxable value and lower the annual tax bill. This requires a licensed appraiser to document comparable sales. The absence of any appeal does not mean the assessment is accurate — it may simply mean no one has challenged it yet.'
+      'Possibly. No prior appeal means no prior attempt -- the door is open.',
+      'Property owners in Washington State can appeal their assessed value each year. A successful appeal can reduce the taxable value and lower the annual tax bill. This requires a licensed appraiser to document comparable sales. The absence of any appeal does not mean the assessment is accurate -- it may simply mean no one has challenged it yet.'
     ):''}
   </div>
 </div>
@@ -9892,14 +9892,14 @@ ${permits.length?`
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">09</span><span class="ch-t">NATURAL HAZARD & GEOGRAPHIC RISK</span><span class="ch-s ${bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)||bool(haz.landslide)?'warn':'ok'}">${bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)||bool(haz.landslide)?'HAZARDS PRESENT':'LOW RISK PROFILE'}</span></div>
   <div class="ch-body">
-    ${row('Tsunami inundation zone',bool(geo.in_tsunami_zone)?'YES — modeled wave inundation confirmed for this parcel':'No — not within the modeled tsunami zone',bool(geo.in_tsunami_zone)?'bad':'good')}
-    ${row('100-year flood plain',bool(haz.flood_100yr)?'YES — flood insurance likely required by lenders':'No',bool(haz.flood_100yr)?'bad':'good')}
+    ${row('Tsunami inundation zone',bool(geo.in_tsunami_zone)?'YES -- modeled wave inundation confirmed for this parcel':'No -- not within the modeled tsunami zone',bool(geo.in_tsunami_zone)?'bad':'good')}
+    ${row('100-year flood plain',bool(haz.flood_100yr)?'YES -- flood insurance likely required by lenders':'No',bool(haz.flood_100yr)?'bad':'good')}
     ${row('Seismic site class',$(geo.seismic_site_class))}
     ${geo.seismic_site_class_desc?`<div class="row"><span class="rk">What seismic class means</span><span class="rv" style="font-size:10px;max-width:65%">${geo.seismic_site_class_desc.substring(0,80)}…</span></div>`:''}
     ${row('Geology and soil type', $(geo.geology_label))}
     ${geo.shear_unit_description?row('Soil description',$(geo.shear_unit_description)):''}
     ${geo.vs30_mps?math(
-      'SHEAR WAVE VELOCITY (VS30) — How fast sound travels through the ground, used to measure earthquake risk',
+      'SHEAR WAVE VELOCITY (VS30) -- How fast sound travels through the ground, used to measure earthquake risk',
       sf(geo.vs30_mps).toFixed(0)+' meters per second',
       'Higher numbers = stiffer, more stable ground. Below 180 m/s is soft soil with high earthquake amplification. Above 760 m/s is rock.'
     ):''}
@@ -9910,20 +9910,20 @@ ${permits.length?`
     ${row('Fault movement rate',geo.fault_slip_rate?geo.fault_slip_rate+' (millimeters per year)':null)}
     ${row('Fault age classification',$(geo.fault_age))}
     ${row('Data confidence',$(geo.fault_confidence))}
-    ${row('Landslide hazard (county assessor flag)',bool(haz.landslide)?'YES — flagged in assessor record':'No',bool(haz.landslide)?'bad':'good')}
-    ${row('Landslide zone (geologic model)',bool(geo.in_landslide_zone)?'YES — parcel overlaps a mapped landslide polygon':'No',bool(geo.in_landslide_zone)?'bad':'good')}
+    ${row('Landslide hazard (county assessor flag)',bool(haz.landslide)?'YES -- flagged in assessor record':'No',bool(haz.landslide)?'bad':'good')}
+    ${row('Landslide zone (geologic model)',bool(geo.in_landslide_zone)?'YES -- parcel overlaps a mapped landslide polygon':'No',bool(geo.in_landslide_zone)?'bad':'good')}
     ${row('Erosion hazard',bool(haz.erosion)?'YES':'No',bool(haz.erosion)?'bad':'')}
     ${row('Steep slope hazard',bool(haz.steep_slope)?'YES':'No',bool(haz.steep_slope)?'bad':'')}
-    ${bool(haz.wetland)?row('Wetland on parcel','Yes — development and clearing restrictions apply','bad'):''}
-    ${bool(haz.stream)?row('Stream on or adjacent to parcel','Yes — buffer setbacks may apply','bad'):''}
+    ${bool(haz.wetland)?row('Wetland on parcel','Yes -- development and clearing restrictions apply','bad'):''}
+    ${bool(haz.stream)?row('Stream on or adjacent to parcel','Yes -- buffer setbacks may apply','bad'):''}
     ${bool(haz.critical_drainage)?row('Critical drainage area','Yes'):''}
-    ${bool(haz.coal_mine)?row('Coal mine hazard','YES — historic mine may be present below ground','bad'):''}
-    ${bool(haz.landfill_buffer)?row('Landfill buffer zone','Yes — proximity to a landfill','bad'):''}
-    ${haz.contamination&&haz.contamination!='0'?row('Contamination flag','Code '+haz.contamination+' — verify with county environmental records','bad'):''}
-    ${mn.abandoned?row('Nearest abandoned mine',mn.abandoned.name+' · '+fmtM(mn.abandoned.distance_m)+(mn.abandoned.hazard==='yes'?' — Hazardous materials on site':''),mn.abandoned.hazard==='yes'?'bad':''):''}
+    ${bool(haz.coal_mine)?row('Coal mine hazard','YES -- historic mine may be present below ground','bad'):''}
+    ${bool(haz.landfill_buffer)?row('Landfill buffer zone','Yes -- proximity to a landfill','bad'):''}
+    ${haz.contamination&&haz.contamination!='0'?row('Contamination flag','Code '+haz.contamination+' -- verify with county environmental records','bad'):''}
+    ${mn.abandoned?row('Nearest abandoned mine',mn.abandoned.name+' · '+fmtM(mn.abandoned.distance_m)+(mn.abandoned.hazard==='yes'?' -- Hazardous materials on site':''),mn.abandoned.hazard==='yes'?'bad':''):''}
     ${mn.active?row('Nearest active mining operation',mn.active.name+' · '+mn.active.commodity+' · '+fmtM(mn.active.distance_m)):''}
     <div style="margin-top:14px;page-break-inside:avoid">
-      <div style="font-size:9px;font-family:'Courier New',monospace;color:#888;letter-spacing:1px;margin-bottom:8px">RISK INDICATOR SUMMARY — Higher bar = higher risk or cost pressure</div>
+      <div style="font-size:9px;font-family:'Courier New',monospace;color:#888;letter-spacing:1px;margin-bottom:8px">RISK INDICATOR SUMMARY -- Higher bar = higher risk or cost pressure</div>
       ${[
         ['Earthquake ground shaking', bool(haz.seismic)?70:geo.seismic_site_class&&geo.seismic_site_class.includes('D')?60:40, bool(haz.seismic)?'#E24B4A':'#639922'],
         ['Tsunami and wave flooding', bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?85:15, bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?'#E24B4A':'#639922'],
@@ -9987,7 +9987,7 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
       ['Average yearly value increase (30% weight)', cagr?Math.min(100,Math.round(sf(cagr)*5)):0, '#185FA5'],
       ['Value consistency over time (20% weight)', apprHist.length>5?80:50, '#185FA5'],
       ['Permitted improvement record (20% weight)', permits.length>0?100:50, '#3B6D11'],
-      ['Transaction clarity — real market sales (15%)', armSales.length>0?75:40, '#EF9F27'],
+      ['Transaction clarity -- real market sales (15%)', armSales.length>0?75:40, '#EF9F27'],
       ['Geographic risk reduction (15% weight)', bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?15:bool(haz.landslide)?40:80, bool(geo.in_tsunami_zone)||bool(haz.flood_100yr)?'#E24B4A':'#639922'],
     ].map(([label,pct,color])=>`
       <div class="bar-row">
@@ -9998,7 +9998,7 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
     <div class="score-note">
       ${bool(geo.in_tsunami_zone)?'This parcel sits within a modeled tsunami inundation zone. This fact does not appear on Zillow, Redfin, or most MLS listings. It is a material risk that affects insurance availability, loan underwriting, and resale liquidity in a stress scenario. ':''}
       ${bool(haz.flood_100yr)?'This parcel is within the 100-year flood plain. Federal flood insurance will likely be required by any mortgage lender. ':''}
-      ${cagr&&sf(cagr)>8?'The '+cagr+'%/yr growth rate over '+yrs+' years significantly outperforms the average stock market return of ~7%/yr — indicating a premium, high-demand market location. ':''}
+      ${cagr&&sf(cagr)>8?'The '+cagr+'%/yr growth rate over '+yrs+' years significantly outperforms the average stock market return of ~7%/yr -- indicating a premium, high-demand market location. ':''}
       This score is computed from publicly available county assessor and government geospatial data. It is a proprietary RWABidAsk metric. It is not an appraisal, a credit rating, or a legal opinion.
     </div>
   </div>
@@ -10013,9 +10013,9 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
   <b>Seismic site class:</b> A letter grade (A through F) that describes how the soil at a location responds to an earthquake. Class A is bedrock (safest). Class E and F are soft soils that amplify shaking significantly.<br>
   <b>VS30:</b> The average speed at which seismic waves travel through the top 30 meters of soil. Higher numbers mean stiffer, more stable ground. Used by engineers to predict earthquake damage.<br>
   <b>Fault slip rate:</b> How fast two sides of a fault are moving relative to each other, measured in millimeters per year. Higher slip rate = more frequent earthquake potential.<br>
-  <b>Easement:</b> A legal right for someone other than the owner to use part of the property — for example, a utility company's right to run power lines across it.<br>
+  <b>Easement:</b> A legal right for someone other than the owner to use part of the property -- for example, a utility company's right to run power lines across it.<br>
   <b>Tidelands:</b> Land between the high-water and low-water marks on a shoreline. In Washington State, tidelands can be privately owned and carry separate water access rights.<br>
-  <b>Levy code:</b> The tax district code that determines which combination of taxing authorities (school district, fire district, city, county, etc.) apply to a property — and therefore what the total tax rate is.<br>
+  <b>Levy code:</b> The tax district code that determines which combination of taxing authorities (school district, fire district, city, county, etc.) apply to a property -- and therefore what the total tax rate is.<br>
   <b>Property Intelligence Score:</b> RWABidAsk's proprietary score combining value growth, permit history, transaction clarity, geographic risk, and assessor data quality into a single 0–100 number.
 </div>
 
@@ -10023,14 +10023,14 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
 <div class="legal">
   <div class="legal-row">
     <div>
-      RWABIDASK PROPERTY INTELLIGENCE REPORT — STANDARD v2.0<br>
+      RWABIDASK PROPERTY INTELLIGENCE REPORT -- STANDARD v2.0<br>
       DATA: KING COUNTY ASSESSOR · BIGQUERY PIPELINE · USGS · WA DNR · ${new Date().toLocaleDateString()}<br>
       FOR USE IN: LENDING · INSURANCE UNDERWRITING · ACQUISITION DUE DILIGENCE
     </div>
     <div style="text-align:right">
       PIN ${pin2}<br>
       NOT A TITLE REPORT · NOT LEGAL ADVICE · NOT AN APPRAISAL<br>
-      © RWABIDASK LLC — NOT FOR REDISTRIBUTION · RWABIDASK.COM
+      © RWABIDASK LLC -- NOT FOR REDISTRIBUTION · RWABIDASK.COM
     </div>
   </div>
   <div style="margin-top:8px;font-size:8px;color:#aaa;line-height:1.6;font-family:Georgia,serif;font-style:italic">
@@ -10055,7 +10055,7 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
     document.body.removeChild(el);
   } catch(e) {
     console.error(e);
-    if(typeof showToast==='function') showToast('PDF ERROR — TRY AGAIN');
+    if(typeof showToast==='function') showToast('PDF ERROR -- TRY AGAIN');
   }
   })();
 }
@@ -10095,15 +10095,15 @@ function mortgageCardHtml(assessedValue, rateOverride) {
 function compRangeTeaserHtml(zip, assessedValue) {
   if (!assessedValue || assessedValue <= 0) return '';
   var html = '<div style="margin:8px 16px 0;padding:12px 14px;background:rgba(0,20,14,.6);border:1px solid rgba(0,255,200,.12);border-radius:4px;position:relative;overflow:hidden">';
-  html += '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">COMP RANGE · ZIP ' + (zip||'—') + ' · RECENT SALES</div>';
-  // Simple range bar — blurred ends, subject dot visible
+  html += '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">COMP RANGE · ZIP ' + (zip||'--') + ' · RECENT SALES</div>';
+  // Simple range bar -- blurred ends, subject dot visible
   html += '<div style="position:relative;height:28px;margin:4px 0 8px">';
   html += '<div style="position:absolute;top:12px;left:0;right:0;height:4px;background:rgba(0,255,200,.15);border-radius:2px"></div>';
   // Blurred left label
   html += '<div style="position:absolute;left:0;top:0;font-size:9px;font-family:monospace;color:var(--muted);filter:blur(4px)">$???k</div>';
   // Blurred right label
   html += '<div style="position:absolute;right:0;top:0;font-size:9px;font-family:monospace;color:var(--muted);filter:blur(4px)">$???k</div>';
-  // Subject dot at 50% — we dont know position without comp data, center it
+  // Subject dot at 50% -- we dont know position without comp data, center it
   html += '<div style="position:absolute;left:50%;top:6px;width:16px;height:16px;border-radius:50%;background:var(--cyan);border:2px solid #fff;transform:translateX(-50%);box-shadow:0 0 8px rgba(0,255,200,.6)"></div>';
   html += '</div>';
   html += '<div style="font-size:8px;color:var(--muted);text-align:center;letter-spacing:1px">UNLOCK INTEL REPORT TO SEE FULL COMP ANALYSIS</div>';
@@ -10112,13 +10112,13 @@ function compRangeTeaserHtml(zip, assessedValue) {
 }
 
 function _renderFull(asset,bq,isPaidReport=false,listing=null){
-const a=asset||{},pin=bq?.PIN||a.apn||a.id||'—',addr=bq?.address||a.address||'—',
+const a=asset||{},pin=bq?.PIN||a.apn||a.id||'--',addr=bq?.address||a.address||'--',
 cityState=bq?.city?`${bq.city} ${bq.state||'WA'} ${bq.zip_code||''}`.trim():(bq?.zip_code||''),
 assessed=bq?.current_assessed_total||0,assessedLand=bq?.current_assessed_land||0,
 assessedImps=bq?.current_assessed_improvements||0,assessedYear=bq?.appraisal_year||'',
 bldg=bq?.building||{},lastSale=bq?.last_sale||{},
-salePrice=lastSale.price?`$${Number(lastSale.price).toLocaleString()}`:'—',
-saleDate=lastSale.date?lastSale.date.substring(0,10):'—',
+salePrice=lastSale.price?`$${Number(lastSale.price).toLocaleString()}`:'--',
+saleDate=lastSale.date?lastSale.date.substring(0,10):'--',
 permitCount=bq?.permit_count||0,
 trend=bq?.value_trend||bq?.value_trend_2yr||[],
 safePin=(pin||'').replace(/'/g,''),
@@ -10266,7 +10266,7 @@ rows=[...rows,
   assessedImps&&assessedImps>0&&['STRUCTURE',`$${Number(assessedImps).toLocaleString()}`],
   lastSale.price&&lastSale.price>10000&&['LAST SALE',salePrice],
   lastSale.price&&lastSale.price>10000&&lastSale.instrument&&['SALE TYPE',lastSale.instrument],
-  lastSale.price&&lastSale.price>10000&&saleDate!=='—'&&['SALE DATE',saleDate],
+  lastSale.price&&lastSale.price>10000&&saleDate!=='--'&&['SALE DATE',saleDate],
   lastSale.price&&lastSale.price>10000&&lastSale.warnings&&lastSale.warnings.length>0&&['SALE FLAGS',lastSale.warnings.slice(0,2).join(' · ')],
   permitCount>0&&['PERMITS',`${permitCount} on record`],
 ].filter(Boolean).filter(r=>r&&r[1]);
@@ -10294,7 +10294,7 @@ document.getElementById('rhead').innerHTML=`
   ${cityState?`<div style="font-size:11px;color:var(--dim);margin-bottom:4px">${cityState}</div>`:''}
   <div style="font-family:monospace;font-size:9px;color:var(--cyan);margin-bottom:10px">APN: ${pin}</div>
   <div class="rprice-row">
-    <div class="rprice">${assessed?`$${Number(assessed).toLocaleString()}`:'—'}</div>
+    <div class="rprice">${assessed?`$${Number(assessed).toLocaleString()}`:'--'}</div>
     ${assessed?`<div class="rprice-psf" style="font-size:9px;color:var(--muted)">${assessedYear} roll year</div>`:''}
   </div>`;
 
@@ -10302,7 +10302,7 @@ if(noData){
   document.getElementById('rbody').innerHTML=`
     <div style="padding:24px 18px;text-align:center">
       <div style="font-size:12px;color:var(--dim);margin-bottom:4px">No parcel record at this location</div>
-      <div style="font-size:10px;color:var(--muted);line-height:1.6">This may be water, a road right-of-way, open space, or federal land. All 39 Washington counties are covered — try clicking on a parcel boundary.</div>
+      <div style="font-size:10px;color:var(--muted);line-height:1.6">This may be water, a road right-of-way, open space, or federal land. All 39 Washington counties are covered -- try clicking on a parcel boundary.</div>
     </div>`;
 } else {
   document.getElementById('rbody').innerHTML=`
@@ -10337,7 +10337,7 @@ if(noData){
     ${mortgageCardHtml(assessed)}
     ${compRangeTeaserHtml(bq&&bq.zip_code, assessed)}
     <div style="margin:8px 16px;padding:14px;background:linear-gradient(135deg,rgba(0,40,28,.7),rgba(0,20,40,.7));border:1px solid rgba(0,255,200,.18);border-radius:4px">
-      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">LOCKED — PROFESSIONAL INTELLIGENCE</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:8px">LOCKED -- PROFESSIONAL INTELLIGENCE</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px">
         <div style="font-size:9px;color:rgba(0,255,200,.5);padding:3px 0">⬡ 5 comp sets + $/sqft</div>
         <div style="font-size:9px;color:rgba(0,255,200,.5);padding:3px 0">⬡ Crime radius + trend</div>
@@ -10352,7 +10352,7 @@ if(noData){
         <div style="font-size:9px;color:rgba(0,255,200,.5);padding:3px 0">⬡ Mortgage calculator</div>
         <div style="font-size:9px;color:rgba(0,255,200,.5);padding:3px 0">⬡ Intel score 0–100</div>
       </div>
-      <button style="width:100%;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#000;border:none;border-radius:4px;padding:12px;font-size:12px;font-weight:900;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase" onclick="initiateStripeSandbox('${safePin}')">UNLOCK FULL REPORT — $${getIntelligencePrice().toFixed(0)}</button>
+      <button style="width:100%;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#000;border:none;border-radius:4px;padding:12px;font-size:12px;font-weight:900;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase" onclick="initiateStripeSandbox('${safePin}')">UNLOCK FULL REPORT -- $${getIntelligencePrice().toFixed(0)}</button>
       <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:.5px">One-time · Instant PDF · Cancel anytime</div>
     </div>
     <div style="margin:0 16px 8px;display:flex;flex-direction:column;gap:7px">
@@ -10367,7 +10367,7 @@ if(noData){
       <button style="width:100%;padding:8px;border:1px solid var(--border);background:none;color:var(--dim);border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer" onclick="requireAuth(()=>{ logPartnerLead('${safePin}','MAKE_OFFER'); showToast('OFFER SYSTEM COMING SOON'); })">MAKE OFFER TO OWNER</button>
     </div>`;
 
-  // ── Listing display — injected at TOP of rbody ─────────────────
+  // ── Listing display -- injected at TOP of rbody ─────────────────
   if (listing && listing.asking_price) {
     const lt = listing.listing_type || 'for_sale';
     const badge = lt==='for_rent'?'FOR RENT':lt==='for_lease'?'FOR LEASE':lt==='auction'?'AUCTION':'FOR SALE';
@@ -10410,7 +10410,7 @@ if(noData){
 }
 
 window.currentAsset=asset;window.activeId=asset?.id||pin;window._lastBqData=bq;
-if(bq&&pin&&pin!=='—'){
+if(bq&&pin&&pin!=='--'){
   const realAsset={...asset,apn:pin,id:pin,address:addr||asset?.address};
   if(typeof addToRecentlyViewed==='function') addToRecentlyViewed(realAsset);
   if(typeof setStatus==='function') setStatus(`PARCEL: ${pin}`);
@@ -10473,8 +10473,8 @@ async function brokerLoadListings(container) {
     data.forEach(function(l) {
       var badge = l.listing_type === 'for_rent' ? 'FOR RENT' : l.listing_type === 'for_lease' ? 'FOR LEASE' : l.listing_type === 'auction' ? 'AUCTION' : 'FOR SALE';
       var statusColor = l.status === 'active' ? '#00ffc8' : '#f87171';
-      var price = l.asking_price ? '$' + Number(l.asking_price).toLocaleString() : '—';
-      var created = l.created_at ? l.created_at.substring(0,10) : '—';
+      var price = l.asking_price ? '$' + Number(l.asking_price).toLocaleString() : '--';
+      var created = l.created_at ? l.created_at.substring(0,10) : '--';
       html += '<div style="border:1px solid rgba(0,255,200,.1);border-radius:6px;padding:14px;margin-bottom:12px">'
         + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
         + '<div><div style="font-size:11px;font-weight:700;color:#c8dded;margin-bottom:2px">APN: ' + l.apn + '</div>'
@@ -10550,9 +10550,9 @@ async function brokerLoadLeads(container) {
     }
     var html = '<div style="font-size:9px;color:#556677;margin-bottom:12px;letter-spacing:1px">' + data.length + ' EVENTS ON RECORD</div>';
     data.forEach(function(l) {
-      var date = l.created_at ? l.created_at.substring(0,10) : '—';
+      var date = l.created_at ? l.created_at.substring(0,10) : '--';
       html += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:10px">'
-        + '<div><span style="color:#00ffc8;font-family:monospace">' + (l.apn||'—') + '</span> <span style="color:#556677">· ' + (l.action||'VIEW') + '</span></div>'
+        + '<div><span style="color:#00ffc8;font-family:monospace">' + (l.apn||'--') + '</span> <span style="color:#556677">· ' + (l.action||'VIEW') + '</span></div>'
         + '<div style="color:#3a4a5a;font-family:monospace">' + date + '</div></div>';
     });
     container.innerHTML = html;
@@ -10641,7 +10641,7 @@ async function brokerSubmitCorrection() {
     });
     if (r1.error) throw r1.error;
     await _sb.from('leads').insert({ apn: apn, action: 'DATA_CORRECTION', user_id: currentUser.id, created_at: new Date().toISOString() });
-    showToast('CORRECTION SUBMITTED — UNDER REVIEW');
+    showToast('CORRECTION SUBMITTED -- UNDER REVIEW');
     ['corr-apn','corr-old','corr-new','corr-notes'].forEach(function(id) {
       var el = document.getElementById(id); if (el) el.value = '';
     });
@@ -10651,7 +10651,7 @@ async function brokerSubmitCorrection() {
 
 
 // ══════════════════════════════════════════════════════════════════
-// SMART CONVERSION SYSTEM — View counter + intent gates
+// SMART CONVERSION SYSTEM -- View counter + intent gates
 // ══════════════════════════════════════════════════════════════════
 // ── Safe global helpers for account menu buttons ────────────────
 window._rwaUpgrade = function _rwaUpgrade(product) {
@@ -10722,7 +10722,7 @@ const RWA_GATE = {
     overlay.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.25);border-radius:8px;width:100%;max-width:420px;padding:28px 24px;font-family:var(--font)">'
       + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:16px">RWABIDASK</div>'
       + '<div style="font-size:20px;font-weight:700;color:#f0f4f8;margin-bottom:8px;line-height:1.3">' + v + ' parcels. You know what you&#39;re looking for.</div>'
-      + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px">Get the data that actually closes deals — comps, crime radius, and chain of title on any parcel, instantly.<br><br>'
+      + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px">Get the data that actually closes deals -- comps, crime radius, and chain of title on any parcel, instantly.<br><br>'
       + '<span style="color:#556677;font-size:11px">ATTOM charges $90/mo just for reports. CoStar starts at $9,000/yr. You&#39;ve been using the same depth of data free.</span></div>'
       + '<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);border-radius:6px;padding:12px 14px;margin-bottom:16px">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
@@ -10734,8 +10734,8 @@ const RWA_GATE = {
       + '</div>'
       + '<div style="font-size:10px;color:#556677;margin-top:6px">' + (1000-v) + ' free views remaining</div>'
       + '</div>'
-      + '<button onclick="RWA_GATE.stripeCheckout(\'intel_report\')" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GET INTEL REPORT — ' + intelP + '</button>'
-      + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:11px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — $34/MO</button>'
+      + '<button onclick="RWA_GATE.stripeCheckout(\'intel_report\')" style="width:100%;padding:11px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GET INTEL REPORT -- ' + intelP + '</button>'
+      + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:11px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO -- $34/MO</button>'
       + '<button onclick="document.getElementById(\'rwa-convert-modal\').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Remind me later</button>'
       + '</div>';
     document.body.appendChild(overlay);
@@ -10757,7 +10757,7 @@ const RWA_GATE = {
       + '<div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.1);border-radius:6px;padding:14px;margin-bottom:20px;text-align:left">'
       + '<div style="font-size:10px;color:#556677;line-height:1.8">'
       + '<span style="color:#8899aa;font-weight:600;">ATTOM</span> charges $90/mo just for reports.<br>'
-      + '<span style="color:#8899aa;font-weight:600;">CoStar</span> starts at $9,000/yr — behind a sales call.<br>'
+      + '<span style="color:#8899aa;font-weight:600;">CoStar</span> starts at $9,000/yr -- behind a sales call.<br>'
       + '<span style="color:#8899aa;font-weight:600;">MLS</span> requires a real estate license just to get in.<br><br>'
       + '<span style="color:var(--cyan);">You just used the same depth of data. Free.</span>'
       + '</div>'
@@ -10765,8 +10765,8 @@ const RWA_GATE = {
       + '<div style="background:rgba(255,255,255,.05);border-radius:4px;height:4px;margin-bottom:20px;overflow:hidden">'
       + '<div style="height:4px;background:#E24B4A;width:100%;border-radius:4px"></div>'
       + '</div>'
-      + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — $34/MO</button>'
-      + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:13px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.4);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — ' + proP + '/MO <span style="font-size:9px;background:rgba(0,255,200,.15);padding:2px 8px;border-radius:10px;margin-left:4px;">MOST POPULAR</span></button>'
+      + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO -- $34/MO</button>'
+      + '<button onclick="RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:13px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.4);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO -- ' + proP + '/MO <span style="font-size:9px;background:rgba(0,255,200,.15);padding:2px 8px;border-radius:10px;margin-left:4px;">MOST POPULAR</span></button>'
       + '<div style="border-top:1px solid rgba(0,255,200,.1);margin:12px 0;"></div>'
 
       + '</div>';
@@ -10828,13 +10828,13 @@ const RWA_GATE = {
     if (plan === 'any' && (tier === 'pro')) { action(); return; }
     if (plan === 'pro' && (tier === 'pro')) { action(); return; }
     if (plan === 'pro' && tier === 'pro') { action(); return; }
-    // Not paid — show appropriate modal
+    // Not paid -- show appropriate modal
     if (!window.currentUser) { openModal('signin'); return; }
     this.showIntelPrompt();
   }
 };
 
-// Track view — called directly inside window.renderBasicsPanel below
+// Track view -- called directly inside window.renderBasicsPanel below
 
 
 
@@ -10938,7 +10938,7 @@ window.resetAllFilters = function resetAllFilters() {
 }
 
 window.runParcelSearch = async function runParcelSearch() {
-  // Free users search active listings only — premium searches all 635k parcels
+  // Free users search active listings only -- premium searches all 635k parcels
 
   // Debounce
   if (_filterSearchDebounce) clearTimeout(_filterSearchDebounce);
@@ -11064,7 +11064,7 @@ window._doParcelSearch = async function _doParcelSearch() {
     }
 
   } catch(e) {
-    if (countEl) countEl.textContent = 'Search error — ' + e.message;
+    if (countEl) countEl.textContent = 'Search error -- ' + e.message;
     console.error('[RWA Filter]', e);
   } finally {
     if (btn) { btn.textContent = 'SEARCH PARCELS'; btn.disabled = false; }
@@ -11080,7 +11080,7 @@ function renderFilterResults(results) {
   }
   const header = '<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">' + results.length + ' parcels found</div>';
   wrap.innerHTML = header + results.map(p => {
-    const price = p.assessed_value > 0 ? '$' + p.assessed_value.toLocaleString() : '—';
+    const price = p.assessed_value > 0 ? '$' + p.assessed_value.toLocaleString() : '--';
     const details = [p.beds ? p.beds + 'bd' : null, p.baths ? p.baths + 'ba' : null, p.sqft ? p.sqft.toLocaleString() + ' sf' : null].filter(Boolean).join(' · ');
     const wf = p.waterfront_ft > 0 ? '<span style="color:var(--cyan);font-size:8px"> · WF ' + p.waterfront_ft + 'ft</span>' : '';
     return '<div style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer" onclick="_filterClick(this)" data-pin="'+p.pin+'" data-lat="'+p.lat+'" data-lng="'+p.lng+'" data-addr="'+escapeHtml(p.address||p.pin)+'">'      + '<div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px">' + escapeHtml(p.address || p.pin) + wf + '</div>'
@@ -11098,7 +11098,7 @@ function plotSearchResultsOnMap(results) {
   clearSearchPins();
   if (!results.length) return;
 
-  // Use existing marker system — add as temporary search result markers
+  // Use existing marker system -- add as temporary search result markers
   window._searchResultMarkers = window._searchResultMarkers || [];
 
   results.forEach(p => {
@@ -11126,7 +11126,7 @@ function plotSearchResultsOnMap(results) {
       price: p.assessed_value, _isSearchResult: true
     }));
     window._lastSearchAssets = searchAssets;
-    showToast(results.length + ' PARCELS FOUND — SHOWING ON MAP');
+    showToast(results.length + ' PARCELS FOUND -- SHOWING ON MAP');
   }
 
   // Fly to first result
@@ -11147,7 +11147,7 @@ function _filterClick(el) {
 
 function _payPerSearch() {
   // Buy 10 extra searches for $2.50
-  showToast('PAY-PER-SEARCH COMING SOON — UPGRADE TO PRO FOR NOW');
+  showToast('PAY-PER-SEARCH COMING SOON -- UPGRADE TO PRO FOR NOW');
 }
 
 function clearSearchPins() {
@@ -11182,7 +11182,7 @@ async function runAISearch() {
     const filters = data.filters || {};
 
     if (!filters || Object.keys(filters).length === 0) {
-      if (status) status.textContent = 'Could not parse filters — try rephrasing';
+      if (status) status.textContent = 'Could not parse filters -- try rephrasing';
       input.disabled = false;
       return;
     }
@@ -11236,7 +11236,7 @@ async function runAISearch() {
 
     // Count applied filters
     const applied = Object.keys(filters).filter(k => k !== 'category').length;
-    if (status) status.textContent = '✦ ' + applied + ' filter' + (applied !== 1 ? 's' : '') + ' applied — hit SEARCH PARCELS';
+    if (status) status.textContent = '✦ ' + applied + ' filter' + (applied !== 1 ? 's' : '') + ' applied -- hit SEARCH PARCELS';
 
     // Auto-run search
     setTimeout(() => {
@@ -11244,7 +11244,7 @@ async function runAISearch() {
     }, 300);
 
   } catch(e) {
-    if (status) status.textContent = 'AI search error — try again';
+    if (status) status.textContent = 'AI search error -- try again';
     console.error('[Gemini]', e);
   } finally {
     input.disabled = false;
@@ -11309,7 +11309,7 @@ window.showPricingPage = function showPricingPage() {
 
       </div>
 
-      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px;border-top:1px solid rgba(0,255,200,.1);padding-top:20px">MONTHLY SUBSCRIPTION — CANCEL ANYTIME</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px;border-top:1px solid rgba(0,255,200,.1);padding-top:20px">MONTHLY SUBSCRIPTION -- CANCEL ANYTIME</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:28px">
 
         <div style="border:1px solid rgba(0,255,200,.15);border-radius:6px;padding:20px">
@@ -11322,7 +11322,7 @@ window.showPricingPage = function showPricingPage() {
             ✓ Priority support<br>
             ✓ Best for: investors pulling 3+ reports/mo
           </div>
-          <button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="width:100%;padding:10px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">SUBSCRIBE — $${t1?'19':'10'}/MO</button>
+          <button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="width:100%;padding:10px;background:rgba(0,255,200,.1);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">SUBSCRIBE -- $${t1?'19':'10'}/MO</button>
         </div>
 
         <div style="border:2px solid rgba(0,255,200,.4);border-radius:6px;padding:20px;position:relative">
@@ -11339,7 +11339,7 @@ window.showPricingPage = function showPricingPage() {
             ✓ White label reports<br>
             ✓ Best for: brokerages, funds, lenders
           </div>
-          <button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="width:100%;padding:10px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">GO PRO — $${proP}/MO</button>
+          <button onclick="window._rwaUpgrade&&window._rwaUpgrade('pro')" style="width:100%;padding:10px;background:linear-gradient(135deg,#00c49a,#00ffc8);color:#000;border:none;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">GO PRO -- $${proP}/MO</button>
         </div>
 
       </div>
@@ -11348,7 +11348,7 @@ window.showPricingPage = function showPricingPage() {
         <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px">FAQ</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:10px;color:#8899aa;line-height:1.8">
           <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Are Intel Reports refundable?</div>All sales are final. Reports are generated instantly.</div>
-          <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Can I cancel my subscription?</div>Yes — cancel anytime. Active until end of billing period.</div>
+          <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Can I cancel my subscription?</div>Yes -- cancel anytime. Active until end of billing period.</div>
           <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">Is listing free?</div>Yes. List any asset anywhere free. Pay $${badgeP} for a verified badge.</div>
           <div><div style="color:#c8dded;font-weight:600;margin-bottom:4px">What counties are covered?</div>King County WA (635k parcels). Pierce, Snohomish & national expansion coming.</div>
         </div>
@@ -11486,7 +11486,7 @@ window.openListingForm = function openListingForm() {
         <label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">PRIVACY</label>
         <div style="display:flex;align-items:center;gap:8px">
           <input type="checkbox" id="lf-privacy" style="accent-color:var(--cyan)">
-          <span style="font-size:10px;color:#8899aa">Show city/region only — hide exact address from public</span>
+          <span style="font-size:10px;color:#8899aa">Show city/region only -- hide exact address from public</span>
         </div>
       </div>
 
@@ -11501,11 +11501,11 @@ window.openListingForm = function openListingForm() {
       </div>
 
       <div style="margin-bottom:16px">
-        <label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">CONTACT PHONE <span style="color:#3a4a5a">(optional — shown to verified users only)</span></label>
+        <label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">CONTACT PHONE <span style="color:#3a4a5a">(optional -- shown to verified users only)</span></label>
         <input id="lf-phone" type="tel" placeholder="+1 206 555 0000" style="width:100%;background:#0d1e2e;border:1px solid rgba(0,255,200,.2);color:#f0f4f8;padding:9px;border-radius:4px;font-size:11px;box-sizing:border-box">
       </div>
 
-      <button onclick="submitUniversalListing()" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-bottom:8px">SUBMIT LISTING — FREE →</button>
+      <button onclick="submitUniversalListing()" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-bottom:8px">SUBMIT LISTING -- FREE →</button>
       <div id="lf-status" style="font-size:9px;color:#556677;text-align:center;min-height:16px"></div>
     </div>`;
 
@@ -11585,7 +11585,7 @@ async function submitUniversalListing() {
         displayAddress = geo.formatted_address;
       }
     } catch(e) {
-      if (statusEl) statusEl.textContent = 'Could not geocode address — using text only';
+      if (statusEl) statusEl.textContent = 'Could not geocode address -- using text only';
     }
   }
 
@@ -11615,11 +11615,11 @@ async function submitUniversalListing() {
   if (error) {
     console.error('Listing error:', error);
     if (statusEl) statusEl.textContent = 'Error: ' + error.message;
-    showToast('ERROR SUBMITTING — ' + error.message);
+    showToast('ERROR SUBMITTING -- ' + error.message);
     return;
   }
 
-  showToast('LISTING SUBMITTED — LIVE ON MAP');
+  showToast('LISTING SUBMITTED -- LIVE ON MAP');
   document.getElementById('rwa-listing-form')?.remove();
 
   // Render on map immediately if physical and has coords
@@ -11757,19 +11757,19 @@ function showListingModal(apn) {
           <div>
             <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">CURRENCY</label>
             <select id="lt-currency" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:12px;">
-              <option value="USD">USD — US Dollar</option>
-              <option value="MXN">MXN — Mexican Peso</option>
-              <option value="EUR">EUR — Euro</option>
-              <option value="GBP">GBP — British Pound</option>
-              <option value="CAD">CAD — Canadian Dollar</option>
-              <option value="AUD">AUD — Australian Dollar</option>
-              <option value="RUB">RUB — Russian Ruble</option>
-              <option value="AED">AED — UAE Dirham</option>
-              <option value="JPY">JPY — Japanese Yen</option>
-              <option value="CNY">CNY — Chinese Yuan</option>
-              <option value="BTC">BTC — Bitcoin</option>
-              <option value="ETH">ETH — Ethereum</option>
-              <option value="XMR">XMR — Monero</option>
+              <option value="USD">USD -- US Dollar</option>
+              <option value="MXN">MXN -- Mexican Peso</option>
+              <option value="EUR">EUR -- Euro</option>
+              <option value="GBP">GBP -- British Pound</option>
+              <option value="CAD">CAD -- Canadian Dollar</option>
+              <option value="AUD">AUD -- Australian Dollar</option>
+              <option value="RUB">RUB -- Russian Ruble</option>
+              <option value="AED">AED -- UAE Dirham</option>
+              <option value="JPY">JPY -- Japanese Yen</option>
+              <option value="CNY">CNY -- Chinese Yuan</option>
+              <option value="BTC">BTC -- Bitcoin</option>
+              <option value="ETH">ETH -- Ethereum</option>
+              <option value="XMR">XMR -- Monero</option>
               <option value="OTHER">Other</option>
             </select>
           </div>
@@ -11780,19 +11780,19 @@ function showListingModal(apn) {
         </div>
 
         <div style="background:#0a1520;border:1px solid #1a4a5a;border-radius:6px;padding:12px;">
-          <div style="font-size:10px;font-weight:700;color:#1a7fa8;letter-spacing:2px;margin-bottom:6px;">VERIFICATION <span style="color:#3a4a5a;font-weight:400;">— builds buyer trust</span></div>
+          <div style="font-size:10px;font-weight:700;color:#1a7fa8;letter-spacing:2px;margin-bottom:6px;">VERIFICATION <span style="color:#3a4a5a;font-weight:400;">-- builds buyer trust</span></div>
           <div style="display:flex;gap:8px;margin-bottom:8px;">
             <div style="flex:1;padding:8px;background:#0d1e2a;border-radius:4px;border:1px solid #2a3a4a;text-align:center;">
               <div style="font-size:10px;color:#556677;font-weight:600;">Free</div>
               <div style="font-size:8px;color:#3a4a5a;margin-top:2px;">Self-reported</div>
             </div>
-            <div style="flex:2;padding:8px;background:#0d1e2a;border-radius:4px;border:1px solid #1a7fa8;cursor:pointer;" onclick="showToast('UPGRADE TO VERIFIED MEMBER — $49/MO')">
-              <div style="font-size:10px;color:#1a7fa8;font-weight:700;">Pro Plan — Verified ✓</div>
+            <div style="flex:2;padding:8px;background:#0d1e2a;border-radius:4px;border:1px solid #1a7fa8;cursor:pointer;" onclick="showToast('UPGRADE TO VERIFIED MEMBER -- $49/MO')">
+              <div style="font-size:10px;color:#1a7fa8;font-weight:700;">Pro Plan -- Verified ✓</div>
               <div style="font-size:8px;color:#556677;margin-top:2px;">Passport · License · Agent card · Priority placement</div>
             </div>
           </div>
           <div>
-            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">PASSPORT / GOV ID UPLOAD <span style="color:#3a4a5a;">(optional — for verified badge)</span></label>
+            <label style="font-size:10px;color:#6688aa;letter-spacing:1px;display:block;margin-bottom:4px;">PASSPORT / GOV ID UPLOAD <span style="color:#3a4a5a;">(optional -- for verified badge)</span></label>
             <input id="lt-passport" type="file" accept="image/*,.pdf" style="width:100%;background:#0a1e2a;border:1px solid #1a4a5a;color:#c8dded;padding:8px;border-radius:4px;font-size:11px;box-sizing:border-box;">
           </div>
         </div>
@@ -11828,9 +11828,9 @@ async function submitListing(apn) {
       _ov.innerHTML = '<div style="background:#0a1628;border:1px solid rgba(0,255,200,.25);border-radius:8px;width:100%;max-width:400px;padding:28px 24px;font-family:var(--font);text-align:center">'
         + '<div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:16px">LIST AN ASSET</div>'
         + '<div style="font-size:18px;font-weight:700;color:#f0f4f8;margin-bottom:8px">Ready to list?</div>'
-        + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px">One listing or unlimited — your call.</div>'
-        + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove();RWA_GATE.stripeCheckout(\'verified_badge\')" style="width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">VERIFY LISTING — $3')+'</button>'
-        + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove();RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:12px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO — UNLIMITED LISTINGS $'+(_t1?'39':'20')+'/MO</button>'
+        + '<div style="font-size:12px;color:#8899aa;line-height:1.6;margin-bottom:20px">One listing or unlimited -- your call.</div>'
+        + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove();RWA_GATE.stripeCheckout(\'verified_badge\')" style="width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">VERIFY LISTING -- $3</button>'
+        + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove();RWA_GATE.stripeCheckout(\'pro\')" style="width:100%;padding:12px;background:transparent;color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px;letter-spacing:.5px">GO PRO -- UNLIMITED LISTINGS $'+(_t1?'34':'21')+'/MO</button>'
         + '<button onclick="document.getElementById(\'rwa-listing-gate\').remove()" style="width:100%;padding:8px;background:transparent;color:#556677;border:none;font-size:10px;cursor:pointer">Cancel</button>'
         + '</div>';
       document.body.appendChild(_ov);
@@ -11859,7 +11859,7 @@ async function submitListing(apn) {
   // Upload files to GCS first
   const uploadedUrls = [];
   for (const file of files) {
-    if (file.size > 50 * 1024 * 1024) { showToast('FILE TOO LARGE — MAX 50MB'); continue; }
+    if (file.size > 50 * 1024 * 1024) { showToast('FILE TOO LARGE -- MAX 50MB'); continue; }
     if (statusEl) statusEl.textContent = 'Uploading ' + file.name + '...';
     try {
       const sigRes = await fetch(PARCEL_API + '?action=upload_url&apn=' + apn +
@@ -11912,9 +11912,9 @@ async function submitListing(apn) {
         } catch(e) { console.warn('[listing sync]', e); }
       }
       document.getElementById('listing-modal')?.remove();
-      showToast('LISTING SUBMITTED — LIVE ON PARCEL');
+      showToast('LISTING SUBMITTED -- LIVE ON PARCEL');
     } else {
-      showToast('SUBMIT ERROR — TRY AGAIN');
+      showToast('SUBMIT ERROR -- TRY AGAIN');
     }
   } catch(e) {
     showToast('CONNECTION ERROR');
@@ -11939,7 +11939,7 @@ window.addEventListener('load',()=>{
     else history.replaceState({}, '', '/');
   });
 });
-console.log('[RWABidAsk] Live — proxy:',PARCEL_API);
+console.log('[RWABidAsk] Live -- proxy:',PARCEL_API);
 </script>
 </body>
 </html>
