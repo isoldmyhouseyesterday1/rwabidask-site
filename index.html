@@ -2999,6 +2999,19 @@ body { min-width: 900px; overflow-x: auto; }
         <button class="ptab map-tab" onclick="setCategory('realestate', this)">REAL ESTATE</button>
         <button class="ptab map-tab" onclick="setCategory('transport', this)">TRANSPORTS</button>
         <button class="ptab map-tab" onclick="setCategory('business', this)">BUSINESSES</button>
+        <button class="ptab map-tab" onclick="setCategory('equities', this)">EQUITIES</button>
+        <button class="ptab map-tab" onclick="setCategory('debt', this)">DEBT</button>
+        <button class="ptab map-tab" onclick="setCategory('currency', this)">CURRENCY & FX</button>
+        <button class="ptab map-tab" onclick="setCategory('energy', this)">ENERGY</button>
+        <button class="ptab map-tab" onclick="setCategory('rights', this)">RIGHTS & CLAIMS</button>
+        <button class="ptab map-tab" onclick="setCategory('resources', this)">RESOURCES & MINERALS</button>
+        <button class="ptab map-tab" onclick="setCategory('infrastructure', this)">INFRASTRUCTURE</button>
+        <button class="ptab map-tab" onclick="setCategory('ip', this)">IP & TECHNOLOGY</button>
+        <button class="ptab map-tab" onclick="setCategory('healthcare', this)">HEALTHCARE</button>
+        <button class="ptab map-tab" onclick="setCategory('robotics', this)">ROBOTICS</button>
+        <button class="ptab map-tab" onclick="setCategory('art', this)">ART & COLLECTIBLES</button>
+        <button class="ptab map-tab" onclick="setCategory('anthro', this)">ANTHRO</button>
+        <button class="ptab map-tab" onclick="setCategory('other', this)">OTHER</button>
       </div>
       <!-- ── AI SEARCH ─────────────────────────────────────────────── -->
       <div id="ai-search-wrap" style="padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden;box-sizing:border-box;">
@@ -7040,13 +7053,10 @@ function showAccountMenu() {
   if (!isAdmin && tier === 'free') {
     upgradeSection = '<div style="padding:10px 14px;border-top:1px solid rgba(0,255,200,.08)">'
       + '<div style="font-size:9px;color:#556677;letter-spacing:1px;margin-bottom:8px">UPGRADE YOUR PLAN</div>'
-      + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:rgba(0,255,200,.08);color:var(--cyan);border:1px solid rgba(0,255,200,.2);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;margin-bottom:6px;letter-spacing:.5px">PRO — $34/MO</button>'
-      + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">PRO — $'+(t1?'39':'20')+'/MO ★</button>'
+      + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">GO PRO — $'+(t1?'34':'21')+'/MO ★</button>'
       + '</div>';
   } else if (!isAdmin && tier === 'pro') {
-    upgradeSection = '<div style="padding:10px 14px;border-top:1px solid rgba(0,255,200,.08)">'
-      + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaUpgrade(\'pro\')" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(0,196,154,.15),rgba(0,255,200,.15));color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px">UPGRADE TO PRO — $'+(t1?'39':'20')+'/MO</button>'
-      + '</div>';
+    upgradeSection = '';
   }
   var billingSection = '';
   if (window._stripeCustomerId && tier !== 'free') {
