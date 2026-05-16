@@ -3068,95 +3068,32 @@ body { min-width: 900px; overflow-x: auto; }
           <!-- TRANSPORT FILTERS -->
           <div id="transport-filters" style="display:none">
             <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">VESSEL / VEHICLE TYPE</div>
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">TYPE</div>
               <select id="f-transport-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All Types</option>
-                <optgroup label="Maritime">
-                  <option>Yacht</option>
-                  <option>Sailboat</option>
-                  <option>Motor Vessel</option>
-                  <option>Catamaran</option>
-                  <option>Superyacht</option>
-                  <option>Commercial Ship</option>
-                  <option>Ferry</option>
-                  <option>Tugboat</option>
-                  <option>Submarine</option>
-                </optgroup>
-                <optgroup label="Aviation">
-                  <option>Private Jet</option>
-                  <option>Turboprop</option>
-                  <option>Helicopter</option>
-                  <option>Seaplane</option>
-                  <option>Hangar</option>
-                </optgroup>
-                <optgroup label="Ground">
-                  <option>Classic Car</option>
-                  <option>Luxury Car</option>
-                  <option>Motorcycle</option>
-                  <option>RV / Motorhome</option>
-                  <option>Specialty Vehicle</option>
-                </optgroup>
+                <option value="">All</option>
+                <option>Yacht / Sailboat</option>
+                <option>Motor Vessel</option>
+                <option>Private Jet</option>
+                <option>Helicopter</option>
+                <option>Classic Car</option>
+                <option>Motorcycle</option>
+                <option>RV / Motorhome</option>
               </select>
-            </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MAKE / MANUFACTURER</div>
-              <input id="f-transport-make" type="text" placeholder="e.g. Ferretti, Cessna, Ferrari" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
               <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MIN</div><input id="f-transport-year-min" type="number" placeholder="1990" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
               <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MAX</div><input id="f-transport-year-max" type="number" placeholder="2025" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LENGTH MIN (ft)</div><input id="f-transport-len-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LENGTH MAX (ft)</div><input id="f-transport-len-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">HOURS / MILES MIN</div><input id="f-transport-hours-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">HOURS / MILES MAX</div><input id="f-transport-hours-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-            </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">FLAG / REGISTRATION</div>
-              <input id="f-transport-flag" type="text" placeholder="e.g. USA, Cayman Islands, UK" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
           </div>
           <!-- BUSINESS FILTERS -->
           <div id="business-filters" style="display:none">
             <div style="margin-bottom:10px">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">INDUSTRY</div>
-              <select id="f-business-industry" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All Industries</option>
-                <option>Restaurant / Food &amp; Bev</option>
-                <option>Retail</option>
-                <option>E-Commerce</option>
-                <option>SaaS / Technology</option>
-                <option>Manufacturing</option>
-                <option>Healthcare / Medical</option>
-                <option>Construction / Trades</option>
-                <option>Automotive</option>
-                <option>Franchise</option>
-                <option>Hospitality / Hotel</option>
-                <option>Transportation / Logistics</option>
-                <option>Professional Services</option>
-                <option>Other</option>
-              </select>
+              <input id="f-business-industry" type="text" placeholder="e.g. Restaurant, SaaS" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MIN REVENUE ($)</div><input id="f-business-rev-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MAX REVENUE ($)</div><input id="f-business-rev-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MIN EBITDA ($)</div><input id="f-business-ebitda-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">EMPLOYEES</div><select id="f-business-employees" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px"><option value="">Any</option><option>1-5</option><option>6-20</option><option>21-50</option><option>51-200</option><option>200+</option></select></div>
-            </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEARS IN OPERATION</div>
-              <select id="f-business-age" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">Any</option>
-                <option>1-2 years</option>
-                <option>3-5 years</option>
-                <option>6-10 years</option>
-                <option>10+ years</option>
-              </select>
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MIN REVENUE</div><input id="f-business-rev-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MAX REVENUE</div><input id="f-business-rev-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
             </div>
           </div>
           <!-- DEBT FILTERS -->
@@ -3241,46 +3178,14 @@ body { min-width: 900px; overflow-x: auto; }
             <div style="margin-bottom:10px">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CATEGORY</div>
               <select id="f-art-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All Categories</option>
-                <option>Fine Art / Painting</option>
-                <option>Sculpture</option>
-                <option>Photography</option>
-                <option>Watch / Timepiece</option>
-                <option>Jewelry / Gems</option>
-                <option>Wine / Champagne</option>
-                <option>Whiskey / Spirits</option>
+                <option value="">All</option>
+                <option>Fine Art</option>
+                <option>Watch / Jewelry</option>
+                <option>Wine / Spirits</option>
                 <option>Classic Car</option>
                 <option>Sports Memorabilia</option>
                 <option>Trading Cards</option>
-                <option>Coins / Numismatics</option>
-                <option>NFT / Digital Asset</option>
-                <option>Other Collectible</option>
-              </select>
-            </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ARTIST / MAKER</div>
-              <input id="f-art-artist" type="text" placeholder="e.g. Basquiat, Rolex, Pappy Van Winkle" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
-            </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CONDITION</div>
-              <select id="f-art-condition" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">Any</option>
-                <option>Mint</option>
-                <option>Excellent</option>
-                <option>Good</option>
-                <option>Fair</option>
-              </select>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MIN</div><input id="f-art-year-min" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MAX</div><input id="f-art-year-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-            </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">AUTHENTICATED</div>
-              <select id="f-art-auth" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">Any</option>
-                <option>Yes - Authenticated</option>
-                <option>No</option>
+                <option>NFT / Digital</option>
               </select>
             </div>
           </div>
@@ -3348,7 +3253,7 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- Beds -->
           <div style="margin-bottom:10px;">
-<div id="re-beds-section">            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">BEDROOMS</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">BEDROOMS</div>
             <div style="display:flex;gap:4px;">
               <button id="fb-beds-0" onclick="setBedsFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
               <button id="fb-beds-1" onclick="setBedsFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
@@ -3361,7 +3266,7 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- Baths -->
           <div style="margin-bottom:10px;">
-</div><div id="re-baths-section">            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">BATHROOMS</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">BATHROOMS</div>
             <div style="display:flex;gap:4px;">
               <button id="fb-baths-0" onclick="setBathsFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
               <button id="fb-baths-1" onclick="setBathsFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
@@ -3374,7 +3279,7 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- Property type -->
           <div style="margin-bottom:10px;">
-</div><div id="re-proptype-section">            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PROPERTY TYPE</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PROPERTY TYPE</div>
             <div style="display:flex;flex-wrap:wrap;gap:5px;">
               <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-sfr" checked style="accent-color:var(--cyan)"> Single Family</label>
               <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-type-condo" style="accent-color:var(--cyan)"> Condo</label>
@@ -3391,7 +3296,7 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- Square feet -->
           <div style="margin-bottom:10px;">
-</div><div id="re-sqft-section">            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">SQUARE FEET</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">SQUARE FEET</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
               <select id="f-sqft-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
                 <option value="">No Min</option>
@@ -3432,7 +3337,7 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- Lot size -->
           <div style="margin-bottom:10px;">
-</div><div id="re-lot-section">            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LOT SIZE</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LOT SIZE</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
               <select id="f-lot-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
                 <option value="">No Min</option>
@@ -3470,7 +3375,7 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- Year built -->
           <div style="margin-bottom:10px;">
-</div><div id="re-year-section">            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">YEAR BUILT</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">YEAR BUILT</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
               <input id="f-yr-min" type="number" placeholder="Min year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
               <input id="f-yr-max" type="number" placeholder="Max year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
@@ -3479,7 +3384,7 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- Parking -->
           <div style="margin-bottom:10px;">
-</div><div id="re-parking-section">            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PARKING SPOTS</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PARKING SPOTS</div>
             <div style="display:flex;gap:4px;">
               <button id="fb-park-0" onclick="setParkingFilter(0)" style="flex:1;padding:5px 2px;background:rgba(0,255,200,.12);color:var(--cyan);border:1px solid rgba(0,255,200,.3);border-radius:3px;font-size:10px;cursor:pointer;">Any</button>
               <button id="fb-park-1" onclick="setParkingFilter(1)" style="flex:1;padding:5px 2px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;font-size:10px;cursor:pointer;">1+</button>
@@ -3490,7 +3395,7 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- Amenities -->
           <div style="margin-bottom:10px;">
-</div><div id="re-amenities-section">            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">AMENITIES</div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">AMENITIES</div>
             <div style="display:flex;flex-wrap:wrap;gap:5px;">
               <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-garage" style="accent-color:var(--cyan)"> Garage</label>
               <label style="font-size:10px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:3px;"><input type="checkbox" id="f-basement" style="accent-color:var(--cyan)"> Basement</label>
@@ -4771,18 +4676,8 @@ function setCategory(catId, btn) {
 }
 
 function updateFilterPanelForCategory(catId) {
-  var isRE = catId === 'realestate' || catId === 'all';
-  var reSpecificIds = ['re-beds-section','re-baths-section','re-proptype-section','re-sqft-section','re-lot-section','re-year-section','re-parking-section','re-amenities-section'];
-  reSpecificIds.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.style.display = isRE ? 'block' : 'none';
-  });
-  var catPanels = ['transport-filters','business-filters','debt-filters','energy-filters','healthcare-filters','ip-filters','anthro-filters','art-filters','generic-filters'];
-  catPanels.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-  var map = {
+  var panels = {
+    'realestate': 're-filters',
     'transport':  'transport-filters',
     'business':   'business-filters',
     'debt':       'debt-filters',
@@ -4793,8 +4688,16 @@ function updateFilterPanelForCategory(catId) {
     'art':        'art-filters',
   };
   var genericCats = ['currency','equities','resources','infrastructure','robotics','rights','other'];
-  if (map[catId]) {
-    var el = document.getElementById(map[catId]);
+  var allPanelIds = ['re-filters','transport-filters','business-filters','debt-filters','energy-filters','healthcare-filters','ip-filters','anthro-filters','art-filters','generic-filters'];
+  allPanelIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  if (catId === 'all') {
+    var el = document.getElementById('re-filters');
+    if (el) el.style.display = 'block';
+  } else if (panels[catId]) {
+    var el = document.getElementById(panels[catId]);
     if (el) el.style.display = 'block';
   } else if (genericCats.indexOf(catId) > -1) {
     var el = document.getElementById('generic-filters');
