@@ -11254,7 +11254,7 @@ async function runAISearch() {
 window.runAISearch = runAISearch;
 
 // ── PRICING PAGE ─────────────────────────────────────────────────────────────
-function showPricingPage() {
+window.showPricingPage = function showPricingPage() {
   const existing = document.getElementById('pricing-modal');
   if (existing) existing.remove();
   const prices = getSubscriptionPrices();
