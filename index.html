@@ -7014,7 +7014,7 @@ async function updateAuthUI() {
         joinBtn.style.background = 'rgba(0,255,200,.15)';
         joinBtn.style.color = 'var(--cyan)';
         joinBtn.style.border = '1px solid rgba(0,255,200,.3)';
-        joinBtn.onclick = () => { if(typeof showPricingPage==='function') typeof showPricingPage==='function'&&showPricingPage(); else if(typeof RWA_GATE!=='undefined') RWA_GATE.showIntelPrompt(); };
+        joinBtn.onclick = () => { if(typeof showPricingPage==='function') showPricingPage(); };
       } else {
         joinBtn.textContent = 'Sign Out';
         joinBtn.style.background = '';
