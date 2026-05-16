@@ -10774,7 +10774,7 @@ const RWA_GATE = {
   },
   showPlansModal: function() {
     document.getElementById('rwa-nudge') && document.getElementById('rwa-nudge').remove();
-    showPricingPage();
+    if(typeof showPricingPage==="function") showPricingPage(); else setTimeout(showPricingPage,500);
   },
   stripeCheckout: async function(product) {
     const _cu = window.currentUser || currentUser;
