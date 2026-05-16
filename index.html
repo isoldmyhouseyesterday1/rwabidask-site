@@ -2466,19 +2466,15 @@ body { min-width: 900px; overflow-x: auto; }
 
 /* Category ribbon — clean, no DASH badges */
 .ptabs {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 2px;
-  padding: 5px 6px;
-  border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; gap: 2px;
+  padding: 6px 8px; border-bottom: 1px solid var(--border);
 }
 .ptab {
-  padding: 5px 4px; font-size: 8px; font-weight: 700;
-  letter-spacing: .5px; text-transform: uppercase;
+  padding: 5px 9px; font-size: 9px; font-weight: 700;
+  letter-spacing: .8px; text-transform: uppercase;
   background: none; border: 1px solid transparent;
   color: var(--dim); cursor: pointer; border-radius: 2px;
   transition: all .12s; white-space: nowrap;
-  text-align: center; overflow: hidden; text-overflow: ellipsis;
 }
 .ptab:hover { border-color: var(--border2); color: var(--silver); }
 .ptab.on {
@@ -3000,22 +2996,13 @@ body { min-width: 900px; overflow-x: auto; }
       <div id="cat-sponsor-strip" style="display:none"></div>
       <div class="ptabs" id="category-tabs">
         <button class="ptab map-tab on" onclick="setCategory('all', this)">ALL</button>
-        <button class="ptab map-tab" onclick="setCategory('anthro', this)">ANTHRO</button>
-        <button class="ptab map-tab" onclick="setCategory('art', this)">ART</button>
-        <button class="ptab map-tab" onclick="setCategory('business', this)">BUSINESS</button>
-        <button class="ptab map-tab" onclick="setCategory('currency', this)">CURRENCY</button>
-        <button class="ptab map-tab" onclick="setCategory('debt', this)">DEBT</button>
-        <button class="ptab map-tab" onclick="setCategory('energy', this)">ENERGY</button>
+        <button class="ptab map-tab" onclick="setCategory('realestate', this)">REAL ESTATE</button>
+        <button class="ptab map-tab" onclick="setCategory('transport', this)">TRANSPORTS</button>
+        <button class="ptab map-tab" onclick="setCategory('business', this)">BUSINESSES</button>
         <button class="ptab map-tab" onclick="setCategory('equities', this)">EQUITIES</button>
-        <button class="ptab map-tab" onclick="setCategory('healthcare', this)">HEALTHCARE</button>
-        <button class="ptab map-tab" onclick="setCategory('infrastructure', this)">INFRASTR.</button>
-        <button class="ptab map-tab" onclick="setCategory('ip', this)">IP & TECH</button>
-        <button class="ptab map-tab" onclick="setCategory('realestate', this)">REAL EST.</button>
-        <button class="ptab map-tab" onclick="setCategory('resources', this)">RESOURCES</button>
-        <button class="ptab map-tab" onclick="setCategory('rights', this)">RIGHTS</button>
-        <button class="ptab map-tab" onclick="setCategory('robotics', this)">ROBOTICS</button>
-        <button class="ptab map-tab" onclick="setCategory('transport', this)">TRANSPORT</button>
-        <button class="ptab map-tab" onclick="setCategory('other', this)">OTHER</button>
+        <button class="ptab map-tab" onclick="setCategory('debt', this)">DEBT</button>
+        <button class="ptab map-tab" onclick="setCategory('currency', this)">CURRENCY & FX</button>
+        <button class="ptab map-tab" onclick="setCategory('energy', this)">ENERGY</button>
         <button class="ptab map-tab" onclick="setCategory('rights', this)">RIGHTS & CLAIMS</button>
         <button class="ptab map-tab" onclick="setCategory('resources', this)">RESOURCES & MINERALS</button>
         <button class="ptab map-tab" onclick="setCategory('infrastructure', this)">INFRASTRUCTURE</button>
