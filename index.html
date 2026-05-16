@@ -7060,6 +7060,7 @@ function showAccountMenu() {
     + '<div style="font-size:9px;color:#556677">Member since '+new Date(currentUser?.created_at||Date.now()).getFullYear()+'</div>'
     + '</div>'
     + '<div style="border-top:1px solid rgba(0,255,200,.08)">'
+    + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();openListingForm()" style="width:100%;padding:9px 14px;background:rgba(0,255,200,.06);color:var(--cyan);border:none;border-bottom:1px solid rgba(0,255,200,.08);font-size:10px;font-weight:700;cursor:pointer;text-align:left;letter-spacing:.5px">+ LIST AN ASSET</button>'
     + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaAction(\'listings\')" style="width:100%;padding:9px 14px;background:transparent;color:#8899aa;border:none;font-size:10px;cursor:pointer;text-align:left;letter-spacing:.5px">My Listings</button>'
     + '<button onclick="document.getElementById(\'rwa-account-menu\').remove();_rwaAction(\'history\')" style="width:100%;padding:9px 14px;background:transparent;color:#8899aa;border:none;font-size:10px;cursor:pointer;text-align:left;letter-spacing:.5px">Intel Report History</button>'
     + '</div>'
@@ -11394,6 +11395,267 @@ function showPricingPage() {
 function _hookMap(){const m=document.querySelector('gmp-map-3d');if(!m){setTimeout(_hookMap,800);return;}let cd=false;m.addEventListener('dblclick',async e=>{if(cd)return;cd=true;setTimeout(()=>cd=false,1500);const lat=e.detail?.latLng?.lat??e.latLng?.lat(),lng=e.detail?.latLng?.lng??e.latLng?.lng();if(!lat||!lng)return;renderBasicsPanel({id:`COORD_${lat}_${lng}`,apn:'Resolving…',address:`${lat.toFixed(6)},${lng.toFixed(6)}`,lat,lng,type:'real_estate'});if(typeof showToast==='function')showToast('QUERYING PARCEL LEDGER…');});}
 function _hookSearch(){const inp=document.getElementById('search-input');if(!inp){setTimeout(_hookSearch,600);return;}async function go(q){q=(q||inp.value||'').trim();if(!q||q.length<4)return;const cm=q.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);if(cm){renderBasicsPanel({id:`COORD_${cm[1]}_${cm[2]}`,apn:'Resolving…',address:q,lat:parseFloat(cm[1]),lng:parseFloat(cm[2]),type:'real_estate'});return;}if(typeof showToast==='function')showToast('SEARCHING…');const ex=(window.ASSETS||[]).filter(a=>(a.address||'').toLowerCase().includes(q.toLowerCase())||(a.apn||'').includes(q));if(ex.length===1){renderBasicsPanel(ex[0]);if(ex[0].lat&&ex[0].lng&&typeof flyTo==='function')flyTo(ex[0].lat,ex[0].lng,400,0);return;}const d=await fetchParcelData({address:q});if(!d){if(typeof showToast==='function')showToast('NOT FOUND IN LEDGER');return;}renderBasicsPanel({id:`ADDR_${Date.now()}`,apn:d.PIN||'',address:d.address||q,type:'real_estate'},d);if(d.LAT&&d.LON&&typeof flyTo==='function')flyTo(d.LAT,d.LON,400,0);if(typeof showToast==='function')showToast(`FOUND: ${d.PIN||q}`);}inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});const btn=document.querySelector('.search-icon');if(btn)btn.addEventListener('click',()=>go());}
 if(!document.getElementById('rwa-css')){const s=document.createElement('style');s.id='rwa-css';s.textContent='@keyframes spin360{to{transform:rotate(360deg)}}';document.head.appendChild(s);}
+
+
+// ── UNIVERSAL ASSET LISTING FORM ─────────────────────────────────────────
+const ASSET_CLASSES = [
+  { id: 'realestate',   label: 'Real Estate',        physical: true,  fields: ['address','price','listing_type','beds','baths','sqft','lot_size','year_built','description'] },
+  { id: 'transport',    label: 'Transports',          physical: true,  fields: ['address','price','listing_type','make','model','year','mileage','description'] },
+  { id: 'business',     label: 'Businesses',          physical: true,  fields: ['address','price','listing_type','business_name','industry','revenue','ebitda','employees','description'] },
+  { id: 'equities',     label: 'Equities',            physical: false, fields: ['price','listing_type','company_name','stake_pct','valuation','industry','description'] },
+  { id: 'debt',         label: 'Debt',                physical: false, fields: ['price','listing_type','loan_type','interest_rate','term_years','ltv','collateral','description'] },
+  { id: 'energy',       label: 'Energy',              physical: true,  fields: ['address','price','listing_type','energy_type','capacity_mw','production_rate','acres','description'] },
+  { id: 'rights',       label: 'Rights & Claims',     physical: true,  fields: ['address','price','listing_type','rights_type','acres','royalty_pct','description'] },
+  { id: 'resources',    label: 'Resources & Minerals',physical: true,  fields: ['address','price','listing_type','resource_type','acres','production','description'] },
+  { id: 'infrastructure',label:'Infrastructure',      physical: true,  fields: ['address','price','listing_type','infra_type','revenue','useful_life','description'] },
+  { id: 'ip',           label: 'IP & Technology',     physical: false, fields: ['price','listing_type','ip_type','expiry_date','revenue_generating','industry','description'] },
+  { id: 'healthcare',   label: 'Healthcare',          physical: true,  fields: ['address','price','listing_type','procedure','specialty','accreditation','description'] },
+  { id: 'robotics',     label: 'Robotics',            physical: true,  fields: ['address','price','listing_type','make','model','year','payload','hours','description'] },
+  { id: 'art',          label: 'Art & Collectibles',  physical: false, fields: ['price','listing_type','category','artist','year','provenance','condition','description'] },
+  { id: 'anthro',       label: 'Anthro',              physical: false, fields: ['price','listing_type','contract_type','industry','jurisdiction','description'] },
+  { id: 'other',        label: 'Other',               physical: false, fields: ['price','listing_type','title','description'] },
+];
+
+const FIELD_DEFS = {
+  address:          { label: 'Address / Location', type: 'text',   placeholder: 'Street address, city, state or "City, State" for privacy' },
+  price:            { label: 'Price / Value (USD)', type: 'number', placeholder: '0' },
+  listing_type:     { label: 'Listing Type',        type: 'select', options: ['For Sale','For Lease','For Rent','Auction','Royalty','Wanted','Investment Opportunity'] },
+  beds:             { label: 'Bedrooms',             type: 'number', placeholder: '3' },
+  baths:            { label: 'Bathrooms',            type: 'number', placeholder: '2' },
+  sqft:             { label: 'Sq Ft',                type: 'number', placeholder: '1500' },
+  lot_size:         { label: 'Lot Size (acres)',     type: 'number', placeholder: '0.25' },
+  year_built:       { label: 'Year Built',           type: 'number', placeholder: '1990' },
+  make:             { label: 'Make',                 type: 'text',   placeholder: 'e.g. Boeing, Cessna, Jeanneau' },
+  model:            { label: 'Model',                type: 'text',   placeholder: 'e.g. 737, 172, Sun Odyssey' },
+  year:             { label: 'Year',                 type: 'number', placeholder: '2020' },
+  mileage:          { label: 'Miles / Hours',        type: 'number', placeholder: '0' },
+  business_name:    { label: 'Business Name',        type: 'text',   placeholder: 'Optional' },
+  industry:         { label: 'Industry',             type: 'text',   placeholder: 'e.g. Restaurant, SaaS, Manufacturing' },
+  revenue:          { label: 'Annual Revenue (USD)', type: 'number', placeholder: '0' },
+  ebitda:           { label: 'EBITDA (USD)',         type: 'number', placeholder: '0' },
+  employees:        { label: 'Employees',            type: 'number', placeholder: '0' },
+  company_name:     { label: 'Company Name',         type: 'text',   placeholder: 'Optional' },
+  stake_pct:        { label: 'Stake %',              type: 'number', placeholder: '20' },
+  valuation:        { label: 'Valuation (USD)',      type: 'number', placeholder: '0' },
+  loan_type:        { label: 'Loan Type',            type: 'text',   placeholder: 'e.g. Mortgage, Bridge, Hard Money' },
+  interest_rate:    { label: 'Interest Rate %',      type: 'number', placeholder: '7.5' },
+  term_years:       { label: 'Term (years)',         type: 'number', placeholder: '30' },
+  ltv:              { label: 'LTV %',                type: 'number', placeholder: '70' },
+  collateral:       { label: 'Collateral',           type: 'text',   placeholder: 'e.g. Single family home, Seattle WA' },
+  energy_type:      { label: 'Energy Type',          type: 'select', options: ['Oil & Gas','Solar','Wind','Hydro','Geothermal','Nuclear','Battery Storage','Other'] },
+  capacity_mw:      { label: 'Capacity (MW)',        type: 'number', placeholder: '0' },
+  production_rate:  { label: 'Production (BOE/day)', type: 'number', placeholder: '0' },
+  acres:            { label: 'Acres',                type: 'number', placeholder: '0' },
+  rights_type:      { label: 'Rights Type',          type: 'select', options: ['Mineral Rights','Water Rights','Air Rights','Carbon Credits','Timber Rights','Drilling Rights','Spectrum Rights','Fishing Rights','Other'] },
+  royalty_pct:      { label: 'Royalty %',            type: 'number', placeholder: '0' },
+  resource_type:    { label: 'Resource Type',        type: 'text',   placeholder: 'e.g. Gold, Copper, Aggregate' },
+  production:       { label: 'Production Rate',      type: 'text',   placeholder: 'e.g. 500 oz/yr' },
+  infra_type:       { label: 'Infrastructure Type',  type: 'text',   placeholder: 'e.g. Cell Tower, Pipeline, Data Center' },
+  useful_life:      { label: 'Useful Life (years)',  type: 'number', placeholder: '0' },
+  ip_type:          { label: 'IP Type',              type: 'select', options: ['Patent','Trademark','Copyright','Domain','Software License','Royalty Stream','Trade Secret','Other'] },
+  expiry_date:      { label: 'Expiry Date',          type: 'text',   placeholder: 'YYYY-MM-DD or N/A' },
+  revenue_generating:{ label: 'Revenue Generating?', type: 'select', options: ['Yes','No'] },
+  procedure:        { label: 'Procedure / Service',  type: 'text',   placeholder: 'e.g. Knee Replacement, Dental Implants' },
+  specialty:        { label: 'Specialty',            type: 'text',   placeholder: 'e.g. Orthopedics, Cosmetic Surgery' },
+  accreditation:    { label: 'Accreditation',        type: 'text',   placeholder: 'e.g. JCI, ISO 9001' },
+  payload:          { label: 'Payload Capacity (kg)',type: 'number', placeholder: '0' },
+  hours:            { label: 'Operating Hours',      type: 'number', placeholder: '0' },
+  category:         { label: 'Category',             type: 'select', options: ['Fine Art','Sculpture','Watch','Jewelry','Wine','Whiskey','Classic Car','Sports Memorabilia','Trading Cards','NFT / Digital','Other'] },
+  artist:           { label: 'Artist / Maker',       type: 'text',   placeholder: 'Optional' },
+  provenance:       { label: 'Provenance',           type: 'text',   placeholder: 'e.g. Christie's 2019' },
+  condition:        { label: 'Condition',            type: 'select', options: ['Mint','Excellent','Good','Fair','Poor'] },
+  contract_type:    { label: 'Contract Type',        type: 'text',   placeholder: 'e.g. Employment, Talent, Staffing Agency' },
+  jurisdiction:     { label: 'Jurisdiction',         type: 'text',   placeholder: 'e.g. USA, UK, UAE' },
+  title:            { label: 'Title / Name',         type: 'text',   placeholder: 'Describe the asset' },
+  description:      { label: 'Description',          type: 'textarea', placeholder: 'Additional details, contact preferences, terms...' },
+};
+
+function openListingForm() {
+  if (!currentUser) { showToast('SIGN IN TO LIST AN ASSET'); return; }
+  const existing = document.getElementById('rwa-listing-form');
+  if (existing) existing.remove();
+
+  const m = document.createElement('div');
+  m.id = 'rwa-listing-form';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
+
+  m.innerHTML = `
+    <div style="background:#0a1628;border:1px solid rgba(0,255,200,.2);border-radius:8px;width:100%;max-width:560px;margin:auto;padding:28px 24px;font-family:var(--font)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:3px;color:var(--cyan)">LIST AN ASSET</div>
+          <div style="font-size:11px;color:#556677;margin-top:2px">Free · Any asset · Anywhere in the world</div>
+        </div>
+        <button onclick="document.getElementById('rwa-listing-form').remove()" style="background:none;border:none;color:#556677;font-size:20px;cursor:pointer">✕</button>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">ASSET CLASS</label>
+        <select id="lf-class" onchange="renderListingFields()" style="width:100%;background:#0d1e2e;border:1px solid rgba(0,255,200,.2);color:#f0f4f8;padding:9px;border-radius:4px;font-size:11px;font-family:var(--font)">
+          ${ASSET_CLASSES.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
+        </select>
+      </div>
+
+      <div id="lf-dynamic-fields"></div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">PRIVACY</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="lf-privacy" style="accent-color:var(--cyan)">
+          <span style="font-size:10px;color:#8899aa">Show city/region only — hide exact address from public</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">CONTACT NAME</label>
+        <input id="lf-name" type="text" placeholder="Your name or company" style="width:100%;background:#0d1e2e;border:1px solid rgba(0,255,200,.2);color:#f0f4f8;padding:9px;border-radius:4px;font-size:11px;box-sizing:border-box">
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">CONTACT EMAIL <span style="color:#3a4a5a">(required)</span></label>
+        <input id="lf-email" type="email" placeholder="you@example.com" value="${currentUser?.email||''}" style="width:100%;background:#0d1e2e;border:1px solid rgba(0,255,200,.2);color:#f0f4f8;padding:9px;border-radius:4px;font-size:11px;box-sizing:border-box">
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">CONTACT PHONE <span style="color:#3a4a5a">(optional — shown to verified users only)</span></label>
+        <input id="lf-phone" type="tel" placeholder="+1 206 555 0000" style="width:100%;background:#0d1e2e;border:1px solid rgba(0,255,200,.2);color:#f0f4f8;padding:9px;border-radius:4px;font-size:11px;box-sizing:border-box">
+      </div>
+
+      <button onclick="submitUniversalListing()" style="width:100%;padding:13px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-bottom:8px">SUBMIT LISTING — FREE →</button>
+      <div id="lf-status" style="font-size:9px;color:#556677;text-align:center;min-height:16px"></div>
+    </div>`;
+
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  renderListingFields();
+}
+
+function renderListingFields() {
+  const classId = document.getElementById('lf-class')?.value;
+  const cls = ASSET_CLASSES.find(c => c.id === classId);
+  if (!cls) return;
+  const container = document.getElementById('lf-dynamic-fields');
+  if (!container) return;
+  container.innerHTML = cls.fields.map(fid => {
+    const f = FIELD_DEFS[fid];
+    if (!f) return '';
+    const style = 'width:100%;background:#0d1e2e;border:1px solid rgba(0,255,200,.2);color:#f0f4f8;padding:9px;border-radius:4px;font-size:11px;box-sizing:border-box;font-family:var(--font)';
+    let input = '';
+    if (f.type === 'select') {
+      input = `<select id="lf-${fid}" style="${style}">${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`;
+    } else if (f.type === 'textarea') {
+      input = `<textarea id="lf-${fid}" placeholder="${f.placeholder||''}" rows="3" style="${style};resize:vertical"></textarea>`;
+    } else {
+      input = `<input id="lf-${fid}" type="${f.type}" placeholder="${f.placeholder||''}" style="${style}">`;
+    }
+    return `<div style="margin-bottom:12px"><label style="font-size:9px;font-weight:700;letter-spacing:1px;color:#6688aa;display:block;margin-bottom:6px">${f.label.toUpperCase()}</label>${input}</div>`;
+  }).join('');
+}
+
+async function submitUniversalListing() {
+  const statusEl = document.getElementById('lf-status');
+  const email = document.getElementById('lf-email')?.value?.trim();
+  if (!email) { showToast('EMAIL REQUIRED'); return; }
+
+  const classId = document.getElementById('lf-class')?.value;
+  const cls = ASSET_CLASSES.find(c => c.id === classId);
+  const privacy = document.getElementById('lf-privacy')?.checked;
+  const name = document.getElementById('lf-name')?.value?.trim();
+  const phone = document.getElementById('lf-phone')?.value?.trim();
+
+  // Collect dynamic fields
+  const fields = {};
+  cls.fields.forEach(fid => {
+    const el = document.getElementById('lf-' + fid);
+    if (el) fields[fid] = el.value;
+  });
+
+  const address = fields.address || '';
+  const price = parseFloat(fields.price) || 0;
+  const description = fields.description || '';
+
+  if (statusEl) statusEl.textContent = 'Geocoding location...';
+
+  // Geocode address to lat/lng
+  let lat = null, lng = null, displayAddress = address;
+  if (address && cls.physical) {
+    try {
+      const geo = await new Promise((res, rej) => {
+        const gc = new google.maps.Geocoder();
+        gc.geocode({ address }, (results, status) => {
+          if (status === 'OK' && results[0]) res(results[0]);
+          else rej(status);
+        });
+      });
+      if (privacy) {
+        // Use city center only
+        const comps = geo.address_components;
+        const city = comps.find(c => c.types.includes('locality'))?.long_name || '';
+        const state = comps.find(c => c.types.includes('administrative_area_level_1'))?.short_name || '';
+        displayAddress = city + (state ? ', ' + state : '');
+        lat = geo.geometry.location.lat();
+        lng = geo.geometry.location.lng();
+      } else {
+        lat = geo.geometry.location.lat();
+        lng = geo.geometry.location.lng();
+        displayAddress = geo.formatted_address;
+      }
+    } catch(e) {
+      if (statusEl) statusEl.textContent = 'Could not geocode address — using text only';
+    }
+  }
+
+  if (statusEl) statusEl.textContent = 'Submitting...';
+
+  // Build record
+  const record = {
+    user_id: currentUser.id,
+    contact_email: email,
+    contact_name: name,
+    contact_phone: phone,
+    asset_class: classId,
+    listing_type: fields.listing_type || 'For Sale',
+    asking_price: price,
+    address: displayAddress,
+    lat: lat,
+    lng: lng,
+    privacy_mode: privacy,
+    fields: fields,
+    description: description,
+    status: 'active',
+    created_at: new Date().toISOString(),
+  };
+
+  const { error } = await _sb.from('asset_listings').insert([record]);
+
+  if (error) {
+    console.error('Listing error:', error);
+    if (statusEl) statusEl.textContent = 'Error: ' + error.message;
+    showToast('ERROR SUBMITTING — ' + error.message);
+    return;
+  }
+
+  showToast('LISTING SUBMITTED — LIVE ON MAP');
+  document.getElementById('rwa-listing-form')?.remove();
+
+  // Render on map immediately if physical and has coords
+  if (lat && lng && cls.physical) {
+    const marker = {
+      id: 'listing-' + Date.now(),
+      lat, lng,
+      address: displayAddress,
+      asset_class: classId,
+      asking_price: price,
+      listing_type: fields.listing_type || 'For Sale',
+      type: classId,
+      _isListing: true,
+    };
+    if (window.ASSETS) window.ASSETS.push(marker);
+    if (typeof renderDOMMarkers === 'function') renderDOMMarkers();
+    if (typeof flyTo === 'function') flyTo(lat, lng, 800, 45);
+  }
+}
+// ── END UNIVERSAL LISTING FORM ────────────────────────────────────────────
 
 // ── LISTING UPLOAD ────────────────────────────────────────────────────────
 function showListingModal(apn) {
