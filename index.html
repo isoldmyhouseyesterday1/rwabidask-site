@@ -4412,7 +4412,7 @@ async function fetchGSAListings() {
       asking_price: lot.asking_price,
       lat: lot.lat || null,
       lng: lot.lng || null,
-      _hasCoords: sed -n '4395,4425p' ~/Desktop/rwabidask-site/index.html(lot.lat && lot.lng),
+      _hasCoords: !!(lot.lat && lot.lng),
       _isGSA: true,
       _gsaData: lot,
     }));
