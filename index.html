@@ -4835,20 +4835,27 @@ async function fetchRSSForClass(assetClass) {
 
   setStatus('SCANNING LIVE FEEDS...');
   const cities = getViewportCities();
-  const clCode = CL_CAT_MAP[assetClass];
+  const clCodes = CL_CAT_MAP[assetClass] || [];
   const specialtyUrls = RSS_CLASS_MAP[assetClass] || [];
   const allItems = [];
 
   const feeds = [
-    ...specialtyUrls.map(url => ({ url, lat: 39, lng: -98, source: url.includes('controller') ? 'Controller.com' : url.includes('trade-a-plane') ? 'Trade-A-Plane' : url.includes('boatshop') ? 'Boatshop24' : url.includes('bizbuysell') ? 'BizBuySell' : 'RSS' })),
-    ...( clCode ? cities.map(c => ({ url: `https://api.allorigins.win/get?url=${encodeURIComponent(`https://${c.slug}.craigslist.org/search/${clCode}.rss`)}`, lat: c.lat, lng: c.lng, source: `CL/${c.slug}`, _allorigins: true })) : [] ),
+    ...specialtyUrls.map(url => ({
+      url: PARCEL_API + '?action=rss-fetch&url=' + encodeURIComponent(url),
+      lat: 39, lng: -98,
+      source: url.includes('controller') ? 'Controller.com' : url.includes('trade-a-plane') ? 'Trade-A-Plane' : url.includes('boatshop') ? 'Boatshop24' : url.includes('bizbuysell') ? 'BizBuySell' : 'RSS'
+    })),
+    ...clCodes.flatMap(code => cities.map(c => ({
+      url: PARCEL_API + '?action=rss-fetch&url=' + encodeURIComponent('https://' + c.slug + '.craigslist.org/search/' + code + '.rss'),
+      lat: c.lat, lng: c.lng, source: 'CL/' + c.slug
+    }))),
   ];
 
   await Promise.all(feeds.map(async feed => {
     try {
       const r = await fetch(feed.url, { signal: AbortSignal.timeout(8000) });
       if (!r.ok) return;
-      const xml = feed._allorigins ? (await r.json()).contents : await r.text();
+      const xml = await r.text();
       if (!xml) return;
       const items = parseRSSXML(xml, assetClass, feed.source, feed.lat, feed.lng);
       allItems.push(...items);
