@@ -4410,8 +4410,9 @@ async function fetchGSAListings() {
       asset_class: lot.asset_class,
       listing_type: lot.listing_type,
       asking_price: lot.asking_price,
-      lat: null,
-      lng: null,
+      lat: lot.lat || null,
+      lng: lot.lng || null,
+      _hasCoords: sed -n '4395,4425p' ~/Desktop/rwabidask-site/index.html(lot.lat && lot.lng),
       _isGSA: true,
       _gsaData: lot,
     }));
