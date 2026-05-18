@@ -4283,6 +4283,8 @@ function getInsuranceOptions(assetType) {
 // ============================================================
 function normalizeAsset(a) {
   if (!a) return a;
+  const _isGSA = a._isGSA;
+  const _gsaData = a._gsaData;
   const s     = (typeof a.specs === 'object' && a.specs) ? a.specs : {};
 
   // ── All known JSONB sub-objects ──────────────────────────────
@@ -4387,6 +4389,7 @@ function normalizeAsset(a) {
   a.apn       = id.apn || s.apn || a.apn || a._raw?.apn || null;
   a._infra    = Object.keys(infra).length ? infra : null;
 
+  if (_isGSA) { a._isGSA = _isGSA; a._gsaData = _gsaData; }
   return a;
 }
 
