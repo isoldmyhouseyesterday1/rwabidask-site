@@ -7556,12 +7556,31 @@ function renderMobileListViewFull() {
   const resultsHtml = filteredAssets.map(a => {
     const origLine = (a.original_currency && a.original_price)
       ? `<div style="font-size:9px;color:var(--muted);margin-top:1px">${fmtOriginalPrice(a.original_price, a.original_currency)}</div>` : '';
+    // For GSA listings, show name + location separately
+    const isGSA = a._isGSA && a._gsaData;
+    const gsaName = isGSA ? (a._gsaData.name || a.address) : null;
+    const gsaLoc = isGSA ? (a._gsaData.address || '') : null;
+    const gsaStatus = isGSA ? (a._gsaData.auction_status || 'ACTIVE') : null;
+    const gsaEnd = isGSA ? (a._gsaData.end_date || '') : null;
+    const gsaImg = isGSA ? (a._gsaData.image_url || '') : null;
+    const displayName = isGSA ? gsaName : a.address;
+    const displayLoc = isGSA ? gsaLoc : (a.city || '--');
+    const displayPrice = isGSA ? (a._gsaData.asking_price > 0 ? fmtPrice(a._gsaData.asking_price) : 'No Bid') : fmtPrice(a.price);
+    const typeLabel = isGSA ? (a._gsaData.asset_class || a.type || 'asset').toUpperCase() + ' // AUCTION' : (a.type||'asset').toUpperCase();
+    const badge = isGSA ? `<span style="font-size:8px;background:rgba(226,197,90,.15);color:var(--gold);border:1px solid rgba(226,197,90,.3);border-radius:2px;padding:1px 5px;margin-left:4px">GSA</span>` : '';
+    const endBadge = isGSA && gsaEnd ? `<div style="font-size:9px;color:var(--muted);margin-top:3px">Ends: ${gsaEnd}</div>` : '';
+    const thumbImg = gsaImg ? `<img src="${gsaImg}" style="width:100%;height:80px;object-fit:cover;border-radius:3px;margin-bottom:8px" onerror="this.style.display='none'">` : '';
     return `
-    <div class="list-tile" onclick="selectAsset('${a.id}')" style="background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px;cursor:pointer">
-      <div class="list-tile-type" style="font-size:9px;font-weight:600;color:var(--cyan);margin-bottom:6px">${(a.type||'asset').toUpperCase()}</div>
-      <div class="list-tile-addr" style="font-size:13px;font-weight:600;color:var(--text)">${escapeHtml(a.address)}</div>
-      <div class="list-tile-loc" style="font-size:10px;color:var(--dim);margin:4px 0">${escapeHtml(a.city || '--')}</div>
-      <div style="font-size:16px;font-weight:700;color:var(--cyan)">${fmtPrice(a.price)}</div>
+    <div class="list-tile" onclick="selectAsset('${a.id}')" style="background:var(--bg1);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;cursor:pointer">
+      ${thumbImg}
+      <div style="display:flex;align-items:center;margin-bottom:4px">
+        <div class="list-tile-type" style="font-size:8px;font-weight:600;color:var(--cyan)">${typeLabel}</div>
+        ${badge}
+      </div>
+      <div class="list-tile-addr" style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4">${escapeHtml(displayName)}</div>
+      <div class="list-tile-loc" style="font-size:9px;color:var(--dim);margin:3px 0">${escapeHtml(displayLoc)}</div>
+      <div style="font-size:15px;font-weight:700;color:var(--cyan)">${displayPrice}</div>
+      ${endBadge}
       ${origLine}
     </div>`;
   }).join('');
