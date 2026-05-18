@@ -4723,25 +4723,28 @@ const RSS_TTL = 15 * 60 * 1000;
 let _rssFetching = false;
 
 const RSS_CLASS_MAP = {
-  aviation:    ['https://www.controller.com/listings/aircraft/for-sale/rss', 'https://www.trade-a-plane.com/rss'],
-  maritime:    ['https://www.boatshop24.com/rss'],
-  business:    ['https://www.bizbuysell.com/rss/'],
-  realestate:  [],
-  transport:   [],
-  equipment:   [],
-  art:         [],
+  transport:      ['https://www.controller.com/listings/aircraft/for-sale/rss','https://www.trade-a-plane.com/rss','https://www.boatshop24.com/rss'],
+  business:       ['https://www.bizbuysell.com/rss/'],
+  realestate:     [], energy:         [], healthcare: [],
+  robotics:       [], anthro:         [], art:        [],
+  currency:       [], debt:           [], equities:   [],
+  infrastructure: [], resources:      [], rights:     [],
+  ip:             [], other:          [],
 };
 
 const CL_CAT_MAP = {
-  maritime:   'boa',
-  realestate: 'rea',
-  transport:  'cta',
-  equipment:  'hea',
-  business:   'bfd',
-  art:        'atq',
-  transport2: 'mcy',
-  transport3: 'rvs',
-  aviation:   'atp',
+  transport:      ['boa','cta','mcy','rvs','atp'],
+  realestate:     ['rea','for'],
+  business:       ['bfd'],
+  anthro:         ['atq'],
+  art:            ['atq','clt'],
+  energy:         ['hea'],
+  robotics:       ['ele'],
+  infrastructure: ['hea'],
+  resources:      ['for'],
+  ip:             ['bfd'],
+  other:          ['zip'],
+  healthcare:[], currency:[], debt:[], equities:[], rights:[],
 };
 
 const CL_CITIES = [
