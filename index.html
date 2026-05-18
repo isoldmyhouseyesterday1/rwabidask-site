@@ -4715,6 +4715,160 @@ function renderCategories() {
   }).join('');
 }
 
+
+// ── ON-DEMAND RSS FETCH ───────────────────────────────────────────────────
+// Fires when user selects a category tab -- fetches live listings for that class
+const _rssCache = {};
+const RSS_TTL = 15 * 60 * 1000;
+let _rssFetching = false;
+
+const RSS_CLASS_MAP = {
+  aviation:    ['https://www.controller.com/listings/aircraft/for-sale/rss', 'https://www.trade-a-plane.com/rss'],
+  maritime:    ['https://www.boatshop24.com/rss'],
+  business:    ['https://www.bizbuysell.com/rss/'],
+  realestate:  [],
+  transport:   [],
+  equipment:   [],
+  art:         [],
+};
+
+const CL_CAT_MAP = {
+  maritime:   'boa',
+  realestate: 'rea',
+  transport:  'cta',
+  equipment:  'hea',
+  business:   'bfd',
+  art:        'atq',
+  transport2: 'mcy',
+  transport3: 'rvs',
+  aviation:   'atp',
+};
+
+const CL_CITIES = [
+  {slug:'seattle',lat:47.61,lng:-122.33},{slug:'sfbay',lat:37.77,lng:-122.41},
+  {slug:'losangeles',lat:34.05,lng:-118.24},{slug:'newyork',lat:40.71,lng:-74.01},
+  {slug:'miami',lat:25.77,lng:-80.19},{slug:'chicago',lat:41.85,lng:-87.65},
+  {slug:'houston',lat:29.76,lng:-95.37},{slug:'phoenix',lat:33.45,lng:-112.07},
+  {slug:'denver',lat:39.74,lng:-104.98},{slug:'boston",lat:42.36,lng:-71.06},
+  {slug:'portland',lat:45.52,lng:-122.68},{slug:'sandiego',lat:32.72,lng:-117.16},
+  {slug:'dallas',lat:32.78,lng:-96.80},{slug:'atlanta',lat:33.75,lng:-84.39},
+  {slug:'minneapolis',lat:44.98,lng:-93.27},{slug:'detroit',lat:42.33,lng:-83.05},
+  {slug:'cleveland',lat:41.50,lng:-81.69},{slug:'pittsburgh',lat:40.44,lng:-79.99},
+  {slug:'philadelphia',lat:39.95,lng:-75.16},{slug:'washingtondc',lat:38.89,lng:-77.03},
+  {slug:'nashville',lat:36.17,lng:-86.78},{slug:'austin',lat:30.27,lng:-97.74},
+  {slug:'saltlakecity',lat:40.76,lng:-111.89},{slug:'lasvegas',lat:36.17,lng:-115.14},
+  {slug:'charlotte',lat:35.23,lng:-80.84},{slug:'raleigh',lat:35.77,lng:-78.64},
+  {slug:'columbus',lat:39.96,lng:-82.99},{slug:'indianapolis',lat:39.77,lng:-86.16},
+  {slug:'kansascity',lat:39.10,lng:-94.58},{slug:'stlouis',lat:38.63,lng:-90.20},
+  {slug:'milwaukee',lat:43.04,lng:-87.91},{slug:'memphis',lat:35.15,lng:-90.05},
+  {slug:'neworleans',lat:29.95,lng:-90.07},{slug:'tampa',lat:27.95,lng:-82.46},
+  {slug:'orlando',lat:28.54,lng:-81.38},{slug:'jacksonville',lat:30.33,lng:-81.66},
+  {slug:'anchorage',lat:61.22,lng:-149.90},{slug:'honolulu',lat:21.31,lng:-157.86},
+  {slug:'toronto',lat:43.65,lng:-79.38},{slug:'vancouver",lat:49.25,lng:-123.12},
+  {slug:'calgary',lat:51.05,lng:-114.07},{slug:'montreal',lat:45.50,lng:-73.57},
+  {slug:'london',lat:51.51,lng:-0.13},{slug:'sydney',lat:-33.87,lng:151.21},
+  {slug:'melbourne',lat:-37.81,lng:144.96},{slug:'amsterdam',lat:52.37,lng:4.90},
+  {slug:'berlin',lat:52.52,lng:13.40},{slug:'paris',lat:48.86,lng:2.35},
+  {slug:'barcelona',lat:41.39,lng:2.16},{slug:'vienna',lat:48.21,lng:16.37},
+];
+
+function getViewportCities() {
+  if (!map3dEl) return CL_CITIES.slice(0, 15);
+  const center = map3dEl.center || {lat:40, lng:-98};
+  const range  = map3dEl.range  || 22000000;
+  const deg    = Math.min(60, (range / 111000) * 1.5);
+  return CL_CITIES.filter(c =>
+    Math.abs(c.lat - center.lat) < deg &&
+    Math.abs(c.lng - center.lng) < deg * 2
+  ).slice(0, 20);
+}
+
+function parseRSSXML(xml, asset_class, source, defaultLat, defaultLng) {
+  const items = [];
+  const re = /<item>([\s\S]*?)<\/item>/g;
+  let m;
+  while ((m = re.exec(xml)) !== null) {
+    const block = m[1];
+    const get = tag => {
+      const r = block.match(new RegExp(`<${tag}[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/${tag}>|<${tag}[^>]*>([^<]*)<\/${tag}>`));
+      return r ? (r[1]||r[2]||'').trim() : '';
+    };
+    const title = get('title');
+    const link  = get('link') || (block.match(/<link>(.*?)<\/link>/)||[])[1] || '';
+    const desc  = get('description').replace(/<[^>]+>/g,'').slice(0,300);
+    const pm    = (title+desc).match(/\$[\d,]+/);
+    const price = pm ? parseInt(pm[0].replace(/[$,]/g,'')) : 0;
+    const gLat  = block.match(/<geo:lat>(.*?)<\/geo:lat>/);
+    const gLng  = block.match(/<geo:long>(.*?)<\/geo:long>/);
+    const lat   = gLat ? parseFloat(gLat[1]) : defaultLat + (Math.random()-0.5)*0.3;
+    const lng   = gLng ? parseFloat(gLng[1]) : defaultLng + (Math.random()-0.5)*0.3;
+    if (!title) continue;
+    const idBase = link.slice(-16).replace(/[^a-z0-9]/gi,'') || Math.random().toString(36).slice(2,10);
+    items.push({
+      id: `rss-${source.replace(/[^a-z0-9]/gi,'-').slice(0,16)}-${idBase}`,
+      address: title, city: source, country: 'Global',
+      lat, lng, price, type: asset_class,
+      _hasCoords: true, _isRSS: true, _rssSource: source,
+      _rssData: { name: title, description: desc, listing_url: link,
+        image_url: (block.match(/<media:content[^>]+url="([^"]+)"/) || block.match(/<enclosure[^>]+url="([^"]+)"/) || [])[1] || null,
+        source, price, asset_class },
+    });
+  }
+  return items;
+}
+
+async function fetchRSSForClass(assetClass) {
+  if (assetClass === 'all' || assetClass === 'realestate') return; // too many RE listings
+  if (_rssFetching) return;
+  _rssFetching = true;
+
+  const now = Date.now();
+  const cacheKey = assetClass;
+  if (_rssCache[cacheKey] && (now - _rssCache[cacheKey].ts) < RSS_TTL) {
+    _injectRSSAssets(_rssCache[cacheKey].items);
+    _rssFetching = false;
+    return;
+  }
+
+  setStatus('SCANNING LIVE FEEDS...');
+  const cities = getViewportCities();
+  const clCode = CL_CAT_MAP[assetClass];
+  const specialtyUrls = RSS_CLASS_MAP[assetClass] || [];
+  const allItems = [];
+
+  const feeds = [
+    ...specialtyUrls.map(url => ({ url, lat: 39, lng: -98, source: url.includes('controller') ? 'Controller.com' : url.includes('trade-a-plane') ? 'Trade-A-Plane' : url.includes('boatshop') ? 'Boatshop24' : url.includes('bizbuysell') ? 'BizBuySell' : 'RSS' })),
+    ...( clCode ? cities.map(c => ({ url: `https://api.allorigins.win/get?url=${encodeURIComponent(`https://${c.slug}.craigslist.org/search/${clCode}.rss`)}`, lat: c.lat, lng: c.lng, source: `CL/${c.slug}`, _allorigins: true })) : [] ),
+  ];
+
+  await Promise.all(feeds.map(async feed => {
+    try {
+      const r = await fetch(feed.url, { signal: AbortSignal.timeout(8000) });
+      if (!r.ok) return;
+      const xml = feed._allorigins ? (await r.json()).contents : await r.text();
+      if (!xml) return;
+      const items = parseRSSXML(xml, assetClass, feed.source, feed.lat, feed.lng);
+      allItems.push(...items);
+    } catch(e) { /* silent */ }
+  }));
+
+  _rssCache[cacheKey] = { ts: now, items: allItems };
+  _injectRSSAssets(allItems);
+  _rssFetching = false;
+  setStatus('LEDGER SYNC COMPLETE');
+}
+
+function _injectRSSAssets(items) {
+  // Remove old RSS assets for this session, add fresh ones
+  const existingIds = new Set(items.map(i => i.id));
+  window.ASSETS = window.ASSETS.filter(a => !a._isRSS || existingIds.has(a.id));
+  // Add new items (dedupe by id)
+  const currentIds = new Set(window.ASSETS.map(a => a.id));
+  items.forEach(item => { if (!currentIds.has(item.id)) window.ASSETS.push(item); });
+  renderList(filterAssets(window.ASSETS));
+  if (typeof renderDOMMarkers === 'function') renderDOMMarkers();
+}
+
 function setCategory(catId, btn) {
   document.querySelectorAll('.ptab').forEach(b => b.classList.remove('on'));
   if (btn) btn.classList.add('on');
@@ -4729,6 +4883,8 @@ function setCategory(catId, btn) {
   if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull();
   // Update filter panel for active category
   updateFilterPanelForCategory(catId);
+  // Fire on-demand RSS fetch for selected class
+  if (catId !== 'all') fetchRSSForClass(catId);
 }
 
 function updateFilterPanelForCategory(catId) {
