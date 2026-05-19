@@ -4398,7 +4398,7 @@ function normalizeAsset(a) {
 // ============================================================
 async function fetchGSAListings() {
   try {
-    const resp = await fetch(PARCEL_API + '?action=gsa&bust=1');
+    const resp = await fetch(PARCEL_API + '?action=gsa');
     if (!resp.ok) return [];
     const data = await resp.json();
     if (!Array.isArray(data)) return [];
