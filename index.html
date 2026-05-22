@@ -4466,6 +4466,33 @@ async function fetchFAAListings() {
   }
 }
 
+
+async function fetchEbayListings(category, keywords='') {
+  try {
+    let url = PARCEL_API + '?action=ebay-listings&limit=50&category=' + category;
+    if (keywords) url += '&keywords=' + encodeURIComponent(keywords);
+    const resp = await fetch(url);
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    if (!Array.isArray(data)) return [];
+    return data.map(item => ({
+      id:        item.id,
+      address:   item.title,
+      type:      'transport',
+      asset_class: 'transport',
+      price:     item.price || 0,
+      lat:       null,
+      lng:       null,
+      _hasCoords: false,
+      _isEbay:   true,
+      _ebayData: item,
+    }));
+  } catch(e) {
+    console.warn('[RWA] eBay fetch failed:', e);
+    return [];
+  }
+}
+
 async function fetchListingsFromSupabase() {
   if (!_sb) {
     console.warn('[RWABidAsk] Supabase not ready, retrying...');
@@ -4939,12 +4966,136 @@ function setCategory(catId, btn) {
   // Fire on-demand RSS fetch for selected class
   if (catId !== 'all') fetchRSSForClass(catId);
   if (catId === 'transport') {
-    fetchFAAListings().then(items => {
-      if (!items.length) return;
+    // eBay Motors aircraft + vehicles
+    const ebayCategories = [63677, 63678, 63676, 26429, 50054, 6001];
+    Promise.all([
+      fetchFAAListings(),
+      ...ebayCategories.map(cat => fetchEbayListings(cat))
+    ]).then(results => {
+      const allItems = results.flat();
+      if (!allItems.length) return;
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      allItems.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+      if (markersRendered) renderDOMMarkers();
+    });
+  }
+  if (catId === 'art') {
+    fetchEbayListings('550').then(items => {
+      items.forEach(a => { a.type = 'art'; a.asset_class = 'art'; });
       const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
       items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
       renderList(filterAssets(window.ASSETS));
-      if (markersRendered) renderDOMMarkers();
+    });
+  }
+  if (catId === 'business') {
+    fetchEbayListings('12576').then(items => {
+      items.forEach(a => { a.type = 'business'; a.asset_class = 'business'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'healthcare') {
+    fetchEbayListings('36132').then(items => {
+      items.forEach(a => { a.type = 'healthcare'; a.asset_class = 'healthcare'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'robotics') {
+    Promise.all([fetchEbayListings('92074'), fetchEbayListings('12584')]).then(results => {
+      const items = results.flat();
+      items.forEach(a => { a.type = 'robotics'; a.asset_class = 'robotics'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'energy') {
+    Promise.all([fetchEbayListings('12139'), fetchEbayListings('26261')]).then(results => {
+      const items = results.flat();
+      items.forEach(a => { a.type = 'energy'; a.asset_class = 'energy'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'infrastructure') {
+    Promise.all([fetchEbayListings('131131'), fetchEbayListings('12139')]).then(results => {
+      const items = results.flat();
+      items.forEach(a => { a.type = 'infrastructure'; a.asset_class = 'infrastructure'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'ip') {
+    Promise.all([fetchEbayListings('58058'), fetchEbayListings('293')]).then(results => {
+      const items = results.flat();
+      items.forEach(a => { a.type = 'ip'; a.asset_class = 'ip'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'resources') {
+    Promise.all([fetchEbayListings('12108'), fetchEbayListings('11700')]).then(results => {
+      const items = results.flat();
+      items.forEach(a => { a.type = 'resources'; a.asset_class = 'resources'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'rights') {
+    fetchEbayListings('41956').then(items => {
+      items.forEach(a => { a.type = 'rights'; a.asset_class = 'rights'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'anthro') {
+    Promise.all([fetchEbayListings('64482'), fetchEbayListings('237')]).then(results => {
+      const items = results.flat();
+      items.forEach(a => { a.type = 'anthro'; a.asset_class = 'anthro'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'currency') {
+    fetchEbayListings('11116').then(items => {
+      items.forEach(a => { a.type = 'currency'; a.asset_class = 'currency'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'debt') {
+    fetchEbayListings('10136').then(items => {
+      items.forEach(a => { a.type = 'debt'; a.asset_class = 'debt'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'equities') {
+    fetchEbayListings('619').then(items => {
+      items.forEach(a => { a.type = 'equities'; a.asset_class = 'equities'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
+    });
+  }
+  if (catId === 'other') {
+    fetchEbayListings('99').then(items => {
+      items.forEach(a => { a.type = 'other'; a.asset_class = 'other'; });
+      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+      renderList(filterAssets(window.ASSETS));
     });
   }
 }
