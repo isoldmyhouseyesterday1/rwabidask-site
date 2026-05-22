@@ -3886,6 +3886,8 @@ const DASHBOARD_ONLY_CATEGORIES = new Set(['financial','infrastructure','technol
 
 function getAssetCategory(type) {
   const t = (type || '').toLowerCase().trim();
+  const directCats = ['all','anthro','art','business','currency','debt','energy','equities','healthcare','infrastructure','ip','realestate','resources','rights','robotics','transport','other'];
+  if (directCats.includes(t)) return t;
   const map = {
     // ── TRANSPORT -- vessels, aircraft, vehicles ──────────────────
     yacht: 'transport', sailboat: 'transport', powerboat: 'transport',
