@@ -2997,7 +2997,7 @@ body { min-width: 900px; overflow-x: auto; }
 <!-- dashboard summary removed -- data in header topbar -->
       <div id="cat-sponsor-strip" style="display:none"></div>
       <div class="ptabs" id="category-tabs">
-        <button class="ptab map-tab on" onclick="setCategory('all', this)">ALL</button>
+        <button class="ptab map-tab" onclick="setCategory('all', this)">ALL</button>
         <button class="ptab map-tab" onclick="setCategory('anthro', this)">ANTHRO</button>
         <button class="ptab map-tab" onclick="setCategory('art', this)">ART & COLLECT.</button>
         <button class="ptab map-tab" onclick="setCategory('business', this)">BUSINESSES</button>
@@ -4044,7 +4044,7 @@ let currentAssetForModal = null;
 
 let map3dEl = null;
 let acInstance = null;
-let activeTab = 'all';
+let activeTab = '';
 let activeFilter = 'any';
 let activeId = null;
 let heatOn = false;
@@ -5113,6 +5113,8 @@ function initDualSlider() {
 function onPriceSlider() { applySliderFilter(); }
 
 function filterAssets(assets) {
+  // No category selected -- show nothing, prompt user to pick
+  if (!activeTab) return [];
   let filtered = assets;
   // Category filter -- asset_type is primary, category is fallback
   if (activeTab !== 'all') {
@@ -5143,7 +5145,11 @@ function renderList(assetsToShow) {
   const resultCount = list.length;
   const resultHeader = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
   if (!list.length) {
-    wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;
+    if (!activeTab) {
+      wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">SELECT AN ASSET CLASS<br><span style="font-size:9px;color:var(--cyan);margin-top:6px;display:block">CHOOSE A CATEGORY ABOVE TO BEGIN</span></div></div>`;
+    } else {
+      wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;
+    }
     return;
   }
   wrap.innerHTML = resultHeader + list.map(a => {
@@ -9021,7 +9027,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render category tabs
     if (typeof renderCategoryTabs === 'function') renderCategoryTabs();
     // Init filter panel for default category
-    if (typeof updateFilterPanelForCategory === 'function') updateFilterPanelForCategory('realestate');
+    if (typeof updateFilterPanelForCategory === 'function') updateFilterPanelForCategory('');
     // Show wallet button when user is signed in
     const origUpdateAuth = window.updateAuthUI;
     if (typeof origUpdateAuth === 'function') {
