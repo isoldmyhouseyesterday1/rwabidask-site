@@ -148,6 +148,8 @@ html, body {
 
 /* Mobile-only elements: hidden by default, shown inside mobile @media */
 #mobile-view-toggle { display: none; }
+.ftog{padding:4px 8px;background:var(--bg3);color:var(--dim);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;letter-spacing:.3px;transition:all .15s}
+.ftog.on{background:rgba(0,255,200,.12);color:var(--cyan);border-color:rgba(0,255,200,.4)}
 #mobile-list-view   { display: none; }
 
 #shell {
@@ -3067,22 +3069,77 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- TRANSPORT FILTERS -->
           <div id="transport-filters" style="display:none">
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">TYPE</div>
-              <select id="f-transport-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All</option>
-                <option>Yacht / Sailboat</option>
-                <option>Motor Vessel</option>
-                <option>Private Jet</option>
-                <option>Helicopter</option>
-                <option>Classic Car</option>
-                <option>Motorcycle</option>
-                <option>RV / Motorhome</option>
-              </select>
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">AVIATION</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="single engine aircraft cessna piper" onclick="setTransportToggle(this)">Single Engine</button>
+                <button class="ftog" data-kw="multi engine twin aircraft" onclick="setTransportToggle(this)">Multi Engine</button>
+                <button class="ftog" data-kw="private jet gulfstream citation learjet" onclick="setTransportToggle(this)">Private Jet</button>
+                <button class="ftog" data-kw="turboprop king air pilatus" onclick="setTransportToggle(this)">Turboprop</button>
+                <button class="ftog" data-kw="helicopter robinson bell" onclick="setTransportToggle(this)">Helicopter</button>
+                <button class="ftog" data-kw="drone uav unmanned" onclick="setTransportToggle(this)">Drone / UAV</button>
+                <button class="ftog" data-kw="military aircraft surplus warbird" onclick="setTransportToggle(this)">Military Aircraft</button>
+                <button class="ftog" data-kw="seaplane floatplane amphibious" onclick="setTransportToggle(this)">Seaplane</button>
+                <button class="ftog" data-kw="glider sailplane" onclick="setTransportToggle(this)">Glider</button>
+                <button class="ftog" data-kw="ultralight experimental aircraft" onclick="setTransportToggle(this)">Ultralight</button>
+                <button class="ftog" data-kw="commercial airliner boeing airbus" onclick="setTransportToggle(this)">Commercial Airliner</button>
+                <button class="ftog" data-kw="aircraft parts engine avionics" onclick="setTransportToggle(this)">Parts / Engines</button>
+              </div>
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MARINE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="superyacht megayacht luxury yacht" onclick="setTransportToggle(this)">Superyacht</button>
+                <button class="ftog" data-kw="sailing yacht sailboat" onclick="setTransportToggle(this)">Sailing Yacht</button>
+                <button class="ftog" data-kw="motor yacht powerboat" onclick="setTransportToggle(this)">Motor Yacht</button>
+                <button class="ftog" data-kw="catamaran trimaran" onclick="setTransportToggle(this)">Catamaran</button>
+                <button class="ftog" data-kw="speedboat bowrider center console" onclick="setTransportToggle(this)">Speedboat</button>
+                <button class="ftog" data-kw="fishing vessel trawler" onclick="setTransportToggle(this)">Fishing Vessel</button>
+                <button class="ftog" data-kw="oil tanker crude carrier supertanker" onclick="setTransportToggle(this)">Oil Tanker</button>
+                <button class="ftog" data-kw="cargo ship container vessel" onclick="setTransportToggle(this)">Cargo Ship</button>
+                <button class="ftog" data-kw="ferry passenger vessel" onclick="setTransportToggle(this)">Ferry</button>
+                <button class="ftog" data-kw="tugboat workboat" onclick="setTransportToggle(this)">Tugboat</button>
+                <button class="ftog" data-kw="cruise ship expedition vessel" onclick="setTransportToggle(this)">Cruise Ship</button>
+                <button class="ftog" data-kw="submarine underwater vessel" onclick="setTransportToggle(this)">Submarine</button>
+                <button class="ftog" data-kw="pontoon houseboat" onclick="setTransportToggle(this)">Pontoon / Houseboat</button>
+                <button class="ftog" data-kw="barge dredge platform" onclick="setTransportToggle(this)">Barge / Platform</button>
+              </div>
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">GROUND</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="exotic sports car ferrari lamborghini" onclick="setTransportToggle(this)">Exotic / Sports Car</button>
+                <button class="ftog" data-kw="classic vintage antique car" onclick="setTransportToggle(this)">Classic Car</button>
+                <button class="ftog" data-kw="luxury car rolls royce bentley" onclick="setTransportToggle(this)">Luxury Car</button>
+                <button class="ftog" data-kw="electric vehicle tesla ev" onclick="setTransportToggle(this)">Electric Vehicle</button>
+                <button class="ftog" data-kw="motorcycle harley davidson" onclick="setTransportToggle(this)">Motorcycle</button>
+                <button class="ftog" data-kw="rv motorhome class a" onclick="setTransportToggle(this)">RV / Motorhome</button>
+                <button class="ftog" data-kw="semi truck freightliner kenworth" onclick="setTransportToggle(this)">Semi Truck</button>
+                <button class="ftog" data-kw="dump truck construction" onclick="setTransportToggle(this)">Dump Truck</button>
+                <button class="ftog" data-kw="bus coach school bus" onclick="setTransportToggle(this)">Bus</button>
+                <button class="ftog" data-kw="forklift" onclick="setTransportToggle(this)">Forklift</button>
+                <button class="ftog" data-kw="crane lifting equipment" onclick="setTransportToggle(this)">Crane</button>
+                <button class="ftog" data-kw="bulldozer excavator caterpillar" onclick="setTransportToggle(this)">Bulldozer / Excavator</button>
+                <button class="ftog" data-kw="tractor farm equipment" onclick="setTransportToggle(this)">Tractor / Farm Equip</button>
+                <button class="ftog" data-kw="military vehicle humvee" onclick="setTransportToggle(this)">Military Vehicle</button>
+                <button class="ftog" data-kw="cargo trailer flatbed" onclick="setTransportToggle(this)">Trailer</button>
+              </div>
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">RAIL & SPACE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="locomotive train railroad engine" onclick="setTransportToggle(this)">Locomotive</button>
+                <button class="ftog" data-kw="railcar freight passenger car" onclick="setTransportToggle(this)">Railcar</button>
+                <button class="ftog" data-kw="spacecraft rocket satellite" onclick="setTransportToggle(this)">Spacecraft / Rocket</button>
+                <button class="ftog" data-kw="hovercraft ground effect vehicle" onclick="setTransportToggle(this)">Hovercraft</button>
+              </div>
+              <input type="hidden" id="f-transport-type" value="">
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MIN</div><input id="f-transport-year-min" type="number" placeholder="1990" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MAX</div><input id="f-transport-year-max" type="number" placeholder="2025" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px">
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">YEAR MIN</div><input id="f-transport-year-min" type="number" placeholder="1940" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">YEAR MAX</div><input id="f-transport-year-max" type="number" placeholder="2026" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+            </div>
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">LISTING STATUS</div>
+              <div style="display:flex;gap:4px">
+                <button class="ftog on" id="fs-active" onclick="setStatusToggle('active',this)">For Sale</button>
+                <button class="ftog" id="fs-registry" onclick="setStatusToggle('registry',this)">Registry / Dark Pool</button>
+                <button class="ftog" id="fs-all" onclick="setStatusToggle('all',this)">All</button>
+              </div>
             </div>
           <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
@@ -4525,6 +4582,18 @@ async function runCategorySearch() {
   showToast(items.length + ' RESULTS');
 }
 window.runCategorySearch = runCategorySearch;
+function setTransportToggle(btn) {
+  document.querySelectorAll('#transport-filters .ftog[data-kw]').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('f-transport-type').value = btn.dataset.kw;
+}
+function setStatusToggle(status, btn) {
+  document.querySelectorAll('#fs-active,#fs-registry,#fs-all').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  window._transportStatusFilter = status;
+}
+window.setTransportToggle = setTransportToggle;
+window.setStatusToggle = setStatusToggle;
 
 async function fetchFAAListings() {
   try {
