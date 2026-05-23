@@ -11066,19 +11066,7 @@ window.closeFilterModal = closeFilterModal;
 
 
 
-function closeFilterModal() {
-  var m = document.getElementById('filter-modal');
-  if (m) m.style.display = 'none';
-  document.body.style.overflow = '';
-}
-document.addEventListener('click', function(e) {
-  var m = document.getElementById('filter-modal');
-  if (m && e.target === m) closeFilterModal();
-});
-window.openFilterModal = openFilterModal;
-window.closeFilterModal = closeFilterModal;
 
-</body></html>`;
 
     const el = document.createElement('div');
     el.innerHTML = html;
