@@ -11051,35 +11051,7 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
 </div>
 
 
-function openFilterModal() {
-  const modal = document.getElementById('filter-modal');
-  const body = document.getElementById('filter-modal-body');
-  const title = document.getElementById('filter-modal-title');
-  if (!modal) return;
-  const catPanelMap = {
-    'realestate':'re-filters','transport':'transport-filters',
-    'business':'business-filters','debt':'debt-filters',
-    'energy':'energy-filters','healthcare':'healthcare-filters',
-    'ip':'ip-filters','anthro':'anthro-filters','art':'art-filters',
-    'resources':'resources-filters','rights':'rights-filters',
-    'infrastructure':'infrastructure-filters','robotics':'robotics-filters',
-    'currency':'currency-filters','equities':'equities-filters','other':'generic-filters',
-  };
-  const catLabel = (ASSET_CATEGORIES.find(c=>c.id===activeTab)||{label:'ALL'}).label;
-  title.textContent = (catLabel||'ALL') + ' — FILTERS';
-  const panel = document.getElementById(catPanelMap[activeTab]||'generic-filters');
-  const priceHtml = `<div style="margin-bottom:14px"><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">PRICE RANGE</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><div style="font-size:8px;color:var(--muted);margin-bottom:4px">MIN</div><select id="fm-price-min" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:6px;font-size:10px"><option value="">No Min</option><option value="1000">$1K</option><option value="10000">$10K</option><option value="50000">$50K</option><option value="100000">$100K</option><option value="500000">$500K</option><option value="1000000">$1M</option><option value="5000000">$5M</option><option value="10000000">$10M</option><option value="50000000">$50M</option><option value="100000000">$100M</option></select></div><div><div style="font-size:8px;color:var(--muted);margin-bottom:4px">MAX</div><select id="fm-price-max" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:6px;font-size:10px"><option value="">No Max</option><option value="50000">$50K</option><option value="100000">$100K</option><option value="500000">$500K</option><option value="1000000">$1M</option><option value="5000000">$5M</option><option value="10000000">$10M</option><option value="50000000">$50M</option><option value="100000000">$100M</option><option value="1000000000">$1B+</option></select></div></div></div>`;
-  if (panel) {
-    const clone = panel.cloneNode(true);
-    clone.style.display = 'block';
-    clone.querySelectorAll('button[onclick*="runCategorySearch"]').forEach(b => b.remove());
-    body.innerHTML = priceHtml + clone.innerHTML;
-  } else {
-    body.innerHTML = priceHtml;
-  }
-  modal.style.display = 'block';
-  document.body.style.overflow = 'hidden';
-}
+
 function closeFilterModal() {
   const m = document.getElementById('filter-modal');
   if (m) m.style.display = 'none';
@@ -11093,38 +11065,7 @@ window.openFilterModal = openFilterModal;
 window.closeFilterModal = closeFilterModal;
 
 
-function openFilterModal() {
-  var modal = document.getElementById('filter-modal');
-  var body = document.getElementById('filter-modal-body');
-  var title = document.getElementById('filter-modal-title');
-  if (!modal) return;
-  var catPanelMap = {
-    realestate:'re-filters',transport:'transport-filters',
-    business:'business-filters',debt:'debt-filters',
-    energy:'energy-filters',healthcare:'healthcare-filters',
-    ip:'ip-filters',anthro:'anthro-filters',art:'art-filters',
-    resources:'resources-filters',rights:'rights-filters',
-    infrastructure:'infrastructure-filters',robotics:'robotics-filters',
-    currency:'currency-filters',equities:'equities-filters',other:'generic-filters'
-  };
-  var cat = (window.ASSET_CATEGORIES||[]).find(function(c){return c.id===window.activeTab;});
-  title.textContent = (cat ? cat.label : 'ALL') + ' — FILTERS';
-  var panelId = catPanelMap[window.activeTab] || 'generic-filters';
-  var panel = document.getElementById(panelId);
-  var html = '';
-  if (panel) {
-    var clone = panel.cloneNode(true);
-    clone.style.display = 'block';
-    var btns = clone.querySelectorAll('button');
-    for (var i=0; i<btns.length; i++) {
-      if ((btns[i].getAttribute('onclick')||'').indexOf('runCategorySearch') > -1) btns[i].remove();
-    }
-    html = clone.outerHTML;
-  }
-  body.innerHTML = html;
-  modal.style.display = 'block';
-  document.body.style.overflow = 'hidden';
-}
+
 function closeFilterModal() {
   var m = document.getElementById('filter-modal');
   if (m) m.style.display = 'none';
