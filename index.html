@@ -5160,7 +5160,7 @@ function setCategory(catId, btn) {
   if (catId && catId !== 'all') {
     const fp = document.getElementById('filter-panel');
     const btn = document.getElementById('filter-toggle-btn');
-    if (fp && fp.style.display === 'none') {
+    if (fp) {
       fp.style.display = 'block';
       if (btn) btn.textContent = 'FILTERS ▴';
     }
