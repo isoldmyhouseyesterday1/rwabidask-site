@@ -4528,7 +4528,7 @@ window.runCategorySearch = runCategorySearch;
 
 async function fetchFAAListings() {
   try {
-    const resp = await fetch(PARCEL_API + '?action=faa-aircraft&lat_min=45&lat_max=49&lng_min=-125&lng_max=-116');
+    const resp = await fetch(PARCEL_API + '?action=faa-aircraft&lat_min=24&lat_max=50&lng_min=-125&lng_max=-65&limit=200');
     if (!resp.ok) return [];
     const data = await resp.json();
     if (!Array.isArray(data)) return [];
@@ -5061,22 +5061,20 @@ function setCategory(catId, btn) {
   if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull();
   // Update filter panel for active category
   updateFilterPanelForCategory(catId);
+  // Auto-open filter panel when category selected
+  if (catId && catId !== 'all') {
+    const fp = document.getElementById('filter-panel');
+    const btn = document.getElementById('filter-toggle-btn');
+    if (fp && fp.style.display === 'none') {
+      fp.style.display = 'block';
+      if (btn) btn.textContent = 'FILTERS ▴';
+    }
+  }
   // Fire on-demand RSS fetch for selected class
   if (catId !== 'all') fetchRSSForClass(catId);
   if (catId === 'transport') {
-    // eBay Motors aircraft + vehicles
-    const ebayCategories = [63677, 63678, 63676, 26429, 50054, 6001];
-    Promise.all([
-      fetchFAAListings(),
-      ...ebayCategories.map(cat => fetchEbayListings(cat))
-    ]).then(results => {
-      const allItems = results.flat();
-      if (!allItems.length) return;
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      allItems.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-      if (markersRendered) renderDOMMarkers();
-    });
+    // Data loads only when user hits SEARCH in filter panel
+    renderList(filterAssets(window.ASSETS));
   }
   if (catId === 'art') {
     fetchEbayListings('550').then(items => {
