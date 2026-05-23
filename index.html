@@ -4536,9 +4536,17 @@ async function fetchFAAListings() {
       const jitterLat = (ac.lat || 47.5) + (Math.random() - 0.5) * 1.5;
       const jitterLng = (ac.lng || -120.5) + (Math.random() - 0.5) * 1.5;
       return {
-        id: 'faa-' + (ac.n_number || ac.id || Math.random()),
-        apn: ac.n_number || '',
-        address: 'N' + (ac.n_number || '?') + ' — ' + (ac.mfr || '') + ' ' + (ac.model || ''),
+        const nn = ac.N_NUMBER || ac.n_number || '';
+        const mfr = ac.MANUFACTURER || ac.mfr || '';
+        const model = ac.MODEL || ac.model || '';
+        const year = ac.YEAR_MFR || ac.year_mfr || '';
+        const seats = ac.NO_SEATS || ac.no_seats || '';
+        const speed = ac.SPEED || ac.speed || '';
+        const state = ac.STATE || ac.state || '';
+        id: 'faa-' + (nn || Math.random()),
+        apn: nn,
+        address: (nn ? 'N'+nn : 'Unknown') + ' — ' + [year, mfr, model].filter(Boolean).join(' '),
+        city: state,
         type: 'transport',
         asset_class: 'transport',
         price: 0,
@@ -4547,6 +4555,7 @@ async function fetchFAAListings() {
         _hasCoords: true,
         _isFAA: true,
         _faaData: ac,
+        description: [year ? 'Year: '+year : '', seats ? seats+' seats' : '', speed ? speed+'mph' : ''].filter(Boolean).join(' · '),
       };
     });
   } catch(e) {
@@ -9938,6 +9947,47 @@ window.renderBasicsPanel=async function(asset,bqData){if(typeof RWA_GATE!=='unde
       </div>`;
     return;
   }
+  // ── FAA Registry Display ────────────────────────────────────
+  if(asset?._isFAA && asset?._faaData){
+    const f=asset._faaData;
+    const nn = f.N_NUMBER||f.n_number||'';
+    const mfr = f.MANUFACTURER||f.mfr||'';
+    const model = f.MODEL||f.model||'';
+    const year = f.YEAR_MFR||f.year_mfr||'';
+    const seats = f.NO_SEATS||f.no_seats||'';
+    const speed = f.SPEED||f.speed||'';
+    const owner = f.OWNER_NAME||f.owner_name||'Registered Owner';
+    const state = f.STATE||f.state||'';
+    const acType = f.TYPE_AIRCRAFT||f.type_aircraft||'';
+    const rhead=document.getElementById('rhead');
+    const rbody=document.getElementById('rbody');
+    if(rhead) rhead.innerHTML=`<div class="rtype">TRANSPORT // FAA REGISTRY</div><div class="rname">${nn?'N'+escapeHtml(nn):''} — ${escapeHtml(mfr)} ${escapeHtml(model)}</div><div style="margin-top:6px;font-size:10px;color:var(--muted)">${escapeHtml(state)}</div>`;
+    if(rbody) rbody.innerHTML=`
+      <div style="padding:12px 16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px">TAIL NUMBER</div>
+            <div style="font-size:16px;font-weight:700;color:var(--cyan)">${nn?'N'+escapeHtml(nn):'--'}</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px">YEAR</div>
+            <div style="font-size:14px;font-weight:700;color:var(--gold)">${escapeHtml(year||'--')}</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:#8899aa;margin-bottom:12px;line-height:1.8">
+          <div><span style="color:var(--muted)">MAKE / MODEL:</span> ${escapeHtml(mfr+' '+model)}</div>
+          ${seats?`<div><span style="color:var(--muted)">SEATS:</span> ${escapeHtml(seats)}</div>`:''}
+          ${speed?`<div><span style="color:var(--muted)">SPEED:</span> ${escapeHtml(speed)} mph</div>`:''}
+          <div><span style="color:var(--muted)">REGISTERED OWNER:</span> ${escapeHtml(owner)}</div>
+          <div><span style="color:var(--muted)">STATE:</span> ${escapeHtml(state)}</div>
+          <div><span style="color:var(--muted)">SOURCE:</span> FAA Registry</div>
+        </div>
+        <button onclick="showToast('BID FEATURE COMING SOON')" style="width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px">PLACE BID ON THIS AIRCRAFT →</button>
+        <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:8px">FAA registry data · not listed for sale · dark pool bid</div>
+      </div>`;
+    return;
+  }
+
   // ── eBay Listing Display ─────────────────────────────────────
   if(asset?._isEbay && asset?._ebayData){
     const e=asset._ebayData;
@@ -9967,7 +10017,7 @@ window.renderBasicsPanel=async function(asset,bqData){if(typeof RWA_GATE!=='unde
       </div>`;
     return;
   }
-  if(asset?.apn&&asset.apn!=='Resolving…'){const slug=asset.apn.replace(/[^0-9-]/g,'');history.pushState({apn:slug},'','/parcel/'+slug);}const rhead=document.getElementById('rhead'),rbody=document.getElementById('rbody');if(rhead)rhead.innerHTML=`<div class="rtype">PARCEL RECORD // QUERYING</div><div class="rname">${asset?.address||asset?.apn||'Parcel'}</div><div style="margin-top:14px;display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid rgba(0,255,200,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin360 .7s linear infinite"></div><span style="font-size:10px;color:var(--muted);letter-spacing:1px">QUERYING LEDGER…</span></div>`;if(rbody)rbody.innerHTML='';const resp=await fetchParcelData({lat:asset?.lat,lng:asset?.lng,pin:asset?.apn||asset?.id},true);const data=resp?.parcel||resp;const listing=resp?.listing||null;if(data&&asset){asset._bq=data;asset._listing=listing;}_renderFull(asset,data,false,listing);
+  if(asset?.apn&&asset.apn!=='Resolving…'&&!asset._isFAA&&!asset._isEbay&&!asset._isRSS){const slug=asset.apn.replace(/[^0-9-]/g,'');history.pushState({apn:slug},'','/parcel/'+slug);}const rhead=document.getElementById('rhead'),rbody=document.getElementById('rbody');if(rhead)rhead.innerHTML=`<div class="rtype">PARCEL RECORD // QUERYING</div><div class="rname">${asset?.address||asset?.apn||'Parcel'}</div><div style="margin-top:14px;display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid rgba(0,255,200,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin360 .7s linear infinite"></div><span style="font-size:10px;color:var(--muted);letter-spacing:1px">QUERYING LEDGER…</span></div>`;if(rbody)rbody.innerHTML='';const resp=await fetchParcelData({lat:asset?.lat,lng:asset?.lng,pin:asset?.apn||asset?.id},true);const data=resp?.parcel||resp;const listing=resp?.listing||null;if(data&&asset){asset._bq=data;asset._listing=listing;}_renderFull(asset,data,false,listing);
 // async polygon fetch -- non-blocking
 const _pin=data?.PIN||asset?.apn;
 if(_pin&&_pin!=='Resolving…'){
