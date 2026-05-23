@@ -3084,6 +3084,7 @@ body { min-width: 900px; overflow-x: auto; }
               <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MIN</div><input id="f-transport-year-min" type="number" placeholder="1990" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
               <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MAX</div><input id="f-transport-year-max" type="number" placeholder="2025" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- BUSINESS FILTERS -->
           <div id="business-filters" style="display:none">
@@ -3095,6 +3096,7 @@ body { min-width: 900px; overflow-x: auto; }
               <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MIN REVENUE</div><input id="f-business-rev-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
               <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MAX REVENUE</div><input id="f-business-rev-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- DEBT FILTERS -->
           <div id="debt-filters" style="display:none">
@@ -3110,6 +3112,7 @@ body { min-width: 900px; overflow-x: auto; }
                 <option>NPL Portfolio</option>
               </select>
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- ENERGY FILTERS -->
           <div id="energy-filters" style="display:none">
@@ -3125,6 +3128,7 @@ body { min-width: 900px; overflow-x: auto; }
                 <option>Battery Storage</option>
               </select>
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- HEALTHCARE FILTERS -->
           <div id="healthcare-filters" style="display:none">
@@ -3136,6 +3140,7 @@ body { min-width: 900px; overflow-x: auto; }
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">COUNTRY</div>
               <input id="f-healthcare-country" type="text" placeholder="e.g. Mexico, Thailand, USA" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- IP FILTERS -->
           <div id="ip-filters" style="display:none">
@@ -3151,6 +3156,7 @@ body { min-width: 900px; overflow-x: auto; }
                 <option>Royalty Stream</option>
               </select>
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- ANTHRO FILTERS -->
           <div id="anthro-filters" style="display:none">
@@ -3172,6 +3178,7 @@ body { min-width: 900px; overflow-x: auto; }
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LOCATION</div>
               <input id="f-anthro-location" type="text" placeholder="City, Country" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- ART FILTERS -->
           <div id="art-filters" style="display:none">
@@ -3188,6 +3195,7 @@ body { min-width: 900px; overflow-x: auto; }
                 <option>NFT / Digital</option>
               </select>
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- GENERIC FILTERS -->
           <div id="generic-filters" style="display:none">
@@ -3598,6 +3606,7 @@ body { min-width: 900px; overflow-x: auto; }
                 <option value="other">Other</option>
               </select>
             </div>
+            <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div><!-- end transport-filters -->
 
           <!-- BUSINESS FILTERS -->
@@ -4439,6 +4448,84 @@ async function fetchGSAListings() {
 }
 
 
+
+// ── Category search -- fires on SEARCH button click ──────────────────────
+const EBAY_CAT_MAP = {
+  transport:     ['63677','63678','63676','26429','50054','6001'],
+  art:           ['550','281','26588','64482','212'],
+  business:      ['12576'],
+  healthcare:    ['36132'],
+  robotics:      ['92074','12584'],
+  energy:        ['12139','26261'],
+  infrastructure:['131131'],
+  ip:            ['58058','293','41956'],
+  resources:     ['12108','11700'],
+  rights:        ['41956'],
+  anthro:        ['64482','237'],
+  currency:      ['11116'],
+  debt:          ['10136'],
+  equities:      ['619'],
+  other:         ['99'],
+};
+
+const TRANSPORT_TYPE_CAT = {
+  yacht:'26429', sailboat:'26429', powerboat:'26429', catamaran:'26429',
+  ferry:'26429', tugboat:'26429', ship:'26429',
+  jet:'63678', plane:'63677', helicopter:'63676', drone:'63676',
+  rv:'50054', vehicle:'6001',
+};
+
+async function runCategorySearch() {
+  const cat = activeTab;
+  if (!cat || cat === 'realestate') return;
+
+  showToast('SEARCHING…');
+  window.ASSETS = (window.ASSETS||[]).filter(a => !a._isEbay && !a._isFAA);
+
+  const gv = id => (document.getElementById(id)?.value||'').trim();
+
+  let cats = EBAY_CAT_MAP[cat] || ['99'];
+  let kw = '';
+
+  // Sub-type keyword routing
+  if (cat === 'transport') {
+    const type = gv('f-transport-type');
+    if (type && TRANSPORT_TYPE_CAT[type]) { cats = [TRANSPORT_TYPE_CAT[type]]; kw = type; }
+  } else if (cat === 'art') {
+    kw = gv('f-art-type');
+  } else if (cat === 'business') {
+    kw = gv('f-business-industry');
+  } else if (cat === 'healthcare') {
+    kw = gv('f-healthcare-procedure') + ' ' + gv('f-healthcare-country');
+  } else if (cat === 'ip') {
+    kw = gv('f-ip-type');
+  } else if (cat === 'energy') {
+    kw = gv('f-energy-type');
+  } else if (cat === 'anthro') {
+    kw = gv('f-anthro-type') + ' ' + gv('f-anthro-location');
+  } else if (cat === 'other') {
+    kw = gv('f-generic-keywords');
+  }
+
+  // Fetch all relevant eBay categories in parallel
+  const results = await Promise.all(cats.map(c => fetchEbayListings(c, kw.trim())));
+  const items = results.flat();
+  items.forEach(a => { a.type = cat; a.asset_class = cat; });
+
+  // Also fetch FAA for transport
+  if (cat === 'transport') {
+    const faaItems = await fetchFAAListings();
+    items.push(...faaItems);
+  }
+
+  const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
+  items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
+  renderList(filterAssets(window.ASSETS));
+  if (markersRendered) renderDOMMarkers();
+  showToast(items.length + ' RESULTS');
+}
+window.runCategorySearch = runCategorySearch;
+
 async function fetchFAAListings() {
   try {
     const resp = await fetch(PARCEL_API + '?action=faa-aircraft&lat_min=45&lat_max=49&lng_min=-125&lng_max=-116');
@@ -5269,7 +5356,8 @@ function filterAssets(assets) {
   // No category selected -- show nothing, prompt user to pick
   if (!activeTab) return [];
   let filtered = assets;
-  // Category filter -- asset_type is primary, category is fallback
+
+  // ── Category filter ───────────────────────────────────────────
   if (activeTab !== 'all') {
     filtered = filtered.filter(a => {
       const rawFields = a._raw || {};
@@ -5277,13 +5365,88 @@ function filterAssets(assets) {
       return getAssetCategory(typeStr) === activeTab;
     });
   }
-  // Price filter -- compare as float; full range up to $25T
+
+  // ── Price slider filter ───────────────────────────────────────
   filtered = filtered.filter(a => {
     const p = parseFloat(a.price) || 0;
-    if (p <= 0) return sliderMinPrice <= 1; // include $0 assets at min range
+    if (p <= 0) return sliderMinPrice <= 1;
     return p >= sliderMinPrice && p <= sliderMaxPrice;
   });
-    window.allFiltered = filtered; // always in sync
+
+  // ── Dynamic filter panel values (source-agnostic) ─────────────
+  const gv = id => (document.getElementById(id)?.value || '').trim().toLowerCase();
+  const gc = id => document.getElementById(id)?.checked;
+
+  // Transport filters
+  if (activeTab === 'transport') {
+    const type = gv('f-transport-type');
+    const yrMin = parseInt(gv('f-t-yr-min')) || 0;
+    const yrMax = parseInt(gv('f-t-yr-max')) || 9999;
+    const cond = gv('f-t-condition');
+    if (type) filtered = filtered.filter(a => {
+      const t = (a.type||a.title||a.address||'').toLowerCase();
+      return t.includes(type) || (a._faaData && (a._faaData.TYPE_AIRCRAFT||'').toLowerCase().includes(type))
+        || (a._ebayData && (a._ebayData.title||'').toLowerCase().includes(type));
+    });
+    if (yrMin > 0) filtered = filtered.filter(a => {
+      const yr = parseInt(a._faaData?.YEAR_MFR || a._ebayData?.title?.match(/(19|20)\d{2}/)?.[0] || 0);
+      return !yr || yr >= yrMin;
+    });
+    if (yrMax < 9999) filtered = filtered.filter(a => {
+      const yr = parseInt(a._faaData?.YEAR_MFR || a._ebayData?.title?.match(/(19|20)\d{2}/)?.[0] || 9999);
+      return !yr || yr <= yrMax;
+    });
+    if (cond) filtered = filtered.filter(a => (a._ebayData?.condition||'').toLowerCase().includes(cond));
+  }
+
+  // Business filters
+  if (activeTab === 'business') {
+    const industry = gv('f-business-industry');
+    if (industry) filtered = filtered.filter(a =>
+      (a.title||a.address||'').toLowerCase().includes(industry) ||
+      (a._ebayData?.title||'').toLowerCase().includes(industry)
+    );
+  }
+
+  // Healthcare filters
+  if (activeTab === 'healthcare') {
+    const proc = gv('f-healthcare-procedure');
+    const country = gv('f-healthcare-country');
+    if (proc) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(proc));
+    if (country) filtered = filtered.filter(a => (a.location||a._ebayData?.location||'').toLowerCase().includes(country));
+  }
+
+  // Art filters
+  if (activeTab === 'art') {
+    const type = gv('f-art-type');
+    if (type) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(type.toLowerCase()));
+  }
+
+  // IP filters
+  if (activeTab === 'ip') {
+    const type = gv('f-ip-type');
+    if (type) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(type.toLowerCase()));
+  }
+
+  // Energy filters
+  if (activeTab === 'energy') {
+    const type = gv('f-energy-type');
+    if (type) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(type.toLowerCase()));
+  }
+
+  // Anthro filters
+  if (activeTab === 'anthro') {
+    const type = gv('f-anthro-type');
+    const loc = gv('f-anthro-location');
+    if (type) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(type.toLowerCase()));
+    if (loc) filtered = filtered.filter(a => (a.location||a._ebayData?.location||a.city||'').toLowerCase().includes(loc));
+  }
+
+  // Generic keyword filter (currency, equities, debt, resources, rights, infrastructure, robotics, other)
+  const kw = gv('f-generic-keywords');
+  if (kw) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(kw));
+
+  window.allFiltered = filtered;
   return filtered;
 }
 
