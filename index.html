@@ -9475,6 +9475,11 @@ setTimeout(() => {
     window.setCategory = function(catId, btn) {
       sc(catId, btn);
       startSponsorRotation(catId);
+      if (catId && catId !== 'all') {
+        const fp = document.getElementById('filter-panel');
+        const tb = document.getElementById('filter-toggle-btn');
+        if (fp) { fp.style.display = 'block'; if (tb) tb.textContent = 'FILTERS ▴'; }
+      }
     };
   }
 }, 1000);
