@@ -4536,17 +4536,10 @@ async function fetchFAAListings() {
       const jitterLat = (ac.lat || 47.5) + (Math.random() - 0.5) * 1.5;
       const jitterLng = (ac.lng || -120.5) + (Math.random() - 0.5) * 1.5;
       return {
-        const nn = ac.N_NUMBER || ac.n_number || '';
-        const mfr = ac.MANUFACTURER || ac.mfr || '';
-        const model = ac.MODEL || ac.model || '';
-        const year = ac.YEAR_MFR || ac.year_mfr || '';
-        const seats = ac.NO_SEATS || ac.no_seats || '';
-        const speed = ac.SPEED || ac.speed || '';
-        const state = ac.STATE || ac.state || '';
-        id: 'faa-' + (nn || Math.random()),
-        apn: nn,
-        address: (nn ? 'N'+nn : 'Unknown') + ' — ' + [year, mfr, model].filter(Boolean).join(' '),
-        city: state,
+        id: 'faa-' + (ac.N_NUMBER || ac.n_number || Math.random()),
+        apn: ac.N_NUMBER || ac.n_number || '',
+        address: ((ac.N_NUMBER||ac.n_number) ? 'N'+(ac.N_NUMBER||ac.n_number) : 'Unknown') + ' — ' + [ac.YEAR_MFR||ac.year_mfr, ac.MANUFACTURER||ac.mfr, ac.MODEL||ac.model].filter(Boolean).join(' '),
+        city: ac.STATE || ac.state || '',
         type: 'transport',
         asset_class: 'transport',
         price: 0,
