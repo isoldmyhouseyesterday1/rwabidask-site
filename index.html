@@ -4548,7 +4548,7 @@ async function fetchFAAListings() {
         _hasCoords: true,
         _isFAA: true,
         _faaData: ac,
-        description: [year ? 'Year: '+year : '', seats ? seats+' seats' : '', speed ? speed+'mph' : ''].filter(Boolean).join(' · '),
+        description: [ac.YEAR_MFR ? 'Year: '+ac.YEAR_MFR : '', ac.NO_SEATS ? ac.NO_SEATS+' seats' : '', ac.SPEED && ac.SPEED!='0' ? ac.SPEED+'mph' : ''].filter(Boolean).join(' · '),
       };
     });
   } catch(e) {
