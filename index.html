@@ -5156,14 +5156,12 @@ function setCategory(catId, btn) {
   if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull();
   // Update filter panel for active category
   updateFilterPanelForCategory(catId);
-  // Auto-open filter panel when category selected
+  // Auto-open filter panel + sponsor rotation
   if (catId && catId !== 'all') {
     const fp = document.getElementById('filter-panel');
-    const btn = document.getElementById('filter-toggle-btn');
-    if (fp) {
-      fp.style.display = 'block';
-      if (btn) btn.textContent = 'FILTERS ▴';
-    }
+    const fb = document.getElementById('filter-toggle-btn');
+    if (fp) { fp.style.display = 'block'; if (fb) fb.textContent = 'FILTERS ▴'; }
+    if (typeof startSponsorRotation === 'function') startSponsorRotation(catId);
   }
   // Fire on-demand RSS fetch for selected class
   if (catId !== 'all') fetchRSSForClass(catId);
@@ -9467,22 +9465,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ════════════════════════════════════════════════════════════════════
 // CATEGORY SPONSOR HOOK -- show sponsor strip on category select
 // ════════════════════════════════════════════════════════════════════
-const _origSetCategory = window.setCategory;
-// Extend setCategory after it's defined to add sponsor rotation
-setTimeout(() => {
-  const sc = window.setCategory;
-  if (sc) {
-    window.setCategory = function(catId, btn) {
-      sc(catId, btn);
-      startSponsorRotation(catId);
-      if (catId && catId !== 'all') {
-        const fp = document.getElementById('filter-panel');
-        const tb = document.getElementById('filter-toggle-btn');
-        if (fp) { fp.style.display = 'block'; if (tb) tb.textContent = 'FILTERS ▴'; }
-      }
-    };
-  }
-}, 1000);
 
 
 // ════════════════════════════════════════════════════════════════════
