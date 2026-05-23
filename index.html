@@ -3145,121 +3145,265 @@ body { min-width: 900px; overflow-x: auto; }
           </div>
           <!-- BUSINESS FILTERS -->
           <div id="business-filters" style="display:none">
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">INDUSTRY</div>
-              <input id="f-business-industry" type="text" placeholder="e.g. Restaurant, SaaS" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MIN REVENUE</div><input id="f-business-rev-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MAX REVENUE</div><input id="f-business-rev-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">BUSINESS TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="restaurant food service" onclick="setCatToggle(this,'f-business-kw')">Restaurant</button>
+                <button class="ftog" data-kw="retail store" onclick="setCatToggle(this,'f-business-kw')">Retail</button>
+                <button class="ftog" data-kw="saas software technology" onclick="setCatToggle(this,'f-business-kw')">SaaS / Tech</button>
+                <button class="ftog" data-kw="ecommerce online business" onclick="setCatToggle(this,'f-business-kw')">Ecommerce</button>
+                <button class="ftog" data-kw="franchise" onclick="setCatToggle(this,'f-business-kw')">Franchise</button>
+                <button class="ftog" data-kw="manufacturing" onclick="setCatToggle(this,'f-business-kw')">Manufacturing</button>
+                <button class="ftog" data-kw="construction contractor" onclick="setCatToggle(this,'f-business-kw')">Construction</button>
+                <button class="ftog" data-kw="healthcare medical practice" onclick="setCatToggle(this,'f-business-kw')">Medical Practice</button>
+                <button class="ftog" data-kw="auto repair service" onclick="setCatToggle(this,'f-business-kw')">Auto / Service</button>
+                <button class="ftog" data-kw="hotel motel hospitality" onclick="setCatToggle(this,'f-business-kw')">Hotel / Hospitality</button>
+                <button class="ftog" data-kw="laundry dry cleaning" onclick="setCatToggle(this,'f-business-kw')">Laundry / Cleaning</button>
+                <button class="ftog" data-kw="distribution wholesale" onclick="setCatToggle(this,'f-business-kw')">Distribution</button>
+                <button class="ftog" data-kw="media marketing agency" onclick="setCatToggle(this,'f-business-kw')">Agency / Media</button>
+                <button class="ftog" data-kw="financial services" onclick="setCatToggle(this,'f-business-kw')">Financial Services</button>
+              </div>
+              <input type="hidden" id="f-business-kw" value="">
+              <input id="f-business-industry" type="text" placeholder="Or type keyword..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box;margin-top:4px">
             </div>
           <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- DEBT FILTERS -->
           <div id="debt-filters" style="display:none">
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LOAN TYPE</div>
-              <select id="f-debt-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All</option>
-                <option>Mortgage Note</option>
-                <option>Business Loan</option>
-                <option>Bridge Loan</option>
-                <option>Hard Money</option>
-                <option>Bond</option>
-                <option>NPL Portfolio</option>
-              </select>
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">DEBT TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="mortgage note real estate" onclick="setCatToggle(this,'f-debt-type')">Mortgage Note</button>
+                <button class="ftog" data-kw="business loan sba" onclick="setCatToggle(this,'f-debt-type')">Business Loan</button>
+                <button class="ftog" data-kw="hard money bridge loan" onclick="setCatToggle(this,'f-debt-type')">Hard Money</button>
+                <button class="ftog" data-kw="bond corporate municipal" onclick="setCatToggle(this,'f-debt-type')">Bond</button>
+                <button class="ftog" data-kw="non performing loan npl portfolio" onclick="setCatToggle(this,'f-debt-type')">NPL Portfolio</button>
+                <button class="ftog" data-kw="seller financing owner carry" onclick="setCatToggle(this,'f-debt-type')">Seller Finance</button>
+                <button class="ftog" data-kw="mezzanine debt preferred equity" onclick="setCatToggle(this,'f-debt-type')">Mezzanine</button>
+                <button class="ftog" data-kw="personal loan consumer credit" onclick="setCatToggle(this,'f-debt-type')">Consumer Credit</button>
+              </div>
+              <input type="hidden" id="f-debt-type" value="">
             </div>
           <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- ENERGY FILTERS -->
           <div id="energy-filters" style="display:none">
-            <div style="margin-bottom:10px">
+            <div style="margin-bottom:8px">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ENERGY TYPE</div>
-              <select id="f-energy-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All</option>
-                <option>Oil &amp; Gas</option>
-                <option>Solar Farm</option>
-                <option>Wind Farm</option>
-                <option>Hydro</option>
-                <option>Geothermal</option>
-                <option>Battery Storage</option>
-              </select>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="oil gas well drilling" onclick="setCatToggle(this,'f-energy-type')">Oil & Gas</button>
+                <button class="ftog" data-kw="solar panel farm array" onclick="setCatToggle(this,'f-energy-type')">Solar Farm</button>
+                <button class="ftog" data-kw="wind turbine farm" onclick="setCatToggle(this,'f-energy-type')">Wind Farm</button>
+                <button class="ftog" data-kw="hydroelectric dam generator" onclick="setCatToggle(this,'f-energy-type')">Hydro</button>
+                <button class="ftog" data-kw="geothermal power plant" onclick="setCatToggle(this,'f-energy-type')">Geothermal</button>
+                <button class="ftog" data-kw="battery storage energy system" onclick="setCatToggle(this,'f-energy-type')">Battery Storage</button>
+                <button class="ftog" data-kw="nuclear power plant" onclick="setCatToggle(this,'f-energy-type')">Nuclear</button>
+                <button class="ftog" data-kw="generator power diesel" onclick="setCatToggle(this,'f-energy-type')">Generator</button>
+                <button class="ftog" data-kw="refinery petrochemical" onclick="setCatToggle(this,'f-energy-type')">Refinery</button>
+                <button class="ftog" data-kw="pipeline natural gas" onclick="setCatToggle(this,'f-energy-type')">Pipeline</button>
+                <button class="ftog" data-kw="substation transformer electrical" onclick="setCatToggle(this,'f-energy-type')">Substation</button>
+                <button class="ftog" data-kw="coal mining power" onclick="setCatToggle(this,'f-energy-type')">Coal</button>
+              </div>
+              <input type="hidden" id="f-energy-type" value="">
             </div>
           <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- HEALTHCARE FILTERS -->
           <div id="healthcare-filters" style="display:none">
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">PROCEDURE / SERVICE</div>
-              <input id="f-healthcare-procedure" type="text" placeholder="e.g. Knee Replacement, Dental" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
-            </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">COUNTRY</div>
-              <input id="f-healthcare-country" type="text" placeholder="e.g. Mexico, Thailand, USA" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ASSET TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="dental practice clinic" onclick="setCatToggle(this,'f-healthcare-procedure')">Dental Practice</button>
+                <button class="ftog" data-kw="medical equipment hospital" onclick="setCatToggle(this,'f-healthcare-procedure')">Medical Equipment</button>
+                <button class="ftog" data-kw="surgery center outpatient" onclick="setCatToggle(this,'f-healthcare-procedure')">Surgery Center</button>
+                <button class="ftog" data-kw="pharmacy drug store" onclick="setCatToggle(this,'f-healthcare-procedure')">Pharmacy</button>
+                <button class="ftog" data-kw="nursing home assisted living" onclick="setCatToggle(this,'f-healthcare-procedure')">Nursing Home</button>
+                <button class="ftog" data-kw="mri ct scan imaging" onclick="setCatToggle(this,'f-healthcare-procedure')">Imaging Equipment</button>
+                <button class="ftog" data-kw="lab laboratory diagnostic" onclick="setCatToggle(this,'f-healthcare-procedure')">Lab / Diagnostic</button>
+                <button class="ftog" data-kw="veterinary animal clinic" onclick="setCatToggle(this,'f-healthcare-procedure')">Veterinary</button>
+                <button class="ftog" data-kw="wheelchair mobility medical" onclick="setCatToggle(this,'f-healthcare-procedure')">Mobility / Rehab</button>
+              </div>
+              <input type="hidden" id="f-healthcare-procedure" value="">
+              <input id="f-healthcare-country" type="text" placeholder="Country / location..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box;margin-top:4px">
             </div>
           <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- IP FILTERS -->
           <div id="ip-filters" style="display:none">
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">IP TYPE</div>
-              <select id="f-ip-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All</option>
-                <option>Patent</option>
-                <option>Trademark</option>
-                <option>Copyright</option>
-                <option>Domain Name</option>
-                <option>Software License</option>
-                <option>Royalty Stream</option>
-              </select>
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">IP & TECH TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="patent utility design" onclick="setCatToggle(this,'f-ip-type')">Patent</button>
+                <button class="ftog" data-kw="trademark brand license" onclick="setCatToggle(this,'f-ip-type')">Trademark</button>
+                <button class="ftog" data-kw="copyright music publishing" onclick="setCatToggle(this,'f-ip-type')">Copyright</button>
+                <button class="ftog" data-kw="domain name website" onclick="setCatToggle(this,'f-ip-type')">Domain Name</button>
+                <button class="ftog" data-kw="software saas app license" onclick="setCatToggle(this,'f-ip-type')">Software / SaaS</button>
+                <button class="ftog" data-kw="royalty stream music" onclick="setCatToggle(this,'f-ip-type')">Royalty Stream</button>
+                <button class="ftog" data-kw="nft digital asset token" onclick="setCatToggle(this,'f-ip-type')">NFT / Digital Asset</button>
+                <button class="ftog" data-kw="data database proprietary" onclick="setCatToggle(this,'f-ip-type')">Data / Database</button>
+                <button class="ftog" data-kw="franchise territory license" onclick="setCatToggle(this,'f-ip-type')">Franchise Rights</button>
+              </div>
+              <input type="hidden" id="f-ip-type" value="">
             </div>
           <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- ANTHRO FILTERS -->
           <div id="anthro-filters" style="display:none">
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CATEGORY</div>
-              <select id="f-anthro-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All</option>
-                <option>Athlete</option>
-                <option>Model</option>
-                <option>Architect</option>
-                <option>Coder / Developer</option>
-                <option>Security / Protection</option>
-                <option>Carpenter / Trades</option>
-                <option>Creative / Artist</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LOCATION</div>
-              <input id="f-anthro-location" type="text" placeholder="City, Country" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">HUMAN CAPITAL TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="athlete sports professional" onclick="setCatToggle(this,'f-anthro-type')">Athlete</button>
+                <button class="ftog" data-kw="model influencer social media" onclick="setCatToggle(this,'f-anthro-type')">Model / Influencer</button>
+                <button class="ftog" data-kw="musician artist entertainer" onclick="setCatToggle(this,'f-anthro-type')">Musician / Artist</button>
+                <button class="ftog" data-kw="developer programmer software engineer" onclick="setCatToggle(this,'f-anthro-type')">Developer</button>
+                <button class="ftog" data-kw="architect designer" onclick="setCatToggle(this,'f-anthro-type')">Architect / Designer</button>
+                <button class="ftog" data-kw="pilot aviation professional" onclick="setCatToggle(this,'f-anthro-type')">Pilot</button>
+                <button class="ftog" data-kw="doctor surgeon medical professional" onclick="setCatToggle(this,'f-anthro-type')">Medical Professional</button>
+                <button class="ftog" data-kw="security protection bodyguard" onclick="setCatToggle(this,'f-anthro-type')">Security</button>
+                <button class="ftog" data-kw="carpenter trades construction" onclick="setCatToggle(this,'f-anthro-type')">Trades</button>
+                <button class="ftog" data-kw="executive ceo management" onclick="setCatToggle(this,'f-anthro-type')">Executive</button>
+              </div>
+              <input type="hidden" id="f-anthro-type" value="">
+              <input id="f-anthro-location" type="text" placeholder="City, Country..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box;margin-top:4px">
             </div>
           <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- ART FILTERS -->
           <div id="art-filters" style="display:none">
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CATEGORY</div>
-              <select id="f-art-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
-                <option value="">All</option>
-                <option>Fine Art</option>
-                <option>Watch / Jewelry</option>
-                <option>Wine / Spirits</option>
-                <option>Classic Car</option>
-                <option>Sports Memorabilia</option>
-                <option>Trading Cards</option>
-                <option>NFT / Digital</option>
-              </select>
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ART & COLLECTIBLES TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="fine art painting original" onclick="setCatToggle(this,'f-art-type')">Fine Art / Painting</button>
+                <button class="ftog" data-kw="sculpture statue" onclick="setCatToggle(this,'f-art-type')">Sculpture</button>
+                <button class="ftog" data-kw="watch luxury rolex patek" onclick="setCatToggle(this,'f-art-type')">Luxury Watch</button>
+                <button class="ftog" data-kw="jewelry diamond gold" onclick="setCatToggle(this,'f-art-type')">Jewelry</button>
+                <button class="ftog" data-kw="wine whiskey spirits cask" onclick="setCatToggle(this,'f-art-type')">Wine / Spirits</button>
+                <button class="ftog" data-kw="sports memorabilia signed jersey" onclick="setCatToggle(this,'f-art-type')">Sports Memorabilia</button>
+                <button class="ftog" data-kw="trading cards pokemon baseball" onclick="setCatToggle(this,'f-art-type')">Trading Cards</button>
+                <button class="ftog" data-kw="coins currency numismatic" onclick="setCatToggle(this,'f-art-type')">Coins / Numismatic</button>
+                <button class="ftog" data-kw="stamps philatelic" onclick="setCatToggle(this,'f-art-type')">Stamps</button>
+                <button class="ftog" data-kw="antique furniture rare" onclick="setCatToggle(this,'f-art-type')">Antiques</button>
+                <button class="ftog" data-kw="nft digital art crypto" onclick="setCatToggle(this,'f-art-type')">NFT / Digital</button>
+                <button class="ftog" data-kw="comic book rare vintage" onclick="setCatToggle(this,'f-art-type')">Comics / Books</button>
+                <button class="ftog" data-kw="fossil dinosaur natural history" onclick="setCatToggle(this,'f-art-type')">Natural History</button>
+              </div>
+              <input type="hidden" id="f-art-type" value="">
             </div>
           <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- GENERIC FILTERS -->
           <div id="generic-filters" style="display:none">
-            <div style="margin-bottom:10px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">KEYWORDS</div>
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">KEYWORDS</div>
               <input id="f-generic-keywords" type="text" placeholder="Search by keyword..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+          </div>
+          <!-- RESOURCES FILTERS -->
+          <div id="resources-filters" style="display:none">
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">RESOURCE TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="farmland agricultural land" onclick="setCatToggle(this,'f-resources-kw')">Farmland</button>
+                <button class="ftog" data-kw="timber timberland forest" onclick="setCatToggle(this,'f-resources-kw')">Timber</button>
+                <button class="ftog" data-kw="water rights aquifer" onclick="setCatToggle(this,'f-resources-kw')">Water Rights</button>
+                <button class="ftog" data-kw="mineral rights mining claim" onclick="setCatToggle(this,'f-resources-kw')">Mineral Rights</button>
+                <button class="ftog" data-kw="oil gas rights drilling" onclick="setCatToggle(this,'f-resources-kw')">Oil & Gas Rights</button>
+                <button class="ftog" data-kw="carbon credits offset" onclick="setCatToggle(this,'f-resources-kw')">Carbon Credits</button>
+                <button class="ftog" data-kw="fishing quota license" onclick="setCatToggle(this,'f-resources-kw')">Fishing Quota</button>
+                <button class="ftog" data-kw="gold silver precious metals" onclick="setCatToggle(this,'f-resources-kw')">Precious Metals</button>
+                <button class="ftog" data-kw="rare earth lithium cobalt" onclick="setCatToggle(this,'f-resources-kw')">Rare Earth</button>
+              </div>
+              <input type="hidden" id="f-resources-kw" value="">
+            </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+          </div>
+          <!-- RIGHTS FILTERS -->
+          <div id="rights-filters" style="display:none">
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">RIGHTS TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="mineral rights mining" onclick="setCatToggle(this,'f-rights-kw')">Mineral Rights</button>
+                <button class="ftog" data-kw="water rights riparian" onclick="setCatToggle(this,'f-rights-kw')">Water Rights</button>
+                <button class="ftog" data-kw="air rights development" onclick="setCatToggle(this,'f-rights-kw')">Air Rights</button>
+                <button class="ftog" data-kw="timber rights logging" onclick="setCatToggle(this,'f-rights-kw')">Timber Rights</button>
+                <button class="ftog" data-kw="oil gas drilling rights" onclick="setCatToggle(this,'f-rights-kw')">Oil & Gas Rights</button>
+                <button class="ftog" data-kw="spectrum broadcast fcc license" onclick="setCatToggle(this,'f-rights-kw')">Spectrum / Broadcast</button>
+                <button class="ftog" data-kw="fishing quota rights" onclick="setCatToggle(this,'f-rights-kw')">Fishing Rights</button>
+                <button class="ftog" data-kw="carbon credits offset rights" onclick="setCatToggle(this,'f-rights-kw')">Carbon Rights</button>
+                <button class="ftog" data-kw="easement right of way" onclick="setCatToggle(this,'f-rights-kw')">Easement</button>
+              </div>
+              <input type="hidden" id="f-rights-kw" value="">
+            </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+          </div>
+          <!-- INFRASTRUCTURE FILTERS -->
+          <div id="infrastructure-filters" style="display:none">
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">INFRASTRUCTURE TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="cell tower antenna telecom" onclick="setCatToggle(this,'f-infra-kw')">Cell Tower</button>
+                <button class="ftog" data-kw="data center server colocation" onclick="setCatToggle(this,'f-infra-kw')">Data Center</button>
+                <button class="ftog" data-kw="warehouse logistics distribution" onclick="setCatToggle(this,'f-infra-kw')">Warehouse</button>
+                <button class="ftog" data-kw="port terminal marine" onclick="setCatToggle(this,'f-infra-kw')">Port / Terminal</button>
+                <button class="ftog" data-kw="bridge tunnel road" onclick="setCatToggle(this,'f-infra-kw')">Bridge / Tunnel</button>
+                <button class="ftog" data-kw="railroad rail yard" onclick="setCatToggle(this,'f-infra-kw')">Rail Yard</button>
+                <button class="ftog" data-kw="airport hangar runway" onclick="setCatToggle(this,'f-infra-kw')">Airport / Hangar</button>
+                <button class="ftog" data-kw="pipeline utility" onclick="setCatToggle(this,'f-infra-kw')">Pipeline</button>
+                <button class="ftog" data-kw="cold storage refrigerated" onclick="setCatToggle(this,'f-infra-kw')">Cold Storage</button>
+              </div>
+              <input type="hidden" id="f-infra-kw" value="">
+            </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+          </div>
+          <!-- ROBOTICS FILTERS -->
+          <div id="robotics-filters" style="display:none">
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ROBOTICS TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="industrial robot arm automation" onclick="setCatToggle(this,'f-robotics-kw')">Industrial Robot</button>
+                <button class="ftog" data-kw="drone fleet commercial" onclick="setCatToggle(this,'f-robotics-kw')">Drone Fleet</button>
+                <button class="ftog" data-kw="autonomous vehicle self driving" onclick="setCatToggle(this,'f-robotics-kw')">Autonomous Vehicle</button>
+                <button class="ftog" data-kw="cnc machine manufacturing" onclick="setCatToggle(this,'f-robotics-kw')">CNC Machine</button>
+                <button class="ftog" data-kw="3d printer additive manufacturing" onclick="setCatToggle(this,'f-robotics-kw')">3D Printer</button>
+                <button class="ftog" data-kw="exoskeleton wearable robot" onclick="setCatToggle(this,'f-robotics-kw')">Exoskeleton</button>
+                <button class="ftog" data-kw="agribot farm robot" onclick="setCatToggle(this,'f-robotics-kw')">AgriBot</button>
+                <button class="ftog" data-kw="medical robot surgical" onclick="setCatToggle(this,'f-robotics-kw')">Medical Robot</button>
+              </div>
+              <input type="hidden" id="f-robotics-kw" value="">
+            </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+          </div>
+          <!-- CURRENCY FILTERS -->
+          <div id="currency-filters" style="display:none">
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CURRENCY TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="gold silver bullion coin" onclick="setCatToggle(this,'f-currency-kw')">Gold / Silver</button>
+                <button class="ftog" data-kw="foreign currency forex banknote" onclick="setCatToggle(this,'f-currency-kw')">Foreign Currency</button>
+                <button class="ftog" data-kw="cryptocurrency bitcoin ethereum" onclick="setCatToggle(this,'f-currency-kw')">Cryptocurrency</button>
+                <button class="ftog" data-kw="numismatic rare coin collection" onclick="setCatToggle(this,'f-currency-kw')">Rare Coins</button>
+                <button class="ftog" data-kw="stablecoin usdc usdt" onclick="setCatToggle(this,'f-currency-kw')">Stablecoin</button>
+              </div>
+              <input type="hidden" id="f-currency-kw" value="">
+            </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+          </div>
+          <!-- EQUITIES FILTERS -->
+          <div id="equities-filters" style="display:none">
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">EQUITY TYPE</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                <button class="ftog" data-kw="private company equity stake" onclick="setCatToggle(this,'f-equities-kw')">Private Equity</button>
+                <button class="ftog" data-kw="startup early stage venture" onclick="setCatToggle(this,'f-equities-kw')">Startup / Venture</button>
+                <button class="ftog" data-kw="pre ipo secondary shares" onclick="setCatToggle(this,'f-equities-kw')">Pre-IPO</button>
+                <button class="ftog" data-kw="stock certificate shares public" onclick="setCatToggle(this,'f-equities-kw')">Public Stock Cert</button>
+                <button class="ftog" data-kw="crowdfunding regulation cf" onclick="setCatToggle(this,'f-equities-kw')">Crowdfunding</button>
+                <button class="ftog" data-kw="llc membership interest" onclick="setCatToggle(this,'f-equities-kw')">LLC Interest</button>
+              </div>
+              <input type="hidden" id="f-equities-kw" value="">
+            </div>
+          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- Listing type -->
           <div style="margin-bottom:10px;">
@@ -3545,126 +3689,7 @@ body { min-width: 900px; overflow-x: auto; }
           </div><!-- end re-filters -->
 
           <!-- TRANSPORT FILTERS -->
-          <div id="transport-filters" style="display:none;">
-            <div style="margin-bottom:10px;">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">VESSEL / CRAFT TYPE</div>
-              <select id="f-transport-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-                <option value="">All Types</option>
-                <optgroup label="Marine">
-                  <option value="yacht">Yacht</option>
-                  <option value="sailboat">Sailboat</option>
-                  <option value="powerboat">Powerboat</option>
-                  <option value="catamaran">Catamaran</option>
-                  <option value="ferry">Ferry</option>
-                  <option value="tugboat">Tugboat</option>
-                  <option value="ship">Ship / Commercial Vessel</option>
-                </optgroup>
-                <optgroup label="Aviation">
-                  <option value="jet">Private Jet</option>
-                  <option value="plane">Prop Plane</option>
-                  <option value="helicopter">Helicopter</option>
-                  <option value="drone">Drone / UAV</option>
-                </optgroup>
-                <optgroup label="Ground">
-                  <option value="rv">RV / Motorhome</option>
-                  <option value="vehicle">Specialty Vehicle</option>
-                </optgroup>
-              </select>
-            </div>
-
-            <div style="margin-bottom:10px;">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PRICE</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-                <select id="f-t-price-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
-                  <option value="">No Min</option>
-                  <option value="10000">$10K</option>
-                  <option value="50000">$50K</option>
-                  <option value="100000">$100K</option>
-                  <option value="250000">$250K</option>
-                  <option value="500000">$500K</option>
-                  <option value="1000000">$1M</option>
-                  <option value="5000000">$5M</option>
-                  <option value="10000000">$10M</option>
-                </select>
-                <select id="f-t-price-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
-                  <option value="">No Max</option>
-                  <option value="50000">$50K</option>
-                  <option value="100000">$100K</option>
-                  <option value="250000">$250K</option>
-                  <option value="500000">$500K</option>
-                  <option value="1000000">$1M</option>
-                  <option value="5000000">$5M</option>
-                  <option value="10000000">$10M</option>
-                  <option value="50000000">$50M</option>
-                  <option value="100000000">$100M+</option>
-                </select>
-              </div>
-            </div>
-
-            <div style="margin-bottom:10px;">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">YEAR</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-                <input id="f-t-yr-min" type="number" placeholder="Min year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
-                <input id="f-t-yr-max" type="number" placeholder="Max year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
-              </div>
-            </div>
-
-            <div style="margin-bottom:10px;">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LENGTH (FEET)</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-                <select id="f-t-len-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
-                  <option value="">No Min</option>
-                  <option value="20">20 ft</option>
-                  <option value="30">30 ft</option>
-                  <option value="40">40 ft</option>
-                  <option value="50">50 ft</option>
-                  <option value="75">75 ft</option>
-                  <option value="100">100 ft</option>
-                  <option value="150">150 ft</option>
-                  <option value="200">200 ft</option>
-                </select>
-                <select id="f-t-len-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
-                  <option value="">No Max</option>
-                  <option value="30">30 ft</option>
-                  <option value="40">40 ft</option>
-                  <option value="50">50 ft</option>
-                  <option value="75">75 ft</option>
-                  <option value="100">100 ft</option>
-                  <option value="150">150 ft</option>
-                  <option value="200">200 ft</option>
-                  <option value="300">300 ft</option>
-                </select>
-              </div>
-            </div>
-
-            <div style="margin-bottom:10px;">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">CONDITION</div>
-              <select id="f-t-condition" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-                <option value="">Any</option>
-                <option value="new">New</option>
-                <option value="excellent">Excellent</option>
-                <option value="good">Good</option>
-                <option value="fair">Fair</option>
-                <option value="project">Project / Restoration</option>
-              </select>
-            </div>
-
-            <div style="margin-bottom:10px;">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">FLAG / REGISTRATION</div>
-              <select id="f-t-flag" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
-                <option value="">Any</option>
-                <option value="us">United States</option>
-                <option value="cayman">Cayman Islands</option>
-                <option value="marshall">Marshall Islands</option>
-                <option value="panama">Panama</option>
-                <option value="bahamas">Bahamas</option>
-                <option value="uk">United Kingdom</option>
-                <option value="malta">Malta</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
-          </div><!-- end transport-filters -->
+          
 
           <!-- BUSINESS FILTERS -->
           <div id="business-filters" style="display:none;">
@@ -4593,6 +4618,14 @@ function setStatusToggle(status, btn) {
   window._transportStatusFilter = status;
 }
 window.setTransportToggle = setTransportToggle;
+function setCatToggle(btn, inputId) {
+  const allBtns = btn.closest('div').querySelectorAll('.ftog');
+  allBtns.forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  const inp = document.getElementById(inputId);
+  if (inp) inp.value = btn.dataset.kw;
+}
+window.setCatToggle = setCatToggle;
 window.setStatusToggle = setStatusToggle;
 
 async function fetchFAAListings() {
@@ -5260,18 +5293,25 @@ function setCategory(catId, btn) {
 
 function updateFilterPanelForCategory(catId) {
   var panels = {
-    'realestate': 're-filters',
-    'transport':  'transport-filters',
-    'business':   'business-filters',
-    'debt':       'debt-filters',
-    'energy':     'energy-filters',
-    'healthcare': 'healthcare-filters',
-    'ip':         'ip-filters',
-    'anthro':     'anthro-filters',
-    'art':        'art-filters',
+    'realestate':     're-filters',
+    'transport':      'transport-filters',
+    'business':       'business-filters',
+    'debt':           'debt-filters',
+    'energy':         'energy-filters',
+    'healthcare':     'healthcare-filters',
+    'ip':             'ip-filters',
+    'anthro':         'anthro-filters',
+    'art':            'art-filters',
+    'resources':      'resources-filters',
+    'rights':         'rights-filters',
+    'infrastructure': 'infrastructure-filters',
+    'robotics':       'robotics-filters',
+    'currency':       'currency-filters',
+    'equities':       'equities-filters',
+    'other':          'generic-filters',
   };
-  var genericCats = ['currency','equities','resources','infrastructure','robotics','rights','other'];
-  var allPanelIds = ['re-filters','transport-filters','business-filters','debt-filters','energy-filters','healthcare-filters','ip-filters','anthro-filters','art-filters','generic-filters'];
+  var genericCats = [];
+  var allPanelIds = ['re-filters','transport-filters','business-filters','debt-filters','energy-filters','healthcare-filters','ip-filters','anthro-filters','art-filters','generic-filters','resources-filters','rights-filters','infrastructure-filters','robotics-filters','currency-filters','equities-filters'];
   allPanelIds.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
