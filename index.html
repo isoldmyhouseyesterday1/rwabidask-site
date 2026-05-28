@@ -148,8 +148,6 @@ html, body {
 
 /* Mobile-only elements: hidden by default, shown inside mobile @media */
 #mobile-view-toggle { display: none; }
-.ftog{padding:4px 8px;background:var(--bg3);color:var(--dim);border:1px solid var(--border2);border-radius:3px;font-size:9px;cursor:pointer;letter-spacing:.3px;transition:all .15s}
-.ftog.on{background:rgba(0,255,200,.12);color:var(--cyan);border-color:rgba(0,255,200,.4)}
 #mobile-list-view   { display: none; }
 
 #shell {
@@ -237,7 +235,7 @@ body { min-width: 900px; overflow-x: auto; }
   padding: 0 48px 0 18px;
   min-width: 0;
 }
-#search-input::placeholder { color: var(--muted); }
+#search-input::placeholder { color: #888; }
 .search-wrap > * { flex-shrink: 0; }
 .search-wrap input { flex: 1 !important; width: 100% !important; min-width: 0 !important; }
 .search-wrap div { flex: 1 !important; display: flex !important; min-width: 0 !important; }
@@ -2965,7 +2963,7 @@ body { min-width: 900px; overflow-x: auto; }
     </div>
   </div>
   <div class="search-wrap">
-    <input id="search-input" type="text" placeholder="Search any address, APN, or city…" autocomplete="off" style="-webkit-appearance:none;appearance:none;">
+    <input id="search-input" type="text" placeholder="Search any address, APN, or city…" autocomplete="off" style="color:#111111;background:var(--bg2);caret-color:var(--cyan);-webkit-appearance:none;appearance:none;">
     <button class="search-icon" onclick="performSearch()" title="Global Asset Navigation" aria-label="Search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -2999,23 +2997,7 @@ body { min-width: 900px; overflow-x: auto; }
 <!-- dashboard summary removed -- data in header topbar -->
       <div id="cat-sponsor-strip" style="display:none"></div>
       <div class="ptabs" id="category-tabs">
-        <button class="ptab map-tab" onclick="setCategory('all', this)">ALL</button>
-        <button class="ptab map-tab" onclick="setCategory('anthro', this)">ANTHRO</button>
-        <button class="ptab map-tab" onclick="setCategory('art', this)">ART & COLLECT.</button>
-        <button class="ptab map-tab" onclick="setCategory('business', this)">BUSINESSES</button>
-        <button class="ptab map-tab" onclick="setCategory('currency', this)">CURRENCY & FX</button>
-        <button class="ptab map-tab" onclick="setCategory('debt', this)">DEBT</button>
-        <button class="ptab map-tab" onclick="setCategory('energy', this)">ENERGY</button>
-        <button class="ptab map-tab" onclick="setCategory('equities', this)">EQUITIES</button>
-        <button class="ptab map-tab" onclick="setCategory('healthcare', this)">HEALTHCARE</button>
-        <button class="ptab map-tab" onclick="setCategory('infrastructure', this)">INFRASTR.</button>
-        <button class="ptab map-tab" onclick="setCategory('ip', this)">IP & TECH</button>
-        <button class="ptab map-tab" onclick="setCategory('realestate', this)">REAL ESTATE</button>
-        <button class="ptab map-tab" onclick="setCategory('resources', this)">RESOURCES</button>
-        <button class="ptab map-tab" onclick="setCategory('rights', this)">RIGHTS</button>
-        <button class="ptab map-tab" onclick="setCategory('robotics', this)">ROBOTICS</button>
-        <button class="ptab map-tab" onclick="setCategory('transport', this)">TRANSPORTS</button>
-        <button class="ptab map-tab" onclick="setCategory('other', this)">OTHER</button>
+        <button class="ptab map-tab on" id="tab-realestate" onclick="setCategory('realestate', this)">REAL ESTATE</button>
       </div>
       <!-- ── AI SEARCH ─────────────────────────────────────────────── -->
       <div id="ai-search-wrap" style="padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden;box-sizing:border-box;">
@@ -3035,7 +3017,7 @@ body { min-width: 900px; overflow-x: auto; }
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">ASSESSED VALUE</span>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button id="filter-toggle-btn" style="font-size:8px;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);cursor:pointer;padding:2px 8px;letter-spacing:.5px;font-weight:600;border-radius:3px" onclick="openFilterModal()">FILTERS ▾</button>
+            <button id="filter-toggle-btn" style="font-size:8px;color:var(--cyan);background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.2);cursor:pointer;padding:2px 8px;letter-spacing:.5px;font-weight:600;border-radius:3px" onclick="window.toggleFilterPanel&&window.toggleFilterPanel()">FILTERS ▾</button>
             <button style="font-size:8px;color:var(--cyan);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;font-weight:600" onclick="window.resetAllFilters&&window.resetAllFilters()">RESET</button>
           </div>
         </div>
@@ -3056,7 +3038,7 @@ body { min-width: 900px; overflow-x: auto; }
       </div>
 
       <!-- ── FILTER PANEL ─────────────────────────────────────────── -->
-      <div id="filter-panel" style="display:none!important">
+      <div id="filter-panel" style="display:none;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-y:auto;overflow-x:hidden;max-height:70vh;">
         <div style="padding:10px 14px 14px;">
 
           <div id="re-filters">
@@ -3069,341 +3051,134 @@ body { min-width: 900px; overflow-x: auto; }
 
           <!-- TRANSPORT FILTERS -->
           <div id="transport-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">AVIATION</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="single engine aircraft cessna piper" onclick="setTransportToggle(this)">Single Engine</button>
-                <button class="ftog" data-kw="multi engine twin aircraft" onclick="setTransportToggle(this)">Multi Engine</button>
-                <button class="ftog" data-kw="private jet gulfstream citation learjet" onclick="setTransportToggle(this)">Private Jet</button>
-                <button class="ftog" data-kw="turboprop king air pilatus" onclick="setTransportToggle(this)">Turboprop</button>
-                <button class="ftog" data-kw="helicopter robinson bell" onclick="setTransportToggle(this)">Helicopter</button>
-                <button class="ftog" data-kw="drone uav unmanned" onclick="setTransportToggle(this)">Drone / UAV</button>
-                <button class="ftog" data-kw="military aircraft surplus warbird" onclick="setTransportToggle(this)">Military Aircraft</button>
-                <button class="ftog" data-kw="seaplane floatplane amphibious" onclick="setTransportToggle(this)">Seaplane</button>
-                <button class="ftog" data-kw="glider sailplane" onclick="setTransportToggle(this)">Glider</button>
-                <button class="ftog" data-kw="ultralight experimental aircraft" onclick="setTransportToggle(this)">Ultralight</button>
-                <button class="ftog" data-kw="commercial airliner boeing airbus" onclick="setTransportToggle(this)">Commercial Airliner</button>
-                <button class="ftog" data-kw="aircraft parts engine avionics" onclick="setTransportToggle(this)">Parts / Engines</button>
-              </div>
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MARINE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="superyacht megayacht luxury yacht" onclick="setTransportToggle(this)">Superyacht</button>
-                <button class="ftog" data-kw="sailing yacht sailboat" onclick="setTransportToggle(this)">Sailing Yacht</button>
-                <button class="ftog" data-kw="motor yacht powerboat" onclick="setTransportToggle(this)">Motor Yacht</button>
-                <button class="ftog" data-kw="catamaran trimaran" onclick="setTransportToggle(this)">Catamaran</button>
-                <button class="ftog" data-kw="speedboat bowrider center console" onclick="setTransportToggle(this)">Speedboat</button>
-                <button class="ftog" data-kw="fishing vessel trawler" onclick="setTransportToggle(this)">Fishing Vessel</button>
-                <button class="ftog" data-kw="oil tanker crude carrier supertanker" onclick="setTransportToggle(this)">Oil Tanker</button>
-                <button class="ftog" data-kw="cargo ship container vessel" onclick="setTransportToggle(this)">Cargo Ship</button>
-                <button class="ftog" data-kw="ferry passenger vessel" onclick="setTransportToggle(this)">Ferry</button>
-                <button class="ftog" data-kw="tugboat workboat" onclick="setTransportToggle(this)">Tugboat</button>
-                <button class="ftog" data-kw="cruise ship expedition vessel" onclick="setTransportToggle(this)">Cruise Ship</button>
-                <button class="ftog" data-kw="submarine underwater vessel" onclick="setTransportToggle(this)">Submarine</button>
-                <button class="ftog" data-kw="pontoon houseboat" onclick="setTransportToggle(this)">Pontoon / Houseboat</button>
-                <button class="ftog" data-kw="barge dredge platform" onclick="setTransportToggle(this)">Barge / Platform</button>
-              </div>
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">GROUND</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="exotic sports car ferrari lamborghini" onclick="setTransportToggle(this)">Exotic / Sports Car</button>
-                <button class="ftog" data-kw="classic vintage antique car" onclick="setTransportToggle(this)">Classic Car</button>
-                <button class="ftog" data-kw="luxury car rolls royce bentley" onclick="setTransportToggle(this)">Luxury Car</button>
-                <button class="ftog" data-kw="electric vehicle tesla ev" onclick="setTransportToggle(this)">Electric Vehicle</button>
-                <button class="ftog" data-kw="motorcycle harley davidson" onclick="setTransportToggle(this)">Motorcycle</button>
-                <button class="ftog" data-kw="rv motorhome class a" onclick="setTransportToggle(this)">RV / Motorhome</button>
-                <button class="ftog" data-kw="semi truck freightliner kenworth" onclick="setTransportToggle(this)">Semi Truck</button>
-                <button class="ftog" data-kw="dump truck construction" onclick="setTransportToggle(this)">Dump Truck</button>
-                <button class="ftog" data-kw="bus coach school bus" onclick="setTransportToggle(this)">Bus</button>
-                <button class="ftog" data-kw="forklift" onclick="setTransportToggle(this)">Forklift</button>
-                <button class="ftog" data-kw="crane lifting equipment" onclick="setTransportToggle(this)">Crane</button>
-                <button class="ftog" data-kw="bulldozer excavator caterpillar" onclick="setTransportToggle(this)">Bulldozer / Excavator</button>
-                <button class="ftog" data-kw="tractor farm equipment" onclick="setTransportToggle(this)">Tractor / Farm Equip</button>
-                <button class="ftog" data-kw="military vehicle humvee" onclick="setTransportToggle(this)">Military Vehicle</button>
-                <button class="ftog" data-kw="cargo trailer flatbed" onclick="setTransportToggle(this)">Trailer</button>
-              </div>
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">RAIL & SPACE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="locomotive train railroad engine" onclick="setTransportToggle(this)">Locomotive</button>
-                <button class="ftog" data-kw="railcar freight passenger car" onclick="setTransportToggle(this)">Railcar</button>
-                <button class="ftog" data-kw="spacecraft rocket satellite" onclick="setTransportToggle(this)">Spacecraft / Rocket</button>
-                <button class="ftog" data-kw="hovercraft ground effect vehicle" onclick="setTransportToggle(this)">Hovercraft</button>
-              </div>
-              <input type="hidden" id="f-transport-type" value="">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">TYPE</div>
+              <select id="f-transport-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Yacht / Sailboat</option>
+                <option>Motor Vessel</option>
+                <option>Private Jet</option>
+                <option>Helicopter</option>
+                <option>Classic Car</option>
+                <option>Motorcycle</option>
+                <option>RV / Motorhome</option>
+              </select>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px">
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">YEAR MIN</div><input id="f-transport-year-min" type="number" placeholder="1940" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
-              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">YEAR MAX</div><input id="f-transport-year-max" type="number" placeholder="2026" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MIN</div><input id="f-transport-year-min" type="number" placeholder="1990" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">YEAR MAX</div><input id="f-transport-year-max" type="number" placeholder="2025" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
             </div>
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">LISTING STATUS</div>
-              <div style="display:flex;gap:4px">
-                <button class="ftog on" id="fs-active" onclick="setStatusToggle('active',this)">For Sale</button>
-                <button class="ftog" id="fs-registry" onclick="setStatusToggle('registry',this)">Registry / Dark Pool</button>
-                <button class="ftog" id="fs-all" onclick="setStatusToggle('all',this)">All</button>
-              </div>
-            </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- BUSINESS FILTERS -->
           <div id="business-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">BUSINESS TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="restaurant food service" onclick="setCatToggle(this,'f-business-kw')">Restaurant</button>
-                <button class="ftog" data-kw="retail store" onclick="setCatToggle(this,'f-business-kw')">Retail</button>
-                <button class="ftog" data-kw="saas software technology" onclick="setCatToggle(this,'f-business-kw')">SaaS / Tech</button>
-                <button class="ftog" data-kw="ecommerce online business" onclick="setCatToggle(this,'f-business-kw')">Ecommerce</button>
-                <button class="ftog" data-kw="franchise" onclick="setCatToggle(this,'f-business-kw')">Franchise</button>
-                <button class="ftog" data-kw="manufacturing" onclick="setCatToggle(this,'f-business-kw')">Manufacturing</button>
-                <button class="ftog" data-kw="construction contractor" onclick="setCatToggle(this,'f-business-kw')">Construction</button>
-                <button class="ftog" data-kw="healthcare medical practice" onclick="setCatToggle(this,'f-business-kw')">Medical Practice</button>
-                <button class="ftog" data-kw="auto repair service" onclick="setCatToggle(this,'f-business-kw')">Auto / Service</button>
-                <button class="ftog" data-kw="hotel motel hospitality" onclick="setCatToggle(this,'f-business-kw')">Hotel / Hospitality</button>
-                <button class="ftog" data-kw="laundry dry cleaning" onclick="setCatToggle(this,'f-business-kw')">Laundry / Cleaning</button>
-                <button class="ftog" data-kw="distribution wholesale" onclick="setCatToggle(this,'f-business-kw')">Distribution</button>
-                <button class="ftog" data-kw="media marketing agency" onclick="setCatToggle(this,'f-business-kw')">Agency / Media</button>
-                <button class="ftog" data-kw="financial services" onclick="setCatToggle(this,'f-business-kw')">Financial Services</button>
-              </div>
-              <input type="hidden" id="f-business-kw" value="">
-              <input id="f-business-industry" type="text" placeholder="Or type keyword..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box;margin-top:4px">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">INDUSTRY</div>
+              <input id="f-business-industry" type="text" placeholder="e.g. Restaurant, SaaS" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MIN REVENUE</div><input id="f-business-rev-min" type="number" placeholder="0" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+              <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">MAX REVENUE</div><input id="f-business-rev-max" type="number" placeholder="Any" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box"></div>
+            </div>
           </div>
           <!-- DEBT FILTERS -->
           <div id="debt-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">DEBT TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="mortgage note real estate" onclick="setCatToggle(this,'f-debt-type')">Mortgage Note</button>
-                <button class="ftog" data-kw="business loan sba" onclick="setCatToggle(this,'f-debt-type')">Business Loan</button>
-                <button class="ftog" data-kw="hard money bridge loan" onclick="setCatToggle(this,'f-debt-type')">Hard Money</button>
-                <button class="ftog" data-kw="bond corporate municipal" onclick="setCatToggle(this,'f-debt-type')">Bond</button>
-                <button class="ftog" data-kw="non performing loan npl portfolio" onclick="setCatToggle(this,'f-debt-type')">NPL Portfolio</button>
-                <button class="ftog" data-kw="seller financing owner carry" onclick="setCatToggle(this,'f-debt-type')">Seller Finance</button>
-                <button class="ftog" data-kw="mezzanine debt preferred equity" onclick="setCatToggle(this,'f-debt-type')">Mezzanine</button>
-                <button class="ftog" data-kw="personal loan consumer credit" onclick="setCatToggle(this,'f-debt-type')">Consumer Credit</button>
-              </div>
-              <input type="hidden" id="f-debt-type" value="">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LOAN TYPE</div>
+              <select id="f-debt-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Mortgage Note</option>
+                <option>Business Loan</option>
+                <option>Bridge Loan</option>
+                <option>Hard Money</option>
+                <option>Bond</option>
+                <option>NPL Portfolio</option>
+              </select>
             </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- ENERGY FILTERS -->
           <div id="energy-filters" style="display:none">
-            <div style="margin-bottom:8px">
+            <div style="margin-bottom:10px">
               <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ENERGY TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="oil gas well drilling" onclick="setCatToggle(this,'f-energy-type')">Oil & Gas</button>
-                <button class="ftog" data-kw="solar panel farm array" onclick="setCatToggle(this,'f-energy-type')">Solar Farm</button>
-                <button class="ftog" data-kw="wind turbine farm" onclick="setCatToggle(this,'f-energy-type')">Wind Farm</button>
-                <button class="ftog" data-kw="hydroelectric dam generator" onclick="setCatToggle(this,'f-energy-type')">Hydro</button>
-                <button class="ftog" data-kw="geothermal power plant" onclick="setCatToggle(this,'f-energy-type')">Geothermal</button>
-                <button class="ftog" data-kw="battery storage energy system" onclick="setCatToggle(this,'f-energy-type')">Battery Storage</button>
-                <button class="ftog" data-kw="nuclear power plant" onclick="setCatToggle(this,'f-energy-type')">Nuclear</button>
-                <button class="ftog" data-kw="generator power diesel" onclick="setCatToggle(this,'f-energy-type')">Generator</button>
-                <button class="ftog" data-kw="refinery petrochemical" onclick="setCatToggle(this,'f-energy-type')">Refinery</button>
-                <button class="ftog" data-kw="pipeline natural gas" onclick="setCatToggle(this,'f-energy-type')">Pipeline</button>
-                <button class="ftog" data-kw="substation transformer electrical" onclick="setCatToggle(this,'f-energy-type')">Substation</button>
-                <button class="ftog" data-kw="coal mining power" onclick="setCatToggle(this,'f-energy-type')">Coal</button>
-              </div>
-              <input type="hidden" id="f-energy-type" value="">
+              <select id="f-energy-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Oil &amp; Gas</option>
+                <option>Solar Farm</option>
+                <option>Wind Farm</option>
+                <option>Hydro</option>
+                <option>Geothermal</option>
+                <option>Battery Storage</option>
+              </select>
             </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- HEALTHCARE FILTERS -->
           <div id="healthcare-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ASSET TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="dental practice clinic" onclick="setCatToggle(this,'f-healthcare-procedure')">Dental Practice</button>
-                <button class="ftog" data-kw="medical equipment hospital" onclick="setCatToggle(this,'f-healthcare-procedure')">Medical Equipment</button>
-                <button class="ftog" data-kw="surgery center outpatient" onclick="setCatToggle(this,'f-healthcare-procedure')">Surgery Center</button>
-                <button class="ftog" data-kw="pharmacy drug store" onclick="setCatToggle(this,'f-healthcare-procedure')">Pharmacy</button>
-                <button class="ftog" data-kw="nursing home assisted living" onclick="setCatToggle(this,'f-healthcare-procedure')">Nursing Home</button>
-                <button class="ftog" data-kw="mri ct scan imaging" onclick="setCatToggle(this,'f-healthcare-procedure')">Imaging Equipment</button>
-                <button class="ftog" data-kw="lab laboratory diagnostic" onclick="setCatToggle(this,'f-healthcare-procedure')">Lab / Diagnostic</button>
-                <button class="ftog" data-kw="veterinary animal clinic" onclick="setCatToggle(this,'f-healthcare-procedure')">Veterinary</button>
-                <button class="ftog" data-kw="wheelchair mobility medical" onclick="setCatToggle(this,'f-healthcare-procedure')">Mobility / Rehab</button>
-              </div>
-              <input type="hidden" id="f-healthcare-procedure" value="">
-              <input id="f-healthcare-country" type="text" placeholder="Country / location..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box;margin-top:4px">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">PROCEDURE / SERVICE</div>
+              <input id="f-healthcare-procedure" type="text" placeholder="e.g. Knee Replacement, Dental" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">COUNTRY</div>
+              <input id="f-healthcare-country" type="text" placeholder="e.g. Mexico, Thailand, USA" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            </div>
           </div>
           <!-- IP FILTERS -->
           <div id="ip-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">IP & TECH TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="patent utility design" onclick="setCatToggle(this,'f-ip-type')">Patent</button>
-                <button class="ftog" data-kw="trademark brand license" onclick="setCatToggle(this,'f-ip-type')">Trademark</button>
-                <button class="ftog" data-kw="copyright music publishing" onclick="setCatToggle(this,'f-ip-type')">Copyright</button>
-                <button class="ftog" data-kw="domain name website" onclick="setCatToggle(this,'f-ip-type')">Domain Name</button>
-                <button class="ftog" data-kw="software saas app license" onclick="setCatToggle(this,'f-ip-type')">Software / SaaS</button>
-                <button class="ftog" data-kw="royalty stream music" onclick="setCatToggle(this,'f-ip-type')">Royalty Stream</button>
-                <button class="ftog" data-kw="nft digital asset token" onclick="setCatToggle(this,'f-ip-type')">NFT / Digital Asset</button>
-                <button class="ftog" data-kw="data database proprietary" onclick="setCatToggle(this,'f-ip-type')">Data / Database</button>
-                <button class="ftog" data-kw="franchise territory license" onclick="setCatToggle(this,'f-ip-type')">Franchise Rights</button>
-              </div>
-              <input type="hidden" id="f-ip-type" value="">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">IP TYPE</div>
+              <select id="f-ip-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Patent</option>
+                <option>Trademark</option>
+                <option>Copyright</option>
+                <option>Domain Name</option>
+                <option>Software License</option>
+                <option>Royalty Stream</option>
+              </select>
             </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- ANTHRO FILTERS -->
           <div id="anthro-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">HUMAN CAPITAL TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="athlete sports professional" onclick="setCatToggle(this,'f-anthro-type')">Athlete</button>
-                <button class="ftog" data-kw="model influencer social media" onclick="setCatToggle(this,'f-anthro-type')">Model / Influencer</button>
-                <button class="ftog" data-kw="musician artist entertainer" onclick="setCatToggle(this,'f-anthro-type')">Musician / Artist</button>
-                <button class="ftog" data-kw="developer programmer software engineer" onclick="setCatToggle(this,'f-anthro-type')">Developer</button>
-                <button class="ftog" data-kw="architect designer" onclick="setCatToggle(this,'f-anthro-type')">Architect / Designer</button>
-                <button class="ftog" data-kw="pilot aviation professional" onclick="setCatToggle(this,'f-anthro-type')">Pilot</button>
-                <button class="ftog" data-kw="doctor surgeon medical professional" onclick="setCatToggle(this,'f-anthro-type')">Medical Professional</button>
-                <button class="ftog" data-kw="security protection bodyguard" onclick="setCatToggle(this,'f-anthro-type')">Security</button>
-                <button class="ftog" data-kw="carpenter trades construction" onclick="setCatToggle(this,'f-anthro-type')">Trades</button>
-                <button class="ftog" data-kw="executive ceo management" onclick="setCatToggle(this,'f-anthro-type')">Executive</button>
-              </div>
-              <input type="hidden" id="f-anthro-type" value="">
-              <input id="f-anthro-location" type="text" placeholder="City, Country..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box;margin-top:4px">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CATEGORY</div>
+              <select id="f-anthro-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Athlete</option>
+                <option>Model</option>
+                <option>Architect</option>
+                <option>Coder / Developer</option>
+                <option>Security / Protection</option>
+                <option>Carpenter / Trades</option>
+                <option>Creative / Artist</option>
+                <option>Other</option>
+              </select>
             </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">LOCATION</div>
+              <input id="f-anthro-location" type="text" placeholder="City, Country" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
+            </div>
           </div>
           <!-- ART FILTERS -->
           <div id="art-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ART & COLLECTIBLES TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="fine art painting original" onclick="setCatToggle(this,'f-art-type')">Fine Art / Painting</button>
-                <button class="ftog" data-kw="sculpture statue" onclick="setCatToggle(this,'f-art-type')">Sculpture</button>
-                <button class="ftog" data-kw="watch luxury rolex patek" onclick="setCatToggle(this,'f-art-type')">Luxury Watch</button>
-                <button class="ftog" data-kw="jewelry diamond gold" onclick="setCatToggle(this,'f-art-type')">Jewelry</button>
-                <button class="ftog" data-kw="wine whiskey spirits cask" onclick="setCatToggle(this,'f-art-type')">Wine / Spirits</button>
-                <button class="ftog" data-kw="sports memorabilia signed jersey" onclick="setCatToggle(this,'f-art-type')">Sports Memorabilia</button>
-                <button class="ftog" data-kw="trading cards pokemon baseball" onclick="setCatToggle(this,'f-art-type')">Trading Cards</button>
-                <button class="ftog" data-kw="coins currency numismatic" onclick="setCatToggle(this,'f-art-type')">Coins / Numismatic</button>
-                <button class="ftog" data-kw="stamps philatelic" onclick="setCatToggle(this,'f-art-type')">Stamps</button>
-                <button class="ftog" data-kw="antique furniture rare" onclick="setCatToggle(this,'f-art-type')">Antiques</button>
-                <button class="ftog" data-kw="nft digital art crypto" onclick="setCatToggle(this,'f-art-type')">NFT / Digital</button>
-                <button class="ftog" data-kw="comic book rare vintage" onclick="setCatToggle(this,'f-art-type')">Comics / Books</button>
-                <button class="ftog" data-kw="fossil dinosaur natural history" onclick="setCatToggle(this,'f-art-type')">Natural History</button>
-              </div>
-              <input type="hidden" id="f-art-type" value="">
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CATEGORY</div>
+              <select id="f-art-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px">
+                <option value="">All</option>
+                <option>Fine Art</option>
+                <option>Watch / Jewelry</option>
+                <option>Wine / Spirits</option>
+                <option>Classic Car</option>
+                <option>Sports Memorabilia</option>
+                <option>Trading Cards</option>
+                <option>NFT / Digital</option>
+              </select>
             </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- GENERIC FILTERS -->
           <div id="generic-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">KEYWORDS</div>
+            <div style="margin-bottom:10px">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">KEYWORDS</div>
               <input id="f-generic-keywords" type="text" placeholder="Search by keyword..." style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;box-sizing:border-box">
             </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
-          </div>
-          <!-- RESOURCES FILTERS -->
-          <div id="resources-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">RESOURCE TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="farmland agricultural land" onclick="setCatToggle(this,'f-resources-kw')">Farmland</button>
-                <button class="ftog" data-kw="timber timberland forest" onclick="setCatToggle(this,'f-resources-kw')">Timber</button>
-                <button class="ftog" data-kw="water rights aquifer" onclick="setCatToggle(this,'f-resources-kw')">Water Rights</button>
-                <button class="ftog" data-kw="mineral rights mining claim" onclick="setCatToggle(this,'f-resources-kw')">Mineral Rights</button>
-                <button class="ftog" data-kw="oil gas rights drilling" onclick="setCatToggle(this,'f-resources-kw')">Oil & Gas Rights</button>
-                <button class="ftog" data-kw="carbon credits offset" onclick="setCatToggle(this,'f-resources-kw')">Carbon Credits</button>
-                <button class="ftog" data-kw="fishing quota license" onclick="setCatToggle(this,'f-resources-kw')">Fishing Quota</button>
-                <button class="ftog" data-kw="gold silver precious metals" onclick="setCatToggle(this,'f-resources-kw')">Precious Metals</button>
-                <button class="ftog" data-kw="rare earth lithium cobalt" onclick="setCatToggle(this,'f-resources-kw')">Rare Earth</button>
-              </div>
-              <input type="hidden" id="f-resources-kw" value="">
-            </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
-          </div>
-          <!-- RIGHTS FILTERS -->
-          <div id="rights-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">RIGHTS TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="mineral rights mining" onclick="setCatToggle(this,'f-rights-kw')">Mineral Rights</button>
-                <button class="ftog" data-kw="water rights riparian" onclick="setCatToggle(this,'f-rights-kw')">Water Rights</button>
-                <button class="ftog" data-kw="air rights development" onclick="setCatToggle(this,'f-rights-kw')">Air Rights</button>
-                <button class="ftog" data-kw="timber rights logging" onclick="setCatToggle(this,'f-rights-kw')">Timber Rights</button>
-                <button class="ftog" data-kw="oil gas drilling rights" onclick="setCatToggle(this,'f-rights-kw')">Oil & Gas Rights</button>
-                <button class="ftog" data-kw="spectrum broadcast fcc license" onclick="setCatToggle(this,'f-rights-kw')">Spectrum / Broadcast</button>
-                <button class="ftog" data-kw="fishing quota rights" onclick="setCatToggle(this,'f-rights-kw')">Fishing Rights</button>
-                <button class="ftog" data-kw="carbon credits offset rights" onclick="setCatToggle(this,'f-rights-kw')">Carbon Rights</button>
-                <button class="ftog" data-kw="easement right of way" onclick="setCatToggle(this,'f-rights-kw')">Easement</button>
-              </div>
-              <input type="hidden" id="f-rights-kw" value="">
-            </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
-          </div>
-          <!-- INFRASTRUCTURE FILTERS -->
-          <div id="infrastructure-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">INFRASTRUCTURE TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="cell tower antenna telecom" onclick="setCatToggle(this,'f-infra-kw')">Cell Tower</button>
-                <button class="ftog" data-kw="data center server colocation" onclick="setCatToggle(this,'f-infra-kw')">Data Center</button>
-                <button class="ftog" data-kw="warehouse logistics distribution" onclick="setCatToggle(this,'f-infra-kw')">Warehouse</button>
-                <button class="ftog" data-kw="port terminal marine" onclick="setCatToggle(this,'f-infra-kw')">Port / Terminal</button>
-                <button class="ftog" data-kw="bridge tunnel road" onclick="setCatToggle(this,'f-infra-kw')">Bridge / Tunnel</button>
-                <button class="ftog" data-kw="railroad rail yard" onclick="setCatToggle(this,'f-infra-kw')">Rail Yard</button>
-                <button class="ftog" data-kw="airport hangar runway" onclick="setCatToggle(this,'f-infra-kw')">Airport / Hangar</button>
-                <button class="ftog" data-kw="pipeline utility" onclick="setCatToggle(this,'f-infra-kw')">Pipeline</button>
-                <button class="ftog" data-kw="cold storage refrigerated" onclick="setCatToggle(this,'f-infra-kw')">Cold Storage</button>
-              </div>
-              <input type="hidden" id="f-infra-kw" value="">
-            </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
-          </div>
-          <!-- ROBOTICS FILTERS -->
-          <div id="robotics-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">ROBOTICS TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="industrial robot arm automation" onclick="setCatToggle(this,'f-robotics-kw')">Industrial Robot</button>
-                <button class="ftog" data-kw="drone fleet commercial" onclick="setCatToggle(this,'f-robotics-kw')">Drone Fleet</button>
-                <button class="ftog" data-kw="autonomous vehicle self driving" onclick="setCatToggle(this,'f-robotics-kw')">Autonomous Vehicle</button>
-                <button class="ftog" data-kw="cnc machine manufacturing" onclick="setCatToggle(this,'f-robotics-kw')">CNC Machine</button>
-                <button class="ftog" data-kw="3d printer additive manufacturing" onclick="setCatToggle(this,'f-robotics-kw')">3D Printer</button>
-                <button class="ftog" data-kw="exoskeleton wearable robot" onclick="setCatToggle(this,'f-robotics-kw')">Exoskeleton</button>
-                <button class="ftog" data-kw="agribot farm robot" onclick="setCatToggle(this,'f-robotics-kw')">AgriBot</button>
-                <button class="ftog" data-kw="medical robot surgical" onclick="setCatToggle(this,'f-robotics-kw')">Medical Robot</button>
-              </div>
-              <input type="hidden" id="f-robotics-kw" value="">
-            </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
-          </div>
-          <!-- CURRENCY FILTERS -->
-          <div id="currency-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">CURRENCY TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="gold silver bullion coin" onclick="setCatToggle(this,'f-currency-kw')">Gold / Silver</button>
-                <button class="ftog" data-kw="foreign currency forex banknote" onclick="setCatToggle(this,'f-currency-kw')">Foreign Currency</button>
-                <button class="ftog" data-kw="cryptocurrency bitcoin ethereum" onclick="setCatToggle(this,'f-currency-kw')">Cryptocurrency</button>
-                <button class="ftog" data-kw="numismatic rare coin collection" onclick="setCatToggle(this,'f-currency-kw')">Rare Coins</button>
-                <button class="ftog" data-kw="stablecoin usdc usdt" onclick="setCatToggle(this,'f-currency-kw')">Stablecoin</button>
-              </div>
-              <input type="hidden" id="f-currency-kw" value="">
-            </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
-          </div>
-          <!-- EQUITIES FILTERS -->
-          <div id="equities-filters" style="display:none">
-            <div style="margin-bottom:8px">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">EQUITY TYPE</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-                <button class="ftog" data-kw="private company equity stake" onclick="setCatToggle(this,'f-equities-kw')">Private Equity</button>
-                <button class="ftog" data-kw="startup early stage venture" onclick="setCatToggle(this,'f-equities-kw')">Startup / Venture</button>
-                <button class="ftog" data-kw="pre ipo secondary shares" onclick="setCatToggle(this,'f-equities-kw')">Pre-IPO</button>
-                <button class="ftog" data-kw="stock certificate shares public" onclick="setCatToggle(this,'f-equities-kw')">Public Stock Cert</button>
-                <button class="ftog" data-kw="crowdfunding regulation cf" onclick="setCatToggle(this,'f-equities-kw')">Crowdfunding</button>
-                <button class="ftog" data-kw="llc membership interest" onclick="setCatToggle(this,'f-equities-kw')">LLC Interest</button>
-              </div>
-              <input type="hidden" id="f-equities-kw" value="">
-            </div>
-          <button onclick="runCategorySearch()" style="width:100%;padding:8px;background:var(--cyan);color:#000;border:none;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;margin-top:4px;margin-bottom:10px">SEARCH ↗</button>
           </div>
           <!-- Listing type -->
           <div style="margin-bottom:10px;">
@@ -3689,7 +3464,125 @@ body { min-width: 900px; overflow-x: auto; }
           </div><!-- end re-filters -->
 
           <!-- TRANSPORT FILTERS -->
-          
+          <div id="transport-filters" style="display:none;">
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">VESSEL / CRAFT TYPE</div>
+              <select id="f-transport-type" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">All Types</option>
+                <optgroup label="Marine">
+                  <option value="yacht">Yacht</option>
+                  <option value="sailboat">Sailboat</option>
+                  <option value="powerboat">Powerboat</option>
+                  <option value="catamaran">Catamaran</option>
+                  <option value="ferry">Ferry</option>
+                  <option value="tugboat">Tugboat</option>
+                  <option value="ship">Ship / Commercial Vessel</option>
+                </optgroup>
+                <optgroup label="Aviation">
+                  <option value="jet">Private Jet</option>
+                  <option value="plane">Prop Plane</option>
+                  <option value="helicopter">Helicopter</option>
+                  <option value="drone">Drone / UAV</option>
+                </optgroup>
+                <optgroup label="Ground">
+                  <option value="rv">RV / Motorhome</option>
+                  <option value="vehicle">Specialty Vehicle</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">PRICE</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <select id="f-t-price-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Min</option>
+                  <option value="10000">$10K</option>
+                  <option value="50000">$50K</option>
+                  <option value="100000">$100K</option>
+                  <option value="250000">$250K</option>
+                  <option value="500000">$500K</option>
+                  <option value="1000000">$1M</option>
+                  <option value="5000000">$5M</option>
+                  <option value="10000000">$10M</option>
+                </select>
+                <select id="f-t-price-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Max</option>
+                  <option value="50000">$50K</option>
+                  <option value="100000">$100K</option>
+                  <option value="250000">$250K</option>
+                  <option value="500000">$500K</option>
+                  <option value="1000000">$1M</option>
+                  <option value="5000000">$5M</option>
+                  <option value="10000000">$10M</option>
+                  <option value="50000000">$50M</option>
+                  <option value="100000000">$100M+</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">YEAR</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <input id="f-t-yr-min" type="number" placeholder="Min year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
+                <input id="f-t-yr-max" type="number" placeholder="Max year" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;width:100%;">
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">LENGTH (FEET)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <select id="f-t-len-min" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Min</option>
+                  <option value="20">20 ft</option>
+                  <option value="30">30 ft</option>
+                  <option value="40">40 ft</option>
+                  <option value="50">50 ft</option>
+                  <option value="75">75 ft</option>
+                  <option value="100">100 ft</option>
+                  <option value="150">150 ft</option>
+                  <option value="200">200 ft</option>
+                </select>
+                <select id="f-t-len-max" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 4px;font-size:10px;">
+                  <option value="">No Max</option>
+                  <option value="30">30 ft</option>
+                  <option value="40">40 ft</option>
+                  <option value="50">50 ft</option>
+                  <option value="75">75 ft</option>
+                  <option value="100">100 ft</option>
+                  <option value="150">150 ft</option>
+                  <option value="200">200 ft</option>
+                  <option value="300">300 ft</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">CONDITION</div>
+              <select id="f-t-condition" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">Any</option>
+                <option value="new">New</option>
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+                <option value="project">Project / Restoration</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">FLAG / REGISTRATION</div>
+              <select id="f-t-flag" style="width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:3px;padding:5px 6px;font-size:10px;">
+                <option value="">Any</option>
+                <option value="us">United States</option>
+                <option value="cayman">Cayman Islands</option>
+                <option value="marshall">Marshall Islands</option>
+                <option value="panama">Panama</option>
+                <option value="bahamas">Bahamas</option>
+                <option value="uk">United Kingdom</option>
+                <option value="malta">Malta</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div><!-- end transport-filters -->
 
           <!-- BUSINESS FILTERS -->
           <div id="business-filters" style="display:none;">
@@ -3951,23 +3844,10 @@ let markersRendered = false;
 // ASSET CATEGORIES - Castle/Estates mapped to Real Estate
 // ============================================================
 const ASSET_CATEGORIES = [
-  { id: 'all',            label: 'ALL',            physical: false, mapPin: false },
-  { id: 'anthro',         label: 'ANTHRO',         physical: true,  mapPin: true  },
-  { id: 'art',            label: 'ART & COLLECT.', physical: false, mapPin: false },
-  { id: 'business',       label: 'BUSINESSES',     physical: false, mapPin: false },
-  { id: 'currency',       label: 'CURRENCY & FX',  physical: false, mapPin: false },
-  { id: 'debt',           label: 'DEBT',           physical: false, mapPin: false },
-  { id: 'energy',         label: 'ENERGY',         physical: true,  mapPin: true  },
-  { id: 'equities',       label: 'EQUITIES',       physical: false, mapPin: false },
-  { id: 'healthcare',     label: 'HEALTHCARE',     physical: true,  mapPin: true  },
-  { id: 'infrastructure', label: 'INFRASTR.',      physical: true,  mapPin: true  },
-  { id: 'ip',             label: 'IP & TECH',      physical: false, mapPin: false },
-  { id: 'realestate',     label: 'REAL ESTATE',    physical: true,  mapPin: true  },
-  { id: 'resources',      label: 'RESOURCES',      physical: true,  mapPin: true  },
-  { id: 'rights',         label: 'RIGHTS',         physical: false, mapPin: false },
-  { id: 'robotics',       label: 'ROBOTICS',       physical: true,  mapPin: true  },
-  { id: 'transport',      label: 'TRANSPORTS',     physical: true,  mapPin: true  },
-  { id: 'other',          label: 'OTHER',          physical: false, mapPin: false },
+  { id: 'all',          label: 'ALL',          physical: false, mapPin: false },
+  { id: 'realestate',   label: 'REAL ESTATE',  physical: false, mapPin: false },
+  { id: 'transport',    label: 'TRANSPORTS',   physical: true,  mapPin: true  },
+  { id: 'business',     label: 'BUSINESSES',   physical: false, mapPin: false },
 ];
 
 // Categories that render globe pins (physical, tangible, locatable)
@@ -3977,8 +3857,6 @@ const DASHBOARD_ONLY_CATEGORIES = new Set(['financial','infrastructure','technol
 
 function getAssetCategory(type) {
   const t = (type || '').toLowerCase().trim();
-  const directCats = ['all','anthro','art','business','currency','debt','energy','equities','healthcare','infrastructure','ip','realestate','resources','rights','robotics','transport','other'];
-  if (directCats.includes(t)) return t;
   const map = {
     // ── TRANSPORT -- vessels, aircraft, vehicles ──────────────────
     yacht: 'transport', sailboat: 'transport', powerboat: 'transport',
@@ -4137,7 +4015,7 @@ let currentAssetForModal = null;
 
 let map3dEl = null;
 let acInstance = null;
-let activeTab = '';
+let activeTab = 'realestate';
 let activeFilter = 'any';
 let activeId = null;
 let heatOn = false;
@@ -4504,15 +4382,15 @@ function normalizeAsset(a) {
 // ============================================================
 async function fetchGSAListings() {
   try {
-    const resp = await fetch(PARCEL_API + '?action=gsa');
+    const resp = await fetch(PARCEL_API + '?action=gsa&bust=1');
     if (!resp.ok) return [];
     const data = await resp.json();
     if (!Array.isArray(data)) return [];
-    return data.map(lot => ({
+    return data.filter(lot => (lot.asset_class||'').toLowerCase().includes('real') || (lot.asset_class||'').toLowerCase().includes('land') || (lot.asset_class||'') === '').map(lot => ({
       id: lot.id,
       apn: lot.id,
       address: lot.name + ' -- ' + lot.address,
-      type: lot.asset_class || 'other',
+      type: 'realestate',
       asset_class: lot.asset_class,
       listing_type: lot.listing_type,
       asking_price: lot.asking_price,
@@ -4525,163 +4403,6 @@ async function fetchGSAListings() {
     }));
   } catch(e) {
     console.warn('[RWA] GSA fetch failed:', e);
-    return [];
-  }
-}
-
-
-
-// ── Category search -- fires on SEARCH button click ──────────────────────
-const EBAY_CAT_MAP = {
-  transport:     ['63677','63678','63676','26429','50054','6001'],
-  art:           ['550','281','26588','64482','212'],
-  business:      ['12576'],
-  healthcare:    ['36132'],
-  robotics:      ['92074','12584'],
-  energy:        ['12139','26261'],
-  infrastructure:['131131'],
-  ip:            ['58058','293','41956'],
-  resources:     ['12108','11700'],
-  rights:        ['41956'],
-  anthro:        ['64482','237'],
-  currency:      ['11116'],
-  debt:          ['10136'],
-  equities:      ['619'],
-  other:         ['99'],
-};
-
-const TRANSPORT_TYPE_CAT = {
-  yacht:'26429', sailboat:'26429', powerboat:'26429', catamaran:'26429',
-  ferry:'26429', tugboat:'26429', ship:'26429',
-  jet:'63678', plane:'63677', helicopter:'63676', drone:'63676',
-  rv:'50054', vehicle:'6001',
-};
-
-async function runCategorySearch() {
-  const cat = activeTab;
-  if (!cat || cat === 'realestate') return;
-
-  showToast('SEARCHING…');
-  window.ASSETS = (window.ASSETS||[]).filter(a => !a._isEbay && !a._isFAA);
-
-  const gv = id => (document.getElementById(id)?.value||'').trim();
-
-  let cats = EBAY_CAT_MAP[cat] || ['99'];
-  let kw = '';
-
-  // Sub-type keyword routing
-  if (cat === 'transport') {
-    const type = gv('f-transport-type');
-    if (type && TRANSPORT_TYPE_CAT[type]) { cats = [TRANSPORT_TYPE_CAT[type]]; kw = type; }
-  } else if (cat === 'art') {
-    kw = gv('f-art-type');
-  } else if (cat === 'business') {
-    kw = gv('f-business-industry');
-  } else if (cat === 'healthcare') {
-    kw = gv('f-healthcare-procedure') + ' ' + gv('f-healthcare-country');
-  } else if (cat === 'ip') {
-    kw = gv('f-ip-type');
-  } else if (cat === 'energy') {
-    kw = gv('f-energy-type');
-  } else if (cat === 'anthro') {
-    kw = gv('f-anthro-type') + ' ' + gv('f-anthro-location');
-  } else if (cat === 'other') {
-    kw = gv('f-generic-keywords');
-  }
-
-  // Fetch all relevant eBay categories in parallel
-  const results = await Promise.all(cats.map(c => fetchEbayListings(c, kw.trim())));
-  const items = results.flat();
-  items.forEach(a => { a.type = cat; a.asset_class = cat; });
-
-  // Also fetch FAA for transport
-  if (cat === 'transport') {
-    const faaItems = await fetchFAAListings();
-    items.push(...faaItems);
-  }
-
-  const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-  items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-  renderList(filterAssets(window.ASSETS));
-  if (markersRendered) renderDOMMarkers();
-  showToast(items.length + ' RESULTS');
-}
-window.runCategorySearch = runCategorySearch;
-function setTransportToggle(btn) {
-  document.querySelectorAll('#transport-filters .ftog[data-kw]').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('f-transport-type').value = btn.dataset.kw;
-}
-function setStatusToggle(status, btn) {
-  document.querySelectorAll('#fs-active,#fs-registry,#fs-all').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  window._transportStatusFilter = status;
-}
-window.setTransportToggle = setTransportToggle;
-function setCatToggle(btn, inputId) {
-  const allBtns = btn.closest('div').querySelectorAll('.ftog');
-  allBtns.forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  const inp = document.getElementById(inputId);
-  if (inp) inp.value = btn.dataset.kw;
-}
-window.setCatToggle = setCatToggle;
-window.setStatusToggle = setStatusToggle;
-
-async function fetchFAAListings() {
-  try {
-    const resp = await fetch(PARCEL_API + '?action=faa-aircraft&lat_min=24&lat_max=50&lng_min=-125&lng_max=-65&limit=200');
-    if (!resp.ok) return [];
-    const data = await resp.json();
-    if (!Array.isArray(data)) return [];
-    return data.map(ac => {
-      const jitterLat = (ac.lat || 47.5) + (Math.random() - 0.5) * 1.5;
-      const jitterLng = (ac.lng || -120.5) + (Math.random() - 0.5) * 1.5;
-      return {
-        id: 'faa-' + (ac.N_NUMBER || ac.n_number || Math.random()),
-        apn: ac.N_NUMBER || ac.n_number || '',
-        address: ((ac.N_NUMBER||ac.n_number) ? 'N'+(ac.N_NUMBER||ac.n_number) : 'Unknown') + ' — ' + [ac.YEAR_MFR||ac.year_mfr, ac.MANUFACTURER||ac.mfr, ac.MODEL||ac.model].filter(Boolean).join(' '),
-        city: ac.STATE || ac.state || '',
-        type: 'transport',
-        asset_class: 'transport',
-        price: 0,
-        lat: jitterLat,
-        lng: jitterLng,
-        _hasCoords: true,
-        _isFAA: true,
-        _faaData: ac,
-        description: [ac.YEAR_MFR ? 'Year: '+ac.YEAR_MFR : '', ac.NO_SEATS ? ac.NO_SEATS+' seats' : '', ac.SPEED && ac.SPEED!='0' ? ac.SPEED+'mph' : ''].filter(Boolean).join(' · '),
-      };
-    });
-  } catch(e) {
-    console.warn('[RWA] FAA fetch failed:', e);
-    return [];
-  }
-}
-
-
-async function fetchEbayListings(category, keywords='') {
-  try {
-    let url = PARCEL_API + '?action=ebay-listings&limit=50&category=' + category;
-    if (keywords) url += '&keywords=' + encodeURIComponent(keywords);
-    const resp = await fetch(url);
-    if (!resp.ok) return [];
-    const data = await resp.json();
-    if (!Array.isArray(data)) return [];
-    return data.map(item => ({
-      id:        item.id,
-      address:   item.title,
-      type:      'transport',
-      asset_class: 'transport',
-      price:     item.price || 0,
-      lat:       null,
-      lng:       null,
-      _hasCoords: false,
-      _isEbay:   true,
-      _ebayData: item,
-    }));
-  } catch(e) {
-    console.warn('[RWA] eBay fetch failed:', e);
     return [];
   }
 }
@@ -4978,170 +4699,6 @@ function renderCategories() {
   }).join('');
 }
 
-
-// ── ON-DEMAND RSS FETCH ───────────────────────────────────────────────────
-// Fires when user selects a category tab -- fetches live listings for that class
-const _rssCache = {};
-const RSS_TTL = 15 * 60 * 1000;
-let _rssFetching = false;
-
-const RSS_CLASS_MAP = {
-  transport:      ['https://www.controller.com/listings/aircraft/for-sale/rss','https://www.trade-a-plane.com/rss','https://www.boatshop24.com/rss'],
-  business:       ['https://www.bizbuysell.com/rss/'],
-  realestate:     [], energy:         [], healthcare: [],
-  robotics:       [], anthro:         [], art:        [],
-  currency:       [], debt:           [], equities:   [],
-  infrastructure: [], resources:      [], rights:     [],
-  ip:             [], other:          [],
-};
-
-const CL_CAT_MAP = {
-  transport:      ['boa','cta','mcy','rvs','atp'],
-  realestate:     ['rea','for'],
-  business:       ['bfd'],
-  anthro:         ['atq'],
-  art:            ['atq','clt'],
-  energy:         ['hea'],
-  robotics:       ['ele'],
-  infrastructure: ['hea'],
-  resources:      ['for'],
-  ip:             ['bfd'],
-  other:          ['zip'],
-  healthcare:[], currency:[], debt:[], equities:[], rights:[],
-};
-
-const CL_CITIES = [
-  {slug:'seattle',lat:47.61,lng:-122.33},{slug:'sfbay',lat:37.77,lng:-122.41},
-  {slug:'losangeles',lat:34.05,lng:-118.24},{slug:'newyork',lat:40.71,lng:-74.01},
-  {slug:'miami',lat:25.77,lng:-80.19},{slug:'chicago',lat:41.85,lng:-87.65},
-  {slug:'houston',lat:29.76,lng:-95.37},{slug:'phoenix',lat:33.45,lng:-112.07},
-  {slug:'denver',lat:39.74,lng:-104.98},{slug:'boston',lat:42.36,lng:-71.06},
-  {slug:'portland',lat:45.52,lng:-122.68},{slug:'sandiego',lat:32.72,lng:-117.16},
-  {slug:'dallas',lat:32.78,lng:-96.80},{slug:'atlanta',lat:33.75,lng:-84.39},
-  {slug:'minneapolis',lat:44.98,lng:-93.27},{slug:'detroit',lat:42.33,lng:-83.05},
-  {slug:'cleveland',lat:41.50,lng:-81.69},{slug:'pittsburgh',lat:40.44,lng:-79.99},
-  {slug:'philadelphia',lat:39.95,lng:-75.16},{slug:'washingtondc',lat:38.89,lng:-77.03},
-  {slug:'nashville',lat:36.17,lng:-86.78},{slug:'austin',lat:30.27,lng:-97.74},
-  {slug:'saltlakecity',lat:40.76,lng:-111.89},{slug:'lasvegas',lat:36.17,lng:-115.14},
-  {slug:'charlotte',lat:35.23,lng:-80.84},{slug:'raleigh',lat:35.77,lng:-78.64},
-  {slug:'columbus',lat:39.96,lng:-82.99},{slug:'indianapolis',lat:39.77,lng:-86.16},
-  {slug:'kansascity',lat:39.10,lng:-94.58},{slug:'stlouis',lat:38.63,lng:-90.20},
-  {slug:'milwaukee',lat:43.04,lng:-87.91},{slug:'memphis',lat:35.15,lng:-90.05},
-  {slug:'neworleans',lat:29.95,lng:-90.07},{slug:'tampa',lat:27.95,lng:-82.46},
-  {slug:'orlando',lat:28.54,lng:-81.38},{slug:'jacksonville',lat:30.33,lng:-81.66},
-  {slug:'anchorage',lat:61.22,lng:-149.90},{slug:'honolulu',lat:21.31,lng:-157.86},
-  {slug:'toronto',lat:43.65,lng:-79.38},{slug:'vancouver',lat:49.25,lng:-123.12},
-  {slug:'calgary',lat:51.05,lng:-114.07},{slug:'montreal',lat:45.50,lng:-73.57},
-  {slug:'london',lat:51.51,lng:-0.13},{slug:'sydney',lat:-33.87,lng:151.21},
-  {slug:'melbourne',lat:-37.81,lng:144.96},{slug:'amsterdam',lat:52.37,lng:4.90},
-  {slug:'berlin',lat:52.52,lng:13.40},{slug:'paris',lat:48.86,lng:2.35},
-  {slug:'barcelona',lat:41.39,lng:2.16},{slug:'vienna',lat:48.21,lng:16.37},
-];
-
-function getViewportCities() {
-  if (!map3dEl) return CL_CITIES.slice(0, 15);
-  const center = map3dEl.center || {lat:40, lng:-98};
-  const range  = map3dEl.range  || 22000000;
-  const deg    = Math.min(60, (range / 111000) * 1.5);
-  return CL_CITIES.filter(c =>
-    Math.abs(c.lat - center.lat) < deg &&
-    Math.abs(c.lng - center.lng) < deg * 2
-  ).slice(0, 20);
-}
-
-function parseRSSXML(xml, asset_class, source, defaultLat, defaultLng) {
-  const items = [];
-  const re = /<item>([\s\S]*?)<\/item>/g;
-  let m;
-  while ((m = re.exec(xml)) !== null) {
-    const block = m[1];
-    const get = tag => {
-      const r = block.match(new RegExp(`<${tag}[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/${tag}>|<${tag}[^>]*>([^<]*)<\/${tag}>`));
-      return r ? (r[1]||r[2]||'').trim() : '';
-    };
-    const title = get('title');
-    const link  = get('link') || (block.match(/<link>(.*?)<\/link>/)||[])[1] || '';
-    const desc  = get('description').replace(/<[^>]+>/g,'').slice(0,300);
-    const pm    = (title+desc).match(/\$[\d,]+/);
-    const price = pm ? parseInt(pm[0].replace(/[$,]/g,'')) : 0;
-    const gLat  = block.match(/<geo:lat>(.*?)<\/geo:lat>/);
-    const gLng  = block.match(/<geo:long>(.*?)<\/geo:long>/);
-    const lat   = gLat ? parseFloat(gLat[1]) : defaultLat + (Math.random()-0.5)*0.3;
-    const lng   = gLng ? parseFloat(gLng[1]) : defaultLng + (Math.random()-0.5)*0.3;
-    if (!title) continue;
-    const idBase = link.slice(-16).replace(/[^a-z0-9]/gi,'') || Math.random().toString(36).slice(2,10);
-    items.push({
-      id: `rss-${source.replace(/[^a-z0-9]/gi,'-').slice(0,16)}-${idBase}`,
-      address: title, city: source, country: 'Global',
-      lat, lng, price, type: asset_class,
-      _hasCoords: true, _isRSS: true, _rssSource: source,
-      _rssData: { name: title, description: desc, listing_url: link,
-        image_url: (block.match(/<media:content[^>]+url="([^"]+)"/) || block.match(/<enclosure[^>]+url="([^"]+)"/) || [])[1] || null,
-        source, price, asset_class },
-    });
-  }
-  return items;
-}
-
-async function fetchRSSForClass(assetClass) {
-  if (assetClass === 'all' || assetClass === 'realestate') return; // too many RE listings
-  if (_rssFetching) return;
-  _rssFetching = true;
-
-  const now = Date.now();
-  const cacheKey = assetClass;
-  if (_rssCache[cacheKey] && (now - _rssCache[cacheKey].ts) < RSS_TTL) {
-    _injectRSSAssets(_rssCache[cacheKey].items);
-    _rssFetching = false;
-    return;
-  }
-
-  setStatus('SCANNING LIVE FEEDS...');
-  const cities = getViewportCities();
-  const clCodes = CL_CAT_MAP[assetClass] || [];
-  const specialtyUrls = RSS_CLASS_MAP[assetClass] || [];
-  const allItems = [];
-
-  const feeds = [
-    ...specialtyUrls.map(url => ({
-      url: PARCEL_API + '?action=rss-fetch&url=' + encodeURIComponent(url),
-      lat: 39, lng: -98,
-      source: url.includes('controller') ? 'Controller.com' : url.includes('trade-a-plane') ? 'Trade-A-Plane' : url.includes('boatshop') ? 'Boatshop24' : url.includes('bizbuysell') ? 'BizBuySell' : 'RSS'
-    })),
-    ...clCodes.flatMap(code => cities.map(c => ({
-      url: PARCEL_API + '?action=rss-fetch&url=' + encodeURIComponent('https://' + c.slug + '.craigslist.org/search/' + code + '.rss'),
-      lat: c.lat, lng: c.lng, source: 'CL/' + c.slug
-    }))),
-  ];
-
-  await Promise.all(feeds.map(async feed => {
-    try {
-      const r = await fetch(feed.url, { signal: AbortSignal.timeout(8000) });
-      if (!r.ok) return;
-      const xml = await r.text();
-      if (!xml) return;
-      const items = parseRSSXML(xml, assetClass, feed.source, feed.lat, feed.lng);
-      allItems.push(...items);
-    } catch(e) { /* silent */ }
-  }));
-
-  _rssCache[cacheKey] = { ts: now, items: allItems };
-  _injectRSSAssets(allItems);
-  _rssFetching = false;
-  setStatus('LEDGER SYNC COMPLETE');
-}
-
-function _injectRSSAssets(items) {
-  // Remove old RSS assets for this session, add fresh ones
-  const existingIds = new Set(items.map(i => i.id));
-  window.ASSETS = window.ASSETS.filter(a => !a._isRSS || existingIds.has(a.id));
-  // Add new items (dedupe by id)
-  const currentIds = new Set(window.ASSETS.map(a => a.id));
-  items.forEach(item => { if (!currentIds.has(item.id)) window.ASSETS.push(item); });
-  renderList(filterAssets(window.ASSETS));
-  if (typeof renderDOMMarkers === 'function') renderDOMMarkers();
-}
-
 function setCategory(catId, btn) {
   document.querySelectorAll('.ptab').forEach(b => b.classList.remove('on'));
   if (btn) btn.classList.add('on');
@@ -5156,160 +4713,22 @@ function setCategory(catId, btn) {
   if (window.innerWidth <= 767 && typeof renderMobileListViewFull === 'function') renderMobileListViewFull();
   // Update filter panel for active category
   updateFilterPanelForCategory(catId);
-  // Auto-open filter panel + sponsor rotation
-  if (catId && catId !== 'all') {
-    const fp = document.getElementById('filter-panel');
-    const fb = document.getElementById('filter-toggle-btn');
-    if (fp) { fp.style.display = 'block'; if (fb) fb.textContent = 'FILTERS ▴'; }
-    if (typeof startSponsorRotation === 'function') startSponsorRotation(catId);
-  }
-  // Fire on-demand RSS fetch for selected class
-  if (catId !== 'all') fetchRSSForClass(catId);
-  if (catId === 'transport') {
-    // Data loads only when user hits SEARCH in filter panel
-    renderList(filterAssets(window.ASSETS));
-  }
-  if (catId === 'art') {
-    fetchEbayListings('550').then(items => {
-      items.forEach(a => { a.type = 'art'; a.asset_class = 'art'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'business') {
-    fetchEbayListings('12576').then(items => {
-      items.forEach(a => { a.type = 'business'; a.asset_class = 'business'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'healthcare') {
-    fetchEbayListings('36132').then(items => {
-      items.forEach(a => { a.type = 'healthcare'; a.asset_class = 'healthcare'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'robotics') {
-    Promise.all([fetchEbayListings('92074'), fetchEbayListings('12584')]).then(results => {
-      const items = results.flat();
-      items.forEach(a => { a.type = 'robotics'; a.asset_class = 'robotics'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'energy') {
-    Promise.all([fetchEbayListings('12139'), fetchEbayListings('26261')]).then(results => {
-      const items = results.flat();
-      items.forEach(a => { a.type = 'energy'; a.asset_class = 'energy'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'infrastructure') {
-    Promise.all([fetchEbayListings('131131'), fetchEbayListings('12139')]).then(results => {
-      const items = results.flat();
-      items.forEach(a => { a.type = 'infrastructure'; a.asset_class = 'infrastructure'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'ip') {
-    Promise.all([fetchEbayListings('58058'), fetchEbayListings('293')]).then(results => {
-      const items = results.flat();
-      items.forEach(a => { a.type = 'ip'; a.asset_class = 'ip'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'resources') {
-    Promise.all([fetchEbayListings('12108'), fetchEbayListings('11700')]).then(results => {
-      const items = results.flat();
-      items.forEach(a => { a.type = 'resources'; a.asset_class = 'resources'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'rights') {
-    fetchEbayListings('41956').then(items => {
-      items.forEach(a => { a.type = 'rights'; a.asset_class = 'rights'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'anthro') {
-    Promise.all([fetchEbayListings('64482'), fetchEbayListings('237')]).then(results => {
-      const items = results.flat();
-      items.forEach(a => { a.type = 'anthro'; a.asset_class = 'anthro'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'currency') {
-    fetchEbayListings('11116').then(items => {
-      items.forEach(a => { a.type = 'currency'; a.asset_class = 'currency'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'debt') {
-    fetchEbayListings('10136').then(items => {
-      items.forEach(a => { a.type = 'debt'; a.asset_class = 'debt'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'equities') {
-    fetchEbayListings('619').then(items => {
-      items.forEach(a => { a.type = 'equities'; a.asset_class = 'equities'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
-  if (catId === 'other') {
-    fetchEbayListings('99').then(items => {
-      items.forEach(a => { a.type = 'other'; a.asset_class = 'other'; });
-      const currentIds = new Set((window.ASSETS||[]).map(a => a.id));
-      items.forEach(a => { if (!currentIds.has(a.id)) window.ASSETS.push(a); });
-      renderList(filterAssets(window.ASSETS));
-    });
-  }
 }
 
 function updateFilterPanelForCategory(catId) {
   var panels = {
-    'realestate':     're-filters',
-    'transport':      'transport-filters',
-    'business':       'business-filters',
-    'debt':           'debt-filters',
-    'energy':         'energy-filters',
-    'healthcare':     'healthcare-filters',
-    'ip':             'ip-filters',
-    'anthro':         'anthro-filters',
-    'art':            'art-filters',
-    'resources':      'resources-filters',
-    'rights':         'rights-filters',
-    'infrastructure': 'infrastructure-filters',
-    'robotics':       'robotics-filters',
-    'currency':       'currency-filters',
-    'equities':       'equities-filters',
-    'other':          'generic-filters',
+    'realestate': 're-filters',
+    'transport':  'transport-filters',
+    'business':   'business-filters',
+    'debt':       'debt-filters',
+    'energy':     'energy-filters',
+    'healthcare': 'healthcare-filters',
+    'ip':         'ip-filters',
+    'anthro':     'anthro-filters',
+    'art':        'art-filters',
   };
-  var genericCats = [];
-  var allPanelIds = ['re-filters','transport-filters','business-filters','debt-filters','energy-filters','healthcare-filters','ip-filters','anthro-filters','art-filters','generic-filters','resources-filters','rights-filters','infrastructure-filters','robotics-filters','currency-filters','equities-filters'];
+  var genericCats = ['currency','equities','resources','infrastructure','robotics','rights','other'];
+  var allPanelIds = ['re-filters','transport-filters','business-filters','debt-filters','energy-filters','healthcare-filters','ip-filters','anthro-filters','art-filters','generic-filters'];
   allPanelIds.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -5460,100 +4879,23 @@ function initDualSlider() {
 function onPriceSlider() { applySliderFilter(); }
 
 function filterAssets(assets) {
-  // No category selected -- show nothing, prompt user to pick
-  if (!activeTab) return [];
   let filtered = assets;
-
-  // ── Category filter ───────────────────────────────────────────
+  // Category filter -- asset_type is primary, category is fallback
   if (activeTab !== 'all') {
     filtered = filtered.filter(a => {
+      if (a._isGSA) return true;
       const rawFields = a._raw || {};
       const typeStr = rawFields.asset_type || rawFields.category || a.type || a.asset_type || a.category || '';
       return getAssetCategory(typeStr) === activeTab;
     });
   }
-
-  // ── Price slider filter ───────────────────────────────────────
+  // Price filter -- compare as float; full range up to $25T
   filtered = filtered.filter(a => {
     const p = parseFloat(a.price) || 0;
-    if (p <= 0) return sliderMinPrice <= 1;
+    if (p <= 0) return sliderMinPrice <= 1; // include $0 assets at min range
     return p >= sliderMinPrice && p <= sliderMaxPrice;
   });
-
-  // ── Dynamic filter panel values (source-agnostic) ─────────────
-  const gv = id => (document.getElementById(id)?.value || '').trim().toLowerCase();
-  const gc = id => document.getElementById(id)?.checked;
-
-  // Transport filters
-  if (activeTab === 'transport') {
-    const type = gv('f-transport-type');
-    const yrMin = parseInt(gv('f-t-yr-min')) || 0;
-    const yrMax = parseInt(gv('f-t-yr-max')) || 9999;
-    const cond = gv('f-t-condition');
-    if (type) filtered = filtered.filter(a => {
-      const t = (a.type||a.title||a.address||'').toLowerCase();
-      return t.includes(type) || (a._faaData && (a._faaData.TYPE_AIRCRAFT||'').toLowerCase().includes(type))
-        || (a._ebayData && (a._ebayData.title||'').toLowerCase().includes(type));
-    });
-    if (yrMin > 0) filtered = filtered.filter(a => {
-      const yr = parseInt(a._faaData?.YEAR_MFR || a._ebayData?.title?.match(/(19|20)\d{2}/)?.[0] || 0);
-      return !yr || yr >= yrMin;
-    });
-    if (yrMax < 9999) filtered = filtered.filter(a => {
-      const yr = parseInt(a._faaData?.YEAR_MFR || a._ebayData?.title?.match(/(19|20)\d{2}/)?.[0] || 9999);
-      return !yr || yr <= yrMax;
-    });
-    if (cond) filtered = filtered.filter(a => (a._ebayData?.condition||'').toLowerCase().includes(cond));
-  }
-
-  // Business filters
-  if (activeTab === 'business') {
-    const industry = gv('f-business-industry');
-    if (industry) filtered = filtered.filter(a =>
-      (a.title||a.address||'').toLowerCase().includes(industry) ||
-      (a._ebayData?.title||'').toLowerCase().includes(industry)
-    );
-  }
-
-  // Healthcare filters
-  if (activeTab === 'healthcare') {
-    const proc = gv('f-healthcare-procedure');
-    const country = gv('f-healthcare-country');
-    if (proc) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(proc));
-    if (country) filtered = filtered.filter(a => (a.location||a._ebayData?.location||'').toLowerCase().includes(country));
-  }
-
-  // Art filters
-  if (activeTab === 'art') {
-    const type = gv('f-art-type');
-    if (type) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(type.toLowerCase()));
-  }
-
-  // IP filters
-  if (activeTab === 'ip') {
-    const type = gv('f-ip-type');
-    if (type) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(type.toLowerCase()));
-  }
-
-  // Energy filters
-  if (activeTab === 'energy') {
-    const type = gv('f-energy-type');
-    if (type) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(type.toLowerCase()));
-  }
-
-  // Anthro filters
-  if (activeTab === 'anthro') {
-    const type = gv('f-anthro-type');
-    const loc = gv('f-anthro-location');
-    if (type) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(type.toLowerCase()));
-    if (loc) filtered = filtered.filter(a => (a.location||a._ebayData?.location||a.city||'').toLowerCase().includes(loc));
-  }
-
-  // Generic keyword filter (currency, equities, debt, resources, rights, infrastructure, robotics, other)
-  const kw = gv('f-generic-keywords');
-  if (kw) filtered = filtered.filter(a => (a.title||a.address||a._ebayData?.title||'').toLowerCase().includes(kw));
-
-  window.allFiltered = filtered;
+    window.allFiltered = filtered; // always in sync
   return filtered;
 }
 
@@ -5568,11 +4910,7 @@ function renderList(assetsToShow) {
   const resultCount = list.length;
   const resultHeader = `<div style="padding:8px 16px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)">Showing ${resultCount} Asset${resultCount !== 1 ? 's' : ''}</div>`;
   if (!list.length) {
-    if (!activeTab) {
-      wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">SELECT AN ASSET CLASS<br><span style="font-size:9px;color:var(--cyan);margin-top:6px;display:block">CHOOSE A CATEGORY ABOVE TO BEGIN</span></div></div>`;
-    } else {
-      wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;
-    }
+    wrap.innerHTML = `<div class="sync-state"><div class="sync-rings"><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-ring"></div><div class="sync-dot"></div></div><div class="sync-label">NO ASSETS IN LEDGER<br>ADD LISTINGS VIA DASHBOARD</div></div>`;
     return;
   }
   wrap.innerHTML = resultHeader + list.map(a => {
@@ -9450,7 +8788,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render category tabs
     if (typeof renderCategoryTabs === 'function') renderCategoryTabs();
     // Init filter panel for default category
-    if (typeof updateFilterPanelForCategory === 'function') updateFilterPanelForCategory('');
+    if (typeof updateFilterPanelForCategory === 'function') updateFilterPanelForCategory('realestate');
     // Show wallet button when user is signed in
     const origUpdateAuth = window.updateAuthUI;
     if (typeof origUpdateAuth === 'function') {
@@ -9465,6 +8803,17 @@ document.addEventListener('DOMContentLoaded', () => {
 // ════════════════════════════════════════════════════════════════════
 // CATEGORY SPONSOR HOOK -- show sponsor strip on category select
 // ════════════════════════════════════════════════════════════════════
+const _origSetCategory = window.setCategory;
+// Extend setCategory after it's defined to add sponsor rotation
+setTimeout(() => {
+  const sc = window.setCategory;
+  if (sc) {
+    window.setCategory = function(catId, btn) {
+      sc(catId, btn);
+      startSponsorRotation(catId);
+    };
+  }
+}, 1000);
 
 
 // ════════════════════════════════════════════════════════════════════
@@ -10033,78 +9382,7 @@ window.renderBasicsPanel=async function(asset,bqData){if(typeof RWA_GATE!=='unde
         <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:8px">Bidding handled directly on GSA Auctions platform</div>
       </div>`;
     return;
-  }
-  // ── FAA Registry Display ────────────────────────────────────
-  if(asset?._isFAA && asset?._faaData){
-    const f=asset._faaData;
-    const nn = f.N_NUMBER||f.n_number||'';
-    const mfr = f.MANUFACTURER||f.mfr||'';
-    const model = f.MODEL||f.model||'';
-    const year = f.YEAR_MFR||f.year_mfr||'';
-    const seats = f.NO_SEATS||f.no_seats||'';
-    const speed = f.SPEED||f.speed||'';
-    const owner = f.OWNER_NAME||f.owner_name||'Registered Owner';
-    const state = f.STATE||f.state||'';
-    const acType = f.TYPE_AIRCRAFT||f.type_aircraft||'';
-    const rhead=document.getElementById('rhead');
-    const rbody=document.getElementById('rbody');
-    if(rhead) rhead.innerHTML=`<div class="rtype">TRANSPORT // FAA REGISTRY</div><div class="rname">${nn?'N'+escapeHtml(nn):''} — ${escapeHtml(mfr)} ${escapeHtml(model)}</div><div style="margin-top:6px;font-size:10px;color:var(--muted)">${escapeHtml(state)}</div>`;
-    if(rbody) rbody.innerHTML=`
-      <div style="padding:12px 16px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px">
-            <div style="font-size:8px;color:var(--muted);letter-spacing:1px">TAIL NUMBER</div>
-            <div style="font-size:16px;font-weight:700;color:var(--cyan)">${nn?'N'+escapeHtml(nn):'--'}</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px">
-            <div style="font-size:8px;color:var(--muted);letter-spacing:1px">YEAR</div>
-            <div style="font-size:14px;font-weight:700;color:var(--gold)">${escapeHtml(year||'--')}</div>
-          </div>
-        </div>
-        <div style="font-size:10px;color:#8899aa;margin-bottom:12px;line-height:1.8">
-          <div><span style="color:var(--muted)">MAKE / MODEL:</span> ${escapeHtml(mfr+' '+model)}</div>
-          ${seats?`<div><span style="color:var(--muted)">SEATS:</span> ${escapeHtml(seats)}</div>`:''}
-          ${speed?`<div><span style="color:var(--muted)">SPEED:</span> ${escapeHtml(speed)} mph</div>`:''}
-          <div><span style="color:var(--muted)">REGISTERED OWNER:</span> ${escapeHtml(owner)}</div>
-          <div><span style="color:var(--muted)">STATE:</span> ${escapeHtml(state)}</div>
-          <div><span style="color:var(--muted)">SOURCE:</span> FAA Registry</div>
-        </div>
-        <button onclick="showToast('BID FEATURE COMING SOON')" style="width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px">PLACE BID ON THIS AIRCRAFT →</button>
-        <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:8px">FAA registry data · not listed for sale · dark pool bid</div>
-      </div>`;
-    return;
-  }
-
-  // ── eBay Listing Display ─────────────────────────────────────
-  if(asset?._isEbay && asset?._ebayData){
-    const e=asset._ebayData;
-    const rhead=document.getElementById('rhead');
-    const rbody=document.getElementById('rbody');
-    if(rhead) rhead.innerHTML=`<div class="rtype">${(e.category||asset.asset_class||'ASSET').toUpperCase()} // EBAY LISTING</div><div class="rname">${escapeHtml(e.title||asset.address||'Asset')}</div><div style="margin-top:6px;font-size:10px;color:var(--muted)">${escapeHtml(e.location||'')}</div>`;
-    if(rbody) rbody.innerHTML=`
-      <div style="padding:12px 16px">
-        ${e.image?`<img src="${e.image}" style="width:100%;border-radius:4px;margin-bottom:12px;object-fit:cover;max-height:220px" onerror="this.style.display='none'">`:'' }
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px">
-            <div style="font-size:8px;color:var(--muted);letter-spacing:1px">ASKING PRICE</div>
-            <div style="font-size:16px;font-weight:700;color:var(--cyan)">${e.price>0?'$'+e.price.toLocaleString():'See Listing'}</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px">
-            <div style="font-size:8px;color:var(--muted);letter-spacing:1px">CONDITION</div>
-            <div style="font-size:12px;font-weight:700;color:var(--gold)">${e.condition||'--'}</div>
-          </div>
-        </div>
-        <div style="font-size:10px;color:#8899aa;margin-bottom:12px;line-height:1.6">
-          ${e.location?`<div><span style="color:var(--muted)">LOCATION:</span> ${escapeHtml(e.location)}</div>`:''}
-          ${e.category?`<div><span style="color:var(--muted)">CATEGORY:</span> ${escapeHtml(e.category)}</div>`:''}
-          <div><span style="color:var(--muted)">SOURCE:</span> eBay Marketplace</div>
-        </div>
-        <a href="${e.url||'https://www.ebay.com'}" target="_blank" style="display:block;width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;text-align:center;text-decoration:none;box-sizing:border-box">VIEW ON EBAY →</a>
-        <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:8px">Listing managed on eBay platform</div>
-      </div>`;
-    return;
-  }
-  if(asset?.apn&&asset.apn!=='Resolving…'&&!asset._isFAA&&!asset._isEbay&&!asset._isRSS){const slug=asset.apn.replace(/[^0-9-]/g,'');history.pushState({apn:slug},'','/parcel/'+slug);}const rhead=document.getElementById('rhead'),rbody=document.getElementById('rbody');if(rhead)rhead.innerHTML=`<div class="rtype">PARCEL RECORD // QUERYING</div><div class="rname">${asset?.address||asset?.apn||'Parcel'}</div><div style="margin-top:14px;display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid rgba(0,255,200,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin360 .7s linear infinite"></div><span style="font-size:10px;color:var(--muted);letter-spacing:1px">QUERYING LEDGER…</span></div>`;if(rbody)rbody.innerHTML='';const resp=await fetchParcelData({lat:asset?.lat,lng:asset?.lng,pin:asset?.apn||asset?.id},true);const data=resp?.parcel||resp;const listing=resp?.listing||null;if(data&&asset){asset._bq=data;asset._listing=listing;}_renderFull(asset,data,false,listing);
+  }if(asset?.apn&&asset.apn!=='Resolving…'){const slug=asset.apn.replace(/[^0-9-]/g,'');history.pushState({apn:slug},'','/parcel/'+slug);}const rhead=document.getElementById('rhead'),rbody=document.getElementById('rbody');if(rhead)rhead.innerHTML=`<div class="rtype">PARCEL RECORD // QUERYING</div><div class="rname">${asset?.address||asset?.apn||'Parcel'}</div><div style="margin-top:14px;display:flex;align-items:center;gap:10px"><div style="width:16px;height:16px;border:2px solid rgba(0,255,200,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin360 .7s linear infinite"></div><span style="font-size:10px;color:var(--muted);letter-spacing:1px">QUERYING LEDGER…</span></div>`;if(rbody)rbody.innerHTML='';const resp=await fetchParcelData({lat:asset?.lat,lng:asset?.lng,pin:asset?.apn||asset?.id},true);const data=resp?.parcel||resp;const listing=resp?.listing||null;if(data&&asset){asset._bq=data;asset._listing=listing;}_renderFull(asset,data,false,listing);
 // async polygon fetch -- non-blocking
 const _pin=data?.PIN||asset?.apn;
 if(_pin&&_pin!=='Resolving…'){
@@ -10611,7 +9889,7 @@ async function generateIntelPDF(bq) {
     <div>
       <div class="pub">RWABIDASK -- PROPERTY INTELLIGENCE REPORT</div>
       <div class="prop-name">${addr}</div>
-      <div class="prop-sub">PIN ${pin2} &nbsp;·&nbsp; King County WA &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>
+      <div class="prop-sub">PIN ${pin2} &nbsp;·&nbsp; ${(bq?._county ? bq._county.charAt(0).toUpperCase()+bq._county.slice(1) : 'King')} County WA &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>
     </div>
     <div class="score-block">
       <div class="score-n">${score}<span style="font-size:20px;font-weight:400">/100</span></div>
@@ -11018,7 +10296,7 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
   <div class="legal-row">
     <div>
       RWABIDASK PROPERTY INTELLIGENCE REPORT -- STANDARD v2.0<br>
-      DATA: KING COUNTY ASSESSOR · BIGQUERY PIPELINE · USGS · WA DNR · ${new Date().toLocaleDateString()}<br>
+      DATA: ${(bq?._county||'KING').toUpperCase()} COUNTY ASSESSOR · BIGQUERY PIPELINE · USGS · WA DNR · ${new Date().toLocaleDateString()}<br>
       FOR USE IN: LENDING · INSURANCE UNDERWRITING · ACQUISITION DUE DILIGENCE
     </div>
     <div style="text-align:right">
@@ -11032,41 +10310,7 @@ ${(mw.oil_gas_well||mw.metallic_mineral||mw.aggregate_resource||mw.geothermal||m
   </div>
 </div>
 
-</div>
-<!-- ── FILTER MODAL ──────────────────────────────────────────────── -->
-<div id="filter-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)">
-  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(560px,94vw);max-height:85vh;background:var(--bg1);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;overflow:hidden">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0">
-      <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--cyan)" id="filter-modal-title">FILTERS</div>
-      <button onclick="closeFilterModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0;line-height:1">✕</button>
-    </div>
-    <div id="filter-modal-body" style="overflow-y:auto;padding:14px 16px;flex:1">
-      <!-- populated dynamically -->
-    </div>
-    <div style="padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px">
-      <button onclick="resetAllFilters();closeFilterModal()" style="flex:1;padding:10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">RESET</button>
-      <button onclick="runCategorySearch();closeFilterModal()" style="flex:2;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1.5px">SEARCH ↗</button>
-    </div>
-  </div>
-</div>
-
-
-
-function closeFilterModal() {
-  const m = document.getElementById('filter-modal');
-  if (m) m.style.display = 'none';
-  document.body.style.overflow = '';
-}
-document.addEventListener('click', function(e) {
-  const m = document.getElementById('filter-modal');
-  if (m && e.target === m) closeFilterModal();
-});
-window.openFilterModal = openFilterModal;
-window.closeFilterModal = closeFilterModal;
-
-
-
-
+</div></body></html>`;
 
     const el = document.createElement('div');
     el.innerHTML = html;
@@ -11311,7 +10555,7 @@ const spark=trend.length>1?(()=>{
 
 const sc=bq?.seismic_site_class||'';
 const tsunami=bool(hazards.tsunami)||bool(bq?.geo?.in_tsunami_zone);
-const zoningUrl = bq?._county==='pierce' ? 'https://www.piercecountywa.gov/2186/Zoning' : 'https://aqua.kingcounty.gov/council/clerk/code/24-30_Title_21A.htm';
+const zoningUrl = bq?._county==='pierce' ? 'https://www.piercecountywa.gov/2186/Zoning' : bq?._county==='snohomish' ? 'https://snohomishcountywa.gov/2765/Zoning' : 'https://aqua.kingcounty.gov/council/clerk/code/24-30_Title_21A.htm';
 const zoningHtml=zoning?`${zoning} <a href="${zoningUrl}" target="_blank" style="color:var(--cyan);text-decoration:none;font-size:9px">↗ code</a>`:null;
 rows=rows.map(([k,v])=>k==='ZONING'&&zoningHtml?[k,zoningHtml]:[k,v]);
 
@@ -12902,70 +12146,5 @@ window.addEventListener('load',()=>{
 });
 console.log('[RWABidAsk] Live -- proxy:',PARCEL_API);
 </script>
-
-<!-- ── FILTER MODAL ──────────────────────────────────────────────── -->
-<div id="filter-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)">
-  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(560px,94vw);max-height:85vh;background:var(--bg1);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;overflow:hidden">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0">
-      <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--cyan)" id="filter-modal-title">FILTERS</div>
-      <button onclick="closeFilterModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0;line-height:1">✕</button>
-    </div>
-    <div id="filter-modal-body" style="overflow-y:auto;padding:14px 16px;flex:1">
-      <!-- populated dynamically -->
-    </div>
-    <div style="padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px">
-      <button onclick="resetAllFilters();closeFilterModal()" style="flex:1;padding:10px;background:var(--bg3);color:var(--muted);border:1px solid var(--border2);border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:1px">RESET</button>
-      <button onclick="runCategorySearch();closeFilterModal()" style="flex:2;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1.5px">SEARCH ↗</button>
-    </div>
-  </div>
-</div>
-
-
-<script>
-function openFilterModal() {
-  var modal = document.getElementById('filter-modal');
-  var body = document.getElementById('filter-modal-body');
-  var title = document.getElementById('filter-modal-title');
-  if (!modal) return;
-  var catPanelMap = {
-    realestate:'re-filters',transport:'transport-filters',
-    business:'business-filters',debt:'debt-filters',
-    energy:'energy-filters',healthcare:'healthcare-filters',
-    ip:'ip-filters',anthro:'anthro-filters',art:'art-filters',
-    resources:'resources-filters',rights:'rights-filters',
-    infrastructure:'infrastructure-filters',robotics:'robotics-filters',
-    currency:'currency-filters',equities:'equities-filters',other:'generic-filters'
-  };
-  var cat = (window.ASSET_CATEGORIES||[]).find(function(c){return c.id===window.activeTab;});
-  title.textContent = (cat ? cat.label : 'ALL') + ' — FILTERS';
-  var panelId = catPanelMap[window.activeTab] || 'generic-filters';
-  var panel = document.getElementById(panelId);
-  var html = '';
-  if (panel) {
-    var clone = panel.cloneNode(true);
-    clone.style.display = 'block';
-    var btns = clone.querySelectorAll('button');
-    for (var i=0; i<btns.length; i++) {
-      if ((btns[i].getAttribute('onclick')||'').indexOf('runCategorySearch') > -1) btns[i].remove();
-    }
-    html = clone.outerHTML;
-  }
-  body.innerHTML = html;
-  modal.style.display = 'block';
-  document.body.style.overflow = 'hidden';
-}
-function closeFilterModal() {
-  var m = document.getElementById('filter-modal');
-  if (m) m.style.display = 'none';
-  document.body.style.overflow = '';
-}
-document.addEventListener('click', function(e) {
-  var m = document.getElementById('filter-modal');
-  if (m && e.target === m) closeFilterModal();
-});
-window.openFilterModal = openFilterModal;
-window.closeFilterModal = closeFilterModal;
-</script>
-
 </body>
 </html>
