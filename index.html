@@ -9127,7 +9127,7 @@ async function initiateStripeSandbox(apn) {
       const _county = window._lastBqData?._county;
       const _lat = window._lastBqData?.LAT || window.currentAsset?.lat;
       const _lng = window._lastBqData?.LON || window.currentAsset?.lng;
-      const bq = await fetchParcelData(_county === 'pierce' && _lat && _lng ? {lat: _lat, lng: _lng, paid: true} : {pin: apn, paid: true});
+      const bq = await fetchParcelData((_county === 'pierce' || _county === 'snohomish') && _lat && _lng ? {lat: _lat, lng: _lng, paid: true} : {pin: apn, paid: true});
       if (bq) {
         const asset = {id: apn, apn: apn, type: 'real_estate'};
         _renderFull(asset, bq);
@@ -9396,6 +9396,7 @@ if(_pin&&_pin!=='Resolving…'){
 }
 };
 async function generateIntelPDF(bq) {
+  const _countyLabel = bq?._county==='pierce' ? 'Pierce' : bq?._county==='snohomish' ? 'Snohomish' : 'King';
   if (!bq) { if(typeof showToast==='function') showToast('NO REPORT DATA'); return; }
   if(typeof showToast==='function') showToast('GENERATING INTEL REPORT…');
   (async () => {
@@ -9900,7 +9901,7 @@ async function generateIntelPDF(bq) {
   <div class="tags">
     <span class="tag">GENERATED ${new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()}</span>
     <span class="tag">LEVY ${$(p.levy_code)||'--'}</span>
-    <span class="tag">KING COUNTY ASSESSOR</span>
+    <span class="tag">${_countyLabel} COUNTY ASSESSOR</span>
     <span class="tag">RWABIDASK STANDARD v2.0</span>
     ${bool(geo.in_tsunami_zone)?'<span class="tag alert">TSUNAMI INUNDATION ZONE</span>':''}
     ${bool(haz.flood_100yr)?'<span class="tag alert">100YR FLOOD PLAIN</span>':''}
@@ -9993,7 +9994,7 @@ ${apprHist.length?`
     ${cagr?insight(
       'RWABidAsk Research: What this growth rate tells buyers, lenders, and investors',
       'This property has grown at '+cagr+'% per year on the assessor\'s record over '+yrs+' years.',
-      'A property growing faster than inflation (typically 2–3%/yr) is holding and building real value. A rate above 7%/yr outperforms the average stock market return. This data comes directly from the King County Assessor -- it is what the county uses to calculate your tax bill each year.'
+      'A property growing faster than inflation (typically 2–3%/yr) is holding and building real value. A rate above 7%/yr outperforms the average stock market return. This data comes directly from the ${_countyLabel} Assessor -- it is what the county uses to calculate your tax bill each year.'
     ):''}
   </div>
 </div>`:''}
