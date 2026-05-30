@@ -9408,7 +9408,9 @@ async function generateIntelPDF(bq) {
       try {
         const sess = await _sb?.auth?.getSession();
         const tok = sess?.data?.session?.access_token || SB_KEY;
-        const r = await fetch(PARCEL_API+'?pin='+encodeURIComponent(pin)+'&paid=true',
+        const _pdfCounty = bq?._county || '';
+        const _pdfUrl = (_pdfCounty==='pierce'||_pdfCounty==='snohomish') && bq?.LAT && bq?.LON ? PARCEL_API+'?lat='+bq.LAT+'&lng='+bq.LON+'&paid=true' : PARCEL_API+'?pin='+encodeURIComponent(pin)+'&paid=true';
+        const r = await fetch(_pdfUrl,
           {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tok}});
         const j = await r.json();
         if (j?.parcel) d = j.parcel;
@@ -9974,7 +9976,7 @@ ${$(b.year_built)?`
     ${estTax>0?insight(
       'RWABidAsk Research: Estimated annual property tax',
       '~$'+estTax.toLocaleString()+' per year / ~$'+Math.round(estTax/12).toLocaleString()+' per month',
-      'Based on King County\'s approximate effective tax rate of 0.95% of assessed value. Actual bills vary by levy district. Contact King County Treasury for the exact figure.'
+      'Based on the county\'s approximate effective tax rate of 0.95% of assessed value. Actual bills vary by levy district. Contact the county treasurer for the exact figure.'
     ):''}
   </div>
 </div>
