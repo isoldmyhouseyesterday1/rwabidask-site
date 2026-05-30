@@ -1930,28 +1930,8 @@ serve(async(req) => {
               _county: 'pierce',
               _coverage: 'full',
             };
-            // Pierce comps — same occupancy type, within 1mi (expand to 3mi if < 5 results)
-            let pierceComps: any[] = [];
-            try {
-              const pLat = card.LAT, pLng = card.LON;
-              const pOcc = p.occupancy || null;
-              const pQual = p.quality || null;
-              const compQ = (miles: number) => `
-                SELECT parcel_id, occupancy, sqft_total, lot_sqft, quality, condition, year_built, assessed_total, lat, lng,
-                  ROUND(ST_DISTANCE(ST_GEOGPOINT(lng, lat), ST_GEOGPOINT(${pLng}, ${pLat})) / 1609.34, 2) as miles
-                FROM \`leafy-loader-492820-p7.rwabidask.pierce_master_intel_enriched\`
-                WHERE lat IS NOT NULL AND lng IS NOT NULL
-                  AND parcel_id != '${pierceId}'
-                  ${pOcc ? `AND occupancy = '${pOcc}'` : ''}
-                  AND ST_DISTANCE(ST_GEOGPOINT(lng, lat), ST_GEOGPOINT(${pLng}, ${pLat})) < ${miles * 1609.34}
-                ORDER BY miles ASC LIMIT 10`;
-              pierceComps = await bq(compQ(1), 15000);
-              if (pierceComps.length < 5) pierceComps = await bq(compQ(3), 15000);
-            } catch(e) { console.warn('[pierce comps]', e); }
-
             if (paid) {
-              const pierceCrime = await fetchPierceCrime(parseFloat(card.LAT.toString()), parseFloat(card.LON.toString()));
-              return new Response(JSON.stringify({ tier: "intel_report", parcel: card, comps: pierceComps, crime: pierceCrime }), {
+              return new Response(JSON.stringify({ tier: "intel_report", parcel: card }), {
                 status: 200, headers: { ...CORS, "Content-Type": "application/json" }
               });
             }

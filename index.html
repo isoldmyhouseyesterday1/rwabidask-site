@@ -10029,24 +10029,8 @@ ${apprHist.length?`
 </div>
 
 
-${(()=>{
-  if(bq?._county==='pierce'){
-    const pc=_paidComps||[];
-    if(!pc.length) return '<div class="ch"><div class="ch-hd"><span class="ch-n">C1</span><span class="ch-t">COMPARABLE PROPERTIES (PIERCE COUNTY)</span><span class="ch-s none">NONE FOUND</span></div><div class="ch-body"><div style="font-size:10px;color:#888;font-style:italic;padding:8px 0">No comparable properties found nearby</div></div></div>';
-    const rows=pc.map(c=>`<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:4px;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:10px;font-family:monospace">
-      <div><div style="font-size:8px;color:#888;letter-spacing:.5px">PARCEL</div><div style="font-weight:600">${c.parcel_id}</div><div style="font-size:8px;color:#888">${c.occupancy||'--'}</div></div>
-      <div><div style="font-size:8px;color:#888;letter-spacing:.5px">ASSESSED</div><div style="font-weight:600">${c.assessed_total?'$'+(parseInt(c.assessed_total)).toLocaleString():'--'}</div></div>
-      <div><div style="font-size:8px;color:#888;letter-spacing:.5px">SQFT</div><div>${c.sqft_total?parseInt(c.sqft_total).toLocaleString():'--'}</div></div>
-      <div><div style="font-size:8px;color:#888;letter-spacing:.5px">YEAR</div><div>${c.year_built||'--'}</div></div>
-      <div><div style="font-size:8px;color:#888;letter-spacing:.5px">GRADE</div><div>${c.quality||'--'}</div></div>
-      <div><div style="font-size:8px;color:#888;letter-spacing:.5px">MILES</div><div>${c.miles||'--'}</div></div>
-    </div>`).join('');
-    return `<div class="ch"><div class="ch-hd"><span class="ch-n">C1</span><span class="ch-t">COMPARABLE PROPERTIES (PIERCE COUNTY · SAME TYPE · RADIUS)</span><span class="ch-s ok">${pc.length} FOUND</span></div><div class="ch-body">${rows}</div></div>`;
-  }
-  return '';
-})()}
 ${nbhdStatsHtml}
-${bq?._county&&bq._county!=='king'?'':(`<!-- CH C1: TIGHT VALUE COMPS -->
+<!-- CH C1: TIGHT VALUE COMPS -->
 <div class="ch">
   <div class="ch-hd"><span class="ch-n">C1</span><span class="ch-t">TIGHT VALUE COMPS (0.5 MI · ±30% GLA · ±15YR · SAME USE)</span><span class="ch-s ${c1.length>0?'ok':'none'}">${c1.length>0?c1.length+' FOUND':'NONE'}</span></div>
   <div class="ch-body">${nbhdHtml}</div>
@@ -10078,7 +10062,8 @@ ${zipBarChart ? `<div style="margin:8px 0 16px;page-break-inside:avoid"><div sty
   <div class="ch-hd"><span class="ch-n">C6</span><span class="ch-t">ACTIVE LISTINGS (RWABIDASK NETWORK)</span><span class="ch-s ${activeComp.length>0?'ok':'none'}">${activeComp.length>0?activeComp.length+' ACTIVE':'NONE'}</span></div>
   <div class="ch-body">${activeHtml}</div>
 </div>
-${mortgPdfHtml}\`)}<!-- CH CR: CRIME & SAFETY -->
+${mortgPdfHtml}
+<!-- CH CR: CRIME & SAFETY -->
 <div class="ch">
   <div class="ch-hd">
     <span class="ch-n">CR</span>
