@@ -9426,7 +9426,7 @@ async function generateIntelPDF(bq) {
     const pct  = (a,b) => b>0?((a/b-1)*100).toFixed(1)+'%':null;
 
     const p   = d;
-    const v   = p.valuation      || {};
+    const v   = p.valuation || { latest_total_val: p.current_assessed_total, latest_land_val: p.current_assessed_land, latest_imps_val: p.current_assessed_improvements, appraisal_year: p.appraisal_year };
     const b   = p.building       || {};
     const geo = p.geo            || {};
     const inf = p.infrastructure || {};
